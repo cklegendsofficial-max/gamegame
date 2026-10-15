@@ -58,10 +58,18 @@ export interface Item {
   uq?: string;
   mods?: GearMods;
   horse?: HorseInfo;
+  /** Nadir ve üstü eşyaların rastgele ekleri (AFFIXES anahtarları). */
+  afx?: string[];
+  /** Atölyede seçilen malzeme (CRAFT_MATS anahtarı). */
+  mat?: string;
+  /** Usta imzası tarifi. */
+  sig?: string;
+  /** Kahramanın ilk silahı: öldürdükçe büyür. */
+  yad?: { kills: number; lv: number };
 }
 
 export function setPiece(id: number, cls: ClassDef, set: SetId, slot: Slot, tier: number): Item {
-  const it = classItem(id, cls, slot, tier, 4);
+  const it = classItem(id, cls, slot, tier, 4, false);
   it.name = SETS[set].pieces[slot];
   it.set = set;
   return it;
@@ -69,7 +77,7 @@ export function setPiece(id: number, cls: ClassDef, set: SetId, slot: Slot, tier
 
 export function uniqueItem(id: number, cls: ClassDef, u: Unique, tier: number): Item {
   const slot = u.slot === "kalkan" && !cls.shield ? "tilsim" : u.slot;
-  const it = classItem(id, cls, slot, tier, 4);
+  const it = classItem(id, cls, slot, tier, 4, false);
   it.name = u.name;
   it.uq = u.id;
   it.mods = { ...u.mods };
@@ -127,7 +135,84 @@ const CHARMS = [
 export const ITEM_NAMES = { weapons: WEAPONS, heavy: HEAVY, light: LIGHT, shields: SHIELDS, mounts: MOUNTS, charms: CHARMS };
 export const WEAPON_KINDS: WeaponKind[] = ["kilic", "balta", "hancer", "ok", "asa"];
 
-export function makeItem(id: number, slot: Slot, tier: number, rar: number, kind: WeaponKind | ArmorKind | "" = ""): Item {
+const VOW = "aeıioöuü";
+const POSS_DONE = new Set(["Şam Kılıcı", "Hükümdar Kılıcı", "Odun Baltası", "Savaş Baltası", "Tolga Baltası", "Ejder Baltası", "Gölge Hançeri", "Ateş Hançeri", "Av Yayı", "Türk Yayı", "Usta Yayı", "Hakan Yayı", "Tengri Asası", "Gök Kurt Asası", "Gece Zırhı", "Gölge Cübbesi", "Kurt Dişi", "Kartal Tüyü", "Yıldız Taşı", "Bozkır Atı", "Arap Atı"]);
+
+/** Ad tamlamasının ikinci ögesi: "Demir Kılıç" → "Demir Kılıcı". */
+export function poss(name: string): string {
+  if ([...POSS_DONE].some((p) => name === p || name.endsWith(" " + p))) return name;
+  const words = name.split(" ");
+  const last = words.pop()!;
+  const low = last.toLocaleLowerCase("tr");
+  const lastV = [...low].reverse().find((c) => VOW.includes(c)) ?? "a";
+  const v = "aı".includes(lastV) ? "ı" : "ei".includes(lastV) ? "i" : "ou".includes(lastV) ? "u" : "ü";
+  const end = low[low.length - 1];
+  const syll = [...low].filter((c) => VOW.includes(c)).length;
+  let stem = last;
+  if (VOW.includes(end)) stem = last + "s";
+  else if (end === "ç") stem = last.slice(0, -1) + "c";
+  else if (end === "k" && syll > 1) stem = last.slice(0, -1) + "ğ";
+  else if (end === "p" && syll > 1) stem = last.slice(0, -1) + "b";
+  return [...words, stem + v].join(" ");
+}
+
+export interface Affix {
+  id: string;
+  name: string;
+  /** "pre": sıfat ("Ateşli"), "own": tamlayan ("Hanın"). */
+  kind: "pre" | "own";
+  slots: Slot[];
+  roll: (it: Item, t: number, q: number) => void;
+}
+
+const addMod = (it: Item, k: keyof GearMods, v: number) => {
+  it.mods ??= {};
+  it.mods[k] = Math.round(((it.mods[k] ?? 0) + v) * 1000) / 1000;
+};
+
+export const AFFIXES: Affix[] = [
+  { id: "kurtdisli", name: "Kurt Dişli", kind: "pre", slots: ["silah"], roll: (it, t, q) => { it.crit = Math.round((it.crit + 0.02 + 0.008 * t * q) * 1000) / 1000; } },
+  { id: "atesli", name: "Ateşli", kind: "pre", slots: ["silah"], roll: (it, t, q) => { it.atk += Math.max(1, Math.round(it.atk * 0.12 * q + t * 0.5)); } },
+  { id: "keskin", name: "Keskin", kind: "pre", slots: ["silah"], roll: (it, t, q) => { it.atk += Math.max(1, Math.round(t * 1.4 * q)); } },
+  { id: "zehirli", name: "Zehirli", kind: "pre", slots: ["silah"], roll: (it, t, q) => { it.atk += Math.round(t * 0.6 * q); it.crit = Math.round((it.crit + 0.015 * q) * 1000) / 1000; } },
+  { id: "saglam", name: "Sağlam", kind: "pre", slots: ["zirh", "kalkan"], roll: (it, t, q) => { it.def += Math.max(1, Math.round(t * 1.1 * q)); } },
+  { id: "keceli", name: "Keçe Astarlı", kind: "pre", slots: ["zirh", "kalkan"], roll: (it, t, q) => { it.hp += Math.max(2, Math.round(t * 5 * q)); } },
+  { id: "orgulu", name: "Demir Örgülü", kind: "pre", slots: ["zirh", "kalkan"], roll: (it, t, q) => { it.def += Math.round(t * 0.6 * q); it.hp += Math.round(t * 2.5 * q); } },
+  { id: "ruzgar", name: "Rüzgâr Hızlı", kind: "pre", slots: ["zirh", "tilsim"], roll: (it, t, q) => addMod(it, "spd", Math.round((0.015 + 0.006 * t) * q * 100) / 100) },
+  { id: "bilge", name: "Bilge", kind: "pre", slots: ["tilsim"], roll: (it, t, q) => { it.kar += Math.max(1, Math.round(t * 0.5 * q)); } },
+  { id: "yigit", name: "Yiğit", kind: "pre", slots: ["tilsim"], roll: (it, t, q) => { it.lid += Math.max(1, Math.round(t * 0.5 * q)); } },
+  { id: "han", name: "Hanın", kind: "own", slots: ["silah", "zirh", "kalkan", "tilsim"], roll: (it, t, q) => { it.kar += Math.max(1, Math.round(t * 0.35 * q)); it.lid += Math.max(1, Math.round(t * 0.35 * q)); } },
+  { id: "bahadir", name: "Bahadırın", kind: "own", slots: ["silah", "zirh", "kalkan"], roll: (it, t, q) => { it.hp += Math.max(3, Math.round(t * 4 * q)); } },
+  { id: "kurt", name: "Kurdun", kind: "own", slots: ["silah", "tilsim"], roll: (it, t, q) => { if (it.slot === "silah") it.atk += Math.max(1, Math.round(t * q)); else addMod(it, "atk", Math.round(0.03 * q * 100) / 100); } },
+  { id: "kartal", name: "Kartalın", kind: "own", slots: ["silah", "zirh", "tilsim"], roll: (it, t, q) => { it.crit = Math.round((it.crit + 0.01 + 0.004 * t * q) * 1000) / 1000; } },
+  { id: "tengri", name: "Tengri'nin", kind: "own", slots: ["silah", "zirh", "kalkan", "tilsim"], roll: (_it, _t, q) => addMod(_it, "xp", Math.round(0.04 * q * 100) / 100) },
+  { id: "tuccar", name: "Tüccarın", kind: "own", slots: ["zirh", "tilsim"], roll: (it, t, q) => addMod(it, "carry", Math.round(6 * t * q)) },
+  { id: "ozan", name: "Ozanın", kind: "own", slots: ["kalkan", "tilsim"], roll: (it, t, q) => { it.kar += Math.max(1, Math.round(t * 0.4 * q)); addMod(it, "army", 0.02); } },
+];
+export const AFFIX_BY_ID: Record<string, Affix> = Object.fromEntries(AFFIXES.map((a) => [a.id, a]));
+
+/** Nadir eşyaya bir, destansı ve üstüne iki ek verir; değerler her seferinde farklı çıkar. */
+function rollAffixes(it: Item, base: string): void {
+  if (it.rar < 2 || it.slot === "at") return;
+  const pick = (kind: Affix["kind"]) => {
+    const pool = AFFIXES.filter((a) => a.kind === kind && a.slots.includes(it.slot));
+    return pool[Math.floor(Math.random() * pool.length)];
+  };
+  const want: Affix["kind"][] = it.rar >= 3 ? ["own", "pre"] : [Math.random() < 0.5 ? "own" : "pre"];
+  const got = want.map(pick).filter((a): a is Affix => !!a);
+  for (const a of got) a.roll(it, it.tier, 0.6 + Math.random() * 0.8);
+  it.afx = got.map((a) => a.id);
+  it.name = affixName(it.afx, base);
+}
+
+export function affixName(afx: string[], base: string): string {
+  const own = afx.map((id) => AFFIX_BY_ID[id]).find((a) => a?.kind === "own");
+  const pre = afx.map((id) => AFFIX_BY_ID[id]).find((a) => a?.kind === "pre");
+  const core = pre ? `${pre.name} ${base}` : base;
+  return own ? `${own.name} ${poss(core)}` : core;
+}
+
+export function makeItem(id: number, slot: Slot, tier: number, rar: number, kind: WeaponKind | ArmorKind | "" = "", affix = true): Item {
   tier = Math.max(1, Math.min(5, tier));
   const m = RARITY[rar].mult;
   const it: Item = { id, slot, kind: "", tier, rar, name: "", icon: "", atk: 0, def: 0, hp: 0, spd: 0, carry: 0, lid: 0, kar: 0, crit: 0, lvReq: (tier - 1) * 3 + 1, req: null };
@@ -169,32 +254,97 @@ export function makeItem(id: number, slot: Slot, tier: number, rar: number, kind
     it.lid = Math.round(tier * 0.6 * m + 0.4);
     it.kar = Math.round(tier * 0.6 * m);
   }
-  if (rar > 0) it.name = `${RARITY[rar].name} ${it.name}`;
+  if (affix && rar >= 2 && slot !== "at") rollAffixes(it, it.name);
+  else if (rar > 0) it.name = `${RARITY[rar].name} ${it.name}`;
   return it;
 }
 
-export function classItem(id: number, cls: ClassDef, slot: Slot, tier: number, rar: number): Item {
-  if (slot === "silah") return makeItem(id, slot, tier, rar, cls.weapons[Math.floor(Math.random() * cls.weapons.length)]);
-  if (slot === "zirh") return makeItem(id, slot, tier, rar, cls.armor);
-  return makeItem(id, slot, tier, rar);
+export function classItem(id: number, cls: ClassDef, slot: Slot, tier: number, rar: number, affix = true): Item {
+  if (slot === "silah") return makeItem(id, slot, tier, rar, cls.weapons[Math.floor(Math.random() * cls.weapons.length)], affix);
+  if (slot === "zirh") return makeItem(id, slot, tier, rar, cls.armor, affix);
+  return makeItem(id, slot, tier, rar, "", affix);
 }
 
-export function rollItem(id: number, tier: number, cls: ClassDef | null, luck = 0): Item {
+/** Kahramanın şu anki seviyesi ve statlarıyla kuşanabileceği en yüksek kademe. */
+export function fitTier(it: Item, lv: number, stats: Record<Stat, number>): number {
+  let t = it.tier;
+  while (t > 1 && ((t - 1) * 3 + 1 > lv || (it.req && 1 + (t - 1) * 3 > stats[it.req.stat]))) t--;
+  return t;
+}
+
+export interface LootFit {
+  lv: number;
+  stats: Record<Stat, number>;
+}
+
+export function rollItem(id: number, tier: number, cls: ClassDef | null, luck = 0, fit?: LootFit): Item {
   const slots: Slot[] = ["silah", "silah", "zirh", "zirh", "kalkan", "at", "tilsim"];
   let slot = slots[Math.floor(Math.random() * slots.length)];
   const r = Math.random() + luck;
   const rar = r > 0.97 ? 3 : r > 0.85 ? 2 : r > 0.6 ? 1 : 0;
   const t = Math.max(1, Math.min(5, tier + (Math.random() < 0.25 ? 1 : 0) - (Math.random() < 0.25 ? 1 : 0)));
-  if (cls && Math.random() < 0.65) {
+  if (cls && Math.random() < (fit ? 0.85 : 0.65)) {
     if (slot === "kalkan" && !cls.shield) slot = "zirh";
-    return classItem(id, cls, slot, t, rar);
+    const it = classItem(id, cls, slot, t, rar);
+    if (!fit) return it;
+    const ft = fitTier(it, fit.lv, fit.stats);
+    return ft < it.tier && Math.random() < 0.75 ? makeItem(id, slot, ft, rar, it.kind) : it;
   }
   const kind = slot === "silah" ? WEAPON_KINDS[Math.floor(Math.random() * 5)] : slot === "zirh" ? (Math.random() < 0.5 ? "agir" : "hafif") : "";
   return makeItem(id, slot, t, rar, kind);
 }
 
+const YAD_AT = [10, 40, 120, 300, 700, 1500];
+const YAD_EPI = ["", "Kan Tatmış", "Ün Salmış", "Yiğit", "Destanlık", "Kurt Ruhlu", "Tengri Kutlu"];
+
+export function yadNext(it: Item): number | null {
+  return it.yad ? YAD_AT[it.yad.lv] ?? null : null;
+}
+
+/** Yadigâr silaha öldürülen düşmanları işler; seviye atlarsa adı ve gücü büyür. */
+export function growHeirloom(it: Item, kills: number, ownerGen: string): boolean {
+  if (!it.yad || it.slot !== "silah") return false;
+  it.yad.kills += kills;
+  let up = false;
+  while (it.yad.lv < YAD_AT.length && it.yad.kills >= YAD_AT[it.yad.lv]) {
+    it.yad.lv++;
+    up = true;
+  }
+  if (!up) return false;
+  const L = it.yad.lv;
+  const k = it.kind as WeaponKind;
+  const w = WEAPONS[k] ?? WEAPONS.kilic;
+  const idx = Math.min(4, Math.floor(L * 0.75));
+  const plus = it.plus ?? 0;
+  const base = it.base ?? { atk: it.atk, def: it.def, hp: it.hp, name: it.name };
+  base.atk = Math.max(base.atk, Math.round(w.atk[idx] * (1 + 0.25 * L)));
+  const noun = WEAPON_NAME[k] ?? "Kılıç";
+  base.name = L >= 4 ? `${ownerGen} ${YAD_EPI[L]} ${poss(noun)}` : `${YAD_EPI[L]} ${noun}`;
+  it.base = base;
+  it.tier = Math.max(it.tier, idx + 1);
+  it.icon = w.icon + Math.max(Number(it.icon.slice(-1)) || 1, idx + 1);
+  it.crit = Math.round((it.crit + 0.01) * 1000) / 1000;
+  it.rar = Math.max(it.rar, Math.min(4, Math.floor(L * 0.7)));
+  setPlus(it, plus);
+  return true;
+}
+
+const SLOT_PRICE: Record<Slot, number> = { silah: 1.1, zirh: 1, kalkan: 0.8, at: 1.6, tilsim: 0.85 };
+
+/** Fiyat kademe, nadirlik, yuva ve eşyanın gücünden (affix dahil) hesaplanır. */
 export function itemPrice(it: Item): number {
-  return Math.round(30 * Math.pow(it.tier, 2.1) * RARITY[it.rar].mult * (it.slot === "at" ? 1.6 : 1) * (1 + 0.3 * (it.plus ?? 0)) * (it.set || it.uq ? 2.5 : 1));
+  const base = 30 * Math.pow(it.tier, 2.1) * RARITY[it.rar].mult * SLOT_PRICE[it.slot];
+  const mods = Object.keys(it.mods ?? {}).length;
+  const ref = Math.max(1, 6 * it.tier * RARITY[it.rar].mult);
+  const power = Math.max(0.85, Math.min(1.3, 0.85 + (gearScore(it) / ref) * 0.15));
+  return Math.round(base * power * (1 + 0.12 * mods) * (1 + 0.3 * (it.plus ?? 0)) * (it.set || it.uq ? 2.5 : 1));
+}
+
+/** Aynı yuvadaki eşyaları kabaca karşılaştırmak için tek sayılık güç. */
+export function gearScore(it: Item): number {
+  const m = it.mods ?? {};
+  const modSum = (Object.keys(m) as (keyof GearMods)[]).reduce((a, k) => a + (k === "carry" ? m[k]! / 200 : m[k]!), 0);
+  return it.atk + it.def * 1.2 + it.hp / 3 + it.crit * 120 + it.spd * 50 + it.carry / 10 + (it.lid + it.kar) * 2 + modSum * 60 + (it.plus ?? 0);
 }
 
 export function kindName(it: Item): string {
@@ -202,6 +352,8 @@ export function kindName(it: Item): string {
   if (it.slot === "zirh") return ARMOR_NAME[it.kind === "agir" ? "agir" : "hafif"];
   return SLOT_NAME[it.slot];
 }
+
+const MAT_NAME: Record<string, string> = { sam: "Şam çeliği", cin: "Çin demiri", kosele: "Kösele", ipek: "İpek astarlı", turkuaz: "Turkuaz kakmalı", yesim: "Yeşim kakmalı" };
 
 export function itemStats(it: Item): string {
   const p: string[] = [];
@@ -215,6 +367,12 @@ export function itemStats(it: Item): string {
   if (it.kar) p.push(`${t("Karizma")} +${it.kar}`);
   if (it.mods) p.push(modsText(it.mods));
   if (it.horse) p.push(`${it.horse.gen}. kuşak${it.horse.sire ? ` · ${it.horse.sire} × ${it.horse.dam}` : ""}`);
+  if (it.yad) {
+    const nx = yadNext(it);
+    p.push(`${t("Yadigâr")} · ${it.yad.kills}${nx ? `/${nx}` : ""} ${t("düşman")}`);
+  }
+  if (it.mat && MAT_NAME[it.mat]) p.push(t(MAT_NAME[it.mat]));
+  if (it.sig) p.push(t("İmza eşyası"));
   const pr = itemProc(it);
   if (pr) p.push(`✦ ${t(pr.name)}: ${t(PROC_TEXT[pr.kind])}`);
   return p.join(" · ");

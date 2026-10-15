@@ -32,14 +32,77 @@ export const CITIES: CityDef[] = [
 ].map((c) => ({ id: c.id, x: c.x * W, y: c.y * H }));
 
 const SEAS: [number, number, number, number][] = [
-  [0.17, 0.29, 0.1, 0.085],
   [0.08, 0.95, 0.2, 0.16],
-  [0.41, 0.4, 0.035, 0.14],
-  [0.58, 0.24, 0.032, 0.038],
   [0.47, 1.02, 0.1, 0.07],
   [0.885, 0.2, 0.018, 0.009],
   [-0.02, 0.62, 0.05, 0.1],
 ];
+
+/** Kıyı çizgisi boyunca uzanan denizler: [x, y, yarıçap(px)] noktaları. */
+const COASTS: { name: string; pts: [number, number, number][] }[] = [
+  { name: "Hazar Denizi", pts: [[0.392, 0.07, 300], [0.405, 0.15, 330], [0.418, 0.23, 250], [0.425, 0.31, 215], [0.416, 0.39, 205], [0.401, 0.46, 200], [0.414, 0.525, 175]] },
+  { name: "Aral Gölü", pts: [[0.574, 0.195, 150], [0.588, 0.235, 230], [0.604, 0.262, 210]] },
+  { name: "Karadeniz", pts: [[0.075, 0.315, 270], [0.13, 0.33, 330], [0.19, 0.315, 320], [0.25, 0.3, 290], [0.275, 0.285, 200]] },
+  { name: "Azak Denizi", pts: [[0.218, 0.232, 50], [0.222, 0.2, 110], [0.245, 0.185, 100]] },
+];
+/** Denizin içine uzanan kara (Kırım). */
+const CAPES: [number, number, number, number][] = [[0.178, 0.262, 0.03, 0.036]];
+
+const OASES: [number, number, string][] = [
+  [0.6, 0.53, "Tecen Vahası"],
+  [0.64, 0.585, "Serahs Vahası"],
+  [0.66, 0.34, "Karakum Kuyusu"],
+  [0.69, 0.4, "Kızılkum Vahası"],
+  [0.97, 0.43, "Hotan Vahası"],
+  [0.53, 0.74, "Tabas Vahası"],
+  [0.5, 0.31, "Üstyurt Kuyusu"],
+  [0.28, 0.86, "Tedmür Vahası"],
+];
+
+/** Tarihî geçitler ve yaklaşık yerleri; her geçide en yakın ad verilir. */
+const PASS_NAMES: [number, number, string][] = [
+  [0.36, 0.42, "Derbent Kapısı"],
+  [0.76, 0.52, "Demir Kapı"],
+  [0.87, 0.38, "Torugart Geçidi"],
+  [0.2, 0.55, "Gülek Boğazı"],
+  [0.62, 0.64, "Kopet Geçidi"],
+  [0.5, 0.62, "Hazar Kapısı"],
+  [0.33, 0.56, "Zagros Geçidi"],
+  [0.27, 0.48, "Kafkas Geçidi"],
+];
+
+export interface Landmark {
+  x: number;
+  y: number;
+  name: string;
+}
+
+export interface Sign {
+  x: number;
+  y: number;
+  /** Okun gösterdiği şehir ve yön (radyan). */
+  to: string;
+  a: number;
+}
+
+const COAST_BOX = COASTS.map((c) => {
+  const pad = Math.max(...c.pts.map((p) => p[2])) * 1.6;
+  return { x0: Math.min(...c.pts.map((p) => p[0] * W)) - pad, x1: Math.max(...c.pts.map((p) => p[0] * W)) + pad, y0: Math.min(...c.pts.map((p) => p[1] * H)) - pad, y1: Math.max(...c.pts.map((p) => p[1] * H)) + pad };
+});
+
+function coastDist(wx: number, wy: number, pts: [number, number, number][]): number {
+  let best = 1e9;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const [ax, ay, ar] = pts[i];
+    const [bx, by, br] = pts[i + 1];
+    const px = ax * W, py = ay * H, qx = bx * W, qy = by * H;
+    const dx = qx - px, dy = qy - py;
+    const t = Math.max(0, Math.min(1, ((wx - px) * dx + (wy - py) * dy) / (dx * dx + dy * dy)));
+    const d = Math.hypot(wx - (px + dx * t), wy - (py + dy * t)) / lerp(ar, br, t);
+    best = Math.min(best, d * d);
+  }
+  return best;
+}
 
 const RIDGES: [number, number, number, number, number, number][] = [
   [0.24, 0.37, 0.36, 0.41, 150, 0.75],
@@ -68,6 +131,8 @@ const RIVERS: [number, number][][] = [
   [[0.86, 0.32], [0.82, 0.36], [0.76, 0.37], [0.7, 0.33], [0.65, 0.28], [0.6, 0.235]],
   [[0.76, 0.42], [0.73, 0.46], [0.7, 0.5]],
   [[0.3, 0.55], [0.36, 0.7], [0.42, 0.85], [0.45, 0.96]],
+  [[0.33, 0.0], [0.35, 0.03], [0.37, 0.045], [0.388, 0.065]],
+  [[0.27, 0.07], [0.258, 0.12], [0.246, 0.172]],
 ];
 
 export const ROAD_LINKS: [string, string][] = [
@@ -94,6 +159,11 @@ export interface World {
   trees: number[];
   peaks: number[];
   roads: number[][];
+  oases: Landmark[];
+  passes: Landmark[];
+  signs: Sign[];
+  bridges: { x: number; y: number; a: number }[];
+  seas: Landmark[];
 }
 
 const SEED = 7331;
@@ -170,6 +240,14 @@ export function generate(): World {
       let water = -1;
       let sea = 1e9;
       for (const [cx, cy, rx, ry] of SEAS) sea = Math.min(sea, ((nx - cx) / rx) ** 2 + ((ny - cy) / ry) ** 2);
+      COASTS.forEach((c, ci) => {
+        const b = COAST_BOX[ci];
+        if (wx > b.x0 && wx < b.x1 && wy > b.y0 && wy < b.y1) sea = Math.min(sea, coastDist(wx, wy, c.pts));
+      });
+      for (const [cx, cy, rx, ry] of CAPES) {
+        const k = ((nx - cx) / rx) ** 2 + ((ny - cy) / ry) ** 2;
+        if (k < 1.6) sea = Math.max(sea, lerp(2.4, sea, Math.max(0, (k - 0.6) / 1)));
+      }
       if (sea < 2.2) water = 1 - (sea + (fbm(nx * 9, ny * 9, SEED + 9) - 0.5) * 0.9);
       for (const c of CITIES) {
         const d2 = (wx - c.x) ** 2 + (wy - c.y) ** 2;
@@ -185,6 +263,10 @@ export function generate(): World {
       for (const [cx, cy, r] of DESERTS) {
         const d = ((nx - cx) ** 2 + ((ny - cy) * 0.58) ** 2) / (r * r);
         m -= 0.7 * Math.exp(-d);
+      }
+      for (const [ox, oy] of OASES) {
+        const d2 = (wx - ox * W) ** 2 + (wy - oy * H) ** 2;
+        if (d2 < 40000) m += 0.62 * Math.exp(-d2 / 4500);
       }
       const i = gy * GW + gx;
       height[i] = h;
@@ -248,6 +330,7 @@ export function generate(): World {
     }
 
   const roads: number[][] = [];
+  const ends: [string, string][] = [];
   for (const [a, b] of ROAD_LINKS) {
     const ca = CITIES.find((c) => c.id === a)!;
     const cb = CITIES.find((c) => c.id === b)!;
@@ -265,6 +348,7 @@ export function generate(): World {
     pts[pts.length - 2] = cb.x;
     pts[pts.length - 1] = cb.y;
     roads.push(pts);
+    ends.push([a, b]);
   }
   for (let i = 0; i < cost.length; i++) if (road[i] && cost[i] !== Infinity) cost[i] = Math.min(cost[i], 0.55);
 
@@ -287,8 +371,66 @@ export function generate(): World {
     }
   }
 
-  const { canvas, trees, peaks } = paint(height, moist, river, rivers, roads);
-  return { seed: SEED, height, moist, river, cost, road, reach, canvas, trees, peaks, roads };
+  const marks = landmarks(height, river, roads, ends);
+  const { canvas, trees, peaks } = paint(height, moist, river, rivers, roads, marks);
+  return { seed: SEED, height, moist, river, cost, road, reach, canvas, trees, peaks, roads, ...marks };
+}
+
+interface Marks {
+  oases: Landmark[];
+  passes: Landmark[];
+  signs: Sign[];
+  bridges: { x: number; y: number; a: number }[];
+  seas: Landmark[];
+}
+
+/** Vahalar, geçitler, köprüler ve yol işaretleri. */
+function landmarks(height: Float32Array, river: Uint8Array, roads: number[][], ends: [string, string][]): Marks {
+  const gi = (x: number, y: number) => Math.min(GH - 1, Math.max(0, Math.floor(y / (H / GH)))) * GW + Math.min(GW - 1, Math.max(0, Math.floor(x / (W / GW))));
+  const nearCity = (x: number, y: number, r: number) => CITIES.some((c) => Math.hypot(c.x - x, c.y - y) < r);
+  const oases = OASES.map(([x, y, name]) => ({ x: x * W, y: y * H, name })).filter((o) => height[gi(o.x, o.y)] >= 0);
+  const passes: Landmark[] = [];
+  const bridges: { x: number; y: number; a: number }[] = [];
+  const signs: Sign[] = [];
+  roads.forEach((pts, ri) => {
+    const [a, b] = ends[ri];
+    let top = -1;
+    let topH = 0.36;
+    let wet = false;
+    let run = 0;
+    let n = 0;
+    for (let k = 2; k < pts.length - 2; k += 2) {
+      const x = pts[k], y = pts[k + 1];
+      const h = height[gi(x, y)];
+      if (h > topH && !nearCity(x, y, 300)) {
+        topH = h;
+        top = k;
+      }
+      const ang = Math.atan2(pts[k + 3] - pts[k - 1], pts[k + 2] - pts[k - 2]);
+      const r = river[gi(x, y)] === 2;
+      if (r && !wet && !bridges.some((q) => Math.hypot(q.x - x, q.y - y) < 80)) bridges.push({ x, y, a: ang });
+      wet = r;
+      run += Math.hypot(x - pts[k - 2], y - pts[k - 1]);
+      if (run > 700 && !nearCity(x, y, 280)) {
+        run = 0;
+        const back = n++ % 2 === 1;
+        signs.push({ x: x + Math.cos(ang + Math.PI / 2) * 22, y: y + Math.sin(ang + Math.PI / 2) * 22, to: back ? a : b, a: back ? ang + Math.PI : ang });
+      }
+    }
+    if (top > 0) {
+      const x = pts[top], y = pts[top + 1];
+      if (!passes.some((p) => Math.hypot(p.x - x, p.y - y) < 600)) {
+        const free = PASS_NAMES.filter(([, , n]) => !passes.some((p) => p.name === n));
+        const near = free.reduce((a, b) => (Math.hypot(b[0] * W - x, b[1] * H - y) < Math.hypot(a[0] * W - x, a[1] * H - y) ? b : a), free[0] ?? PASS_NAMES[0]);
+        passes.push({ x, y, name: near[2] });
+      }
+    }
+  });
+  const seas = COASTS.map((c) => {
+    const m = c.pts[Math.floor(c.pts.length / 2)];
+    return { x: m[0] * W, y: m[1] * H, name: c.name };
+  });
+  return { oases, passes, signs, bridges, seas };
 }
 
 function sampleH(height: Float32Array, x: number, y: number): number {
@@ -302,7 +444,7 @@ function sampleH(height: Float32Array, x: number, y: number): number {
   return lerp(lerp(height[i], height[i + 1], fx), lerp(height[i + GW], height[i + GW + 1], fx), fy);
 }
 
-function paint(height: Float32Array, moist: Float32Array, river: Uint8Array, rivers: number[][], roads: number[][]): { canvas: HTMLCanvasElement; trees: number[]; peaks: number[] } {
+function paint(height: Float32Array, moist: Float32Array, river: Uint8Array, rivers: number[][], roads: number[][], marks: Marks): { canvas: HTMLCanvasElement; trees: number[]; peaks: number[] } {
   const canvas = document.createElement("canvas");
   canvas.width = TW;
   canvas.height = TH;
@@ -429,6 +571,59 @@ function paint(height: Float32Array, moist: Float32Array, river: Uint8Array, riv
     g.lineWidth = 5;
     g.setLineDash([]);
     g.stroke();
+  }
+  for (const o of marks.oases) {
+    g.save();
+    g.translate(o.x, o.y);
+    g.scale(1.7, 1.7);
+    g.translate(-o.x, -o.y);
+    const pool = g.createRadialGradient(o.x, o.y, 4, o.x, o.y, 34);
+    pool.addColorStop(0, "rgba(52,128,150,0.95)");
+    pool.addColorStop(0.7, "rgba(70,150,160,0.85)");
+    pool.addColorStop(1, "rgba(120,150,90,0)");
+    g.fillStyle = pool;
+    g.beginPath();
+    g.ellipse(o.x, o.y, 34, 20, 0.3, 0, Math.PI * 2);
+    g.fill();
+    for (let k = 0; k < 7; k++) {
+      const a = (k / 7) * Math.PI * 2 + 0.4;
+      const px = o.x + Math.cos(a) * 46, py = o.y + Math.sin(a) * 28;
+      g.strokeStyle = "rgba(92,64,36,0.9)";
+      g.lineWidth = 2.5;
+      g.beginPath();
+      g.moveTo(px, py + 10);
+      g.lineTo(px + 2, py - 6);
+      g.stroke();
+      g.fillStyle = "rgba(46,104,46,0.95)";
+      for (let f = 0; f < 5; f++) {
+        const fa = (f / 5) * Math.PI * 2;
+        g.beginPath();
+        g.ellipse(px + 2 + Math.cos(fa) * 6, py - 6 + Math.sin(fa) * 3, 7, 2.4, fa, 0, Math.PI * 2);
+        g.fill();
+      }
+    }
+    g.restore();
+  }
+  for (const b of marks.bridges) {
+    g.save();
+    g.translate(b.x, b.y);
+    g.rotate(b.a);
+    g.fillStyle = "rgba(60,40,22,0.6)";
+    g.fillRect(-20, -9, 40, 18);
+    g.fillStyle = "rgba(168,128,84,1)";
+    g.fillRect(-18, -7, 36, 14);
+    g.strokeStyle = "rgba(98,66,36,0.95)";
+    g.lineWidth = 1.5;
+    for (let k = -14; k <= 14; k += 5) {
+      g.beginPath();
+      g.moveTo(k, -7);
+      g.lineTo(k, 7);
+      g.stroke();
+    }
+    g.fillStyle = "rgba(70,46,24,1)";
+    g.fillRect(-19, -9, 38, 2.5);
+    g.fillRect(-19, 6.5, 38, 2.5);
+    g.restore();
   }
   g.restore();
   return { canvas, trees, peaks };

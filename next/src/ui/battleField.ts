@@ -451,10 +451,13 @@ export class BattleField {
       const off = this.lunge(s, gl.u, p) * dir - enter * enter * 0.35 * dir;
       const wheel = s === 0 && gl.u === "horse" && (this.order === "kanat" || this.charge) ? Math.sin(Math.PI * Math.min(1, p)) * (gl.y < 0.5 ? -0.12 : 0.12) : 0;
       const x = (gl.x + off) * w;
+      const mv = Math.min(1, Math.abs(this.lunge(s, gl.u, p) - this.lunge(s, gl.u, Math.max(0, p - 0.04))) * 90 + enter * 2.5);
+      const ph = now / (gl.u === "horse" ? 85 : 125) + gl.ph;
+      const sz = size * depth(gl.y + wheel) * (gl.u === "horse" ? 1.15 : 1);
       const gallop = gl.u === "horse" ? Math.abs(Math.sin(now / 90 + gl.ph)) * 2.2 : Math.sin(now / 160 + gl.ph) * 0.8;
       const gy = Y(gl.y + wheel);
-      const y = gy - gallop;
-      const sz = size * depth(gl.y + wheel) * (gl.u === "horse" ? 1.15 : 1);
+      const y = gy - gallop - Math.abs(Math.sin(ph)) * sz * 0.08 * mv;
+      const sway = Math.sin(ph) * (gl.u === "horse" ? 0.09 : 0.14) * mv;
       ctx.globalAlpha = 0.35;
       ctx.fillStyle = "#1a0e04";
       ctx.beginPath();
@@ -462,7 +465,13 @@ export class BattleField {
       ctx.fill();
       ctx.globalAlpha = 0.82 + 0.18 * depth(gl.y);
       const spr = this.sprite(gl.u, s);
-      if (spr) ctx.drawImage(spr, x - sz / 2, y - sz / 2, sz, sz);
+      if (spr && sway) {
+        ctx.save();
+        ctx.translate(x, y + sz * 0.4);
+        ctx.rotate(sway);
+        ctx.drawImage(spr, -sz / 2, -sz * 0.9, sz, sz);
+        ctx.restore();
+      } else if (spr) ctx.drawImage(spr, x - sz / 2, y - sz / 2, sz, sz);
       else this.glyph(gl.u, x, y, SIDE_COLOR[s], 1);
       ctx.fillStyle = SIDE_COLOR[s];
       ctx.fillRect(x - sz * 0.22, gy + sz * 0.5, sz * 0.44, 2);

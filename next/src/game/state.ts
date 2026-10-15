@@ -27,6 +27,8 @@ import { factionOf } from "./factions";
 import type { MyCaravan } from "./mycaravan";
 import type { DipMap } from "./spy";
 import type { WorldState } from "./world";
+import type { Diff, Drill, Ledger, Order, Realm } from "./reforms";
+import type { FactionId } from "./factions";
 
 export interface Village {
   name: string;
@@ -349,6 +351,35 @@ export interface GameState {
   haggle?: Record<string, { day: number; m: number }>;
   /** Yaşayan dünya: savaşlar, işgaller, kıtlık, doğa, çağ, hafıza. */
   wd?: WorldState;
+  /** İlk silah yadigâr olarak işaretlendi. */
+  yadSet?: boolean;
+  /** Hürriyetin kazanıldığı an (s.time); ilk dakikaların bildirimleri özetlenir. */
+  freeAt?: number;
+  /** Şehir görev zincirleri: adım, adım başındaki sayaç, bitti mi. */
+  chains?: Record<string, { step: number; base: number; done?: boolean }>;
+  /** Geçerli destan bölümünde verilen kararlar ve sahne sonuçları. */
+  sagaNotes?: string[];
+  /** Kazanılmış bölüm sahneleri ve son kaybedilen sahnenin zamanı. */
+  stages?: { won: string[]; lostAt?: number };
+  /** Asker türü başına eğitim basamağı ve seçilen dal. */
+  drill?: Drill;
+  /** Asker türü başına birlik tecrübesi. */
+  drillXp?: Partial<Record<Unit, number>>;
+  /** Beylik yönetimi: vergi, memnuniyet, uzmanlaşma. */
+  realm?: Realm;
+  /** Şehir başına NPC eşya siparişleri. */
+  orders?: Record<string, { day: number; list: Order[] }>;
+  /** Ziyaret edilen şehirlerin fiyat geçmişi: [gün, alış, satış]. */
+  ledger?: Ledger;
+  /** Kervansaraylı şehirlerdeki depo. */
+  depot?: Record<string, Partial<Record<Good, [number, number]>>>;
+  diff?: Diff;
+  /** Demir mod: tek kayıt, geri dönüş yok. */
+  iron?: boolean;
+  /** Biat edilen devlet. */
+  fealty?: { f: FactionId; since: number; paid: number } | null;
+  /** Haraca bağlanan rakip beyler. */
+  tribute?: { rival: string; until: number; gold: number }[];
 }
 
 export interface Voyage {
@@ -501,8 +532,8 @@ export function campGarrison(tier: number, R: () => number = Math.random): Army 
   return army(Math.round(n * (1 - a - h)), Math.round(n * a), Math.round(n * h));
 }
 
-export function banditArmy(tier: number): Army {
-  const n = Math.max(2, Math.round(2.5 * Math.pow(1.8, tier - 1) * (0.7 + Math.random() * 0.6)));
+export function banditArmy(tier: number, scale = 1): Army {
+  const n = Math.max(2, Math.round(2.5 * Math.pow(1.8, tier - 1) * (0.7 + Math.random() * 0.6) * scale));
   const r = Math.random();
   if (tier <= 1 || r < 0.4) return army(Math.round(n * 0.75), Math.round(n * 0.25), 0);
   if (r < 0.75) return army(Math.round(n * 0.3), Math.round(n * 0.6), Math.round(n * 0.1));
@@ -762,6 +793,38 @@ function migrateMap(r: Partial<GameState> & { explored?: string }, fresh: GameSt
   return fog;
 }
 
+function walkableAt(w: World, x: number, y: number): boolean {
+  const nx = Math.floor(x / NAV);
+  const ny = Math.floor(y / NAV);
+  if (nx < 1 || ny < 1 || nx >= NW - 1 || ny >= NH - 1) return false;
+  const i = ny * NW + nx;
+  return w.reach[i] === 1 && w.cost[i] !== Infinity;
+}
+
+/** Harita değişince denizde ya da ulaşılmaz yerde kalan kayıtlı yerleri en yakın karaya taşır. */
+function fixPlaces(w: World, s: GameState): void {
+  const fix = (p: { x: number; y: number } | null | undefined) => {
+    if (!p || typeof p.x !== "number" || walkableAt(w, p.x, p.y)) return;
+    for (let r = NAV; r < 1600; r += NAV)
+      for (let a = 0; a < 24; a++) {
+        const x = p.x + Math.cos((a / 24) * Math.PI * 2) * r;
+        const y = p.y + Math.sin((a / 24) * Math.PI * 2) * r;
+        if (!walkableAt(w, x, y)) continue;
+        p.x = x;
+        p.y = y;
+        return;
+      }
+  };
+  const lists = [s.villages, s.camps, s.nodes, s.ruins, s.kurgans, s.forts] as unknown as ({ x: number; y: number }[] | undefined)[];
+  for (const l of lists) for (const p of l ?? []) fix(p);
+  fix(s.hero);
+  const loose = s as unknown as { story?: { fort?: { x: number; y: number } }; act2?: { gate?: { x: number; y: number } }; act3?: { peak?: { x: number; y: number } }; otag?: { x: number; y: number } };
+  fix(loose.story?.fort);
+  fix(loose.act2?.gate);
+  fix(loose.act3?.peak);
+  fix(loose.otag);
+}
+
 export function loadGame(w: World): GameState {
   const fresh = newGame(w);
   try {
@@ -772,7 +835,7 @@ export function loadGame(w: World): GameState {
     const oldW = r.mapW ?? W0;
     let explored = typeof r.explored === "string" ? decodeBits(r.explored, NW * NH) : fresh.explored;
     if (oldW !== W) explored = migrateMap(r, fresh, oldW);
-    return {
+    const st = {
       ...fresh,
       ...r,
       buildings: { ...fresh.buildings, ...(r.buildings ?? {}) },
@@ -787,6 +850,8 @@ export function loadGame(w: World): GameState {
       storms: [],
       marches: Array.isArray(r.marches) ? r.marches : [],
     } as GameState;
+    fixPlaces(w, st);
+    return st;
   } catch {
     return fresh;
   }

@@ -56,7 +56,24 @@ export interface Chapter {
   scene?: { img: string; text: (g: Game) => string; choices: Choice[] };
   auto?: (g: Game) => boolean;
   outro?: { img: string; title: string; text: (g: Game) => string };
+  /** Bölümü kapatan savaş ya da kuşatma sahnesi; kazanılmadan bölüm ilerlemez. */
+  stage?: Stage;
   goto: (g: Game) => { x: number; y: number } | null;
+}
+
+export interface Stage {
+  title: string;
+  /** Savaş ekranında görünen sahne notu. */
+  text: string;
+  siege?: boolean;
+  /** Düşman oranı [mızrak, okçu, atlı]; boyut kahramanın ordusuna göre ölçeklenir. */
+  mix: [number, number, number];
+  /** Kahraman ordusunun katı ve en az düşman sayısı. */
+  k: number;
+  min: number;
+  bonus: number;
+  win: string;
+  lose: string;
 }
 
 const city = (id: string) => CITIES.find((c) => c.id === id)!;
@@ -77,6 +94,13 @@ export const CHAPTERS: Chapter[] = [
       text: (g) => `Ak sakallı derviş kopuzunu bıraktı ve omzundaki damgaya uzun uzun baktı.<br><br><i>"Demek sen de onlardansın, ${g.s.hero.name}. Kara Tamga… Kara Han'ın köle avcıları. Esirlerin ruhlarını eski kurganlara hapsediyor, balbalları uyandırıyorlar. Taşlar uyandıkça bozkır kararıyor."</i><br><br><i>"Ailenin izini sürmek istiyorsan önce bir Kurgan Taşını kır. İçindeki ruhlar sana yolu gösterecek. Ben de seninle geleceğim; yaşlı bir dervişin sözü bazen kılıçtan keskindir."</i>`,
       choices: [{ label: "Korkut'u yanına al", run: (g) => { g.addCompanion("korkut"); g.storyAdvance(); } }],
     },
+    stage: {
+      title: "Tekke Baskını",
+      text: "Kara Tamga'nın köle avcıları seni Buhara'ya kadar izlemiş. Dervişin tekkesinin kapısını kırıyorlar; Korkut'u yaşatmak için avluyu tut!",
+      mix: [3, 1, 0], k: 0.7, min: 6, bonus: 0,
+      win: "Avcılar avludan kaçıştı. Korkut kopuzunu yerden aldı: \"Seni bulmaları uzun sürmedi, evlat. Demek ki korkuyorlar.\"",
+      lose: "Avcılar tekkenin avlusunu tuttu; Korkut'u son anda arka kapıdan kaçırdın. Birliğini toplayıp yeniden dene.",
+    },
     goto: () => city("bukhara"),
   },
   {
@@ -85,6 +109,13 @@ export const CHAPTERS: Chapter[] = [
     img: "map/kurgan",
     intro: "Korkut haritada mor ışıkla titreyen taşları gösterdi. <i>\"Her biri bir mezar, her mezarda bir esirin ruhu. Birini kır, ruhlar konuşsun.\"</i>",
     auto: (g) => g.s.c.kurgans >= 1,
+    stage: {
+      title: "Balbalların Uyanışı",
+      text: "Taş çatlarken kurganın çevresindeki balballar yerinden kalktı. Ruhları serbest bırakmak için taş askerleri dağıt!",
+      mix: [2, 1, 1], k: 0.8, min: 8, bonus: 0.05,
+      win: "Son balbal toza dönüştü; kurganın üstünde mor bir ışık yükseldi.",
+      lose: "Balballar seni kurgandan uzaklaştırdı. Ruhlar hâlâ taşın içinde inliyor.",
+    },
     outro: {
       img: "ruh",
       title: "Ruhların fısıltısı",
@@ -120,6 +151,14 @@ export const CHAPTERS: Chapter[] = [
     img: "map/camp",
     intro: "Kara Han'ın kalesi gizli. Ama haramilerin hepsi ona haraç öder. Kampları birer birer düşürürsen, çete başlarından biri mutlaka konuşur.",
     auto: (g) => g.s.c.camps >= 3 && g.s.renown >= 60,
+    stage: {
+      title: "Çete Başının Palankası",
+      siege: true,
+      text: "Kuşatma! Çete başı ahşap palankasına kapandı. Kapıyı kır, sur dibindeki okçuları sustur ve onu canlı yakala.",
+      mix: [2, 2, 1], k: 0.9, min: 14, bonus: 0.15,
+      win: "Palankanın kapısı çatırdayarak devrildi; çete başı dizlerinin üstüne çöktü.",
+      lose: "Palankanın okçuları birliğini geri püskürttü. Yaralarını sar, yeniden kuşat.",
+    },
     outro: {
       img: "map/castle",
       title: "Kalenin yeri",
@@ -156,6 +195,14 @@ export const ACT2: Chapter[] = [
       text: (g) => `Korkut kopuzunun tellerine dokunmadan oturuyordu. Gözleri kıpkırmızıydı.<br><br><i>"Kara Han bir kuldu, ${g.s.hero.name}. Efendisi yerin dokuz kat altında: <b>Erlik Han</b>. Esirlerin ruhlarıyla uyandırılan her taş, Erlik'in zincirinden bir halkayı çözüyordu. Kara Han öldü ama zincir gevşedi."</i><br><br><i>"Erlik'in kapısını bulmak için önce yerin altına inmelisin. Kurganların en derin katlarında atalarımız kapının yerini taşlara kazıdı."</i>`,
       choices: [{ label: "Derinlere ineceğim", run: (g) => g.storyAdvance() }],
     },
+    stage: {
+      title: "Buhara Surlarında Gölgeler",
+      siege: true,
+      text: "Erlik'in gölgeleri Buhara surlarına tırmanıyor! Şehrin kapısını tut, medreseye ulaşmalarına izin verme.",
+      mix: [2, 2, 2], k: 0.9, min: 40, bonus: 0.15,
+      win: "Gölgeler şafakla birlikte eridi. Buharalılar surların üstünden adını haykırıyor.",
+      lose: "Gölgeler surları aştı; Korkut'la medreseye çekildiniz. Birliğini toparla ve yeniden savun.",
+    },
     goto: () => city("bukhara"),
   },
   {
@@ -164,6 +211,13 @@ export const ACT2: Chapter[] = [
     img: "map/kurgan",
     intro: "Ataların yazıtları derinlerde. Bir mezar kapısından in ve 10. kata kadar ilerle. Meşalelerini ve askerlerini iyi hazırla.",
     auto: (g) => g.s.deepBest >= 10,
+    stage: {
+      title: "Yazıtın Bekçileri",
+      text: "Onuncu katta yazıtın önünde zincirli bekçiler bekliyor. Yazıtı okuyabilmek için onları geç!",
+      mix: [3, 1, 1], k: 0.9, min: 45, bonus: 0.2,
+      win: "Bekçilerin zincirleri çözüldü; taş yazıt mor ışıkla aydınlandı.",
+      lose: "Bekçiler seni merdivenlere geri itti. Yazıt hâlâ karanlıkta.",
+    },
     outro: {
       img: "ruh",
       title: "Taştaki yazıt",
@@ -177,6 +231,13 @@ export const ACT2: Chapter[] = [
     img: "lord_bey",
     intro: "Erlik'e karşı tek tuğ yetmez. Bozkırın beylerini hediyeyle, antla ya da kılıçla kendi bayrağın altında topla.",
     auto: (g) => g.s.rivals.filter((r) => r.status === "ally" || r.status === "vassal").length >= 2,
+    stage: {
+      title: "Otağ Baskını",
+      text: "Birliği kıskanan dönek beyler gece otağını bastı! Müttefik beylerin çadırlarını koru; tuğlar yere düşmesin.",
+      mix: [1, 1, 2], k: 1, min: 55, bonus: 0.15,
+      win: "Dönekler karanlığa kaçtı. Müttefik beyler yanında savaştığın için sana kılıçlarıyla yemin etti.",
+      lose: "Baskıncılar otağı ateşe verdi; beyler dağılmadan önce yeniden toparlan.",
+    },
     outro: {
       img: "lord_bey",
       title: "Tuğlar bir arada",
@@ -231,6 +292,14 @@ export const ACT3: Chapter[] = [
       text: (g) => `Umay Kam bu kez ateş yakmamıştı. Davulunu dizlerine koymuş, göğe bakıyordu.<br><br><i>"Erlik'i yendin, ${g.s.hero.name}. Ama yeraltı boşalınca gök de sarsıldı. Tengri'nin <b>Kut</b>'u, beylere hükmetme hakkı, Ötüken'den koptu ve göğe savruldu. Kut sahipsiz kalırsa bozkır yüz yıl kardeş kanıyla yıkanır."</i><br><br><i>"Kut, beyleri tek sofrada toplayana, adı yedi iklimde anılana iner. Önce beyleri kurultayda birleştir. Sonra Tengri Dağı sana yolunu gösterecek."</i>`,
       choices: [{ label: "Kut'un peşine düşeceğim", run: (g) => g.storyAdvance() }],
     },
+    stage: {
+      title: "Kaşgar Kuşatması",
+      siege: true,
+      text: "Kut'un düştüğünü duyan yağmacı hanlar Kaşgar'ı kuşattı! Surlardan çık, kuşatma kulelerini yak ve şehri kurtar.",
+      mix: [2, 2, 2], k: 1, min: 80, bonus: 0.2,
+      win: "Kuşatma kuleleri alevler içinde çöktü; yağmacı hanlar Tanrı Dağları'na çekildi.",
+      lose: "Yağmacılar surların dibinde tutunuyor. Kaşgar kapılarını kapattı; yeniden saldır.",
+    },
     goto: () => city("kashgar"),
   },
   {
@@ -239,6 +308,13 @@ export const ACT3: Chapter[] = [
     img: "lord_bey",
     intro: "Kut sözle de kazanılır kılıçla da, ama asla tek başına. Müttefik ve tabi beylerini Semerkant'ta kurultaya çağır; adın bozkırın dört bucağına yayılsın.",
     auto: (g) => g.s.kurultay.held >= 1 && g.s.renown >= OTUKEN_RENOWN,
+    stage: {
+      title: "Kurultayın Sınavı",
+      text: "Kurultaydan dönen asi beyler Kut'u kendilerine istiyor. Semerkant önlerinde onları dağıt; Kut'u kılıçla değil adaletle taşıyacağını göster.",
+      mix: [2, 1, 2], k: 1, min: 100, bonus: 0.2,
+      win: "Asi beyler tuğlarını yere eğdi. Kurultay bir kez daha senin adını andı.",
+      lose: "Asiler Semerkant önlerinde tutundu. Ordunu güçlendir ve yeniden karşılarına çık.",
+    },
     outro: {
       img: "ruh",
       title: "Gökten inen ışık",

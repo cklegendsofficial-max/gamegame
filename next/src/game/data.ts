@@ -33,9 +33,9 @@ export function armySize(a: Army): number {
   return a.spear + a.archer + a.horse;
 }
 
-export function armyPower(a: Army, bonus = 0): number {
+export function armyPower(a: Army, bonus = 0, mul?: { atk: Partial<Record<Unit, number>>; hp: Partial<Record<Unit, number>> }): number {
   let p = 0;
-  for (const u of UNIT_KEYS) p += a[u] * UNITS[u].atk * Math.sqrt(UNITS[u].hp);
+  for (const u of UNIT_KEYS) p += a[u] * UNITS[u].atk * (mul?.atk[u] ?? 1) * Math.sqrt(UNITS[u].hp * (mul?.hp[u] ?? 1));
   return p * (1 + bonus);
 }
 

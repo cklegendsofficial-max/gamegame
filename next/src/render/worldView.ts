@@ -739,12 +739,86 @@ export class WorldView {
     return { sp: c, x, y, label };
   }
 
+  private barRect: { l: number; r: number; b: number } | null = null;
+
+  /** Üst çubuğun altında kalacak şehir etiketlerini şehrin altına çevirir. */
+  private flipLabels(cam: Camera): void {
+    const bar = this.barRect;
+    this.cityM.forEach((m, i) => {
+      const lb = m.label;
+      if (!lb) return;
+      const w = CITIES[i].id === CAPITAL.id ? 210 : 170;
+      const up = m.y - w * 0.62;
+      const top = cam.toScreen(m.x, up).y - lb.height * cam.zoom;
+      const sx = cam.toScreen(m.x, m.y).x;
+      const half = (lb.width * cam.zoom) / 2;
+      const hidden = !!bar && top < bar.b + 4 && sx + half > bar.l && sx - half < bar.r;
+      if (hidden) {
+        lb.anchor.set(0.5, 0);
+        lb.position.set(m.x, m.y + w * 0.24);
+      } else {
+        lb.anchor.set(0.5, 1);
+        lb.position.set(m.x, up);
+      }
+    });
+  }
+
   private buildPlaces(): void {
     CITIES.forEach((c) => {
       const cap = c.id === CAPITAL.id;
       const m = this.place("cities/" + c.id, c.x, c.y, cap ? 210 : 170, CITY_NAME[c.id] + (cap ? " ★" : ""), cap ? 1.25 : 1.05);
       this.cityM.push(m);
     });
+    this.buildMarks();
+  }
+
+  private markL: { t: Text; x: number; y: number; kind: "sign" | "pass" | "oasis" | "sea"; post?: Graphics }[] = [];
+
+  /** Geçitler, yol işaretleri, vaha ve deniz adları. */
+  private buildMarks(): void {
+    const w = this.world;
+    const add = (kind: "sign" | "pass" | "oasis" | "sea", x: number, y: number, text: string, fill: string, size: number, post?: Graphics) => {
+      const t = this.label(text, x, y, size);
+      t.style.fill = fill;
+      if (kind === "sea") {
+        t.style.fontStyle = "italic";
+        t.style.letterSpacing = 6;
+        t.alpha = 0.75;
+        t.anchor.set(0.5, 0.5);
+      }
+      this.labels.addChild(t);
+      this.markL.push({ t, x, y, kind, post });
+    };
+    for (const sea of w.seas) add("sea", sea.x, sea.y, tr(sea.name), "#cfe8f4", 1.3);
+    for (const o of w.oases) add("oasis", o.x, o.y + 44, tr(o.name), "#bfe6a0", 0.6);
+    for (const p of w.passes) {
+      const g = new Graphics();
+      g.poly([-16, 8, 0, -16, 16, 8]).fill({ color: 0x6a5a4a, alpha: 0.9 }).stroke({ color: 0xf0e0c0, width: 2 });
+      g.poly([-6, -2, 0, -16, 6, -2]).fill({ color: 0xf4f4f4 });
+      g.position.set(p.x, p.y);
+      this.places.addChild(g);
+      add("pass", p.x, p.y + 14, `⛰ ${tr(p.name)}`, "#f0dcb0", 0.75, g);
+    }
+    for (const s of w.signs) {
+      const g = new Graphics();
+      g.rect(-1.5, -22, 3, 24).fill(0x5a3a1a);
+      const dx = Math.cos(s.a) >= 0 ? 1 : -1;
+      g.poly([-12 * dx, -24, 8 * dx, -24, 14 * dx, -19, 8 * dx, -14, -12 * dx, -14]).fill(0xc89a5a).stroke({ color: 0x5a3a1a, width: 1.2 });
+      g.position.set(s.x, s.y);
+      this.places.addChild(g);
+      add("sign", s.x, s.y + 4, `${dx > 0 ? "" : "← "}${CITY_NAME[s.to] ?? s.to}${dx > 0 ? " →" : ""}`, "#f4e0b0", 0.6, g);
+    }
+  }
+
+  private syncMarks(game: Game, cam: Camera): void {
+    const ls = Math.min(2.2, Math.max(0.8, 0.65 / cam.zoom));
+    for (const m of this.markL) {
+      const seen = m.kind === "sea" || game.isExplored(m.x, m.y);
+      const z = m.kind === "sign" ? cam.zoom > 0.6 : m.kind === "sea" ? true : cam.zoom > 0.38;
+      m.t.visible = seen && z;
+      if (m.post) m.post.visible = seen;
+      m.t.scale.set(m.kind === "sea" ? Math.min(3, Math.max(1, 0.8 / cam.zoom)) : ls);
+    }
   }
 
   attachState(game: Game): void {
@@ -1051,6 +1125,20 @@ export class WorldView {
     c.zIndex = y;
   }
 
+  private walkPrev = new Map<string, { x: number; y: number; m: number }>();
+
+  /** Haritadaki birlik yürürken zıplar ve sallanır; durunca yavaşça durulur. */
+  private walk(key: string, c: Container, x: number, y: number, dt: number, seed: number, amp = 1): void {
+    const p = this.walkPrev.get(key);
+    const v = p && dt > 0 ? Math.hypot(x - p.x, y - p.y) / dt : 0;
+    const m = p ? p.m + ((v > 3 ? 1 : 0) - p.m) * Math.min(1, dt * 6) : 0;
+    if (this.walkPrev.size > 600) this.walkPrev.clear();
+    this.walkPrev.set(key, { x, y, m });
+    const ph = this.time * 10 + seed * 1.7;
+    c.position.set(x, y - Math.abs(Math.sin(ph)) * 3.5 * m * amp);
+    c.rotation = Math.sin(ph) * 0.07 * m * amp;
+  }
+
   marker(x: number, y: number): void {
     this.mark = { x, y, t: 0 };
   }
@@ -1333,7 +1421,7 @@ export class WorldView {
       if (glow) glow.scale.set(1 + Math.sin(this.time * 4) * 0.12);
       const vis = game.isExplored(b.x, b.y);
       c.visible = vis;
-      c.position.set(b.x, b.y);
+      this.walk("b" + b.id, c, b.x, b.y, dt, b.id);
       c.scale.set(inv * 0.95);
       (c.getChildByLabel("count") as Text).text = String(armySize(b.army));
       const ex = c.getChildByLabel("ex")!;
@@ -1376,7 +1464,7 @@ export class WorldView {
       liveC.add(cv.id);
       const c = this.caravan(cv.id, parseInt(FACTIONS[cv.fac as FactionId].color.slice(1), 16));
       c.visible = game.isExplored(cv.x, cv.y);
-      c.position.set(cv.x, cv.y + (cv.raid ? 0 : Math.sin(this.time * 5 + cv.id) * 1.2));
+      this.walk("c" + cv.id, c, cv.x, cv.y, dt, cv.id, 0.6);
       c.scale.set(inv * 0.9);
       const ex = c.getChildByLabel("ex")!;
       ex.visible = !!cv.raid;
@@ -1387,7 +1475,7 @@ export class WorldView {
       liveC.add(id);
       const c = this.caravan(id, 0xffd56a);
       const p = game.myCvPos(mc);
-      c.position.set(p.x, p.y + Math.sin(this.time * 5 + mc.id) * 1.2);
+      this.walk("m" + mc.id, c, p.x, p.y, dt, mc.id, 0.6);
       c.scale.set(inv * 0.85);
       c.getChildByLabel("ex")!.visible = false;
     }
@@ -1426,7 +1514,7 @@ export class WorldView {
       }
       const c = e.c;
       c.visible = game.isExplored(r.x, r.y);
-      c.position.set(r.x, r.y);
+      this.walk("r" + r.id, c, r.x, r.y, dt, r.id.length * 3.1);
       c.scale.set(inv);
       c.zIndex = r.y;
       const glow = c.getChildByLabel("glow");
@@ -1436,7 +1524,7 @@ export class WorldView {
     for (const m of s.marches) {
       liveM.add(m.id);
       const c = this.march(m.id);
-      c.position.set(m.x, m.y);
+      this.walk("a" + m.id, c, m.x, m.y, dt, m.id);
       c.scale.set(inv);
       const txt = c.getChildByLabel("txt") as Text;
       txt.text = m.phase === "gather" ? `⛏ ${Math.max(0, Math.ceil((m.until - Date.now()) / 1000))}sn` : m.phase === "back" ? `↩ ${Math.round(m.load)}` : `→ ${armySize(m.army)}`;
@@ -1483,6 +1571,9 @@ export class WorldView {
         m.sp.visible = true;
         if (m.label) m.label.visible = true;
       });
+      const bar = document.querySelector(".top")?.getBoundingClientRect();
+      const cv = (this.app.canvas as HTMLCanvasElement).getBoundingClientRect();
+      this.barRect = bar && bar.height ? { l: bar.left - cv.left, r: bar.right - cv.left, b: bar.bottom - cv.top } : null;
       for (const id of Object.keys(s.serais)) {
         if (this.seraiF.has(id)) continue;
         const c = CITIES.find((x) => x.id === id)!;
@@ -1509,7 +1600,9 @@ export class WorldView {
       }
       const ls = Math.min(2.4, Math.max(0.9, 0.7 / cam.zoom));
       for (const m of [...this.villageM, ...this.campM, ...this.kurganM, ...this.kaleM, ...this.cityM]) if (m.label) m.label.scale.set(ls);
+      this.syncMarks(game, cam);
     }
+    this.flipLabels(cam);
 
     this.fxG.clear();
     const lk = (this.time - this.lvAt) / 2.6;

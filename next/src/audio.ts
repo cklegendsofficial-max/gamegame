@@ -6,6 +6,8 @@ const HUSEYNI = [0, 2, 3, 5, 7, 9, 10, 12, 14, 15, 17, 19];
 const RAST = [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19];
 const ROOT = 146.83;
 const KEY = "kk_audio";
+/** Arazi rüzgârı: [bant frekansı, kazanç]. */
+const GROUND_WIND: Record<string, [number, number]> = { dag: [720, 0.034], kum: [1500, 0.028], bozkir: [520, 0.024], cayir: [380, 0.012] };
 
 type Mood = { scale: number[]; root: number; tempo: number; rest: number; wind: number; drum: boolean; bell: boolean; war?: boolean; zil?: boolean; pulse?: boolean; throat?: boolean; lead?: number };
 export type MusicScene = "travel" | "battle" | "city" | "danger" | "steppe";
@@ -82,6 +84,7 @@ class SoundSystem {
     this.moodK = season;
     this.mood = MOODS[season] ?? MOODS.bahar;
     this.step = Math.min(this.step, this.mood.scale.length - 1);
+    this.groundK = "";
     if (this.ctx && this.windG && this.stormLv <= 0) this.windG.gain.setTargetAtTime(this.mood.wind, this.ctx.currentTime, 3);
   }
 
@@ -126,6 +129,7 @@ class SoundSystem {
   storm(level: number): void {
     if (!this.ctx || !this.windG || level === this.stormLv) return;
     this.stormLv = level;
+    this.groundK = "";
     this.windG.gain.setTargetAtTime([this.mood.wind, 0.09, this.moodK === "kis" ? 0.11 : 0.06][level] ?? this.mood.wind, this.ctx.currentTime, 1.2);
   }
 
@@ -159,6 +163,7 @@ class SoundSystem {
     bp.type = "bandpass";
     bp.frequency.value = 500;
     bp.Q.value = 0.6;
+    this.windBp = bp;
     const wg = (this.windG = ctx.createGain());
     wg.gain.value = 0.018;
     const wl = ctx.createOscillator();
@@ -406,7 +411,43 @@ class SoundSystem {
     }
   }
 
-  play(kind: "click" | "coin" | "hit" | "win" | "lose" | "quest" | "story" | "bad" | "level" | "clash" | "arrow" | "hoof" | "horn" | "roar" | "anvil" | "page"): void {
+  private groundK = "";
+  private windBp: BiquadFilterNode | null = null;
+
+  /** Arazinin rüzgârı: dağda uğuldayan, kumda tıslayan, çayırda yumuşak. */
+  ground(kind: string): void {
+    const ctx = this.ctx;
+    if (!ctx || !this.windG || !this.windBp || kind === this.groundK) return;
+    this.groundK = kind;
+    const [f, g] = GROUND_WIND[kind] ?? GROUND_WIND.bozkir;
+    const t = ctx.currentTime;
+    this.windBp.frequency.setTargetAtTime(f, t, 2.5);
+    if (this.stormLv <= 0) this.windG.gain.setTargetAtTime(Math.max(this.mood.wind, g), t, 2.5);
+  }
+
+  /** Haritada tek adım ya da tek nal vuruşu; zemine göre tını değişir. */
+  footstep(kind: string, horse: boolean): void {
+    const ctx = this.ctx;
+    if (!ctx || this.muted || ctx.state !== "running" || this.scene !== "travel") return;
+    const t = ctx.currentTime + 0.01;
+    const soft = kind === "kum" || kind === "cayir";
+    if (horse) {
+      for (let k = 0; k < 3; k++) {
+        const at = t + k * 0.07 + Math.random() * 0.01;
+        this.tone((soft ? 80 : 105) + Math.random() * 18, at, 0.07, soft ? 0.05 : 0.08, "sine", 50);
+        this.swept(at, 0.04, soft ? 0.03 : 0.05, "lowpass", kind === "dag" ? 1600 : 900, 300, 1);
+      }
+      return;
+    }
+    if (kind === "kum") this.swept(t, 0.12, 0.035, "highpass", 2200, 1400, 0.7, 0.03);
+    else if (kind === "cayir") this.swept(t, 0.1, 0.03, "bandpass", 2600, 1800, 1.2, 0.02);
+    else if (kind === "dag") {
+      this.swept(t, 0.05, 0.05, "highpass", 3200, 2600, 1);
+      this.tone(120, t, 0.06, 0.04, "sine", 70);
+    } else this.swept(t, 0.08, 0.04, "lowpass", 700, 250, 1);
+  }
+
+  play(kind: "click" | "coin" | "hit" | "win" | "lose" | "quest" | "story" | "bad" | "level" | "clash" | "arrow" | "hoof" | "horn" | "roar" | "anvil" | "page" | "gate"): void {
     const ctx = this.ctx;
     if (!ctx || this.muted || ctx.state !== "running") return;
     const t = ctx.currentTime + 0.01;
@@ -489,6 +530,29 @@ class SoundSystem {
       case "bad":
         this.tone(220, t, 0.25, 0.12, "triangle", 150);
         break;
+      case "gate": {
+        const o = ctx.createOscillator();
+        o.type = "sawtooth";
+        o.frequency.setValueAtTime(70, t);
+        o.frequency.linearRampToValueAtTime(115, t + 0.5);
+        o.frequency.linearRampToValueAtTime(85, t + 1.1);
+        const bp = ctx.createBiquadFilter();
+        bp.type = "bandpass";
+        bp.frequency.value = 420;
+        bp.Q.value = 6;
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.06, t + 0.15);
+        g.gain.linearRampToValueAtTime(0.03, t + 0.9);
+        g.gain.linearRampToValueAtTime(0, t + 1.15);
+        o.connect(bp).connect(g).connect(this.fx);
+        o.start(t);
+        o.stop(t + 1.2);
+        this.tone(70, t + 1.15, 0.35, 0.2, "sine", 40);
+        this.swept(t + 1.15, 0.12, 0.08, "lowpass", 800, 200, 1);
+        this.ring(t + 1.35, 1650, 0.025, 1.2);
+        break;
+      }
     }
   }
 }

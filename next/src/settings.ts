@@ -17,9 +17,10 @@ export interface Settings {
   spoils: boolean;
   pages: boolean;
   fires: boolean;
+  cb: boolean;
 }
 
-const DEF: Settings = { music: 0.5, fx: 0.7, ui: 1, eco: false, mini: true, haptic: true, lang: "tr", speed: 1, narrate: false, dynMusic: true, cine: true, duel: !navigator.webdriver, tips: !navigator.webdriver, spoils: !navigator.webdriver, pages: !navigator.webdriver, fires: !navigator.webdriver };
+const DEF: Settings = { cb: false, music: 0.5, fx: 0.7, ui: 1, eco: false, mini: true, haptic: true, lang: "tr", speed: 1, narrate: false, dynMusic: true, cine: true, duel: !navigator.webdriver, tips: !navigator.webdriver, spoils: !navigator.webdriver, pages: !navigator.webdriver, fires: !navigator.webdriver };
 
 export function weakDevice(): boolean {
   const nav = navigator as Navigator & { deviceMemory?: number };
@@ -55,4 +56,5 @@ export function toggleFullscreen(): void {
 export function applyUi(): void {
   document.documentElement.style.setProperty("--ui", String(settings.ui));
   document.body.classList.toggle("nomini", !settings.mini);
+  document.body.classList.toggle("cb", settings.cb);
 }
