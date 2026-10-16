@@ -109,6 +109,20 @@ export const UNIQUES: Unique[] = [
   { id: "boz_at", name: "Boz Atlı Hızır'ın Atı", slot: "at", lore: "Darda kalana yetişen Hızır'ın atı; yolları kısaltır, yükü hafifletir.", mods: { spd: 0.25, carry: 80 } },
 ];
 
-export const UNIQUE_BY_ID: Record<string, Unique> = Object.fromEntries(UNIQUES.map((u) => [u.id, u]));
+/** Yalnızca o bossu yenince düşen kupa eşyaları (BossKit.loot anahtarları). */
+export const BOSS_UNIQUES: (Unique & { boss: string })[] = [
+  { id: "kasim", boss: "Köle Tüccarı Kasım", name: "Kırık Pranga", slot: "tilsim", lore: "Bileğindeki prangayı kırdığın gün sakladın. Artık zincir değil, yemin.", mods: { army: 0.06, loot: 0.12 } },
+  { id: "karahan", boss: "Kara Han", name: "Kara Han'ın Kara Tuğu", slot: "silah", lore: "Annenin zincirini tutan elin silahı. Şimdi senin elinde; kara değil, kızıl parlıyor.", mods: { atk: 0.18, crit: 0.04, army: 0.04 } },
+  { id: "erlik", boss: "Erlik Han", name: "Erlik'in Kırık Tacı", slot: "tilsim", lore: "Alt dünyanın efendisinin tacından bir parça. Taşıyanın gölgesi biraz daha koyu düşer.", mods: { atk: 0.1, army: 0.1, xp: 0.1 } },
+  { id: "kokboru", boss: "Kök Börü", name: "Kök Börü Yelesi", slot: "zirh", lore: "Gök kurdun önünde diz çökmeyen tek yiğide verdiği yelesinden örülmüş zırh.", mods: { hp: 0.18, def: 0.1, spd: 0.06 } },
+  { id: "tepegoz", boss: "Tepegöz", name: "Tepegöz'ün Gözü", slot: "tilsim", lore: "Basat'ın oku kör etti; göz taşa döndü ama hâlâ görüyor.", mods: { crit: 0.08, loot: 0.15 } },
+  { id: "soklu", boss: "Şöklü Melik", name: "Melik'in Demir Kalkanı", slot: "kalkan", lore: "Oğuz'un yurdunu yağmalayanın kalkanı; kırk ok yedi, bir kez delinmedi.", mods: { def: 0.2, hp: 0.08 } },
+  { id: "akboru", boss: "Ak Börü", name: "Ak Börü Postu", slot: "zirh", lore: "Bu postu giyen ne üşür ne yolunu yitirir. Yaşlılar adını anarken yere tükürür.", mods: { heal: 0.03, hp: 0.12, spd: 0.05 } },
+  { id: "ejder", boss: "Yer Ejderi", name: "Yer Ejderi Pulu", slot: "kalkan", lore: "Dağın altında bin yıl uyuyan ejderin sırtından sökülmüş pul.", mods: { def: 0.24, heal: 0.015 } },
+  { id: "noyan", boss: "Moğol Noyanı", name: "Noyan'ın Kır Atı", slot: "at", lore: "Bozkırı kırk günde aşan Moğol atı. Sahibini değiştirdi, huyunu değil.", mods: { spd: 0.18, carry: 60, army: 0.04 } },
+  { id: "karakus", boss: "Erlik'in Yeği Kara Kuş", name: "Kara Kuş Tüyü", slot: "tilsim", lore: "Göğe yükselen kara tüy; rüzgârı arkana alır.", mods: { spd: 0.12, crit: 0.05 } },
+];
+
+export const UNIQUE_BY_ID: Record<string, Unique> = Object.fromEntries([...UNIQUES, ...BOSS_UNIQUES].map((u) => [u.id, u]));
 
 export const SET_FORGE = { lv: 15, gold: 2500, ruh: 8, parsomen: 2, yesim: 3 };

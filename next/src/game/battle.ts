@@ -1,5 +1,7 @@
 import { UNITS, UNIT_KEYS, armyPower, armySize, type Army, type Unit } from "./data";
 import type { SkillKind } from "./classes";
+import { bossLine } from "./regions";
+import { ARENAS, COUNTER, KINS, bossKit, kinSummon, type Arena, type BossKit, type BossMove, type Kin, type KinDef, type MoveKind } from "./bosses";
 
 export interface Champion {
   atk: number;
@@ -32,6 +34,14 @@ export interface Round {
   order?: Order;
   ma?: number;
   mb?: number;
+  /** Bossun bir sonraki turda yapacağı hareketin uyarısı. */
+  tell?: { name: string; text: string; kind: MoveKind; counter: Order };
+  /** Bu turda isabet eden ya da karşılanan boss hareketi. */
+  move?: { name: string; kind: MoveKind; countered: boolean };
+  /** Boss ikinci evreye geçti. */
+  phase?: string;
+  /** Bossun bu turdaki sözü. */
+  say?: string;
 }
 
 export type Ground = "bozkir" | "cayir" | "kum" | "dag";
@@ -40,6 +50,8 @@ export interface Field {
   night: boolean;
   sky?: Sky | null;
   note?: string;
+  arena?: Arena;
+  kin?: Kin;
 }
 export type Sky = "kum" | "yagmur" | "tipi" | "kar";
 export const SKIES: Record<Sky, { name: string; mul: Partial<Record<Unit, number>>; text: string }> = {
@@ -56,7 +68,7 @@ export const GROUNDS: Record<Ground, { name: string; icon: string; mul: Partial<
 };
 export function fieldMul(f: Field | null): Partial<Record<Unit, number>> {
   if (!f) return {};
-  const m = { ...GROUNDS[f.ground].mul };
+  const m = { ...(f.arena ? ARENAS[f.arena].mul : GROUNDS[f.ground].mul) };
   if (f.night) m.archer = (m.archer ?? 1) * 0.75;
   if (f.sky) for (const [u, k] of Object.entries(SKIES[f.sky].mul) as [Unit, number][]) m[u] = (m[u] ?? 1) * k;
   return m;
@@ -79,12 +91,12 @@ export const ORDER_KEYS: Order[] = ["nara", "kanat", "yagmur", "siper", "ricat",
 export const RESERVE_SHARE = 0.25;
 export const RESERVE_MIN = 8;
 export const ORDERS: Record<Order, { name: string; icon: string; text: string }> = {
-  nara: { name: "Nara", icon: "u_spear", text: "İki tur boyunca birliğin +%25 güçle vurur." },
-  kanat: { name: "Kanat Saldırısı", icon: "u_cavalry", text: "Atlılar yandan dolanır: bu tur atlı hasarı ×1.8." },
-  ricat: { name: "Turan Taktiği", icon: "u_archer", text: "Sahte ricat: bir tur geri çekil, düşman safını bozarsa sonraki iki tur ×1.7 vur. Atlı oranın düşükse düşman yemi yutmayabilir." },
+  nara: { name: "Nara", icon: "ord_nara", text: "İki tur boyunca birliğin +%25 güçle vurur." },
+  kanat: { name: "Kanat Saldırısı", icon: "ord_kanat", text: "Atlılar yandan dolanır: bu tur atlı hasarı ×1.8." },
+  ricat: { name: "Turan Taktiği", icon: "ord_ricat", text: "Sahte ricat: bir tur geri çekil, düşman safını bozarsa sonraki iki tur ×1.7 vur. Atlı oranın düşükse düşman yemi yutmayabilir." },
   yedek: { name: "Yedekler!", icon: "tug", text: "Tepede bekleyen taze kuvvet meydana iner: bu tur ×1.4 vurur, moral +18. Ön saf erirse kendiliğinden iner. İnmezse yenilgide kayıpsız çekilir." },
-  yagmur: { name: "Ok Yağmuru", icon: "u_archer", text: "Okçular hep birlikte gökyüzünü karartır: bu tur okçu hasarı ×2, düşman morali −6." },
-  siper: { name: "Kalkan Siperi", icon: "shield", text: "Mızraklılar kalkanları kilitler: bu tur gelen hasar −%45, ama sen de %30 az vurursun." },
+  yagmur: { name: "Ok Yağmuru", icon: "ord_yagmur", text: "Okçular hep birlikte gökyüzünü karartır: bu tur okçu hasarı ×2, düşman morali −6." },
+  siper: { name: "Kalkan Siperi", icon: "ord_siper", text: "Mızraklılar kalkanları kilitler: bu tur gelen hasar −%45, ama sen de %30 az vurursun." },
 };
 
 export interface UnitMul {
@@ -165,9 +177,31 @@ export class Sim {
 
   private am: UnitMul;
   private siper = 0;
+  readonly kit: BossKit | null;
+  readonly kin: KinDef | null;
+  private fmB: Partial<Record<Unit, number>>;
+  private tell: BossMove | null = null;
+  private tellCd = 1;
+  private lastMove: BossMove | null = null;
+  private raged = false;
+  private lowSaid = false;
+  private bossMax = 0;
+  private cursed = 0;
+  /** Oyuncu yönetmediğinde (olasılık, otomatik savaş) uyarıyı doğru emirle karşılama şansı. */
+  autoCounter = 0.6;
+  counters = 0;
 
   constructor(private a0: Army, aBonus0: number, private b0: Army, private bBonus = 0, private champ: Champion | null = null, boss0: Boss | null = null, field: Field | null = null, reserve = false, aMul: UnitMul = NO_MUL) {
     this.fm = fieldMul(field);
+    this.kit = bossKit(boss0);
+    const kin = field?.kin ?? this.kit?.kin;
+    this.kin = kin && kin !== "insan" ? KINS[kin] : null;
+    this.fmB = { ...this.fm };
+    if (this.kin) {
+      for (const [u, k] of Object.entries(this.kin.atk) as [Unit, number][]) this.fmB[u] = (this.fmB[u] ?? 1) * k;
+      for (const [u, k] of Object.entries(this.kin.vs) as [Unit, number][]) this.fm[u] = (this.fm[u] ?? 1) * k;
+    }
+    this.bossMax = boss0?.hp ?? 0;
     this.am = aMul;
     this.a = { ...a0 };
     if (reserve && armySize(a0) >= RESERVE_MIN)
@@ -198,6 +232,39 @@ export class Sim {
       this.mb -= 8;
       this.rounds.push({ a: { ...this.a }, b: { ...this.b }, hp: c.hp, bhp: this.boss?.hp ?? 0, ev, ma: this.ma, mb: this.mb });
     }
+  }
+
+  /** Kahramanın sınıf, yoldaş ve eşya becerileri: savaş kiti şeridinde gösterilir. */
+  skills(): { name: string; kind: SkillKind; pow: number }[] {
+    return this.c?.skills ?? [];
+  }
+
+  /** Şu an ekranda bekleyen boss uyarısı. */
+  pendingTell(): BossMove | null {
+    return this.tell;
+  }
+
+  private unitFor(o: Order): boolean {
+    if (o === "kanat") return this.a.horse > 0;
+    if (o === "yagmur") return this.a.archer > 0;
+    if (o === "siper") return this.a.spear > 0;
+    if (o === "ricat") return armySize(this.a) > 0;
+    return true;
+  }
+
+  private pickMove(): BossMove | null {
+    const kit = this.kit;
+    if (!kit) return null;
+    const pool = this.raged ? [...kit.moves, kit.rage.move, kit.rage.move] : kit.moves;
+    const fresh = pool.filter((m) => m !== this.lastMove);
+    const list = fresh.length ? fresh : pool;
+    return list[Math.floor(Math.random() * list.length)];
+  }
+
+  private setTell(m: BossMove, round: Round): void {
+    this.tell = m;
+    round.tell = { name: m.name, text: m.tell, kind: m.kind, counter: COUNTER[m.kind] };
+    round.ev.push(`⚠ ${m.name}`);
   }
 
   /** Savaş başlamadan (er meydanı vb.) iki tarafın moralini ayarlar. */
@@ -238,13 +305,11 @@ export class Sim {
   }
 
   canOrder(o: Order): boolean {
-    if (this.over || this.used.includes(o)) return false;
-    if (o === "kanat") return this.a.horse > 0;
-    if (o === "yagmur") return this.a.archer > 0;
-    if (o === "siper") return this.a.spear > 0;
-    if (o === "ricat") return armySize(this.a) > 0;
+    if (this.over) return false;
+    if (this.tell && COUNTER[this.tell.kind] === o) return this.unitFor(o);
+    if (this.used.includes(o)) return false;
     if (o === "yedek") return armySize(this.resv) > 0;
-    return true;
+    return this.unitFor(o);
   }
 
   done(): boolean {
@@ -256,8 +321,13 @@ export class Sim {
     const { c, boss } = this;
     const r = this.r++;
     const ev: string[] = r === 0 ? [...this.luckEv] : [];
-    if (order && this.canOrder(order)) this.used.push(order);
-    else order = undefined;
+    const tell = this.tell;
+    if (!order && tell && Math.random() < this.autoCounter && this.canOrder(COUNTER[tell.kind])) order = COUNTER[tell.kind];
+    if (order && this.canOrder(order)) {
+      if (!this.used.includes(order)) this.used.push(order);
+    } else order = undefined;
+    this.tell = null;
+    const countered = !!tell && order === COUNTER[tell.kind];
     let ordMul = 1;
     let inOrd = 1;
     const uMul: Partial<Record<Unit, number>> = {};
@@ -294,7 +364,7 @@ export class Sim {
     }
     if (order === "ricat") {
       const share = this.a.horse / Math.max(1, armySize(this.a));
-      const ok = Math.random() < (boss ? 0.45 : 0.35 + share * 1.6);
+      const ok = countered || Math.random() < (boss ? 0.45 : 0.35 + share * 1.6);
       ordMul = 0;
       inOrd = 0.3;
       if (ok) {
@@ -344,6 +414,50 @@ export class Sim {
       inMul *= 0.55;
       this.siper--;
     }
+    let moveMul = 1;
+    let stagger = 1;
+    let roundMove: Round["move"];
+    if (tell && boss && boss.hp > 0) {
+      roundMove = { name: tell.name, kind: tell.kind, countered };
+      if (countered) {
+        stagger = 1.6;
+        this.ma = Math.min(100, this.ma + 8);
+        this.counters++;
+        ev.push(`Karşılandı: ${tell.name}!`);
+      } else {
+        ev.push(`${boss.name}: ${tell.name}!`);
+        if (tell.kind === "nefes") {
+          moveMul = 1 + tell.pow;
+          inMul *= 1 + tell.pow * 0.35;
+        } else if (tell.kind === "hucum") {
+          if (c && c.hp > 0) {
+            if (c.dodge > 0 && Math.random() < c.dodge) ev.push("Sıyrıldın");
+            else c.hp = Math.max(0, c.hp - (boss.atk * tell.pow * 100) / (100 + c.def * 6));
+          } else moveMul = 1 + tell.pow;
+        } else if (tell.kind === "cagir") {
+          const add = kinSummon(this.b0, tell.pow, tell.mix);
+          for (const u of UNIT_KEYS) this.b[u] += add[u];
+        } else if (tell.kind === "lanet") {
+          this.ma = Math.max(0, this.ma - tell.pow);
+          this.cursed = 2;
+        } else if (tell.kind === "sifa") {
+          boss.hp = Math.min(this.bossMax, boss.hp + this.bossMax * tell.pow);
+        } else {
+          ordMul *= 1 - tell.pow;
+          inMul *= 1.15;
+        }
+      }
+    }
+    if (this.cursed > 0) {
+      ordMul *= 0.85;
+      this.cursed--;
+    }
+    const kin = this.kin;
+    if (kin?.ambush && r === 0) {
+      inMul *= 1 + kin.ambush;
+      ev.push(`${kin.name} pusudan saldırdı!`);
+    }
+    if (kin?.drain && c && c.hp > 0) c.hp = Math.max(1, c.hp - c.maxHp * kin.drain);
     for (const u of UNIT_KEYS) if (this.fm[u]) uMul[u] = (uMul[u] ?? 1) * this.fm[u]!;
     for (const u of UNIT_KEYS) if (this.am.atk[u]) uMul[u] = (uMul[u] ?? 1) * this.am.atk[u]!;
     const bonus = (1 + this.aBonus + this.rally * Math.min(1, r / 4)) * ordMul - 1;
@@ -359,9 +473,9 @@ export class Sim {
     const prevA = armySize(this.a);
     const prevB = armySize(this.b);
     const atkB = hit(ordMul ? this.a : NONE, this.b, bonus, this.hpB, extra * ordMul, boss, BOSS_WEIGHT, uMul);
-    const bossDmg = boss && boss.hp > 0 ? boss.atk * inMul : 0;
-    const atkA = hit(this.b, this.a, (1 + this.bBonus) * inMul - 1, this.hpA, bossDmg, c, CHAMP_WEIGHT, this.fm, this.am.hp);
-    this.hurtBoss(atkB.toChamp);
+    const bossDmg = boss && boss.hp > 0 ? boss.atk * inMul * moveMul : 0;
+    const atkA = hit(this.b, this.a, (1 + this.bBonus) * inMul - 1, this.hpA, bossDmg, c, CHAMP_WEIGHT, this.fmB, this.am.hp);
+    this.hurtBoss(atkB.toChamp * stagger);
     if (c) {
       if (c.dodge > 0 && Math.random() < c.dodge) ev.push("Sıyrıldın");
       else c.hp = Math.max(0, c.hp - (atkA.toChamp * 100) / (100 + c.def * 6));
@@ -373,8 +487,27 @@ export class Sim {
     this.a = atkA.out;
     this.b = atkB.out;
     if (boss && boss.hp <= 0) ev.push(`${boss.name} düştü!`);
+    let rage: BossMove | null = null;
+    let phase: string | undefined;
+    if (boss && this.kit && !this.raged && boss.hp > 0 && boss.hp <= this.bossMax * 0.5) {
+      this.raged = true;
+      boss.atk *= this.kit.rage.atk;
+      ev.push(`${this.kit.rage.name}!`);
+      phase = this.kit.rage.text;
+      rage = this.kit.rage.move;
+    }
     this.morale(prevA, prevB, order, ev);
-    const round: Round = { a: { ...this.a }, b: { ...this.b }, hp: c?.hp ?? 0, bhp: boss?.hp ?? 0, ev, order, ma: this.ma, mb: this.mb };
+    let say: string | undefined;
+    if (boss && this.kit && boss.hp > 0) {
+      const line = (k: Parameters<typeof bossLine>[2]) => bossLine(boss.name, this.kit!.theme, k) ?? undefined;
+      if (phase) say = line("rage");
+      else if (roundMove) say = line(roundMove.countered ? "hurt" : "hit");
+      else if (!this.lowSaid && boss.hp < this.bossMax * 0.25) {
+        this.lowSaid = true;
+        say = line("low");
+      } else if (Math.random() < 0.3) say = line("taunt");
+    }
+    const round: Round = { a: { ...this.a }, b: { ...this.b }, hp: c?.hp ?? 0, bhp: boss?.hp ?? 0, ev, order, ma: this.ma, mb: this.mb, move: roundMove, phase, say };
     this.rounds.push(round);
     if (
       !!this.rout ||
@@ -386,6 +519,20 @@ export class Sim {
       (!c && armySize(this.a) + armySize(this.resv) < armySize(this.a0) * 0.25)
     )
       this.over = true;
+    if (!this.over && boss && boss.hp > 0 && this.kit) {
+      if (rage) {
+        this.setTell(rage, round);
+        this.lastMove = rage;
+        this.tellCd = 2;
+      } else if (--this.tellCd <= 0) {
+        const m = this.pickMove();
+        if (m) {
+          this.setTell(m, round);
+          this.lastMove = m;
+          this.tellCd = this.raged ? 2 : 3;
+        }
+      }
+    }
     return round;
   }
 
@@ -404,6 +551,11 @@ export class Sim {
     if (order === "yagmur") db -= 6;
     if (ev.includes("Turan taktiği: düşman yemi yuttu!")) db -= 16;
     if (ev.includes("Safları bozuldu!")) db -= 6;
+    const kin = this.kin;
+    if (kin) {
+      if (db < 0) db *= kin.fear;
+      if (kin.dread) da -= kin.dread;
+    }
     if (c) {
       if (c.hp <= 0) da -= 40;
       else if (c.hp > c.maxHp * 0.5) da += 2;
@@ -411,7 +563,7 @@ export class Sim {
     }
     if (boss && boss.hp > 0) db = Math.max(db, 0);
     this.ma = Math.max(c && c.hp > c.maxHp * 0.5 ? 25 : 0, Math.min(100, this.ma + da));
-    this.mb = Math.max(boss && boss.hp > 0 ? 30 : 0, Math.min(100, this.mb + db));
+    this.mb = Math.max((boss && boss.hp > 0) || kin?.fear === 0 ? 30 : 0, Math.min(100, this.mb + db));
     if (this.mb <= 0 && !boss && armySize(this.b) > 0) {
       this.rout = "b";
       ev.push("Düşman bozguna uğradı!");

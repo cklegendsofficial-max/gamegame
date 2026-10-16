@@ -1,6 +1,7 @@
 import { ARMOR_NAME, WEAPON_NAME, WEAPON_STAT, type ArmorKind, type ClassDef, type WeaponKind } from "./classes";
 import { SETS, modsText, type GearMods, type SetId, type Unique } from "./legend";
 import { BREEDS, horseName, type Breed, type HorseInfo } from "./horse";
+import { RUNE_BY_ID } from "./crafting";
 import { t } from "../i18n";
 
 export type Stat = "guc" | "cev" | "day" | "lid" | "kar";
@@ -64,8 +65,14 @@ export interface Item {
   mat?: string;
   /** Usta imzası tarifi. */
   sig?: string;
+  /** Kazınmış Orhun rünü (RUNES anahtarı). */
+  rune?: string;
   /** Kahramanın ilk silahı: öldürdükçe büyür. */
   yad?: { kills: number; lv: number };
+  /** Yöre işçiliği (ORIGINS anahtarı): şehir demircisi ya da bölge ganimeti. */
+  org?: string;
+  /** Bölge bossu malzemesinden dökülmüş efsane (RELICS anahtarı). */
+  relic?: string;
 }
 
 export function setPiece(id: number, cls: ClassDef, set: SetId, slot: Slot, tier: number): Item {
@@ -373,6 +380,8 @@ export function itemStats(it: Item): string {
   }
   if (it.mat && MAT_NAME[it.mat]) p.push(t(MAT_NAME[it.mat]));
   if (it.sig) p.push(t("İmza eşyası"));
+  const rn = it.rune ? RUNE_BY_ID[it.rune] : null;
+  if (rn) p.push(`${rn.glyph} ${t(rn.name)}: ${modsText(rn.mods)}`);
   const pr = itemProc(it);
   if (pr) p.push(`✦ ${t(pr.name)}: ${t(PROC_TEXT[pr.kind])}`);
   return p.join(" · ");

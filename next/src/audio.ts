@@ -10,13 +10,15 @@ const KEY = "kk_audio";
 const GROUND_WIND: Record<string, [number, number]> = { dag: [720, 0.034], kum: [1500, 0.028], bozkir: [520, 0.024], cayir: [380, 0.012] };
 
 type Mood = { scale: number[]; root: number; tempo: number; rest: number; wind: number; drum: boolean; bell: boolean; war?: boolean; zil?: boolean; pulse?: boolean; throat?: boolean; lead?: number };
-export type MusicScene = "travel" | "battle" | "city" | "danger" | "steppe";
+export type MusicScene = "travel" | "battle" | "city" | "danger" | "steppe" | "boss" | "epic";
 /** Sahne müziği mevsim havasını ezer; "travel" mevsimin kendisidir. */
 const SCENES: Record<Exclude<MusicScene, "travel">, Partial<Mood>> = {
   battle: { scale: HICAZ, root: 146.83, tempo: 0.6, rest: 0.35, drum: true, war: true, bell: false, lead: 1.3 },
   city: { scale: RAST, root: 164.81, tempo: 0.78, rest: 0.7, drum: true, zil: true, bell: false, lead: 1.1 },
   danger: { scale: HICAZ, root: 110, tempo: 1.3, rest: 1.5, drum: false, pulse: true, bell: false, lead: 0.8 },
   steppe: { scale: HUSEYNI, root: 110, tempo: 1.2, rest: 1.3, drum: false, throat: true, bell: false, lead: 0.9 },
+  boss: { scale: HICAZ, root: 110, tempo: 0.5, rest: 0.25, drum: true, war: true, pulse: true, throat: true, bell: false, lead: 1.45 },
+  epic: { scale: HUSEYNI, root: 130.81, tempo: 1.35, rest: 1.1, drum: false, throat: true, bell: true, lead: 1.2 },
 };
 const MOODS: Record<string, Mood> = {
   bahar: { scale: RAST, root: 146.83, tempo: 1, rest: 1, wind: 0.014, drum: false, bell: false },
@@ -61,7 +63,8 @@ class SoundSystem {
     this.music.gain.cancelScheduledValues(t);
     this.music.gain.setTargetAtTime(g * 0.25, t, 0.15);
     this.music.gain.setTargetAtTime(g, t + 0.5, 0.4);
-    if (sc === "battle") [0, 0.3, 0.6].forEach((d) => this.drum(t + 0.5 + d, true));
+    if (sc === "battle" || sc === "boss") [0, 0.3, 0.6].forEach((d) => this.drum(t + 0.5 + d, true));
+    if (sc === "boss") [0.9, 1.05, 1.2, 1.5].forEach((d) => this.drum(t + 0.5 + d, true));
     this.bazaar(sc === "city");
   }
 
@@ -447,7 +450,7 @@ class SoundSystem {
     } else this.swept(t, 0.08, 0.04, "lowpass", 700, 250, 1);
   }
 
-  play(kind: "click" | "coin" | "hit" | "win" | "lose" | "quest" | "story" | "bad" | "level" | "clash" | "arrow" | "hoof" | "horn" | "roar" | "anvil" | "page" | "gate"): void {
+  play(kind: "click" | "coin" | "hit" | "win" | "lose" | "quest" | "story" | "bad" | "level" | "clash" | "arrow" | "hoof" | "horn" | "roar" | "anvil" | "page" | "gate" | "tell" | "rage" | "stagger" | "type" | "chest" | "buy"): void {
     const ctx = this.ctx;
     if (!ctx || this.muted || ctx.state !== "running") return;
     const t = ctx.currentTime + 0.01;
@@ -529,6 +532,35 @@ class SoundSystem {
         break;
       case "bad":
         this.tone(220, t, 0.25, 0.12, "triangle", 150);
+        break;
+      case "tell":
+        this.drum(t, true);
+        this.tone(n(1) * 2, t + 0.05, 0.5, 0.09, "sawtooth", n(0) * 2);
+        this.tone(n(5), t + 0.05, 0.6, 0.07, "triangle");
+        this.swept(t, 0.5, 0.06, "bandpass", 600, 2400, 3, 0.3);
+        break;
+      case "rage":
+        this.swept(t, 1.6, 0.2, "bandpass", 260, 520, 0.8, 0.4);
+        this.tone(55, t, 1.6, 0.3, "sawtooth", 40);
+        [0, 0.18, 0.36].forEach((d) => this.drum(t + d, true));
+        break;
+      case "stagger":
+        this.burst(t, 0.25, 0.4, 900);
+        this.ring(t, 620, 0.12, 1.4);
+        this.ring(t + 0.02, 1240, 0.06, 1);
+        this.tone(80, t, 0.4, 0.3, "sine", 40);
+        break;
+      case "type":
+        this.tone(2400 + Math.random() * 400, t, 0.02, 0.015, "square");
+        break;
+      case "chest":
+        this.swept(t, 0.4, 0.12, "lowpass", 300, 900, 1, 0.1);
+        [0, 4, 7, 11, 12, 16].forEach((k, i) => this.pluck(n(k % 12) * (k >= 12 ? 4 : 2), t + 0.3 + i * 0.07, 0.16, this.fx, 2));
+        this.burst(t + 0.3, 1.2, 0.05, 7000);
+        break;
+      case "buy":
+        for (let i = 0; i < 6; i++) this.tone(1568 + i * 130, t + i * 0.05, 0.12, 0.08);
+        this.ring(t + 0.32, 2093, 0.06, 1.2);
         break;
       case "gate": {
         const o = ctx.createOscillator();

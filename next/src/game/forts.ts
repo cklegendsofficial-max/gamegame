@@ -29,7 +29,7 @@ export interface FortTier {
 }
 
 export const FORT_TIERS: Record<1 | 2 | 3 | 4, FortTier> = {
-  1: { name: "Gözetleme Kulesi", en: "Watchtower", art: "map/tower", lv: 5, gar: 22, wall: 0.1, income: 35, guard: 420 },
+  1: { name: "Gözetleme Kulesi", en: "Watchtower", art: "map/tower_wood", lv: 5, gar: 22, wall: 0.1, income: 35, guard: 420 },
   2: { name: "Palanka", en: "Stockade", art: "map/tower", lv: 8, gar: 46, wall: 0.2, income: 70, guard: 520 },
   3: { name: "Kale", en: "Castle", art: "map/castle", lv: 11, gar: 80, wall: 0.3, income: 120, guard: 620 },
   4: { name: "Hisar", en: "Citadel", art: "map/castle", lv: 14, gar: 130, wall: 0.42, income: 190, guard: 720 },

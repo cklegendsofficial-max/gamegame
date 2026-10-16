@@ -11,7 +11,27 @@ export interface Owned {
   gov?: string;
   blds?: Partial<Record<CityBld, number>>;
   ev?: { kind: string; until: number } | null;
+  /** Vali politikası: vergi (altın odaklı), adalet (bağlılık odaklı), asker (savunma odaklı). */
+  policy?: "vergi" | "adalet" | "asker";
+  /** "Valiye bırak": açıksa, vali haftada bir politikası gereğince kendi kararını uygular. */
+  auto?: boolean;
+  /** Vali ordu emri: savun (yakın tehdide küçük sefer), baskın (yakın kampa haftalık baskın), topla (en yakın kaynağa toplama seferi). Yalnızca "Valiye bırak" açıkken işler, garnizonun dışına çıkmaz. */
+  armyOrder?: ArmyOrder;
 }
+
+export type ArmyOrder = "savun" | "baskin" | "topla";
+export const ARMY_ORDERS: Record<ArmyOrder, { name: string; icon: string; desc: string }> = {
+  savun: { name: "Savun", icon: "shield", desc: "Yakında bir harami kampı ya da köy baskını varsa, vali garnizondan küçük bir sefer çıkarır." },
+  baskin: { name: "Baskın", icon: "swords", desc: "Haftada bir şans: vali yakın bir harami kampına baskın düzenler; kamp zayıflar, sana altın ve şöhret gelir." },
+  topla: { name: "Topla", icon: "schest", desc: "Toplama seferi boşsa, garnizondan küçük bir birlik en yakın kaynak noktasına gönderilir." },
+};
+
+export type CityPolicy = "vergi" | "adalet" | "asker";
+export const CITY_POLICIES: Record<CityPolicy, { name: string; icon: string; desc: string; tax: number; loy: number; def: number; drain: number }> = {
+  vergi: { name: "Vergi Politikası", icon: "coins", desc: "Vergi geliri +%25 ama bağlılık her gün biraz düşer.", tax: 0.25, loy: -0.5, def: 0, drain: 0 },
+  adalet: { name: "Adalet Politikası", icon: "scroll", desc: "Bağlılık her gün artar ama vergi geliri −%15.", tax: -0.15, loy: 0.6, def: 0, drain: 0 },
+  asker: { name: "Asker Politikası", icon: "tug", desc: "Garnizon savunması +%10 ama asker tayını kasadan ve hazineden emer.", tax: 0, loy: 0, def: 0.1, drain: 1 },
+};
 
 export type CityBld = "sur" | "pazar" | "kisla" | "ambar";
 

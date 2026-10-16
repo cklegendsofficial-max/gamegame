@@ -28,6 +28,7 @@ import type { MyCaravan } from "./mycaravan";
 import type { DipMap } from "./spy";
 import type { WorldState } from "./world";
 import type { Diff, Drill, Ledger, Order, Realm } from "./reforms";
+import type { RareMat } from "./regions";
 import type { FactionId } from "./factions";
 
 export interface Village {
@@ -38,6 +39,8 @@ export interface Village {
   rec: number;
   recAt: number;
   rep: number;
+  /** Baskın sonrası görsel yara izi — opsiyonel, eski kayıtlarda yok. */
+  state?: "raided" | "ruined";
 }
 
 export interface Camp {
@@ -156,6 +159,8 @@ export interface March {
   y: number;
   until: number;
   load: number;
+  /** Vali "topla" emriyle gönderilmişse kaynak şehir; dönüşte asker buraya (başkent garnizonu yerine) döner. */
+  city?: string;
 }
 
 export interface TrainOrder {
@@ -261,12 +266,12 @@ export interface GameState {
   renown: number;
   c: Counters;
   markets: Record<string, Partial<Record<Good, number>>>;
-  smith: Record<string, { items: Item[]; day: number }>;
+  smith: Record<string, { items: Item[]; day: number; rare?: number }>;
   bounties: Bounty[];
   bountyDay: number;
   wageDebt: number;
-  mats: { ruh: number; parsomen: number };
-  story: { ch: number; fort: { x: number; y: number } | null; done: boolean; lord: boolean };
+  mats: { ruh: number; parsomen: number; nisan: number; celik?: number } & Partial<Record<RareMat, number>>;
+  story: { ch: number; fort: { x: number; y: number } | null; done: boolean; lord: boolean; korkutDefer?: boolean; kurganRite?: boolean };
   comps: string[];
   events: MarketEvent[];
   evDay: number;
@@ -365,6 +370,10 @@ export interface GameState {
   drill?: Drill;
   /** Asker türü başına birlik tecrübesi. */
   drillXp?: Partial<Record<Unit, number>>;
+  /** Bölge bossları: yeniden doğma zamanı (ms, 0 = yaşıyor) ve kaç kez yenildiği. */
+  dens?: Record<string, { at: number; kills: number }>;
+  /** Dökülen bölge efsaneleri. */
+  relics?: string[];
   /** Beylik yönetimi: vergi, memnuniyet, uzmanlaşma. */
   realm?: Realm;
   /** Şehir başına NPC eşya siparişleri. */
@@ -380,6 +389,30 @@ export interface GameState {
   fealty?: { f: FactionId; since: number; paid: number } | null;
   /** Haraca bağlanan rakip beyler. */
   tribute?: { rival: string; until: number; gold: number }[];
+  /** Bir devletin zafer koşulunu kazandın mı (yalnızca bir kez bildirilir). */
+  factionWin?: FactionId;
+  /** Oyuncunun seçtiği opsiyonel yan destan: hangi destan, hangi hedefte, bitti mi. */
+  sideSaga?: { id: string; step: number; done?: boolean };
+  /** Tamamlanmış yan destanların id'leri (tekrar başlatılamaz). */
+  sagasDone?: string[];
+  /** Kaybedilen şehirlerin yara izi: gün sayısı dolana kadar haritada kararır ve tüter. */
+  cityScars?: Record<string, number>;
+  /** Zanaat alıştırması: 0/1 malzeme ara, 2 atölyeye git, 3 kuşan, 4 bitti. */
+  craftTut?: number;
+  /** Şehir ustasının en son ziyaret edildiği gün (haftalık soğuma). */
+  artisan?: Record<string, number>;
+  /** Ustadan alınan ve bir sonraki ilgili dökümde harcanacak tek seferlik iyileştirme. */
+  artisanBuff?: { slot: Slot; kind: "rar" | "discount" };
+  /** 4/4 tamamlanan set id'leri (sinematik bir kez). */
+  setDone?: string[];
+  /** İlk destan savaşından önceki emir öğreticisi okundu mu (nara/siper/ok yağmuru). */
+  battleTut?: boolean;
+  /** Haritada beliren geçici sefer okları: bey akını ya da vali seferi, birkaç saniye görünür. */
+  fxMarch?: { x: number; y: number; tx: number; ty: number; t0: number; until: number; col: number }[];
+  /** Yanında yürüyen yoldaş: haritada kahramanın hemen yanında görünür. */
+  escort?: CompId;
+  /** Yoldaşa kuşandırılan tek tılsım/silah; küçük bir saldırı ya da şifa katkısı verir. */
+  compGear?: Partial<Record<CompId, Item>>;
 }
 
 export interface Voyage {
@@ -597,7 +630,7 @@ export function newGame(w: World): GameState {
     bounties: [],
     bountyDay: 0,
     wageDebt: 0,
-    mats: { ruh: 0, parsomen: 0 },
+    mats: { ruh: 0, parsomen: 0, nisan: 0 },
     story: { ch: 0, fort: null, done: false, lord: false },
     comps: [],
     events: [],

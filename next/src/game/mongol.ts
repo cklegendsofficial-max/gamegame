@@ -44,7 +44,7 @@ export const mongolArmy = (lv: number, str: number): Army => {
 
 export const mongolBoss = (lv: number, str: number): Boss => ({
   name: str >= STR_MAX ? "Noyan Cebe" : str === 2 ? "Noyan Sübutay" : "Tümen Başı Toku",
-  icon: "heroes/boss_hakan",
+  icon: "heroes/boss_noyan",
   atk: Math.round(24 + lv * 0.6),
   def: Math.round(12 + lv * 0.3),
   hp: 1100 + lv * 18,

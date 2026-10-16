@@ -4,6 +4,12 @@ import type { Good } from "./rpg";
 export type RivalTrait = "hirsli" | "onurlu" | "kurnaz" | "comert";
 export type RivalStatus = "peace" | "ally" | "war" | "vassal" | "dead";
 
+/** Rakip beyin seninle geçmişi: hediyelerini ve ihanetlerini hatırlar. */
+export interface RivalMemory {
+  gifts: number;
+  betray: number;
+}
+
 export interface Rival {
   id: string;
   name: string;
@@ -26,6 +32,7 @@ export interface Rival {
   heirs?: string[];
   gen?: number;
   wed?: boolean;
+  memory?: RivalMemory;
 }
 
 export type ReqKind = "camp" | "goods" | "foe" | "sefer";

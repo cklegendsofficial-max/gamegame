@@ -2,6 +2,7 @@ import type { Unit } from "./data";
 import type { UnitMul } from "./battle";
 import type { FactionId } from "./factions";
 import type { Slot } from "./rpg";
+import { LEGIONS } from "./regions";
 
 /** Bir asker türünün eğitim basamağı: saldırı/can çarpanı ve ücret çarpanı. */
 export interface DrillStep {
@@ -42,9 +43,17 @@ export const DRILL: Record<Unit, { lv1: DrillStep; lv2: DrillStep[] }> = {
 };
 
 /** Basamağa çıkmak için gereken birlik tecrübesi ve taban altın. */
-export const DRILL_XP = [0, 60, 220];
-export const DRILL_GOLD = [0, 120, 380];
-export const DRILL_PER_MAN = [0, 4, 9];
+export const DRILL_XP = [0, 60, 220, 600, 1400];
+export const DRILL_GOLD = [0, 120, 380, 900, 2200];
+export const DRILL_PER_MAN = [0, 4, 9, 15, 24];
+export const DRILL_MAX = 4;
+
+/** 3. basamak: seçilen dalın seçkin bölüğü; her türün kendine özgü yeteneği vardır. */
+export const ELITE: Record<Unit, { atk: number; hp: number; wage: number; desc: string }> = {
+  spear: { atk: 1.12, hp: 1.2, wage: 1.25, desc: "Seçkin bölük: kalkan duvarı hiç bozulmaz. Saldırı ×1.12, can ×1.2." },
+  archer: { atk: 1.2, hp: 1.1, wage: 1.25, desc: "Seçkin bölük: zırh delen ok uçları. Saldırı ×1.2, can ×1.1." },
+  horse: { atk: 1.16, hp: 1.15, wage: 1.25, desc: "Seçkin bölük: dörtnala mızrak hücumu. Saldırı ×1.16, can ×1.15." },
+};
 
 export type Drill = Partial<Record<Unit, { lv: number; br?: string }>>;
 
@@ -52,7 +61,13 @@ export function drillStep(d: Drill | undefined, u: Unit): DrillStep | null {
   const x = d?.[u];
   if (!x || x.lv <= 0) return null;
   if (x.lv === 1) return DRILL[u].lv1;
-  return DRILL[u].lv2.find((b) => b.id === x.br) ?? DRILL[u].lv2[0];
+  const b = DRILL[u].lv2.find((s) => s.id === x.br) ?? DRILL[u].lv2[0];
+  if (x.lv === 2) return b;
+  const e = ELITE[u];
+  const s3: DrillStep = { id: `${b.id}_s`, name: `Seçkin ${b.name}`, atk: b.atk * e.atk, hp: b.hp * e.hp, wage: b.wage * e.wage, desc: e.desc, fac: b.fac };
+  if (x.lv === 3) return s3;
+  const L = LEGIONS[u];
+  return { id: `${b.id}_d`, name: L.name, atk: s3.atk * L.atk, hp: s3.hp * L.hp, wage: s3.wage * L.wage, desc: L.desc, fac: b.fac };
 }
 
 export function drillMul(d: Drill | undefined): UnitMul {

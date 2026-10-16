@@ -52,12 +52,25 @@ export const TAUNTS = [
   "Bugün canını bağışladım. Yarın bağışlamam.",
   "Kervanını, atını, kılıcını… hepsini alacağım. Sonra da adını.",
   "Annene söyle, oğlunun mezar taşını hazırlasın.",
+  "Kılıcın ağırmış ama elin titriyor, {hero}. Bir dahakine kaldırmaya gücün yetmez.",
+  "Senin türkünü ben yakacağım; sonu hep aynı biter.",
+  "Kervan yollarında adın bir fıkra oldu. Herkes gülüyor.",
+  "Atını bıraktım, çünkü seni yine yenmek istiyorum.",
+  "Ben bir kurdum, sen kuzu. Bozkırın töresi bu.",
+  "Yüzündeki yarayı ben açtım. Her aynaya baktığında beni hatırla.",
+  "Sana bir tavsiye: bir dahaki sefere daha çok asker getir.",
+  "Toprak seni istemiyor, {hero}. Ben de istemiyorum ama kısmet.",
 ];
 
 export const REVENGE = [
   "Kampımı yaktın, kardeşlerimi kılıçtan geçirdin. Yemin olsun, aynısını sana yapacağım!",
   "Çadırımı yaktın ama ben külünden doğarım. Bekle beni.",
   "O gece kaçtım ama unutmadım. Hiçbir şeyi unutmam.",
+  "Kardeşimin kanı kılıcında kurumadı. Benimki de seninkine karışacak.",
+  "Sürümü dağıttın; şimdi tek başıma, ama tek başıma daha tehlikeliyim.",
+  "Her gece senin yüzünü görüyorum, {hero}. Bir gece gerçekten göreceğim.",
+  "Ateşimi söndürdün. Ben de seninkini söndüreceğim.",
+  "Yaralarım kapandı. Borcum açık.",
 ];
 
 export const LAST_WORDS = [
@@ -66,7 +79,22 @@ export const LAST_WORDS = [
   "\"Kardeşlerim intikamımı alacak…\"",
   "\"Bozkır… ne güzeldi…\"",
   "\"Kılıcımı… kardeşime ver…\"",
+  "\"Anam… beni kımızla büyüttü… sütü hâlâ ağzımda…\"",
+  "\"Atımı… atımı serbest bırak. O suçsuz.\"",
+  "\"İyi dövüştün. Bunu kimseye söyleme.\"",
+  "\"Gök Tengri… beni affeder mi?\"",
+  "\"Bir türkü yak benim için… kısa olsun.\"",
+  "\"Kurtlar yesin beni. Kurtlar adildir.\"",
+  "\"Sen de bir gün… benim gibi… yalnız…\"",
 ];
+
+/** Huya göre ek sözler: kurnaz, akıncı, korkusuz ve yağmacı reisler kendine özgü konuşur. */
+export const TRAIT_TAUNTS: Partial<Record<string, string[]>> = {
+  kurnaz: ["Tuzağımı fark etmedin bile, {hero}. Bir dahakini de fark etmeyeceksin.", "Senin adımlarını sayıyorum. Kervancın bana çalışıyor; bilmiyor muydun?"],
+  akinci: ["Atım rüzgârdan hızlı. Kaçamazsın, kovalayamazsın.", "Ufukta bir toz bulutu görürsen, o benim."],
+  korkusuz: ["Ölümden korkmuyorum. Senden hiç korkmuyorum.", "Yarama tuz basıp yine geldim. Sen gelebilir misin?"],
+  yagmaci: ["Kesen hafiflemiş, {hero}. Ağırlığını ben taşırım.", "Altının sesi tatlı. Seninkinin sesi daha tatlı."],
+};
 
 export function nemName(n: Nemesis): string {
   return `${n.epithet} ${n.name}${n.han ? " Han" : ""}`;

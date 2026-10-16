@@ -1,5 +1,6 @@
 import { Container, Sprite, Texture } from "pixi.js";
 import type { World } from "../world/gen";
+import { MAP_W } from "./mapScale";
 
 /** Haritayı canlandıran süs hayvanları ve yolcular: sürüler, kartallar, kervanlar, ocak dumanı. */
 
@@ -44,6 +45,7 @@ interface Smoke {
   x: number;
   y: number;
   t: number;
+  heavy?: boolean;
 }
 
 function art(w: number, h: number, draw: (g: CanvasRenderingContext2D) => void): Texture {
@@ -84,61 +86,87 @@ const sheepTex = () =>
   });
 
 const horseTex = () =>
-  art(20, 16, (g) => {
+  art(28, 22, (g) => {
+    // gölge
+    g.fillStyle = "rgba(30,15,0,0.28)";
+    g.beginPath();
+    g.ellipse(14, 20, 11, 2.2, 0, 0, Math.PI * 2);
+    g.fill();
+    // bacaklar (dolu)
     g.strokeStyle = "#3a2410";
-    g.lineWidth = 1.4;
-    for (const x of [5, 7, 13, 15]) {
+    g.lineWidth = 2.8;
+    g.lineCap = "round";
+    for (const [x, y1] of [[7, 12], [10, 12], [17, 12], [20, 12]] as [number, number][]) {
       g.beginPath();
-      g.moveTo(x, 9);
-      g.lineTo(x, 15);
+      g.moveTo(x, y1);
+      g.lineTo(x + (x > 14 ? 1 : -0.5), 19);
       g.stroke();
     }
     g.fillStyle = "#8a5a2e";
     g.beginPath();
-    g.ellipse(10, 8, 6.5, 3.4, 0, 0, Math.PI * 2);
+    g.ellipse(14, 10, 9, 4.5, 0, 0, Math.PI * 2);
     g.fill();
+    g.fillStyle = "#a07040";
     g.beginPath();
-    g.moveTo(14, 7);
-    g.lineTo(17.5, 2.5);
-    g.lineTo(19, 3.5);
-    g.lineTo(16.5, 8);
+    g.ellipse(15, 8.5, 6, 2.4, 0, 0, Math.PI * 2);
     g.fill();
-    g.strokeStyle = "#2a1808";
-    g.lineWidth = 1.6;
+    // boyun + baş
+    g.fillStyle = "#8a5a2e";
     g.beginPath();
-    g.moveTo(3.5, 7);
-    g.quadraticCurveTo(1.5, 9, 2, 12);
-    g.stroke();
+    g.moveTo(20, 9);
+    g.quadraticCurveTo(24, 4, 26, 3);
+    g.lineTo(27.5, 5);
+    g.quadraticCurveTo(25, 7, 22, 11);
+    g.closePath();
+    g.fill();
+    g.fillStyle = "#2a1808";
+    g.beginPath();
+    g.arc(26.2, 3.8, 0.7, 0, Math.PI * 2);
+    g.fill();
+    // yele
+    g.fillStyle = "#2a1808";
+    g.beginPath();
+    g.moveTo(20, 8);
+    g.quadraticCurveTo(23, 2, 26, 2.5);
+    g.lineTo(24.5, 5);
+    g.closePath();
+    g.fill();
   });
 
 const camelTex = () =>
-  art(22, 20, (g) => {
-    g.strokeStyle = "#4a3418";
-    g.lineWidth = 1.4;
-    for (const x of [6, 8, 14, 16]) {
+  art(30, 26, (g) => {
+    g.fillStyle = "rgba(30,15,0,0.28)";
+    g.beginPath();
+    g.ellipse(15, 24, 12, 2.2, 0, 0, Math.PI * 2);
+    g.fill();
+    g.strokeStyle = "#5a3a18";
+    g.lineWidth = 3;
+    g.lineCap = "round";
+    for (const x of [8, 11, 18, 21]) {
       g.beginPath();
-      g.moveTo(x, 11);
-      g.lineTo(x, 19);
+      g.moveTo(x, 14);
+      g.lineTo(x + 0.5, 23);
       g.stroke();
     }
     g.fillStyle = "#c79a5c";
     g.beginPath();
-    g.ellipse(11, 10.5, 6.5, 3.2, 0, 0, Math.PI * 2);
+    g.ellipse(15, 13, 9, 4.2, 0, 0, Math.PI * 2);
     g.fill();
     g.beginPath();
-    g.ellipse(10, 7.5, 3.4, 3, 0, 0, Math.PI * 2);
+    g.ellipse(13, 9, 4.5, 4, 0, 0, Math.PI * 2);
     g.fill();
     g.beginPath();
-    g.moveTo(16, 10);
-    g.quadraticCurveTo(19, 9, 19, 4);
-    g.lineTo(21.5, 4.5);
-    g.lineTo(20.5, 6);
-    g.quadraticCurveTo(20.5, 11, 17, 12);
+    g.moveTo(21, 12);
+    g.quadraticCurveTo(26, 11, 26, 5);
+    g.lineTo(28.5, 5.5);
+    g.lineTo(27.5, 8);
+    g.quadraticCurveTo(27, 14, 22, 15);
+    g.closePath();
     g.fill();
     g.fillStyle = "#8a2e22";
-    g.fillRect(7.5, 6, 6, 3);
+    g.fillRect(10, 7.5, 8, 3.5);
     g.fillStyle = "#3f6f9a";
-    g.fillRect(8, 6.5, 2, 2);
+    g.fillRect(11, 8, 2.5, 2.5);
   });
 
 const eagleTex = () =>
@@ -165,35 +193,46 @@ export class Life {
   private caravans: Caravan[] = [];
   private smoke: Smoke[] = [];
 
-  constructor(world: World, villages: { x: number; y: number; yurt: boolean }[], glow: Texture) {
+  constructor(world: World, villages: { x: number; y: number; yurt: boolean; state?: "raided" | "ruined" }[], glow: Texture) {
     const sheep = sheepTex();
     const horse = horseTex();
     const camel = camelTex();
     const eagle = eagleTex();
     villages.forEach((v, i) => {
-      const n = 4 + Math.floor(rnd(i + 3) * 5);
-      const side = rnd(i + 7) * Math.PI * 2;
-      const hx = v.x + Math.cos(side) * 46;
-      const hy = v.y + Math.sin(side) * 30 + 10;
-      const herd: Herd = { x: hx, y: hy, list: [] };
-      for (let k = 0; k < n; k++) {
-        const isHorse = v.yurt && k < 2;
-        const s = new Sprite(isHorse ? horse : sheep);
-        s.anchor.set(0.5, 0.9);
-        s.scale.set(isHorse ? 0.75 : 0.62);
-        const x = hx + (rnd(i * 31 + k) - 0.5) * 34;
-        const y = hy + (rnd(i * 17 + k * 5) - 0.5) * 20;
-        s.position.set(x, y);
-        this.ground.addChild(s);
-        herd.list.push({ s, hx, hy, tx: x, ty: y, wait: rnd(i + k) * 4, ph: rnd(k + i * 3) * 6 });
+      const foot = v.yurt ? MAP_W.yurt : MAP_W.village;
+      const ruined = v.state === "ruined";
+      if (!ruined) {
+        const n = 4 + Math.floor(rnd(i + 3) * 5);
+        const side = rnd(i + 7) * Math.PI * 2;
+        const hx = v.x + Math.cos(side) * foot * 0.52;
+        const hy = v.y + Math.sin(side) * foot * 0.28 + foot * 0.1;
+        const herd: Herd = { x: hx, y: hy, list: [] };
+        for (let k = 0; k < n; k++) {
+          const isHorse = v.yurt && k < 2;
+          const s = new Sprite(isHorse ? horse : sheep);
+          s.anchor.set(0.5, 0.9);
+          s.scale.set(isHorse ? 0.48 : 0.38);
+          const x = hx + (rnd(i * 31 + k) - 0.5) * foot * 0.38;
+          const y = hy + (rnd(i * 17 + k * 5) - 0.5) * foot * 0.22;
+          s.position.set(x, y);
+          this.ground.addChild(s);
+          herd.list.push({ s, hx, hy, tx: x, ty: y, wait: rnd(i + k) * 4, ph: rnd(k + i * 3) * 6 });
+        }
+        this.herds.push(herd);
       }
-      this.herds.push(herd);
-      for (let k = 0; k < 2; k++) {
+      const smokeN = ruined ? 4 : 2;
+      for (let k = 0; k < smokeN; k++) {
         const p = new Sprite(glow);
         p.anchor.set(0.5);
-        p.tint = 0x8a8478;
+        p.tint = ruined ? 0x5a5048 : 0x8a8478;
         this.air.addChild(p);
-        this.smoke.push({ s: p, x: v.x + (rnd(i + 11) - 0.5) * 14, y: v.y - 14, t: k * 2.2 + rnd(i) * 2 });
+        this.smoke.push({
+          s: p,
+          x: v.x + (rnd(i + 11 + k) - 0.5) * foot * (ruined ? 0.28 : 0.16),
+          y: v.y - foot * (ruined ? 0.12 : 0.15),
+          t: k * 2.2 + rnd(i) * 2,
+          heavy: ruined,
+        });
       }
     });
     const pk = world.peaks;
@@ -223,7 +262,7 @@ export class Life {
       for (let b = 0; b < n; b++) {
         const s = new Sprite(b === 0 ? horse : camel);
         s.anchor.set(0.5, 0.9);
-        s.scale.set(0.8);
+        s.scale.set(0.5);
         this.ground.addChild(s);
         beasts.push(s);
       }
@@ -318,11 +357,18 @@ export class Life {
       const vis = inView(p.x, p.y);
       p.s.visible = vis;
       if (!vis) continue;
-      p.t = (p.t + dt) % 4.4;
-      const k = p.t / 4.4;
-      p.s.position.set(p.x + Math.sin(time * 0.6 + p.x) * 4 + k * 10, p.y - k * 34);
-      p.s.width = p.s.height = 8 + k * 22;
-      p.s.alpha = (winter ? 0.5 : 0.32) * Math.sin(Math.PI * k);
+      const cycle = p.heavy ? 5.6 : 4.4;
+      p.t = (p.t + dt) % cycle;
+      const k = p.t / cycle;
+      const drift = p.heavy ? 14 : 10;
+      const rise = p.heavy ? 48 : 34;
+      const wobble = p.heavy ? 7 : 4;
+      p.s.position.set(p.x + Math.sin(time * 0.6 + p.x) * wobble + k * drift, p.y - k * rise);
+      const base = p.heavy ? 14 : 8;
+      const grow = p.heavy ? 32 : 22;
+      p.s.width = p.s.height = base + k * grow;
+      const peakA = p.heavy ? (winter ? 0.62 : 0.48) : winter ? 0.5 : 0.32;
+      p.s.alpha = peakA * Math.sin(Math.PI * k);
     }
   }
 }

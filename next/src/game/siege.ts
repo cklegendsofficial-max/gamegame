@@ -57,6 +57,12 @@ export function siegeWall(r: SiegeRun): number {
   return Math.max(0, r.wall0 * (1 - r.breach / 100));
 }
 
+/** Kuşatma sahnesi evresi: sur dövülürken, gedik açılınca ve son hücuma hazırken farklı arka plan gösterilir. */
+export type SiegePhase = "bombard" | "breach" | "assault";
+export function siegePhase(r: SiegeRun): SiegePhase {
+  return r.breach < 35 ? "bombard" : r.breach < 80 ? "breach" : "assault";
+}
+
 export function siegeGar(r: SiegeRun): Army {
   const k = 0.65 + 0.35 * (r.morale / 100);
   return { spear: Math.round(r.gar.spear * k), archer: Math.round(r.gar.archer * k), horse: Math.round(r.gar.horse * k) };

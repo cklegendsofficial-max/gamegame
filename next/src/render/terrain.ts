@@ -20,6 +20,7 @@ const fragment = `
 in vec2 vUV;
 uniform sampler2D uBase;
 uniform sampler2D uData;
+uniform sampler2D uRelief;
 uniform sampler2D uNoise;
 uniform sampler2D uSand;
 uniform sampler2D uSteppe;
@@ -27,6 +28,7 @@ uniform sampler2D uGrass;
 uniform sampler2D uRock;
 uniform float uTime;
 uniform float uDetail;
+uniform float uRelief3D;
 uniform vec2 uWorld;
 uniform vec3 uMSand;
 uniform vec3 uMSteppe;
@@ -48,8 +50,11 @@ void main() {
   vec2 warp = (nz2.rg - 0.5) * 11.0 / uWorld;
   vec3 base = texture2D(uBase, vUV).rgb;
   vec4 dat = texture2D(uData, vUV + warp);
+  vec4 rel = texture2D(uRelief, vUV + warp);
   float h = dat.r * 2.0 - 0.8;
   float m = dat.g * 1.3;
+  // kıyıya işaretli uzaklık (doku hücresi): + kara, - su
+  float sd = (rel.g * 255.0 - 128.0) / 2.0;
   float vig = 1.0 - 0.35 * max(0.0, length((vUV - 0.5) * vec2(1.1, 1.3)) - 0.45);
 
   // kara: biyom ağırlıkları
@@ -80,6 +85,28 @@ void main() {
   col = mix(col, tinted, 0.28 * k);
   col *= 1.0 - 0.18 * smoothstep(0.0, 0.012, h) * (1.0 - smoothstep(0.012, 0.03, h));
 
+  // çöl: anizotropik kum sırtları (dune) — düz “Paint” dalgalanmayı kırar
+  float duneA = texture2D(uNoise, wp / 180.0 + vec2(0.0, wp.x / 420.0)).r;
+  float duneB = texture2D(uNoise, wp / 70.0 + vec2(wp.y / 260.0, 0.0)).g;
+  float ridge = sin((wp.x * 0.035 + wp.y * 0.012) + duneA * 6.0) * 0.5 + 0.5;
+  ridge = pow(ridge, 1.6) * (0.55 + 0.45 * duneB);
+  float duneLit = mix(0.72, 1.22, ridge);
+  col *= mix(1.0, duneLit, wSand * 0.88);
+  // ikinci eksen: çapraz sırtlar
+  float cross = sin((wp.x * -0.02 + wp.y * 0.04) + duneB * 4.0) * 0.5 + 0.5;
+  col *= mix(1.0, mix(0.9, 1.08, cross), wSand * 0.35);
+  // mikro kum tanesi kırınımı
+  float grain = texture2D(uNoise, wp / 14.0).b;
+  col = mix(col, col * vec3(1.1, 1.03, 0.9), wSand * (grain - 0.5) * 0.28);
+
+  // kabartma: güneş kuzeybatıdan; yamaçlar aydınlanır, vadiler gölgelenir
+  float shade = rel.r * 2.0;
+  col *= mix(1.0, shade, uRelief3D * (1.0 + wSand * 0.25));
+  // ıslak kum ve kıyı şeridi
+  float wet = 1.0 - smoothstep(0.0, 2.6, sd);
+  col *= 1.0 - 0.22 * wet * step(0.0, sd);
+  col = mix(col, col * vec3(1.08, 1.05, 0.98), (1.0 - smoothstep(2.6, 7.0, sd)) * step(2.6, sd) * 0.6);
+
   // mevsimler
   float L = lum(col);
   vec3 dry = vec3(L * 1.18, L * 1.02, L * 0.62);
@@ -89,10 +116,10 @@ void main() {
   vec4 fine = texture2D(uNoise, wp / 7.0);
   vec2 cell = floor(wp / 8.0);
   float hsh = fract(sin(dot(cell, vec2(127.1, 311.7))) * 43758.5453);
-  float patch = smoothstep(0.3, 0.55, nz2.r);
+  float bloom = smoothstep(0.3, 0.55, nz2.r);
   vec2 inC = fract(wp / 8.0) - 0.5 - (vec2(fract(hsh * 13.7), fract(hsh * 29.3)) - 0.5) * 0.4;
   float dot1 = 1.0 - smoothstep(0.14, 0.24, length(inC));
-  float petal = step(1.0 - 0.6 * patch, hsh) * dot1 * uSeason.y * (wGrass + wSteppe * 0.5);
+  float petal = step(1.0 - 0.6 * bloom, hsh) * dot1 * uSeason.y * (wGrass + wSteppe * 0.5);
   float hue = fract(hsh * 7.31);
   vec3 flower = hue < 0.4 ? vec3(0.92, 0.25, 0.22) : hue < 0.7 ? vec3(0.98, 0.84, 0.30) : vec3(0.96, 0.94, 0.90);
   col = mix(col * (1.0 + uSeason.y * 0.06 * wGrass), flower, petal * 0.8);
@@ -103,21 +130,48 @@ void main() {
 
   // su
   float hw = h + (nz2.b - 0.5) * 0.012;
-  float wf = 1.0 - smoothstep(-0.004, 0.004, hw);
-  float depth = clamp(-h / 0.35, 0.0, 1.0);
-  vec3 wc = mix(vec3(0.23, 0.50, 0.60), vec3(0.09, 0.25, 0.38), depth);
-  vec2 q = wp / 240.0;
-  float w1 = texture2D(uNoise, q + vec2(uTime * 0.012, uTime * 0.007)).r;
-  float w2 = texture2D(uNoise, q * 1.73 - vec2(uTime * 0.009, -uTime * 0.013)).g;
-  float wave = (w1 + w2) * 0.5;
-  wc += (wave - 0.5) * 0.10;
-  float sp = pow(max(0.0, w1 + w2 - 1.18), 2.0) * 7.0;
-  wc += vec3(1.0, 0.94, 0.78) * sp * 0.4 * (1.0 - depth * 0.5);
-  float shore = smoothstep(-0.05, -0.003, hw);
-  float band = 0.5 + 0.5 * sin(-h * 140.0 + uTime * 1.4 + nz.r * 7.0);
-  float foam = shore * smoothstep(0.5, 0.95, band * (0.6 + wave * 0.8));
-  wc = mix(wc, vec3(0.70, 0.82, 0.80), shore * 0.25);
-  wc = mix(wc, vec3(0.94, 0.97, 0.96), foam * 0.55);
+  float wf = max(1.0 - smoothstep(-0.004, 0.004, hw), 1.0 - smoothstep(-0.6, 0.4, sd));
+  float off = clamp(-sd / 64.0, 0.0, 1.0);
+  float depth = clamp(max(off, -h / 0.45), 0.0, 1.0);
+  // dalga yüzeyi: iki kayan gürültüden normal
+  vec2 q1 = wp / 300.0 + vec2(uTime * 0.007, uTime * 0.004);
+  vec2 q2 = wp / 150.0 - vec2(uTime * 0.005, -uTime * 0.008);
+  float e = 2.0 / 256.0;
+  float n0 = texture2D(uNoise, q1).r + texture2D(uNoise, q2).g * 0.5;
+  float nX = texture2D(uNoise, q1 + vec2(e, 0.0)).r + texture2D(uNoise, q2 + vec2(e, 0.0)).g * 0.5;
+  float nY = texture2D(uNoise, q1 + vec2(0.0, e)).r + texture2D(uNoise, q2 + vec2(0.0, e)).g * 0.5;
+  vec3 wn = normalize(vec3((n0 - nX) * 10.0, (n0 - nY) * 10.0, 1.0));
+  vec3 sunL = normalize(vec3(-0.55, -0.6, 0.6));
+  float diff = dot(wn, sunL) / sunL.z;
+  float spec = pow(max(0.0, dot(wn, normalize(sunL + vec3(0.0, 0.0, 1.0)))), 120.0);
+  // renk: sığ turkuaz → orta mavi → derin lacivert; açıkta büyük renk lekeleri
+  vec3 shalC = vec3(0.26, 0.64, 0.62);
+  vec3 midC = vec3(0.10, 0.38, 0.52);
+  vec3 deepC = vec3(0.035, 0.15, 0.29);
+  vec3 wc = mix(shalC, midC, smoothstep(0.0, 0.38, depth));
+  wc = mix(wc, deepC, smoothstep(0.28, 1.0, depth));
+  wc *= 0.9 + 0.22 * nz.a;
+  // sığlıkta görünen kum taban ve ışık ağları
+  float vis = 1.0 - smoothstep(0.0, 0.3, depth);
+  vec3 bed = tile(uSand, wp / 260.0) * vec3(0.62, 0.86, 0.84);
+  wc = mix(wc, bed, vis * 0.42);
+  float c1 = texture2D(uNoise, wp / 64.0 + vec2(uTime * 0.021, uTime * 0.013)).b;
+  float c2 = texture2D(uNoise, wp / 57.0 - vec2(uTime * 0.017, -uTime * 0.015)).b;
+  float caus = pow(clamp(1.0 - abs(c1 - c2) * 5.0, 0.0, 1.0), 5.0);
+  wc += vec3(0.85, 1.0, 0.92) * caus * 0.22 * vis;
+  wc *= 0.86 + 0.16 * diff;
+  float sp = spec * (0.35 + 0.65 * depth);
+  wc += vec3(1.0, 0.94, 0.80) * sp * 0.4;
+  // kıyı köpüğü: ince, yumuşak — kalın beyaz “Paint çizgisi” yok
+  float dS = max(0.0, -sd);
+  float fn = texture2D(uNoise, wp / 46.0 + vec2(uTime * 0.01, 0.0)).g;
+  float edge = (1.0 - smoothstep(0.0, 3.2, dS)) * (0.35 + 0.4 * fn);
+  float crest = smoothstep(0.78, 0.98, sin(dS * 1.1 - uTime * 1.35 + nz.r * 5.0)) * (1.0 - smoothstep(2.0, 12.0, dS)) * smoothstep(0.4, 0.7, fn);
+  float foam = clamp(edge * 0.55 + crest * 0.55, 0.0, 1.0);
+  wc = mix(wc, vec3(0.88, 0.94, 0.95), foam * 0.45);
+  // açık denizde köpük başlıkları
+  float cap = smoothstep(0.9, 0.98, n0 / 1.5) * smoothstep(0.4, 0.9, depth);
+  wc = mix(wc, vec3(0.86, 0.92, 0.94), cap * 0.18);
   float ice = uSeason.x * (1.0 - smoothstep(0.08, 0.22, depth + vUV.y * 0.25 - 0.1));
   float crack = smoothstep(0.47, 0.5, abs(fine.a - 0.5) + 0.46) * 0.25;
   wc = mix(wc, vec3(0.80, 0.88, 0.93) - crack, ice * 0.85);
@@ -203,6 +257,109 @@ function dataTex(world: World): Texture {
   return new Texture({ source: new CanvasSource({ resource: c, scaleMode: "linear" }) });
 }
 
+/** 3-4 pah uzaklık dönüşümü: `src` hücrelerine olan uzaklık (hücre birimi). */
+function chamfer(src: Uint8Array, w: number, h: number): Float32Array {
+  const d = new Float32Array(w * h);
+  const BIG = 1e6;
+  for (let i = 0; i < d.length; i++) d[i] = src[i] ? 0 : BIG;
+  for (let y = 0; y < h; y++)
+    for (let x = 0; x < w; x++) {
+      const i = y * w + x;
+      let v = d[i];
+      if (!v) continue;
+      if (x > 0) v = Math.min(v, d[i - 1] + 3);
+      if (y > 0) {
+        v = Math.min(v, d[i - w] + 3);
+        if (x > 0) v = Math.min(v, d[i - w - 1] + 4);
+        if (x < w - 1) v = Math.min(v, d[i - w + 1] + 4);
+      }
+      d[i] = v;
+    }
+  for (let y = h - 1; y >= 0; y--)
+    for (let x = w - 1; x >= 0; x--) {
+      const i = y * w + x;
+      let v = d[i];
+      if (!v) continue;
+      if (x < w - 1) v = Math.min(v, d[i + 1] + 3);
+      if (y < h - 1) {
+        v = Math.min(v, d[i + w] + 3);
+        if (x < w - 1) v = Math.min(v, d[i + w + 1] + 4);
+        if (x > 0) v = Math.min(v, d[i + w - 1] + 4);
+      }
+      d[i] = v;
+    }
+  for (let i = 0; i < d.length; i++) d[i] /= 3;
+  return d;
+}
+
+/** Kutu bulanıklığı (yatay + dikey). */
+function blur(src: Float32Array, w: number, h: number, r: number): Float32Array {
+  const tmp = new Float32Array(w * h);
+  const out = new Float32Array(w * h);
+  const n = r * 2 + 1;
+  for (let y = 0; y < h; y++) {
+    let acc = 0;
+    for (let k = -r; k <= r; k++) acc += src[y * w + Math.min(w - 1, Math.max(0, k))];
+    for (let x = 0; x < w; x++) {
+      tmp[y * w + x] = acc / n;
+      acc += src[y * w + Math.min(w - 1, x + r + 1)] - src[y * w + Math.max(0, x - r)];
+    }
+  }
+  for (let x = 0; x < w; x++) {
+    let acc = 0;
+    for (let k = -r; k <= r; k++) acc += tmp[Math.min(h - 1, Math.max(0, k)) * w + x];
+    for (let y = 0; y < h; y++) {
+      out[y * w + x] = acc / n;
+      acc += tmp[Math.min(h - 1, y + r + 1) * w + x] - tmp[Math.max(0, y - r) * w + x];
+    }
+  }
+  return out;
+}
+
+/** Kabartma dokusu: r = yamaç ışığı ve çukur gölgesi (0.5 = düz), g = kıyıya işaretli uzaklık. */
+function reliefTex(world: World): Texture {
+  const hgt = world.height;
+  const land = new Uint8Array(GW * GH);
+  const sea = new Uint8Array(GW * GH);
+  for (let i = 0; i < hgt.length; i++) (hgt[i] >= 0 ? land : sea)[i] = 1;
+  const toSea = chamfer(sea, GW, GH);
+  const toLand = chamfer(land, GW, GH);
+  const soft = blur(hgt, GW, GH, 2);
+  const wide = blur(blur(hgt, GW, GH, 7), GW, GH, 7);
+  const L = [-0.55, -0.6, 0.6];
+  const ll = Math.hypot(L[0], L[1], L[2]);
+  const lx = L[0] / ll, ly = L[1] / ll, lz = L[2] / ll;
+  const c = document.createElement("canvas");
+  c.width = GW;
+  c.height = GH;
+  const g = c.getContext("2d")!;
+  const img = g.createImageData(GW, GH);
+  const at = (x: number, y: number) => soft[Math.min(GH - 1, Math.max(0, y)) * GW + Math.min(GW - 1, Math.max(0, x))];
+  for (let y = 0; y < GH; y++)
+    for (let x = 0; x < GW; x++) {
+      const i = y * GW + x;
+      const o = i * 4;
+      let shade = 1;
+      if (hgt[i] >= 0) {
+        const k = 9;
+        const nx = -(at(x + 2, y) - at(x - 2, y)) * k;
+        const ny = -(at(x, y + 2) - at(x, y - 2)) * k;
+        const nl = Math.hypot(nx, ny, 1);
+        const lam = (nx * lx + ny * ly + lz) / nl / lz;
+        shade = 1 + (lam - 1) * 0.85;
+        const cav = Math.max(-0.16, Math.min(0.16, (soft[i] - wide[i]) * 2.4));
+        shade = Math.max(0.5, Math.min(1.5, shade * (1 + cav)));
+      }
+      const sd = hgt[i] >= 0 ? toSea[i] : -toLand[i];
+      img.data[o] = Math.round(Math.max(0, Math.min(255, shade * 127.5)));
+      img.data[o + 1] = Math.round(Math.max(0, Math.min(255, 128 + sd * 2)));
+      img.data[o + 2] = 0;
+      img.data[o + 3] = 255;
+    }
+  g.putImageData(img, 0, 0);
+  return new Texture({ source: new CanvasSource({ resource: c, scaleMode: "linear" }) });
+}
+
 /** Mevsim başına shader hedefleri: kar, çiçek, kuraklık, güz. */
 const SEASON_FX: Record<SeasonId, [number, number, number, number]> = {
   bahar: [0, 1, 0, 0],
@@ -229,6 +386,7 @@ export function terrainMesh(world: World, detail: Record<DetailKey, Texture>): T
   const u = new UniformGroup({
     uTime: { value: 0, type: "f32" },
     uDetail: { value: 0.75, type: "f32" },
+    uRelief3D: { value: 0.92, type: "f32" },
     uWorld: { value: new Float32Array([W, H]), type: "vec2<f32>" },
     uMSand: { value: new Float32Array(MEANS.sand), type: "vec3<f32>" },
     uMSteppe: { value: new Float32Array(MEANS.steppe), type: "vec3<f32>" },
@@ -241,6 +399,7 @@ export function terrainMesh(world: World, detail: Record<DetailKey, Texture>): T
     resources: {
       uBase: base.source,
       uData: dataTex(world).source,
+      uRelief: reliefTex(world).source,
       uNoise: noiseTex().source,
       uSand: src("sand"),
       uSteppe: src("steppe"),

@@ -38,6 +38,7 @@ async function boot(): Promise<void> {
   const game = new Game(world, view, cam);
   const hud = new Hud(game);
   game.hud = hud;
+  void game.treasury.init();
   view.attachState(game);
   (window as unknown as { game: Game }).game = game;
   if (import.meta.env.DEV) void import("./ui/admin").then((m) => m.mountAdmin(game));

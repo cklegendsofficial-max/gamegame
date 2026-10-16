@@ -1,8 +1,10 @@
 import { CITIES } from "../world/gen";
 import { army } from "./data";
 import type { Boss } from "./battle";
+import type { Arena, Kin } from "./bosses";
 import type { Game } from "./game";
 import { gen } from "./text";
+import type { SkillKind } from "./classes";
 
 export type CompId = "ayse" | "korkut" | "batu" | "leyla" | "ferhat" | "lucia";
 
@@ -17,6 +19,14 @@ export interface CompMods {
   sight: number;
 }
 
+/** Yoldaş savaş yeteneği: "heal" doğrudan iyileşme oranına eklenir, diğerleri Sim'in SkillKind sistemini kullanır. */
+export type CompSkillKind = SkillKind | "heal";
+export interface CompSkill {
+  name: string;
+  kind: CompSkillKind;
+  pow: number;
+}
+
 export interface Companion {
   id: CompId;
   name: string;
@@ -26,13 +36,15 @@ export interface Companion {
   perk: string;
   mods: Partial<CompMods>;
   hire?: { city: string; gold: number; renown: number };
+  /** Savaş meydanında aktif olan ek yetenek (çampiyon beceri listesine eklenir). */
+  skill?: CompSkill;
 }
 
 export const COMPANIONS: Companion[] = [
-  { id: "ayse", name: "Ayşe", role: "Kız kardeşin · Şifacı", icon: "companions/ayse", desc: "Kara Tamga'nın elinden kurtardığın kız kardeşin. Annenizden öğrendiği otlarla yaraları sarar.", perk: "Savaşta her tur canının %4'ünü iyileştirir.", mods: { heal: 0.04 } },
-  { id: "korkut", name: "Derviş Korkut", role: "Ozan · Bilge", icon: "companions/korkut", desc: "Buhara'nın yaşlı dervişi. Kopuzuyla eski destanları söyler, Kurgan Taşlarının sırrını bilir.", perk: "Kazandığın tecrübe %15 artar; askerlerin %4 güçlü.", mods: { xp: 0.15, army: 0.04 } },
+  { id: "ayse", name: "Ayşe", role: "Kız kardeşin · Şifacı", icon: "companions/ayse", desc: "Kara Tamga'nın elinden kurtardığın kız kardeşin. Annenizden öğrendiği otlarla yaraları sarar.", perk: "Savaşta her tur canının %4'ünü iyileştirir.", mods: { heal: 0.04 }, skill: { name: "Şifa Dalgası", kind: "heal", pow: 0.03 } },
+  { id: "korkut", name: "Derviş Korkut", role: "Ozan · Bilge", icon: "companions/korkut", desc: "Buhara'nın yaşlı dervişi. Kopuzuyla eski destanları söyler, Kurgan Taşlarının sırrını bilir.", perk: "Kazandığın tecrübe %15 artar; askerlerin %4 güçlü.", mods: { xp: 0.15, army: 0.04 }, skill: { name: "Ozan Sancağı", kind: "rally", pow: 0.1 } },
   { id: "ferhat", name: "Ferhat", role: "İz sürücü", icon: "companions/ferhat", desc: "Bozkırda iz sürmeyi kurtlardan öğrenmiş sessiz bir avcı.", perk: "Yürüyüş hızın %12 artar, daha uzağı görürsün.", mods: { speed: 0.12, sight: 3 }, hire: { city: "merv", gold: 350, renown: 10 } },
-  { id: "batu", name: "Batu", role: "Eski yüzbaşı", icon: "companions/batu", desc: "Hakan ordusundan kovulmuş yaşlı bir yüzbaşı. Hâlâ en iyi kılıç talimini o verir.", perk: "Saldırın %10, askerlerinin gücü %6 artar.", mods: { atk: 0.1, army: 0.06 }, hire: { city: "nishapur", gold: 600, renown: 30 } },
+  { id: "batu", name: "Batu", role: "Eski yüzbaşı", icon: "companions/batu", desc: "Hakan ordusundan kovulmuş yaşlı bir yüzbaşı. Hâlâ en iyi kılıç talimini o verir.", perk: "Saldırın %10, askerlerinin gücü %6 artar.", mods: { atk: 0.1, army: 0.06 }, hire: { city: "nishapur", gold: 600, renown: 30 }, skill: { name: "Yüzbaşı Narası", kind: "fury", pow: 0.08 } },
   { id: "leyla", name: "Leyla", role: "Tüccar kızı", icon: "companions/leyla", desc: "Tebriz çarşısının en keskin pazarlıkçısı. Her şehrin fiyatını ezbere bilir.", perk: "Pazarda %3 daha iyi fiyat, +30 yük.", mods: { trade: 0.03, carry: 30 }, hire: { city: "tabriz", gold: 500, renown: 20 } },
   { id: "lucia", name: "Lucia", role: "Venedikli tüccar", icon: "companions/lucia", desc: "Konstantiniyye'deki Venedik kolonisinden gelen gözü pek bir kadın. Doğu ile Batı arasında köprü kurar.", perk: "Pazarda %4 daha iyi fiyat, +40 yük.", mods: { trade: 0.04, carry: 40 }, hire: { city: "constantinople", gold: 900, renown: 50 } },
 ];
@@ -55,7 +67,7 @@ export interface Chapter {
   city?: string;
   scene?: { img: string; text: (g: Game) => string; choices: Choice[] };
   auto?: (g: Game) => boolean;
-  outro?: { img: string; title: string; text: (g: Game) => string };
+  outro?: { img: string; title: string; text: (g: Game) => string; cine?: string };
   /** Bölümü kapatan savaş ya da kuşatma sahnesi; kazanılmadan bölüm ilerlemez. */
   stage?: Stage;
   goto: (g: Game) => { x: number; y: number } | null;
@@ -66,6 +78,8 @@ export interface Stage {
   /** Savaş ekranında görünen sahne notu. */
   text: string;
   siege?: boolean;
+  arena?: Arena;
+  kin?: Kin;
   /** Düşman oranı [mızrak, okçu, atlı]; boyut kahramanın ordusuna göre ölçeklenir. */
   mix: [number, number, number];
   /** Kahraman ordusunun katı ve en az düşman sayısı. */
@@ -78,7 +92,7 @@ export interface Stage {
 
 const city = (id: string) => CITIES.find((c) => c.id === id)!;
 
-export const KASIM: Boss = { name: "Köle Tüccarı Kasım", icon: "merchant", atk: 10, def: 6, hp: 190 };
+export const KASIM: Boss = { name: "Köle Tüccarı Kasım", icon: "heroes/boss_kasim", atk: 10, def: 6, hp: 190 };
 export const KARA_HAN: Boss = { name: "Kara Han", icon: "heroes/boss_karahan", atk: 46, def: 22, hp: 1600 };
 
 export const CHAPTERS: Chapter[] = [
@@ -92,11 +106,23 @@ export const CHAPTERS: Chapter[] = [
     scene: {
       img: "companions/korkut",
       text: (g) => `Ak sakallı derviş kopuzunu bıraktı ve omzundaki damgaya uzun uzun baktı.<br><br><i>"Demek sen de onlardansın, ${g.s.hero.name}. Kara Tamga… Kara Han'ın köle avcıları. Esirlerin ruhlarını eski kurganlara hapsediyor, balbalları uyandırıyorlar. Taşlar uyandıkça bozkır kararıyor."</i><br><br><i>"Ailenin izini sürmek istiyorsan önce bir Kurgan Taşını kır. İçindeki ruhlar sana yolu gösterecek. Ben de seninle geleceğim; yaşlı bir dervişin sözü bazen kılıçtan keskindir."</i>`,
-      choices: [{ label: "Korkut'u yanına al", run: (g) => { g.addCompanion("korkut"); g.storyAdvance(); } }],
+      choices: [
+        { label: "Korkut'u yanına al", run: (g) => { g.addCompanion("korkut"); g.storyAdvance(); } },
+        {
+          label: "Önce yalnız araştır",
+          run: (g) => {
+            g.s.story.korkutDefer = true;
+            g.gain({ gold: 85 });
+            g.chron(`${g.s.hero.name}, Derviş Korkut'u yalnız bırakıp Buhara arka sokaklarında Kara Tamga izlerini sürdü. Tekke avlusunda bulduğu gümüş bir pul kesesine +85 altın kattı.`);
+            g.storyAdvance();
+          },
+        },
+      ],
     },
     stage: {
       title: "Tekke Baskını",
       text: "Kara Tamga'nın köle avcıları seni Buhara'ya kadar izlemiş. Dervişin tekkesinin kapısını kırıyorlar; Korkut'u yaşatmak için avluyu tut!",
+      arena: "avlu",
       mix: [3, 1, 0], k: 0.7, min: 6, bonus: 0,
       win: "Avcılar avludan kaçıştı. Korkut kopuzunu yerden aldı: \"Seni bulmaları uzun sürmedi, evlat. Demek ki korkuyorlar.\"",
       lose: "Avcılar tekkenin avlusunu tuttu; Korkut'u son anda arka kapıdan kaçırdın. Birliğini toplayıp yeniden dene.",
@@ -108,10 +134,11 @@ export const CHAPTERS: Chapter[] = [
     goal: "Haritada mor ışıkla parlayan bir Kurgan Taşını kır.",
     img: "map/kurgan",
     intro: "Korkut haritada mor ışıkla titreyen taşları gösterdi. <i>\"Her biri bir mezar, her mezarda bir esirin ruhu. Birini kır, ruhlar konuşsun.\"</i>",
-    auto: (g) => g.s.c.kurgans >= 1,
+    auto: (g) => g.s.c.kurgans >= 1 && !!g.s.story.kurganRite,
     stage: {
       title: "Balbalların Uyanışı",
       text: "Taş çatlarken kurganın çevresindeki balballar yerinden kalktı. Ruhları serbest bırakmak için taş askerleri dağıt!",
+      arena: "kurgan", kin: "balbal",
       mix: [2, 1, 1], k: 0.8, min: 8, bonus: 0.05,
       win: "Son balbal toza dönüştü; kurganın üstünde mor bir ışık yükseldi.",
       lose: "Balballar seni kurgandan uzaklaştırdı. Ruhlar hâlâ taşın içinde inliyor.",
@@ -140,6 +167,7 @@ export const CHAPTERS: Chapter[] = [
     },
     outro: {
       img: "companions/ayse",
+      cine: "scene/ayse",
       title: "Ayşe",
       text: (g) => `Ayşe boynuna sarıldı ve uzun süre ağladı. <i>"Seni öldü sandım ${g.s.hero.name}… Annemizi ve küçük Ertuğrul'u Kara Han'ın kalesine götürdüler. Kalenin yerini sadece çetelerin başları bilir."</i><br><br>Ayşe artık yanında. Yaralarını o saracak.`,
     },
@@ -199,6 +227,7 @@ export const ACT2: Chapter[] = [
       title: "Buhara Surlarında Gölgeler",
       siege: true,
       text: "Erlik'in gölgeleri Buhara surlarına tırmanıyor! Şehrin kapısını tut, medreseye ulaşmalarına izin verme.",
+      kin: "golge",
       mix: [2, 2, 2], k: 0.9, min: 40, bonus: 0.15,
       win: "Gölgeler şafakla birlikte eridi. Buharalılar surların üstünden adını haykırıyor.",
       lose: "Gölgeler surları aştı; Korkut'la medreseye çekildiniz. Birliğini toparla ve yeniden savun.",
@@ -214,6 +243,7 @@ export const ACT2: Chapter[] = [
     stage: {
       title: "Yazıtın Bekçileri",
       text: "Onuncu katta yazıtın önünde zincirli bekçiler bekliyor. Yazıtı okuyabilmek için onları geç!",
+      arena: "yeralti", kin: "balbal",
       mix: [3, 1, 1], k: 0.9, min: 45, bonus: 0.2,
       win: "Bekçilerin zincirleri çözüldü; taş yazıt mor ışıkla aydınlandı.",
       lose: "Bekçiler seni merdivenlere geri itti. Yazıt hâlâ karanlıkta.",
@@ -234,6 +264,7 @@ export const ACT2: Chapter[] = [
     stage: {
       title: "Otağ Baskını",
       text: "Birliği kıskanan dönek beyler gece otağını bastı! Müttefik beylerin çadırlarını koru; tuğlar yere düşmesin.",
+      arena: "otag",
       mix: [1, 1, 2], k: 1, min: 55, bonus: 0.15,
       win: "Dönekler karanlığa kaçtı. Müttefik beyler yanında savaştığın için sana kılıçlarıyla yemin etti.",
       lose: "Baskıncılar otağı ateşe verdi; beyler dağılmadan önce yeniden toparlan.",
@@ -274,7 +305,7 @@ export const ACT2: Chapter[] = [
   },
 ];
 
-export const KOK_BORU: Boss = { name: "Kök Börü", icon: "heroes/boss_buz", atk: 120, def: 55, hp: 7200 };
+export const KOK_BORU: Boss = { name: "Kök Börü", icon: "heroes/boss_kokboru", atk: 120, def: 55, hp: 7200 };
 export const PEAK_GUARD = army(150, 120, 100);
 export const ACT3_LV = 24;
 export const OTUKEN_RENOWN = 900;
@@ -311,6 +342,7 @@ export const ACT3: Chapter[] = [
     stage: {
       title: "Kurultayın Sınavı",
       text: "Kurultaydan dönen asi beyler Kut'u kendilerine istiyor. Semerkant önlerinde onları dağıt; Kut'u kılıçla değil adaletle taşıyacağını göster.",
+      arena: "ordugah",
       mix: [2, 1, 2], k: 1, min: 100, bonus: 0.2,
       win: "Asi beyler tuğlarını yere eğdi. Kurultay bir kez daha senin adını andı.",
       lose: "Asiler Semerkant önlerinde tutundu. Ordunu güçlendir ve yeniden karşılarına çık.",

@@ -1,5 +1,7 @@
 import { UNIT_KEYS, armySize, type Army, type Unit } from "../game/data";
 import type { Field, Ground, Order, Sky } from "../game/battle";
+import { ARENAS, KINS, type Kin } from "../game/bosses";
+import { FIG_PX, FRAMES, REGION_STYLE, TROOP_STYLE, figureSheet, type FigKind, type FigStyle } from "../render/figures";
 import { assetUrl } from "../render/worldView";
 import { t as tr } from "../i18n";
 import { audio } from "../audio";
@@ -51,16 +53,33 @@ const ROWS = 6;
 const SIDE_COLOR = ["#f0c860", "#e0563f"];
 const UNIT_ICON: Record<Unit, string> = { spear: "u_spear", archer: "u_archer", horse: "u_cavalry" };
 const SPR = 56;
+const FIG_KIND: Record<Unit, FigKind> = { spear: "spear", archer: "archer", horse: "rider" };
+const FOE_STYLE: FigStyle = { coat: "#5a2420", trim: "#2a1a14", hat: "kukuleta", hatCol: "#2a1814", horse: "#3a2a20" };
+const KIN_STYLE: Partial<Record<Kin, FigStyle>> = {
+  korsan: REGION_STYLE.hazar,
+  fedai: REGION_STYLE.horasan,
+  kipcak: REGION_STYLE.kipcak,
+  mogol: { coat: "#3a4a3a", trim: "#c8a050", hat: "kurk", hatCol: "#6a5a3a", horse: "#5a4a3a", mane: "#2a2018" },
+};
 const HORIZON = 0.14;
 
 const GROUND_TEX: Record<Ground, string> = { bozkir: "tex/steppe", cayir: "tex/grass", kum: "tex/sand", dag: "tex/rock" };
 const grounds: Partial<Record<Ground, HTMLImageElement>> = {};
 const icons: Partial<Record<Unit, HTMLImageElement>> = {};
+const art = new Map<string, HTMLImageElement>();
 function loadArt(): void {
   if (grounds.bozkir) return;
   for (const k of Object.keys(GROUND_TEX) as Ground[]) grounds[k] = Object.assign(new Image(), { src: assetUrl(GROUND_TEX[k]) });
   for (const u of UNIT_KEYS) icons[u] = Object.assign(new Image(), { src: assetUrl(UNIT_ICON[u]) });
 }
+function image(key: string): HTMLImageElement | null {
+  const url = assetUrl(key);
+  if (!url) return null;
+  let i = art.get(key);
+  if (!i) art.set(key, (i = Object.assign(new Image(), { src: url })));
+  return i;
+}
+const ready = (i: HTMLImageElement | null | undefined): boolean => !!i && i.complete && i.naturalWidth > 0;
 
 export class BattleField {
   private ctx: CanvasRenderingContext2D;
@@ -122,8 +141,34 @@ export class BattleField {
     this.frozen = performance.now() + ms;
   }
 
+  private arenaImg: HTMLImageElement | null = null;
+  private kinImg: Partial<Record<Unit, HTMLImageElement>> = {};
+  private flashes: { t0: number; color: string; dur: number }[] = [];
+  private bossRage = false;
+  /** Sancaktaki tamga (oyuncunun kendi işareti). */
+  tamga: HTMLCanvasElement | null = null;
+  /** Hazineden kuşanılan sancak rengi. */
+  bannerColor: string | null = null;
+
+  /** Bütün sahneyi kısa bir renkle yıkar (karşılık, boss evresi, ağır darbe). */
+  flash(color: string, dur = 420): void {
+    this.flashes.push({ t0: this.clock(), color, dur });
+  }
+
+  /** Boss ikinci evreye geçti: kırmızı yıkama, sarsıntı, portre öfke halkası. */
+  rage(text: string): void {
+    this.bossRage = true;
+    this.flash("rgba(255,40,20,0.55)", 900);
+    this.shake = { t0: this.clock(), amp: 9 };
+    this.announce(text, "#ff6a4a");
+    this.hitStop(220);
+  }
+
   constructor(private cv: HTMLCanvasElement, a: Army, b: Army, heroSrc: string, bossSrc: string | null, private field: Field | null = null) {
     loadArt();
+    if (field?.arena) this.arenaImg = image(ARENAS[field.arena].img);
+    const kin = field?.kin ? KINS[field.kin] : null;
+    if (kin) for (const u of UNIT_KEYS) if (kin.icons[u]) this.kinImg[u] = image(kin.icons[u]!) ?? undefined;
     this.ctx = cv.getContext("2d")!;
     this.heroImg = Object.assign(new Image(), { src: heroSrc });
     this.bossImg = bossSrc ? Object.assign(new Image(), { src: bossSrc }) : null;
@@ -278,6 +323,30 @@ export class BattleField {
     c.width = w;
     c.height = h;
     const g = c.getContext("2d")!;
+    const ai = this.arenaImg;
+    if (ai && ready(ai)) {
+      const k = Math.max(w / ai.naturalWidth, h / ai.naturalHeight);
+      const dw = ai.naturalWidth * k, dh = ai.naturalHeight * k;
+      g.drawImage(ai, (w - dw) / 2, (h - dh) * 0.6, dw, dh);
+      const fl = g.createLinearGradient(0, 0, 0, h);
+      fl.addColorStop(0, "rgba(0,0,0,0.05)");
+      fl.addColorStop(0.35, "rgba(0,0,0,0.18)");
+      fl.addColorStop(1, "rgba(10,6,2,0.55)");
+      g.fillStyle = fl;
+      g.fillRect(0, 0, w, h);
+      const v = g.createRadialGradient(w / 2, h / 2, h * 0.3, w / 2, h / 2, w * 0.62);
+      v.addColorStop(0, "rgba(0,0,0,0)");
+      v.addColorStop(1, "rgba(10,4,0,0.6)");
+      g.fillStyle = v;
+      g.fillRect(0, 0, w, h);
+      this.bg = c;
+      return c;
+    }
+    if (ai && !ai.complete) {
+      g.fillStyle = "#2a1c10";
+      g.fillRect(0, 0, w, h);
+      return c;
+    }
     const ground = grounds[this.field?.ground ?? "bozkir"];
     if (ground?.complete && ground.naturalWidth) {
       g.fillStyle = g.createPattern(ground, "repeat")!;
@@ -349,13 +418,24 @@ export class BattleField {
     return c;
   }
 
+  /** İnsan askerler için animasyonlu figür sayfası; yaratık soylarında null. */
+  private fig(u: Unit, s: number): HTMLCanvasElement | null {
+    if (s && this.kinImg[u]) return null;
+    const kin = this.field?.kin;
+    if (s && kin && kin !== "insan" && !KIN_STYLE[kin] && KINS[kin].icons[u]) return null;
+    return figureSheet(FIG_KIND[u], s ? (kin && KIN_STYLE[kin]) || FOE_STYLE : TROOP_STYLE);
+  }
+
   /** Birlik ikonunu taraf rengiyle çerçeveli, gölgeli küçük bir sprite'a pişirir. */
   private sprite(u: Unit, s: number, fallen = false): HTMLCanvasElement | null {
     const key = u + s + (fallen ? "x" : "");
     const hit = this.sprites.get(key);
     if (hit) return hit;
-    const img = icons[u];
+    const kinI = s ? this.kinImg[u] : undefined;
+    if (kinI && !kinI.complete) return null;
+    const img = kinI && ready(kinI) ? kinI : icons[u];
     if (!img?.complete || !img.naturalWidth) return null;
+    const kinTint = s && this.field?.kin ? KINS[this.field.kin].tint : "";
     const c = document.createElement("canvas");
     c.width = c.height = SPR;
     const g = c.getContext("2d")!;
@@ -379,7 +459,7 @@ export class BattleField {
       g.setTransform(1, 0, 0, 1, 0, 0);
       g.shadowBlur = 0;
       g.globalCompositeOperation = "source-atop";
-      g.fillStyle = "rgba(150,24,14,0.38)";
+      g.fillStyle = kinTint || (kinI && ready(kinI) ? "rgba(150,24,14,0.12)" : "rgba(150,24,14,0.38)");
       g.fillRect(0, 0, SPR, SPR);
     }
     this.sprites.set(key, c);
@@ -411,7 +491,7 @@ export class BattleField {
     const top = h * HORIZON;
     const Y = (y: number) => top + y * (h - top - size * 0.9) + size * 0.45;
     const depth = (y: number) => 0.72 + 0.48 * Math.max(0, Math.min(1, y));
-    for (let s = 0; s < 2; s++) this.banner(s ? w - 14 : 14, SIDE_COLOR[s], now, s);
+    for (let s = 0; s < 2; s++) this.banner(s ? w - 14 : 14, !s && this.bannerColor ? this.bannerColor : SIDE_COLOR[s], now, s);
     const live: [Glyph, number][] = [];
     const dead: [Glyph, number][] = [];
     for (let s = 0; s < 2; s++)
@@ -431,6 +511,20 @@ export class BattleField {
       ctx.beginPath();
       ctx.ellipse(x + dir * sz * 0.1, y + sz * 0.32, sz * 0.3 * Math.min(1, k + 0.3), sz * 0.09, 0, 0, Math.PI * 2);
       ctx.fill();
+      const sheet = this.fig(gl.u, s);
+      if (sheet) {
+        if (k >= 1.4) continue;
+        const fz = sz * 1.55;
+        ctx.save();
+        ctx.translate(x, y + sz * 0.42);
+        ctx.scale(dir, 1);
+        ctx.rotate(-Math.min(1, (now - gl.dead) / 260) * 1.45);
+        ctx.globalAlpha = Math.max(0, 1 - k * 0.72);
+        ctx.filter = `brightness(${Math.max(0.35, 1 - k)})`;
+        ctx.drawImage(sheet, FRAMES * FIG_PX, 0, FIG_PX, FIG_PX, -fz * 0.48, -fz * 0.9, fz, fz);
+        ctx.restore();
+        continue;
+      }
       const spr = this.sprite(gl.u, s);
       const body = this.sprite(gl.u, s, true);
       if (!spr || !body) continue;
@@ -464,8 +558,29 @@ export class BattleField {
       ctx.ellipse(x, gy + sz * 0.42, sz * 0.38, sz * 0.12, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.globalAlpha = 0.82 + 0.18 * depth(gl.y);
-      const spr = this.sprite(gl.u, s);
-      if (spr && sway) {
+      const sheet = this.fig(gl.u, s);
+      const spr = sheet ? null : this.sprite(gl.u, s);
+      if (sheet) {
+        const fz = sz * 1.55;
+        const strike = gl.u !== "archer" && !this.end ? Math.max(0, Math.sin(Math.PI * Math.min(1, Math.max(0, (p - 0.32) / 0.3)))) : 0;
+        const draw = gl.u === "archer" && !this.end ? Math.max(0, 1 - p / 0.18) : 0;
+        const moving = mv > 0.08 || enter > 0 || strike > 0.1 || this.end;
+        const f = moving ? Math.floor((now / (gl.u === "horse" ? 65 : 105) + gl.ph * 3) % FRAMES) : FRAMES;
+        ctx.save();
+        ctx.translate(x, y + sz * 0.42);
+        ctx.scale(dir, 1);
+        ctx.rotate(strike * (gl.u === "horse" ? 0.12 : 0.22) * Math.sin(now / 70 + gl.ph) + sway * 0.4 - draw * 0.12);
+        ctx.drawImage(sheet, f * FIG_PX, 0, FIG_PX, FIG_PX, -fz * 0.48, -fz * 0.9, fz, fz);
+        if (strike > 0.6 && (Math.floor(now / 90 + gl.ph) & 3) === 0) {
+          ctx.globalAlpha = (strike - 0.6) * 2;
+          ctx.strokeStyle = "#fff6d0";
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(fz * 0.22, -fz * 0.5, fz * 0.26, -1.2, 0.6);
+          ctx.stroke();
+        }
+        ctx.restore();
+      } else if (spr && sway) {
         ctx.save();
         ctx.translate(x, y + sz * 0.4);
         ctx.rotate(sway);
@@ -484,7 +599,10 @@ export class BattleField {
       this.portrait(img, cx, cy, size * 0.42, "#8fe07a");
     });
     this.portrait(this.heroImg, (0.45 + heroOff) * w, Y(0.5), size * 0.75, this.heroRing);
-    if (this.bossImg) this.portrait(this.bossImg, (0.56 - this.lunge(1, "spear", p)) * w, Y(0.5), size, "#c27bff");
+    if (this.bossImg) {
+      const pulse = this.bossRage ? 1 + 0.06 * Math.sin(now / 120) : 1;
+      this.portrait(this.bossImg, (0.56 - this.lunge(1, "spear", p)) * w, Y(0.5), size * 1.15 * pulse, this.bossRage ? "#ff4a2a" : "#c27bff");
+    }
     ctx.lineWidth = 1.4;
     for (const r of this.arrows) {
       const q = (now - r.t0) / (r.t1 - r.t0);
@@ -554,6 +672,15 @@ export class BattleField {
       ctx.fillStyle = "rgba(255,245,220,0.14)";
       ctx.fillRect(0, 0, w, h);
     }
+    this.flashes = this.flashes.filter((f) => now - f.t0 < f.dur);
+    for (const f of this.flashes) {
+      const q = (now - f.t0) / f.dur;
+      if (q < 0) continue;
+      ctx.globalAlpha = 1 - q;
+      ctx.fillStyle = f.color;
+      ctx.fillRect(0, 0, w, h);
+    }
+    ctx.globalAlpha = 1;
     if (this.field?.sky) this.drawSky(this.field.sky, now);
     if (this.end && !this.end.win) {
       ctx.fillStyle = `rgba(30,6,2,${0.4 * Math.min(1, (now - this.end.t0) / 1600)})`;
@@ -681,11 +808,15 @@ export class BattleField {
     ctx.fillStyle = color;
     ctx.beginPath();
     const d = s ? -1 : 1;
+    const tg = !s ? this.tamga : null;
+    const len = tg ? 5.6 : 3.4;
+    const bot = tg ? 34 : 23;
     ctx.moveTo(x, 9);
-    for (let k = 0; k <= 6; k++) ctx.lineTo(x + d * k * 3.4, 9 + Math.sin(now / 200 + k) * 2);
-    for (let k = 6; k >= 0; k--) ctx.lineTo(x + d * k * 3.4, 23 + Math.sin(now / 200 + k + 0.6) * 2);
+    for (let k = 0; k <= 6; k++) ctx.lineTo(x + d * k * len, 9 + Math.sin(now / 200 + k) * 2);
+    for (let k = 6; k >= 0; k--) ctx.lineTo(x + d * k * len, bot + Math.sin(now / 200 + k + 0.6) * 2);
     ctx.closePath();
     ctx.fill();
+    if (tg) ctx.drawImage(tg, x + 7, 11 + Math.sin(now / 200 + 3) * 2, 21, 21);
   }
 
   private portrait(img: HTMLImageElement, x: number, y: number, r: number, ring: string): void {

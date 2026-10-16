@@ -573,35 +573,16 @@ function paint(height: Float32Array, moist: Float32Array, river: Uint8Array, riv
     g.stroke();
   }
   for (const o of marks.oases) {
+    // Sadece ıslak kum lekesi — ağaç/havuz sprite’ı worldView prop’unda (sticker yok)
     g.save();
-    g.translate(o.x, o.y);
-    g.scale(1.7, 1.7);
-    g.translate(-o.x, -o.y);
-    const pool = g.createRadialGradient(o.x, o.y, 4, o.x, o.y, 34);
-    pool.addColorStop(0, "rgba(52,128,150,0.95)");
-    pool.addColorStop(0.7, "rgba(70,150,160,0.85)");
-    pool.addColorStop(1, "rgba(120,150,90,0)");
-    g.fillStyle = pool;
+    const wet = g.createRadialGradient(o.x, o.y, 6, o.x, o.y, 48);
+    wet.addColorStop(0, "rgba(70,110,90,0.35)");
+    wet.addColorStop(0.55, "rgba(120,100,60,0.22)");
+    wet.addColorStop(1, "rgba(120,100,60,0)");
+    g.fillStyle = wet;
     g.beginPath();
-    g.ellipse(o.x, o.y, 34, 20, 0.3, 0, Math.PI * 2);
+    g.ellipse(o.x, o.y, 52, 32, -0.2, 0, Math.PI * 2);
     g.fill();
-    for (let k = 0; k < 7; k++) {
-      const a = (k / 7) * Math.PI * 2 + 0.4;
-      const px = o.x + Math.cos(a) * 46, py = o.y + Math.sin(a) * 28;
-      g.strokeStyle = "rgba(92,64,36,0.9)";
-      g.lineWidth = 2.5;
-      g.beginPath();
-      g.moveTo(px, py + 10);
-      g.lineTo(px + 2, py - 6);
-      g.stroke();
-      g.fillStyle = "rgba(46,104,46,0.95)";
-      for (let f = 0; f < 5; f++) {
-        const fa = (f / 5) * Math.PI * 2;
-        g.beginPath();
-        g.ellipse(px + 2 + Math.cos(fa) * 6, py - 6 + Math.sin(fa) * 3, 7, 2.4, fa, 0, Math.PI * 2);
-        g.fill();
-      }
-    }
     g.restore();
   }
   for (const b of marks.bridges) {

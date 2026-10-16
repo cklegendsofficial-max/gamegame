@@ -1,8 +1,35 @@
 import type { Good, Item, Slot } from "./rpg";
 import type { GearMods } from "./legend";
 
-export type Mat = Good | "ruh" | "parsomen" | "gold";
+export type Mat = Good | (typeof STORE_MATS)[number] | "gold";
 export type Cost = Partial<Record<Mat, number>>;
+export const STORE_MATS = ["ruh", "parsomen", "celik", "nisan", "pul", "inci", "zehir", "golgeipek", "devkemigi", "gokdemir", "ayazkurk"] as const;
+export type StoreMat = (typeof STORE_MATS)[number];
+export const isStoreMat = (m: Mat): m is StoreMat => (STORE_MATS as readonly string[]).includes(m);
+
+export interface Rune {
+  id: string;
+  /** Orhun harfi (Göktürk yazısı). */
+  glyph: string;
+  name: string;
+  desc: string;
+  slots: Slot[];
+  zl: number;
+  cost: Cost;
+  mods: GearMods;
+}
+
+/** Orhun rünleri: boss yenince düşen Alp Nişanı ile kuşanılan eşyaya kazınır. Eşya başına tek rün; yenisi eskisini siler. */
+export const RUNES: Rune[] = [
+  { id: "tengri", glyph: "𐱅", name: "Tengri Rünü", desc: "Gök Tanrı'nın işareti. Saldırı +%6, kritik +%2.", slots: ["silah"], zl: 0, cost: { nisan: 1, ruh: 1, gold: 300 }, mods: { atk: 0.06, crit: 0.02 } },
+  { id: "bori", glyph: "𐰋", name: "Börü Rünü", desc: "Kurdun dişi. Kritik +%5.", slots: ["silah", "tilsim"], zl: 2, cost: { nisan: 1, ruh: 1, gold: 350 }, mods: { crit: 0.05 } },
+  { id: "tag", glyph: "𐱃", name: "Dağ Rünü", desc: "Kayanın sabrı. Savunma +%8, can +%5.", slots: ["zirh", "kalkan"], zl: 0, cost: { nisan: 1, ruh: 1, gold: 300 }, mods: { def: 0.08, hp: 0.05 } },
+  { id: "su", glyph: "𐰽", name: "Su Rünü", desc: "Akan suyun şifası. Tur başı iyileşme +%1.5.", slots: ["zirh", "tilsim"], zl: 4, cost: { nisan: 2, ruh: 1, gold: 450 }, mods: { heal: 0.015 } },
+  { id: "il", glyph: "𐰠", name: "İl Rünü", desc: "Halkın birliği. Ordu gücü +%6.", slots: ["tilsim", "kalkan"], zl: 5, cost: { nisan: 2, ruh: 2, gold: 600 }, mods: { army: 0.06 } },
+  { id: "yol", glyph: "𐰖", name: "Yol Rünü", desc: "Kervanın duası. Hız +%8, yük +30.", slots: ["at", "tilsim"], zl: 3, cost: { nisan: 1, ruh: 1, gold: 350 }, mods: { spd: 0.08, carry: 30 } },
+  { id: "kut", glyph: "𐰸", name: "Kut Rünü", desc: "Hanların kutu. Tecrübe ve ganimet +%10, ordu +%3.", slots: ["silah", "zirh", "kalkan", "at", "tilsim"], zl: 8, cost: { nisan: 4, ruh: 3, parsomen: 1, gold: 1500 }, mods: { xp: 0.1, loot: 0.1, army: 0.03 } },
+];
+export const RUNE_BY_ID: Record<string, Rune> = Object.fromEntries(RUNES.map((r) => [r.id, r]));
 
 export interface Consumable {
   id: string;
@@ -26,13 +53,15 @@ export interface Refine {
   id: string;
   name: string;
   icon: string;
-  out: "ruh" | "parsomen";
+  out: "ruh" | "parsomen" | "celik";
   cost: Cost;
 }
 
 export const REFINES: Refine[] = [
   { id: "ruhdamit", name: "Ruh Taşı damıt", icon: "ruh", out: "ruh", cost: { turkuaz: 3, yesim: 1, gold: 60 } },
   { id: "parsomenyaz", name: "Kutsal Parşömen yaz", icon: "parsomen", out: "parsomen", cost: { ipek: 2, ruh: 3, gold: 80 } },
+  /** Üretim zinciri: ham demiri ocakta döküp çelik elde eder; çelik üst kademe tariflerde kullanılır. */
+  { id: "celikdok", name: "Demirden çelik dök", icon: "mat_iron", out: "celik", cost: { demir: 5, gold: 30 } },
 ];
 
 export const CRAFT_SLOTS: Slot[] = ["silah", "zirh", "kalkan", "tilsim"];
@@ -78,6 +107,11 @@ export const CRAFT_MATS: CraftMat[] = [
     id: "sam", name: "Şam çeliği", icon: "it_sword_4", desc: "Dalgalı desenli çelik: saldırı +%20, kritik +%2.", slots: ["silah"], zl: 2,
     cost: (t) => ({ gumus: 1 + Math.floor(t / 2), gold: 25 * t }),
     apply: (it) => { it.atk = Math.round(it.atk * 1.2) + 1; it.crit = Math.round((it.crit + 0.02) * 1000) / 1000; },
+  },
+  {
+    id: "celik", name: "Dökme çelik", icon: "mat_iron", desc: "Ocakta demirden dökülen çelik: saldırı ve savunma birlikte artar. Önce Simya'da çelik dök.", slots: ["silah", "zirh", "kalkan"], zl: 3,
+    cost: (t) => ({ celik: 1 + Math.floor(t / 2), gold: 20 * t }),
+    apply: (it, t) => { if (it.atk) it.atk = Math.round(it.atk * 1.1) + 1; it.def += 1 + Math.floor(t / 2); },
   },
   {
     id: "cin", name: "Çin demiri", icon: "porcelain", desc: "Sert, yorulmaz demir: dayanıklılık verir. Silahta savunma ve can, zırhta savunma +%25.", slots: ["silah", "zirh", "kalkan"], zl: 4,
@@ -136,7 +170,7 @@ export const SIG_BY_ID: Record<string, Signature> = Object.fromEntries(SIGNATURE
 export const MASTERY: { zl: number; name: string; desc: string; icon: string }[] = [
   { zl: 0, name: "Çırak", desc: "Kademe 1–3 eşyalar, sade demir", icon: "anvil" },
   { zl: 2, name: "Şam çeliği", desc: "Silahlara saldırı katan dalgalı çelik", icon: "it_sword_4" },
-  { zl: 3, name: "Kalfa", desc: "Kademe 4 tarifleri", icon: "it_armor_4" },
+  { zl: 3, name: "Kalfa · Dökme çelik", desc: "Kademe 4 tarifleri; demirden çelik dökümü", icon: "it_armor_4" },
   { zl: 4, name: "Çin demiri · Kösele", desc: "Dayanıklılık ve can veren malzemeler", icon: "porcelain" },
   { zl: 5, name: "İmza: Usta Damgalı silah", desc: "İlk imza eşyan", icon: "seal" },
   { zl: 6, name: "Usta", desc: "Kademe 5 tarifleri", icon: "it_sword_5" },

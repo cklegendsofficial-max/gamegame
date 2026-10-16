@@ -1,3 +1,5 @@
+import type { FactionId } from "./factions";
+
 export const YEAR_DAYS = 16;
 export const KID_MAX = 3;
 export const KID_EVERY = 10;
@@ -20,9 +22,19 @@ export interface Family {
   spouse: Spouse | null;
   kids: Kid[];
   next: number;
+  /** Evlilikle bağlanan müttefik devlet (gelinin beyinin bağlı olduğu devlet). */
+  allyFac?: FactionId;
 }
 
 export const FAMILY_DEFAULT: Family = { spouse: null, kids: [], next: 0 };
+
+/** Hanedanın varisi: en büyük oğul, yoksa en büyük çocuk. */
+export function heirOf(f: Family): Kid | null {
+  if (!f.kids.length) return null;
+  const sons = f.kids.filter((k) => k.son);
+  const pool = sons.length ? sons : f.kids;
+  return pool.reduce((a, b) => (a.born <= b.born ? a : b));
+}
 
 export function pick<T>(a: T[], not: T[] = []): T {
   const pool = a.filter((x) => !not.includes(x));

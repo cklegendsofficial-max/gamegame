@@ -47,7 +47,7 @@ const a = (n: number, s: number, ar: number, h: number): Army => ({ spear: Math.
 
 export const TEPEGOZ: Boss = { name: "Tepegöz", icon: "heroes/boss_golem", hp: 2600, atk: 46, def: 22 };
 export const DUMRUL: Boss = { name: "Deli Dumrul", icon: "heroes/boss_hakan", hp: 900, atk: 24, def: 12 };
-export const SOKLU: Boss = { name: "Şöklü Melik", icon: "heroes/boss_karahan", hp: 3400, atk: 54, def: 26 };
+export const SOKLU: Boss = { name: "Şöklü Melik", icon: "heroes/boss_soklu", hp: 3400, atk: 54, def: 26 };
 
 export const BOYS: Boy[] = [
   {
