@@ -150,6 +150,8 @@ const ENDINGS_EN: Record<string, [string, string, (g: Game) => string]> = {
   ozan: ["Korkut's Way", "Bury the Kut back in Ötüken, take up the kopuz and hit the road", (g) => `You did not take the Kut. With your own hands you buried it in the black earth of Ötüken, beside your ancestors. <i>"The Kut belongs to no one; it belongs to the steppe."</i><br><br>${g.hasComp("korkut") ? "Without wiping his tears, Korkut held out his kopuz to you" : "An old bard held out his kopuz to you"}: <i>"From now on, you will sing the saga."</i><br><br>Every state regards you as an arbiter; beys bring their quarrels to your tent. You did not rule, yet every word of yours was taken as a decree.`],
   noyan: ["Shadow of the Noyan", "Carry the Kut to Genghis's tent: rule the steppe in the Mongols' name", (g) => `You wrapped the Kut in felt and carried it east, to Genghis's golden tent. The Great Khan weighed the flame in his palm, then turned to you: <i>"Whoever brings the steppe's Kut becomes the steppe's noyan."</i><br><br>Now the taxes of ${g.s.mongol?.fallen.length ? `${g.s.mongol.fallen.length} burned cities` : "the whole Silk Road"} pass through your ledger. The beys bow before you, but in their eyes is fear, not loyalty.<br><br>Once you were a chained child. Now the key to the chains hangs from your belt.`],
   tengri: ["Defier of the Sky", "Seal the Kut into your own soul (50 Soul Stones)", (g) => `You hurled fifty captive souls into the Kut's flame and drew the flame into your own chest. The sky thundered, Kök Börü howled, Umay Kam's drum split.<br><br>You no longer age. Your sword carries the weight of the sky. But the beys fear you, and fear is not loyalty. Was a new Erlik born, or did the only one who defeated Erlik take the sky's place? ${g.s.hero.name}'s sword will write the answer.`],
+  kardes: ["Hearth of Kin", "Forsake the Kut; with Ayşe build a hearth for those freed from chains", (g) => `You looked at the Kut's flame and shook your head. Taking Ayşe's hand beside you: <i>"This flame is not for me, but for whoever needs us."</i><br><br>You did not take the Kut; instead you raised a hearth outside Samarkand. Every child, woman and elder freed from chains found a place by that fire.${g.s.story.familyPath === "anne" ? " Your mother sat in the eldest seat of honour; no one feared her anymore." : ""}<br><br>Every night Ayşe circles the fire like an old slave still bandaging a wound. The bards do not call you Khagan; they call you <b>Keeper of the Hearth of Kin</b>, a name heavier than a crown in some ears.`],
+  izsurucu: ["Trail Walker", "Forsake the Kut; with Ferhat follow the endless tracks of the steppe", (_g) => `You looked one last time at the Kut's blue flame, then turned your back. Ferhat was at your side, silent as always: <i>"The throne waits for you, and so does the steppe. You cannot choose both."</i><br><br>The two of you came down from the summit and never stayed long in any tent again. Finding lost caravans, hidden children, wandering clans became your saga.<br><br>You sat on no city's throne, yet every city's gate opened to you. The bards named you <b>Trail Walker</b>: wherever you went, something or someone lost kept following until it found you.`],
 };
 
 const COMP_EN: Record<CompId, [string, string, string]> = {
@@ -284,6 +286,101 @@ const BOYS_EN: Record<string, BoyEn> = {
         ["Share the spoils among the Oghuz beys", "\"The spoils belong to the beys,\" you said. Kazan Han rose: \"This warrior knows the töre better than I!\" All the Oghuz spoke your name."],
         ["Take your share", "Kazan Han sent half in chests. Your treasury filled."],
       ] },
+    ],
+  },
+  bugac: {
+    name: "The Tale of Dirsek Son of Bugaç",
+    intro: "Dede Korkut stroked his kopuz: \"Dirse Han had a son, but by the töre he was nameless until fifteen. At an Oghuz feast a wild bull was loosed; the nameless youth faced it...\"",
+    steps: [
+      { place: "Oghuz Feast", text: "While drums beat, a bull breaks its rope and charges the square; children flee, warriors hang back. Dirse Han's nameless son clenches his fist and stands before the bull.", btn: "Rein in the bull", done: "The bull bellowed one last time and sank to its knees. Dede Korkut laid his hand on the youth's head: \"Your name shall be Bugaç, and the tale yours!\"" },
+      { place: "Dirse Han's Tent", text: "A scheming concubine convinced Dirse Han that his son coveted the throne. Bugaç was struck from behind on the hunt and left among the rocks; Hızır's balm restored him. Now he stands before his father's tent.", btn: "Enter the tent", done: "", choices: [
+        ["Forgive your father, embrace your mother", "His mother fainted when she knew him; Dirse Han fell weeping at his feet. Bugaç raised him: \"The töre does not demand blood; it asks for mercy.\""],
+        ["Accuse the concubine before the töre", "The Oghuz beys heard her out; the lie was exposed. Bugaç won justice without a sword; Dirse Han clasped his son."],
+      ] },
+      { place: "Raided Camp", text: "Hearing Bugaç was wounded, enemy raiders struck the camp. Women and shepherds are helpless; Bugaç, not fully healed, girds his sword.", btn: "Defend the camp", done: "The raiders were scattered and the camp saved. Dede Korkut came and sang the tale: \"Henceforth Bugaç's name means valour among the Oghuz.\"" },
+    ],
+  },
+  kanturali: {
+    name: "The Tale of Kan Turalı, Son of Kanlı Koca",
+    intro: "Dede Korkut narrowed his eyes: \"Kan Turalı wished to marry, but his father said: 'Whoever seeks Selcen Hatun, daughter of the lord of Trabzon, must first beat her three beasts.' Kan Turalı laughed: 'No hardship for me.'\"",
+    steps: [
+      { place: "Trabzon Lord's Square", text: "A lion, a bull and a camel are loosed at once. Selcen Hatun watches from the rampart; Kan Turalı grins and draws: \"Do you want help, or will you only watch?\"", btn: "Fight the beasts", done: "All three beasts lay in the dust. Selcen Hatun came down; her eyes lingered more on the warrior beside Kan Turalı. The lord kept his word; wedding preparations began." },
+      { place: "The Road Home", text: "On the wedding road Kan Turalı fell asleep from exhaustion; the lord's regretful men laid an ambush. Selcen Hatun alone holds her bow.", btn: "Answer the ambush", done: "", choices: [
+        ["Fight at Selcen's side", "Together you broke the ambush. When Kan Turalı woke he bowed to Selcen: \"So valour was enough for both of us.\""],
+        ["Wake Kan Turalı and push him forward", "Kan Turalı woke and scattered the ambush with his own sword, saving his honour. He thanked Selcen from the heart."],
+      ] },
+    ],
+  },
+  yigenek: {
+    name: "The Tale of Yigenek, Son of Kazılık Koca",
+    intro: "Dede Korkut's voice grew heavy: \"Kazılık Koca lay sixteen years in Düzmürd's dungeon. His son Yigenek grew up, learned his father was captive, and took up his bow...\"",
+    steps: [
+      { place: "Oghuz Divan", text: "Yigenek has learned his father has rotted sixteen years in chains; the beys try to dissuade him: \"Düzmürd's fortress cannot be taken.\" Yigenek strikes his bow on the ground: \"If it cannot, I will take it.\"", btn: "Declare you will ride", done: "Seeing Yigenek's resolve, the Oghuz beys followed. Düzmürd's fortress stands in the eastern crags." },
+      { place: "Düzmürd's Fortress", text: "On the ramparts Düzmürd; from the dungeon stairs come Kazılık Koca's chains. Düzmürd mocks: \"Sixteen years and no one came — will you?\"", btn: "Storm the fortress", done: "Düzmürd's head rolled from the rampart. When the dungeon door broke, Kazılık Koca saw his son's face for the first time in sixteen years." },
+      { place: "Father's Hearth", text: "Kazılık Koca is free but wants his honour back: \"I bowed for sixteen years; give a feast so the Oghuz see I am still a Koca.\"", btn: "Prepare the feast", done: "", choices: [
+        ["Hold a great feast", "At the feast Dede Korkut sang: \"The son who freed his father became the youngest hero of the Oghuz.\" Kazılık Koca held his head high."],
+        ["Return home quietly", "No ceremony, but a heartfelt return. Kazılık Koca gripped his son's hand; no more words were needed."],
+      ] },
+    ],
+  },
+  segrek: {
+    name: "The Tale of Segrek, Son of Uşun Koca",
+    intro: "Dede Korkut nodded: \"Uşun Koca's son Egrek was captive at Alinca Fortress. His younger brother Segrek was never told; they tried to distract him with a wedding. On the wedding night he learned the truth...\"",
+    steps: [
+      { place: "Segrek's Wedding", text: "Drums beat, the bride waits, but Segrek's face is dark: someone whispered that his brother Egrek is captive at Alinca. \"Shall I wed while my brother wears chains?\"", btn: "Decide", done: "", choices: [
+        ["Leave the wedding, ride at once", "Under shocked stares he leapt to the saddle. \"I'll finish the wedding when I return,\" he said, \"but first my brother.\""],
+        ["Finish the wedding, ride at dawn", "He honoured the töre but his eyes stayed on the door. At first light he took his brother's road."],
+      ] },
+      { place: "Alinca Fortress", text: "From the ramparts come Egrek's chains. The lord of Alinca would jail Segrek who does not know his brother; but Segrek has drawn his sword.", btn: "Storm the fortress", done: "The lord of Alinca fell. When the dungeon broke the brothers embraced before they even knew each other; at last Egrek wept: \"Are you Segrek?\"" },
+      { place: "The Road Home", text: "On the way home Egrek asks about the bride Segrek left. Segrek laughs: \"I freed you first; the töre was not broken.\"", btn: "Walk home", done: "When they reached the village the bride waited at the gate; this time the wedding was complete. Dede Korkut took his kopuz: \"When brother frees brother, neither töre nor wedding is left wanting.\"" },
+    ],
+  },
+  uruz: {
+    name: "The Captivity of Uruz, Son of Kazan Bey",
+    intro: "Dede Korkut tautened the strings: \"Kazan Bey's son Uruz was taken on the hunt. His mother Burla Hatun keened, Kazan girded his sword… But true valour shows on the road to free him.\"",
+    steps: [
+      { place: "Hunt Road", text: "Uruz's hunters are scattered, swords in the dust. A shepherd whispers: \"Süfrek Tekfur took the boy to his fortress; Burla Hatun is keening.\"", btn: "Follow the trail", done: "You tracked him through the pass the shepherd named. Uruz's horseshoe still marks the earth." },
+      { place: "Süfrek Fortress", text: "From the ramparts Süfrek Tekfur mocks: \"I'll sell Kazan's son for ransom!\" From within come Uruz's chains.", btn: "Storm the fortress", done: "Süfrek fell. In the dungeon you found Uruz; his face dusty but his eyes still brave: \"I thought my father would come… You came.\"" },
+      { place: "Burla Hatun's Tent", text: "Burla Hatun clasped her son. Kazan Han offers you a cup of kumis: \"Whoever brings my son is my brother.\"", btn: "Accept", done: "", choices: [
+        ["Take the honour, stay in the tent", "Kazan took you into his tent; the Oghuz beys spoke your name. Uruz gifted you his sword."],
+        ["Quietly continue your road", "You declined Kazan's gift but kept his goodwill. Burla Hatun filled your travel bag."],
+      ] },
+    ],
+  },
+  emren: {
+    name: "The Tale of Emren, Son of Begil",
+    intro: "Dede Korkut lowered his voice: \"Begil broke his leg on the hunt; hearing this, the foe Yartıküç raided the camp. Begil's son Emren is still a youth, but he has taken up his father's bow...\"",
+    steps: [
+      { place: "Begil's Tent", text: "Begil looks at the bandage on his leg, ashamed: \"Valour is over, my son. Flee.\" Emren has hung his father's bow on his shoulder: \"Flight is not the töre.\"", btn: "Speak with Emren", done: "", choices: [
+        ["Encourage Emren", "\"Whoever bears his father's bow bears his father's honour,\" you said. Emren nodded, eyes wet."],
+        ["Leave balm and rations for Begil", "You dressed Begil's wound and left food. Emren looked grateful: \"We are not alone now.\""],
+      ] },
+      { place: "Yartıküç's Camp", text: "Hearing Begil was wounded, Yartıküç came to plunder. Emren draws his bow, standing alone against them.", btn: "Fight beside Emren", done: "Yartıküç fled; Emren raised his father's bow to the sky. Begil embraced his son: \"Your name is Emren now, and the tale yours.\"" },
+      { place: "Victory Feast", text: "Dede Korkut came and laid his hand on Emren's head. The Oghuz beys await a feast.", btn: "Hear the feast", done: "The kopuz sang: \"When the father is wounded and the son girds a sword, the töre is born anew.\" Emren's name spread across the steppe." },
+    ],
+  },
+  salur: {
+    name: "The Captivity of Salur Kazan",
+    intro: "Dede Korkut drew a deep breath: \"One night Salur Kazan went hunting alone and was taken. His son Uruz, mother Burla, all the Oghuz keened… Freeing him needs a true warrior.\"",
+    steps: [
+      { place: "Oghuz Divan", text: "Keening fills the tent. Uruz has drawn: \"Who will free my father?\" The beys look at each other; no one takes the first step.", btn: "Speak", done: "", choices: [
+        ["Say \"I will go\"", "The beys stared. Uruz set his hand on your shoulder: \"Then the two of us.\""],
+        ["Call the beys to swear an oath", "Everyone raised a cup of kumis. The Oghuz rode together; you at the front."],
+      ] },
+      { place: "Captive Fortress", text: "Kazan Han is in the dungeon, chained but upright. Guards at the door; from within Kazan's voice: \"If it is not my son, let no one come!\"", btn: "Storm the dungeon", done: "The doors broke. Kazan snapped his own chains and laughed when he saw you: \"So the Oghuz are still Oghuz.\"" },
+      { place: "Return Feast", text: "Kazan is free; Burla Hatun has stopped weeping. Dede Korkut waits with his kopuz.", btn: "Hear the tale", done: "\"Whoever frees a captive bey shares the bey's throne,\" said Korkut. Kazan gifted you a banner." },
+    ],
+  },
+  icdis: {
+    name: "Inner Oghuz Against Outer Oghuz",
+    intro: "Dede Korkut's voice grew heavy: \"Inner and Outer Oghuz were called to one feast; Outer Oghuz did not come, and rebelled. The blood between them reached even Bamsı Beyrek's death… This is the tale where brotherhood breaks.\"",
+    steps: [
+      { place: "Divided Feast", text: "In the Inner Oghuz tent the cauldron boils; Outer Oghuz banners stand on the horizon, unanswered. Beyrek would mediate, but swords are drawn.", btn: "Intervene", done: "", choices: [
+        ["Offer an oath of peace", "Both sides listened. The oath hung in the air but no blood was spilled — yet."],
+        ["Threaten Outer Oghuz into the road", "You raised your banner; Outer Oghuz beys drew back, but their grudge grew."],
+      ] },
+      { place: "Rebel Camp", text: "Outer Oghuz beys have gathered; some mark Beyrek as the target. \"Let Inner Oghuz's favourite fall,\" they say. War is inevitable.", btn: "Stop the brothers' blood", done: "The rebels scattered. Beyrek is wounded but standing; he set his hand on your shoulder: \"You defended brotherhood.\"" },
+      { place: "Table Remade", text: "Inner and Outer Oghuz share one table again. Dede Korkut lowered his kopuz: this is the last tale.", btn: "Hear the last tale", done: "\"When brother strikes brother the töre weeps; whoever defends his brother is the greatest of the Oghuz,\" said Korkut. Twelve tales are complete; your name is sealed in the bitig." },
     ],
   },
 };

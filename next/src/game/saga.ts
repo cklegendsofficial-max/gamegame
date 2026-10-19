@@ -15,10 +15,19 @@ export interface GuildRank {
 /** Ticaret kârına göre lonca rütbeleri; cut: alış/satış farkındaki iyileşme. */
 export const GUILD: GuildRank[] = [
   { name: "Çırak", need: 0, cut: 0, text: "Loncanın kapısındasın; ustalar seni henüz tanımıyor." },
-  { name: "Kalfa", need: 1500, cut: 0.01, text: "Lonca sana sipariş vermeye başladı. Alışta ve satışta %1 avantaj." },
-  { name: "Usta", need: 6000, cut: 0.02, text: "Adın lonca defterine ustalar arasında yazıldı. Alışta ve satışta %2 avantaj." },
-  { name: "Ağa", need: 20000, cut: 0.035, text: "Çarşı esnafı sana selam veriyor; sözün senet sayılıyor. Alışta ve satışta %3,5 avantaj." },
-  { name: "Melikü't-Tüccar", need: 50000, cut: 0.05, text: "Tüccarların Meliki! İpek Yolu'nun bütün loncaları senin mührünü tanıyor. Alışta ve satışta %5 avantaj." },
+  { name: "Kalfa", need: 1500, cut: 0.01, text: "Lonca sana sipariş vermeye başladı. Alışta ve satışta %1 avantaj. Lonca odasında ucuz çay ve yol haberleri." },
+  { name: "Usta", need: 6000, cut: 0.02, text: "Adın lonca defterine ustalar arasında yazıldı. Alışta ve satışta %2 avantaj. Haftalık özel sipariş hakkı." },
+  { name: "Ağa", need: 20000, cut: 0.035, text: "Çarşı esnafı sana selam veriyor; sözün senet sayılıyor. Alışta ve satışta %3,5 avantaj. Kervan sigortası açık." },
+  { name: "Melikü't-Tüccar", need: 50000, cut: 0.05, text: "Tüccarların Meliki! İpek Yolu'nun bütün loncaları senin mührünü tanıyor. Alışta ve satışta %5 avantaj. Lonca kapısı her zaman sana açık." },
+];
+
+/** Lonca odasında gösterilen rütbe ayrıcalıkları (UI). */
+export const GUILD_PERKS: string[][] = [
+  ["Çarşıya misafir olarak girersin", "Sipariş hakkı yok"],
+  ["Sipariş alabilirsin", "Yol haberleri (menzil)", "%1 kesinti"],
+  ["Özel sipariş sıklığı artar", "Usta masasında oturursun", "%2 kesinti"],
+  ["Kervan kaybında kısmi tazmin", "Ağa mühürü", "%3,5 kesinti"],
+  ["Tüm loncalarda tanınırsın", "Melik masası", "%5 kesinti"],
 ];
 
 export function guildRank(profit: number): number {

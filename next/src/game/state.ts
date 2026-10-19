@@ -118,6 +118,8 @@ export interface Bandit {
   amb?: boolean;
   posse?: boolean;
   nem?: number;
+  /** Pusudan kaçış/haraç sonrası ateşkes: `s.time` bu değere erişene dek takip etmez. */
+  truce?: number;
 }
 
 export interface Caravan {
@@ -237,6 +239,13 @@ export interface GameState {
   nemAt?: number;
   fireDay?: number;
   fires?: string[];
+  /** Kamp ateşi seçiminin geçici dünya etkisi: kind + bitiş günü. */
+  fireBuff?: { kind: "trade" | "wage" | "mercy" | "fear" | "sea"; until: number };
+  /** Mid oyunda seçilen bitiş eğilimi (kilit değil; son seçimi vurgular). */
+  endingSeed?: string;
+  endingSeedDay?: number;
+  /** Varis yıllık olayı bu yıl oynandı mı (gün). */
+  heirEventDay?: number;
   evSeen?: Record<string, number>;
   sagaCall?: number;
   /** Günlük ham madde satışı (şehir başına adet). */
@@ -271,7 +280,7 @@ export interface GameState {
   bountyDay: number;
   wageDebt: number;
   mats: { ruh: number; parsomen: number; nisan: number; celik?: number } & Partial<Record<RareMat, number>>;
-  story: { ch: number; fort: { x: number; y: number } | null; done: boolean; lord: boolean; korkutDefer?: boolean; kurganRite?: boolean };
+  story: { ch: number; fort: { x: number; y: number } | null; done: boolean; lord: boolean; korkutDefer?: boolean; kurganRite?: boolean; familyPath?: "anne" | "ertugrul" | "kale"; flags?: string[] };
   comps: string[];
   events: MarketEvent[];
   evDay: number;
@@ -319,7 +328,7 @@ export interface GameState {
   songs: Song[];
   tamga: Tamga;
   ozanDay: number;
-  road: { day: number; n: number; seen: string[] };
+  road: { day: number; n: number; seen: string[]; cine?: string[] };
   dir: DirState;
   family: Family;
   boy: BoyState | null;
@@ -348,6 +357,12 @@ export interface GameState {
   news?: { at: number; text: string }[];
   /** Kapısından girilen şehirler (ilk giriş sahnesi için). */
   visited?: string[];
+  /** Han gecesi: günde en fazla 2 etkileşim. */
+  hanNightDay?: number;
+  hanNightUses?: number;
+  hanNightCity?: string;
+  /** Sekme gizlenirken Date.now() — offline gün özeti. */
+  awayAt?: number;
   /** Oyuncunun gördüğü panel sekmeleri; yeni açılanlar rozetle işaretlenir. */
   tabsSeen?: string[];
   /** Görülmüş kölelik olayları. */
@@ -399,12 +414,22 @@ export interface GameState {
   cityScars?: Record<string, number>;
   /** Zanaat alıştırması: 0/1 malzeme ara, 2 atölyeye git, 3 kuşan, 4 bitti. */
   craftTut?: number;
+  /** Görev listesi şema sürümü (eklenen görevlerde qdone kaydırma). */
+  qVer?: number;
+  /** Son Oba anısı kartının hafta indeksi (gün/7). */
+  obaMemoWeek?: number;
+  /** Handan tutulan geçici yol muhafızı: gün bitince askerler ayrılır. */
+  roadGuard?: { until: number; spear: number; archer: number };
   /** Şehir ustasının en son ziyaret edildiği gün (haftalık soğuma). */
   artisan?: Record<string, number>;
   /** Ustadan alınan ve bir sonraki ilgili dökümde harcanacak tek seferlik iyileştirme. */
   artisanBuff?: { slot: Slot; kind: "rar" | "discount" };
   /** 4/4 tamamlanan set id'leri (sinematik bir kez). */
   setDone?: string[];
+  /** Ergenekon roguelike: en derin kat (1–20). */
+  ergBest?: number;
+  /** Ergenekon yerel skor tablosu (haftalık tohumlu koşular). */
+  ergBoard?: import("./ergenekon").ErgBoardRow[];
   /** İlk destan savaşından önceki emir öğreticisi okundu mu (nara/siper/ok yağmuru). */
   battleTut?: boolean;
   /** Haritada beliren geçici sefer okları: bey akını ya da vali seferi, birkaç saniye görünür. */
@@ -617,6 +642,7 @@ export function newGame(w: World): GameState {
     ...places,
     bandits: [],
     quest: 0,
+    qVer: 2,
     time: 0,
     kills: 0,
     nextId: 1,
@@ -883,7 +909,23 @@ export function loadGame(w: World): GameState {
       storms: [],
       marches: Array.isArray(r.marches) ? r.marches : [],
     } as GameState;
+    // Bozuk kayıt koruması: kahraman konumu/değerleri sayı değilse başlangıca al
+    if (!Number.isFinite(st.hero.x) || !Number.isFinite(st.hero.y)) {
+      st.hero.x = fresh.hero.x;
+      st.hero.y = fresh.hero.y;
+    }
+    for (const k of ["hp", "energy", "xp", "lv"] as const) if (!Number.isFinite(st.hero[k])) st.hero[k] = fresh.hero[k];
     fixPlaces(w, st);
+    // qVer 2: "İlk döküm" indeksi 3'e eklendi — eski qdone kaydır
+    if ((st.qVer ?? 1) < 2) {
+      if (st.qdone?.length) st.qdone = st.qdone.map((i) => (i >= 3 ? i + 1 : i));
+      if ((st.quest ?? 0) >= 3) st.quest++;
+      if ((st.c.crafted ?? 0) >= 1) {
+        st.qdone ??= [];
+        if (!st.qdone.includes(3)) st.qdone.push(3);
+      }
+      st.qVer = 2;
+    }
     return st;
   } catch {
     return fresh;

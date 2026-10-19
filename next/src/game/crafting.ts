@@ -55,13 +55,14 @@ export interface Refine {
   icon: string;
   out: "ruh" | "parsomen" | "celik";
   cost: Cost;
+  desc: string;
 }
 
 export const REFINES: Refine[] = [
-  { id: "ruhdamit", name: "Ruh Taşı damıt", icon: "ruh", out: "ruh", cost: { turkuaz: 3, yesim: 1, gold: 60 } },
-  { id: "parsomenyaz", name: "Kutsal Parşömen yaz", icon: "parsomen", out: "parsomen", cost: { ipek: 2, ruh: 3, gold: 80 } },
+  { id: "ruhdamit", name: "Ruh Taşı damıt", icon: "ruh", out: "ruh", cost: { turkuaz: 3, yesim: 1, gold: 60 }, desc: "Turkuaz ve yeşimden ruh damıt; örs ve simya için temel." },
+  { id: "parsomenyaz", name: "Kutsal Parşömen yaz", icon: "parsomen", out: "parsomen", cost: { ipek: 2, ruh: 3, gold: 80 }, desc: "+7 sonrası kırılmayı önler; örs basışında eşyayı korur." },
   /** Üretim zinciri: ham demiri ocakta döküp çelik elde eder; çelik üst kademe tariflerde kullanılır. */
-  { id: "celikdok", name: "Demirden çelik dök", icon: "mat_iron", out: "celik", cost: { demir: 5, gold: 30 } },
+  { id: "celikdok", name: "Demirden çelik dök", icon: "mat_iron", out: "celik", cost: { demir: 5, gold: 30 }, desc: "Ham demiri dökme çeliğe çevir; Kademe 4+ ve çelik tarifleri için şart." },
 ];
 
 export const CRAFT_SLOTS: Slot[] = ["silah", "zirh", "kalkan", "tilsim"];

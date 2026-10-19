@@ -27,7 +27,7 @@ export function techRailStatus(g: Game): TechRailStatus {
   const E = ERAS[s.wd?.era ?? "kurulus"];
   const locks: TechLock[] = [];
   for (const u of UNIT_KEYS) {
-    const need = u === "archer" ? 2 : u === "horse" ? 4 : 0;
+    const need = u === "archer" ? 1 : u === "horse" ? 2 : 0;
     const done = unitUnlocked(u, kl);
     locks.push({ label: `${UNITS[u].name} birimi`, done, why: done ? "" : `Kışla seviyesi ${need} gerekir (şu an ${kl})` });
   }

@@ -21,6 +21,9 @@ export const CRAFTSMEN: Craftsman[] = [
   { id: "terzi", city: "merv", name: "Terzi Gülnaz", role: "Terzi ustası", icon: "mat_leather", slot: "zirh", kind: "discount", desc: "Merv'in ipek ve deri ustası. Ziyaretinden sonra bir sonraki zırh dökümü yarı fiyatına çıkar." },
   { id: "kuyumcu", city: "nishapur", name: "Kuyumcu Baha", role: "Kuyumcu ustası", icon: "turquoise", slot: "tilsim", kind: "rar", desc: "Nişabur firuzesinin sırrını bilir. Ziyaretinden sonra bir sonraki tılsım dökümüne nadirlik bahşeder." },
   { id: "okcu", city: "kashgar", name: "Okçu Ustası Alp", role: "Yay ustası", icon: "u_archer", slot: "silah", kind: "discount", desc: "Bozkırın en keskin gözlü yay ustası. Ziyaretinden sonra bir sonraki silah dökümü yarı fiyatına çıkar." },
+  { id: "semerkant", city: "samarkand", name: "Usta Feridun", role: "Saray demircisi", icon: "it_sword_4", slot: "silah", kind: "rar", desc: "Semerkant sarayının örs başı. Bir sonraki silah dökümüne nadirlik bahşeder." },
+  { id: "buhara", city: "bukhara", name: "Hatun Zeliha", role: "Medrese nakkaşı", icon: "silk", slot: "zirh", kind: "discount", desc: "Buhara ipek atölyesinin hatunu. Bir sonraki zırh dökümü yarı fiyatına çıkar." },
+  { id: "konya", city: "konya", name: "Selçuklu Örsü", role: "Selçuklu ustası", icon: "shield", slot: "kalkan", kind: "rar", desc: "Konya taç kapılarının demircisi. Bir sonraki kalkan dökümüne nadirlik bahşeder." },
 ];
 
 export const CRAFTSMAN_BY_CITY: Record<string, Craftsman> = Object.fromEntries(CRAFTSMEN.map((c) => [c.city, c]));

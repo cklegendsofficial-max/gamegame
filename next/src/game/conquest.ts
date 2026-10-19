@@ -44,8 +44,13 @@ export const TAX = [
 const BASE_GAR: Record<FactionId, number> = { karahan: 42, gazne: 50, selcuk: 56, bizans: 95 };
 const WALL: Record<FactionId, number> = { karahan: 0.2, gazne: 0.25, selcuk: 0.25, bizans: 0.4 };
 
-export function cityGarrison(f: FactionId, losses: number): Army {
-  const n = Math.round(BASE_GAR[f] * Math.max(0.55, 1 - losses * 0.15));
+/**
+ * Denetim: garnizonlar Sv 10/20/30'da aynıydı (42–96); Saray 5 + Sv 20 ile İstanbul dahil her şehir %100
+ * alınıyordu. `heroLv` verilirse kuşatma eşiğinden (SIEGE_LV) sonra her seviye garnizonu +%3 büyütür.
+ */
+export function cityGarrison(f: FactionId, losses: number, heroLv = 0): Army {
+  const grow = 1 + 0.03 * Math.max(0, heroLv - 10);
+  const n = Math.round(BASE_GAR[f] * Math.max(0.55, 1 - losses * 0.15) * grow);
   return { spear: Math.round(n * 0.5), archer: Math.round(n * 0.3), horse: Math.round(n * 0.2) };
 }
 
@@ -86,6 +91,7 @@ export const GOVERNORS: Governor[] = [
   { id: "alper", name: "Alp Er", role: "Asker vali", icon: "heroes/cls_bahadir", desc: "Garnizon savunması +%15, kışla gönüllüleri +1.", tax: 0, loy: 0, def: 0.15, calm: 0 },
   { id: "yusuf", name: "Kadı Yusuf", role: "Adil vali", icon: "heroes/hero4", desc: "Bağlılık her dakika +0.8, vergi −%10.", tax: -0.1, loy: 0.8, def: 0, calm: 0.3 },
   { id: "tonyukuk", name: "Bilge Tonyukuk", role: "Bilge vali", icon: "companions/korkut", desc: "Kötü olaylar yarı yarıya seyrek; vergi +%10, bağlılık +0.3.", tax: 0.1, loy: 0.3, def: 0.05, calm: 0.5 },
+  { id: "ayse", name: "Ayşe Hatun", role: "İmar valisi", icon: "companions/ayse", desc: "Bağlılık +0.5, vergi +%5; panayır ve hasat olayları daha sık.", tax: 0.05, loy: 0.5, def: 0, calm: 0.15 },
 ];
 export const GOV_GOLD = 500;
 
@@ -111,5 +117,6 @@ export const CITY_EVENTS: Record<string, CityEvent> = {
 
 export const ENGINE_GOLD = 1200;
 export const FEAST_GOLD = 600;
-export const SIEGE_LV = 10;
-export const SIEGE_RENOWN = 120;
+/** İlk şehir kuşatması: seviye 8 + 80 şöhret (eski 10/120 erken oyunu kilitliyordu). */
+export const SIEGE_LV = 8;
+export const SIEGE_RENOWN = 80;

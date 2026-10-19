@@ -23,11 +23,13 @@ export function mountAdmin(g: Game): void {
   const flags: Flags = { gold: false, god: false, energy: false, ...JSON.parse(localStorage.getItem(KEY) ?? "{}") };
   const save = () => localStorage.setItem(KEY, JSON.stringify(flags));
   const style = document.createElement("style");
-  style.textContent = CSS;
+  style.textContent = CSS + `\n@media (pointer: coarse) { .adm-btn { opacity: .35; transform: scale(.85); } .adm-btn.adm-peek { opacity: 1; transform: none; } }`;
   document.head.appendChild(style);
   const btn = document.createElement("button");
   btn.className = "adm-btn";
   btn.textContent = "ADMIN (F9)";
+  btn.title = "Geliştirici paneli";
+  btn.addEventListener("pointerdown", () => btn.classList.add("adm-peek"));
   const box = document.createElement("div");
   box.className = "adm hidden";
   document.body.append(btn, box);

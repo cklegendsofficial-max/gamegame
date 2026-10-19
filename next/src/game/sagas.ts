@@ -14,6 +14,13 @@ export interface SideSagaReward {
   title?: string;
 }
 
+export interface SagaBeat {
+  /** Tamamlanan hedefin dizisi (0 tabanlı). */
+  at: number;
+  title: string;
+  text: string;
+}
+
 export interface SideSaga {
   id: string;
   title: string;
@@ -23,6 +30,8 @@ export interface SideSaga {
   goals: SagaGoal[];
   reward: SideSagaReward;
   ending: string;
+  /** Her hedef tamamlandığında anlatılan kısa ara sahne. */
+  beats?: SagaBeat[];
 }
 
 export const SIDE_SAGAS: SideSaga[] = [
@@ -39,6 +48,11 @@ export const SIDE_SAGAS: SideSaga[] = [
     ],
     reward: { gold: 600, renown: 25, title: "Tüccarların Hamisi" },
     ending: "Semerkant çarşısında senin adınla anılan bir kervansaray kapısı açıldı. Tüccarlar artık senin tamganı gördüğünde yol vergisi istemiyor; adın İpek Yolu'nun bir ucundan öbür ucuna, kervan kervan taşınıyor.",
+    beats: [
+      { at: 0, title: "Kervan Yolunda Ad", text: "Semerkant çarşısında tüccarlar artık senin tamganı tanıyor; ilk bin beş yüz altınlık kâr, kervansaraylarda fısıldanan bir isim oldu." },
+      { at: 1, title: "Yedi Sefer", text: "Yedinci kervanın da sağ salim limana ya da hana ulaştı. Kervancı loncası artık seninle anlaşma yapmak için sıraya giriyor." },
+      { at: 2, title: "Hazinenin Dönüşü", text: "Yatırdığın her akçe, kat kat geri döndü. Artık senin adın bir sermaye gibi: kimse boş çek vermiyor." },
+    ],
   },
   {
     id: "intikam",
@@ -53,6 +67,11 @@ export const SIDE_SAGAS: SideSaga[] = [
     ],
     reward: { gold: 300, renown: 40, title: "Kan Davası Bitiren" },
     ending: "Son düşmanın da toprağa düştüğünde, bozkırda bir ağıt değil bir zafer türküsü yükseldi. Kan davan kapandı; artık geceleri sırtını dönüp uyuyabilirsin.",
+    beats: [
+      { at: 0, title: "Kırk Düşman", text: "Kırkıncı düşman da toprağa düştüğünde, bozkırda senin adını fısıldayanlar artık korkuyla değil hesapla konuşuyor." },
+      { at: 1, title: "Üç Kamp Küle", text: "Üçüncü harami kampı da küle döndü. Yol kesen çeteler, senin tuğunu gördüklerinde kervanlarını bırakıp kaçıyor." },
+      { at: 2, title: "Can Düşmanı", text: "Can düşmanın son nefesini verdiğinde bozkır bir an sessiz kaldı. Hesap bitti." },
+    ],
   },
   {
     id: "ozan",
@@ -67,6 +86,11 @@ export const SIDE_SAGAS: SideSaga[] = [
     ],
     reward: { gold: 200, renown: 60, title: "Bozkırın Ozanı" },
     ending: "Bir çoban ateşinin başında, hiç tanımadığın bir ozan senin adını andığı bir türkü söyledi. O gün anladın: artık hikâyen senden büyük, bütün bozkırın malı oldu.",
+    beats: [
+      { at: 0, title: "Üçüncü Destan", text: "Üçüncü destanın da bir ozanın dilinden döküldüğünde, çoban ateşlerinde adını ilk kez yabancılar andı." },
+      { at: 1, title: "On Sayfa", text: "Bitig'e onuncu sayfayı eklediğinde, yazdıkların artık senin değil bozkırın malı oldu." },
+      { at: 2, title: "Beş Yüz Şöhret", text: "Beş yüzüncü şöhret puanıyla, han duvarlarında adın altın yaldızla yazılmaya başladı." },
+    ],
   },
   {
     id: "fatih",
@@ -81,6 +105,11 @@ export const SIDE_SAGAS: SideSaga[] = [
     ],
     reward: { gold: 500, renown: 80, title: "Fetihler Kağanı" },
     ending: "Son kale de senin tuğuna eğildiğinde, ozanlar seni artık yalnız bir bey değil bir fetihler çağının adı olarak anmaya başladı. Burçlarda senin rengin, pazarlarda senin adın.",
+    beats: [
+      { at: 0, title: "İki Şehir", text: "İkinci fethettiğin şehrin burçlarında tuğun dalgalandığında, komşu beyler haritalarını yeniden çizdi." },
+      { at: 1, title: "Yirmi Zafer", text: "Yirminci zaferinin ardından askerlerin seni artık şanssız değil, yenilmez biri olarak anıyor." },
+      { at: 2, title: "İki Kale", text: "İkinci kale de senin eline geçince, bölgedeki bütün tekfurlar haraçlarını erken ödemeye başladı." },
+    ],
   },
   {
     id: "gezgin",
@@ -95,6 +124,11 @@ export const SIDE_SAGAS: SideSaga[] = [
     ],
     reward: { gold: 250, renown: 50, title: "Bozkırın Gezgini" },
     ending: "Haritanda artık karanlık kalan köşe yok. Kurganların sırrını, şehirlerin kapılarını, yeraltının en derin katını gördün. Bozkır senin avucunda bir destan defteri gibi açık.",
+    beats: [
+      { at: 0, title: "Beş Taş", text: "Beşinci Kurgan Taşı devrildiğinde, haritandaki mor ışıklar birer birer sönmeye başladı." },
+      { at: 1, title: "Yirmi Beşinci Kat", text: "Yeraltının yirmi beşinci katına indiğinde, meşalenin ışığı bile atalarının yazıtlarını aydınlatmaya yetmedi." },
+      { at: 2, title: "Yedi Şehir", text: "Yedinci şehrin kapısından geçtiğinde, haritanda artık karanlık kalan bir köşe bulamadın." },
+    ],
   },
 ];
 

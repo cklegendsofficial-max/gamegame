@@ -1,23 +1,24 @@
 /**
  * Haritadaki tüm sticker/prop genişliklerinin kilitli hiyerarşisi.
  * Şehir > kale > köy/obə > kamp/düğüm > höyük; büyüklük sırası asla bozulmaz.
+ * P0: bir kademe daha büyüt — AoE/M&B ‘ilk bakışta silüet’ (mobil).
  */
 export const MAP_W = {
-  cityCap: 210,
-  city: 170,
-  fort: (tier: 1 | 2 | 3 | 4) => ([98, 112, 126, 142] as const)[tier - 1],
-  village: 90,
-  yurt: 82,
-  camp: 70,
-  node: 66,
-  ruin: 68,
-  kurgan: 60,
-  oasis: 140,
-  storyCastle: 128,
-  gate: 145,
-  otag: 100,
-  boy: 115,
-  peak: 140,
-  kipFort: 118,
-  kipHorde: 95,
+  cityCap: 268,
+  city: 220,
+  fort: (tier: 1 | 2 | 3 | 4) => ([126, 144, 162, 182] as const)[tier - 1],
+  village: 118,
+  yurt: 108,
+  camp: 90,
+  node: 80,
+  ruin: 84,
+  kurgan: 78,
+  oasis: 168,
+  storyCastle: 160,
+  gate: 180,
+  otag: 126,
+  boy: 142,
+  peak: 170,
+  kipFort: 148,
+  kipHorde: 120,
 } as const;

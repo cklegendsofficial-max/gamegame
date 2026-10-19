@@ -54,6 +54,7 @@ export const CITY_EPITHET: Record<string, string> = {
   kashgar: "Çin kapısının bekçisi",
 };
 
+
 /** Işık: e güneş yüksekliği, day gündüz payı, dusk alacakaranlık payı. */
 export function lightOf(t: number): { e: number; day: number; dusk: number } {
   const e = Math.cos(t * Math.PI * 2);
@@ -578,7 +579,7 @@ export class CityScene {
       this.py = e.clientY / innerHeight - 0.5;
     });
     this.el.addEventListener("click", () => this.close());
-    this.timer = window.setTimeout(() => this.close(), 6500);
+    this.timer = window.setTimeout(() => this.close(), d.first ? 9000 : 6500);
     const loop = () => {
       if (this.closed) return;
       this.frame();
@@ -671,6 +672,18 @@ export class CityScene {
             ctx.fillStyle = `rgba(40,34,34,${0.35 * (1 - q)})`;
             ctx.beginPath();
             ctx.arc(sx + Math.sin(q * 5 + k) * 20 * v.scale - q * 60 * v.scale, cy + ch * 0.3 - q * h * 0.4, (8 + q * 40) * v.scale, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      } else {
+        // Ocak / hamam dumanı — şehrin yaşadığını hissettirir
+        for (let k = 0; k < 3; k++) {
+          const sx = cx + cw * (0.28 + k * 0.22);
+          for (let j = 0; j < 4; j++) {
+            const q = (this.time * 0.18 + j / 4 + k * 0.2) % 1;
+            ctx.fillStyle = `rgba(180,170,160,${0.12 * (1 - q)})`;
+            ctx.beginPath();
+            ctx.arc(sx + Math.sin(q * 4 + k) * 10 * v.scale, cy + ch * 0.22 - q * h * 0.22, (4 + q * 18) * v.scale, 0, Math.PI * 2);
             ctx.fill();
           }
         }

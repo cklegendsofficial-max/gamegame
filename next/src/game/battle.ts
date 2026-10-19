@@ -1,5 +1,5 @@
 import { UNITS, UNIT_KEYS, armyPower, armySize, type Army, type Unit } from "./data";
-import type { SkillKind } from "./classes";
+import type { SkillKind, UltKind } from "./classes";
 import { bossLine } from "./regions";
 import { ARENAS, COUNTER, KINS, bossKit, kinSummon, type Arena, type BossKit, type BossMove, type Kin, type KinDef, type MoveKind } from "./bosses";
 
@@ -15,6 +15,8 @@ export interface Champion {
   rage: boolean;
   firstStrike: boolean;
   skills: { name: string; kind: SkillKind; pow: number }[];
+  /** Sınıf Kut ultiması; charge0 0–100 başlangıç dolumu. */
+  ulti?: { name: string; kind: UltKind; icon: string; charge0: number };
 }
 
 export interface Boss {
@@ -42,6 +44,8 @@ export interface Round {
   phase?: string;
   /** Bossun bu turdaki sözü. */
   say?: string;
+  /** Bu turda Kut ultiması patladı. */
+  ulti?: string;
 }
 
 export type Ground = "bozkir" | "cayir" | "kum" | "dag";
@@ -52,6 +56,8 @@ export interface Field {
   note?: string;
   arena?: Arena;
   kin?: Kin;
+  /** Bölge/den boss kiti — bossKit adına düşmeden tell/rage için. */
+  kit?: import("./bosses").BossKit;
 }
 export type Sky = "kum" | "yagmur" | "tipi" | "kar";
 export const SKIES: Record<Sky, { name: string; mul: Partial<Record<Unit, number>>; text: string }> = {
@@ -90,6 +96,20 @@ export type Order = "nara" | "kanat" | "ricat" | "yedek" | "yagmur" | "siper";
 export const ORDER_KEYS: Order[] = ["nara", "kanat", "yagmur", "siper", "ricat", "yedek"];
 export const RESERVE_SHARE = 0.25;
 export const RESERVE_MIN = 8;
+
+/** Oyuncu saf düzeni: birlikleri arka/orta/ön şeridine sürükleyerek kurar. */
+export type FormLane = "back" | "mid" | "front";
+export type FormPose = Record<Unit, FormLane>;
+export const FORM_DEFAULT: FormPose = { archer: "back", horse: "mid", spear: "front" };
+export const FORM_LANES: FormLane[] = ["back", "mid", "front"];
+export const FORM_LANE_X: Record<FormLane, [number, number]> = {
+  back: [0.04, 0.14],
+  mid: [0.16, 0.27],
+  front: [0.29, 0.41],
+};
+export const FORM_LANE_NAME: Record<FormLane, string> = { back: "Arka hat", mid: "Orta hat", front: "Ön hat" };
+export const UNIT_FORM_NAME: Record<Unit, string> = { spear: "Mızraklılar", archer: "Okçular", horse: "Atlılar" };
+
 export const ORDERS: Record<Order, { name: string; icon: string; text: string }> = {
   nara: { name: "Nara", icon: "ord_nara", text: "İki tur boyunca birliğin +%25 güçle vurur." },
   kanat: { name: "Kanat Saldırısı", icon: "ord_kanat", text: "Atlılar yandan dolanır: bu tur atlı hasarı ×1.8." },
@@ -187,13 +207,21 @@ export class Sim {
   private lowSaid = false;
   private bossMax = 0;
   private cursed = 0;
+  /** Kut ultiması dolumu 0–100; savaşta bir kez. */
+  ultiCharge = 0;
+  private ultiUsed = false;
+  private ultiDef: { name: string; kind: UltKind; icon: string } | null = null;
+  private ultMul = 1;
+  private ultIn = 1;
   /** Oyuncu yönetmediğinde (olasılık, otomatik savaş) uyarıyı doğru emirle karşılama şansı. */
   autoCounter = 0.6;
   counters = 0;
+  /** Sürükle formasyon — varsayılan: okçu arka, atlı orta, mızrak ön. */
+  form: FormPose = { ...FORM_DEFAULT };
 
   constructor(private a0: Army, aBonus0: number, private b0: Army, private bBonus = 0, private champ: Champion | null = null, boss0: Boss | null = null, field: Field | null = null, reserve = false, aMul: UnitMul = NO_MUL) {
     this.fm = fieldMul(field);
-    this.kit = bossKit(boss0);
+    this.kit = field?.kit ?? bossKit(boss0);
     const kin = field?.kin ?? this.kit?.kin;
     this.kin = kin && kin !== "insan" ? KINS[kin] : null;
     this.fmB = { ...this.fm };
@@ -201,7 +229,6 @@ export class Sim {
       for (const [u, k] of Object.entries(this.kin.atk) as [Unit, number][]) this.fmB[u] = (this.fmB[u] ?? 1) * k;
       for (const [u, k] of Object.entries(this.kin.vs) as [Unit, number][]) this.fm[u] = (this.fm[u] ?? 1) * k;
     }
-    this.bossMax = boss0?.hp ?? 0;
     this.am = aMul;
     this.a = { ...a0 };
     if (reserve && armySize(a0) >= RESERVE_MIN)
@@ -211,7 +238,16 @@ export class Sim {
       }
     this.b = { ...b0 };
     const c = (this.c = champ ? { ...champ } : null);
-    this.boss = boss0 ? { ...boss0 } : null;
+    this.boss = boss0
+      ? {
+          name: boss0.name || "Boss",
+          icon: boss0.icon || "j_bandit",
+          atk: Number.isFinite(boss0.atk) ? boss0.atk : 10,
+          def: Number.isFinite(boss0.def) ? boss0.def : 0,
+          hp: Math.max(1, Number.isFinite(boss0.hp) ? boss0.hp : 100),
+        }
+      : null;
+    this.bossMax = this.boss?.hp ?? 0;
     this.sk = (k) => c?.skills.filter((s) => s.kind === k) ?? [];
     const luck = (Math.random() + Math.random() - 1) * 0.6;
     this.aBonus = aBonus0 + this.sk("aura").reduce((t, s) => t + s.pow, 0) + luck;
@@ -223,6 +259,10 @@ export class Sim {
     this.rally = this.sk("rally").reduce((t, s) => t + s.pow, 0);
     this.maxR = this.boss ? 16 : 12;
     this.luckEv = luck > 0.25 ? ["Rüzgâr arkanda"] : luck < -0.25 ? ["Talih yüz çevirdi"] : [];
+    if (c?.ulti) {
+      this.ultiDef = { name: c.ulti.name, kind: c.ulti.kind, icon: c.ulti.icon };
+      this.ultiCharge = Math.max(0, Math.min(100, c.ulti.charge0));
+    }
     this.rounds = [{ a: { ...this.a }, b: { ...this.b }, hp: c?.hp ?? 0, bhp: this.boss?.hp ?? 0, ev: [], ma: 100, mb: 100 }];
     if (c?.firstStrike) {
       const ev = ["Gölge Darbesi"];
@@ -242,6 +282,46 @@ export class Sim {
   /** Şu an ekranda bekleyen boss uyarısı. */
   pendingTell(): BossMove | null {
     return this.tell;
+  }
+
+  /** Birlik şeritlerini güncelle; çakışmada yer değiştirir. */
+  setForm(unit: Unit, lane: FormLane): FormPose {
+    const cur = this.form[unit];
+    if (cur === lane) return this.form;
+    const other = UNIT_KEYS.find((u) => u !== unit && this.form[u] === lane);
+    if (other) this.form[other] = cur;
+    this.form[unit] = lane;
+    return this.form;
+  }
+
+  /** Formasyonun kısa özeti (HUD / announce). */
+  formHint(): string {
+    const bits: string[] = [];
+    if (this.form.archer === "back") bits.push("okçu siperde");
+    if (this.form.spear === "front") bits.push("mızrak ön saf");
+    if (this.form.horse !== "back") bits.push("atlı hazır");
+    if (this.form.archer === "front") bits.push("okçu açıkta");
+    if (this.form.horse === "back") bits.push("atlı geride");
+    return bits.length ? bits.join(" · ") : "dengeli saf";
+  }
+
+  private formAtk(): Partial<Record<Unit, number>> {
+    const m: Partial<Record<Unit, number>> = {};
+    if (this.form.archer === "back") m.archer = 1.14;
+    else if (this.form.archer === "front") m.archer = 0.88;
+    if (this.form.spear === "front") m.spear = 1.1;
+    else if (this.form.spear === "back") m.spear = 0.9;
+    if (this.form.horse === "front") m.horse = 1.16;
+    else if (this.form.horse === "mid") m.horse = 1.1;
+    else m.horse = 0.88;
+    return m;
+  }
+
+  /** <1 = daha az hasar al. */
+  private formDef(): number {
+    if (this.form.spear === "front") return 0.9;
+    if (this.form.spear === "mid") return 0.96;
+    return 1.06;
   }
 
   private unitFor(o: Order): boolean {
@@ -301,7 +381,10 @@ export class Sim {
   }
 
   private hurtBoss(dmg: number): void {
-    if (this.boss) this.boss.hp = Math.max(0, this.boss.hp - (dmg * 100) / (100 + this.boss.def * 6));
+    if (!this.boss || !Number.isFinite(dmg)) return;
+    const def = Number.isFinite(this.boss.def) ? this.boss.def : 0;
+    const next = this.boss.hp - (dmg * 100) / (100 + def * 6);
+    this.boss.hp = Math.max(0, Number.isFinite(next) ? next : 0);
   }
 
   canOrder(o: Order): boolean {
@@ -312,15 +395,91 @@ export class Sim {
     return this.unitFor(o);
   }
 
+  canUlt(): boolean {
+    return !this.over && !this.ultiUsed && !!this.ultiDef && this.ultiCharge >= 100 && !!this.c && this.c.hp > 0;
+  }
+
+  ultInfo(): { charge: number; name: string; icon: string; ready: boolean; used: boolean } {
+    return {
+      charge: this.ultiCharge,
+      name: this.ultiDef?.name ?? "",
+      icon: this.ultiDef?.icon ?? "tr_star",
+      ready: this.canUlt(),
+      used: this.ultiUsed,
+    };
+  }
+
   done(): boolean {
     return this.over;
   }
 
-  step(order?: Order): Round | null {
+  private applyUlt(ev: string[]): void {
+    const c = this.c;
+    const def = this.ultiDef!;
+    ev.push(def.name + "!");
+    this.ultMul = 1;
+    this.ultIn = 1;
+    switch (def.kind) {
+      case "storm":
+        this.ultMul = 1.55;
+        this.ma = Math.min(100, this.ma + 20);
+        this.nara = Math.max(this.nara, 1);
+        this.mb = Math.max(0, this.mb - 8);
+        break;
+      case "fury":
+        this.ultMul = 1.35;
+        if (c && c.hp > 0) {
+          const d = this.champHit(ev) * 2.5;
+          const hitR = hit(NONE, this.b, this.aBonus, this.hpB, d, this.boss, BOSS_WEIGHT);
+          this.b = hitR.out;
+          this.hurtBoss(hitR.toChamp);
+        }
+        break;
+      case "shadow":
+        if (c && c.hp > 0) {
+          const d = c.atk * c.critMult * 2.6 * (1 + Math.max(0, this.aBonus));
+          ev.push("Kritik!");
+          const hitR = hit(NONE, this.b, 0, this.hpB, d, this.boss, BOSS_WEIGHT);
+          this.b = hitR.out;
+          this.hurtBoss(hitR.toChamp * (this.boss ? 1.25 : 1));
+          this.mb = Math.max(0, this.mb - 14);
+        }
+        break;
+      case "dust":
+        this.ultIn = 0.6;
+        this.mb = Math.max(0, this.mb - 18);
+        if (c) c.dodge = Math.min(0.72, c.dodge + 0.22);
+        break;
+      case "spirit":
+        this.ultMul = 1.3;
+        this.ma = Math.min(100, this.ma + 25);
+        if (c && c.hp > 0) c.hp = Math.min(c.maxHp, c.hp + c.maxHp * 0.28);
+        for (const u of UNIT_KEYS) {
+          const lost = Math.max(0, this.a0[u] - this.a[u] - this.resv[u]);
+          if (lost > 0) this.a[u] += Math.ceil(lost * 0.12);
+        }
+        break;
+    }
+  }
+
+  step(order?: Order, fireUlt = false): Round | null {
     if (this.over) return null;
     const { c, boss } = this;
     const r = this.r++;
     const ev: string[] = r === 0 ? [...this.luckEv] : [];
+    this.ultMul = 1;
+    this.ultIn = 1;
+    let ultiName: string | undefined;
+    // Otomatik savaşta Kut dolunca kendiliğinden patlar.
+    if (!fireUlt && this.canUlt() && this.autoCounter > 0) fireUlt = true;
+    if (fireUlt && this.canUlt()) {
+      this.applyUlt(ev);
+      this.ultiUsed = true;
+      this.ultiCharge = 0;
+      ultiName = this.ultiDef!.name;
+    } else if (!this.ultiUsed && this.ultiDef) {
+      this.ultiCharge = Math.min(100, this.ultiCharge + (this.boss ? 14 : 18));
+    }
     const tell = this.tell;
     if (!order && tell && Math.random() < this.autoCounter && this.canOrder(COUNTER[tell.kind])) order = COUNTER[tell.kind];
     if (order && this.canOrder(order)) {
@@ -350,17 +509,18 @@ export class Sim {
       ev.push("Nara!");
     }
     if (order === "kanat") {
-      uMul.horse = 1.8;
-      ev.push("Kanat saldırısı!");
+      uMul.horse = this.form.horse === "front" ? 2.0 : this.form.horse === "back" ? 1.45 : 1.8;
+      ev.push(this.form.horse === "front" ? "Kanat saldırısı! (ön hat)" : "Kanat saldırısı!");
     }
     if (order === "yagmur") {
-      uMul.archer = 2;
+      uMul.archer = this.form.archer === "back" ? 2.2 : this.form.archer === "front" ? 1.6 : 2;
       ev.push("Ok yağmuru!");
     }
     if (order === "siper") {
       this.siper = 1;
-      ordMul *= 0.7;
-      ev.push("Kalkan siperi!");
+      ordMul *= this.form.spear === "front" ? 0.7 : 0.78;
+      if (this.form.spear !== "front") inOrd *= 1.1;
+      ev.push(this.form.spear === "front" ? "Kalkan siperi!" : "Kalkan siperi (saf açık)");
     }
     if (order === "ricat") {
       const share = this.a.horse / Math.max(1, armySize(this.a));
@@ -460,7 +620,13 @@ export class Sim {
     if (kin?.drain && c && c.hp > 0) c.hp = Math.max(1, c.hp - c.maxHp * kin.drain);
     for (const u of UNIT_KEYS) if (this.fm[u]) uMul[u] = (uMul[u] ?? 1) * this.fm[u]!;
     for (const u of UNIT_KEYS) if (this.am.atk[u]) uMul[u] = (uMul[u] ?? 1) * this.am.atk[u]!;
-    const bonus = (1 + this.aBonus + this.rally * Math.min(1, r / 4)) * ordMul - 1;
+    const fAtk = this.formAtk();
+    for (const u of UNIT_KEYS) if (fAtk[u]) uMul[u] = (uMul[u] ?? 1) * fAtk[u]!;
+    inMul *= this.formDef();
+    if (r === 0) ev.push(`Saf: ${this.formHint()}`);
+    const bonus = (1 + this.aBonus + this.rally * Math.min(1, r / 4)) * ordMul * this.ultMul - 1;
+    inMul *= this.ultIn;
+    extra *= this.ultMul;
     if (this.foeCry === 0 && !boss && r >= 2 && this.mb < 40 && armySize(this.b) >= 6) {
       this.foeCry = 2;
       this.mb = Math.min(100, this.mb + 5);
@@ -507,7 +673,7 @@ export class Sim {
         say = line("low");
       } else if (Math.random() < 0.3) say = line("taunt");
     }
-    const round: Round = { a: { ...this.a }, b: { ...this.b }, hp: c?.hp ?? 0, bhp: boss?.hp ?? 0, ev, order, ma: this.ma, mb: this.mb, move: roundMove, phase, say };
+    const round: Round = { a: { ...this.a }, b: { ...this.b }, hp: c?.hp ?? 0, bhp: boss?.hp ?? 0, ev, order, ma: this.ma, mb: this.mb, move: roundMove, phase, say, ulti: ultiName };
     this.rounds.push(round);
     if (
       !!this.rout ||

@@ -3,8 +3,9 @@ import { CITIES, GH, GW, H, NH, NW, TW, W, type World } from "../world/gen";
 import type { Camera } from "./camera";
 import type { Game } from "../game/game";
 import { CITY_NAME, DAY_SEC, NODE_SPRITE, armySize } from "../game/data";
+import { GOODS, GOOD_KEYS, type Good } from "../game/rpg";
 import { CAPITAL, SLAVE_RADIUS } from "../game/state";
-import { FACTIONS, citiesOf, type FactionId } from "../game/factions";
+import { FACTIONS, FACTION_KEYS, citiesOf, factionOf, type FactionId } from "../game/factions";
 import { nemName } from "../game/nemesis";
 import { TOMBS, tombOf } from "../game/deep";
 import { FORT_TIERS, type FortOwner } from "../game/forts";
@@ -22,16 +23,13 @@ import { bushTextures, palmTextures, peakTextures, propTex, softenIsoTex, yurtTe
 import { AREA_BOSSES, regionAt } from "../game/regions";
 import { PORTS } from "../game/hazar";
 import { MAP_W } from "./mapScale";
-
-const urls: Record<string, string> = {};
-for (const [p, u] of Object.entries(import.meta.glob<string>("../assets/**/*.webp", { eager: true, query: "?url", import: "default" }))) {
-  const parts = p.split("/");
-  urls[parts[parts.length - 2] + "/" + parts[parts.length - 1].replace(".webp", "")] = u;
-}
-
-export function assetUrl(key: string): string {
-  return urls[key] ?? urls["icons/" + key] ?? "";
-}
+import { CITY_SCALE, CITY_TINT } from "./cityLook";
+import { mapPortrait, tickToken, type TokenKind } from "./mapToken";
+import { convexHull, inflateHull, type Pt } from "./realmGeom";
+import { bestTradeRoute, cityXY } from "../game/traffic";
+export { assetUrl } from "./assets";
+import { assetUrls } from "./assets";
+const urls = assetUrls();
 
 const FOG_UP = 4;
 const RIVAL_COL: Record<string, number> = { peace: 0xe8d39a, ally: 0x6fe07a, war: 0xff4a3a, vassal: 0xffc94a, dead: 0x888888 };
@@ -40,6 +38,35 @@ const LABEL_STYLE = { fontFamily: "Georgia, serif", fontSize: 26, fill: "#fff3d6
 const fortColor = (o: FortOwner): string => (o === "me" ? "#ffd36a" : o === "harami" ? "#ff8a70" : FACTIONS[o].color);
 /** Kale seviyesine göre hafif ton farkı: t1 ahşap sıcaklığı kendi dokusundan gelir, t2 palanka hafif soğuk taş, t3 kale hafif sıcak taş, t4 hisar altın. */
 const fortTint = (tier: 1 | 2 | 3 | 4): number => (tier === 4 ? 0xffe6a8 : tier === 3 ? 0xf2e2c6 : tier === 2 ? 0xdce6ef : 0xffffff);
+
+function blendTint(a: number, b: number, t: number): number {
+  const ar = (a >> 16) & 255, ag = (a >> 8) & 255, ab = a & 255;
+  const br = (b >> 16) & 255, bg = (b >> 8) & 255, bb = b & 255;
+  const r = Math.round(ar + (br - ar) * t);
+  const g = Math.round(ag + (bg - ag) * t);
+  const bl = Math.round(ab + (bb - ab) * t);
+  return (r << 16) | (g << 8) | bl;
+}
+
+/** Ordu kompozisyonundan harita host silüeti: atlı → okçu → mızrak. */
+function armyKinds(army: { spear: number; archer: number; horse: number }, max: number): FigKind[] {
+  const tot = Math.max(1, armySize(army));
+  const n = Math.max(1, Math.min(max, Math.ceil(tot / 5)));
+  const nh = Math.min(n, Math.round((army.horse / tot) * n));
+  const na = Math.min(n - nh, Math.round((army.archer / tot) * n));
+  const out: FigKind[] = [];
+  for (let k = 0; k < n; k++) out.push(k < nh ? "rider" : k < nh + na ? "archer" : "spear");
+  return out;
+}
+
+/** Yığın gölgesi — portre tek başına kalmasın, host ‘ayak izi’ okunsun. */
+function hostMass(g: Graphics, n: number, tint = 0x2a1808): void {
+  g.clear();
+  if (n <= 0) return;
+  const w = 16 + Math.min(42, Math.sqrt(n) * 5.5);
+  g.ellipse(0, 22, w, w * 0.32).fill({ color: tint, alpha: 0.22 + Math.min(0.18, n / 200) });
+  g.ellipse(0, 22, w * 0.62, w * 0.18).fill({ color: 0x000000, alpha: 0.16 });
+}
 
 function makeAtlas(): { tex: Texture; trees: Texture[]; peaks: Texture[] } {
   const c = document.createElement("canvas");
@@ -155,9 +182,13 @@ export class WorldView {
   private ink = new Container();
   private units = new Container();
   private pathG = new Graphics();
+  private routeG = new Graphics();
   private fxG = new Graphics();
   /** Sahip olunan şehirlerin sur halkası: surlar yükseldikçe genişler/koyulaşır; başkentte her zaman soluk görünür. */
   private wallRingG = new Graphics();
+  /** Devlet toprak boyası — CK/AoE ‘haritadan oku’ siyaset. */
+  private realmG = new Graphics();
+  private realmLbl = new Container();
   private fog!: Sprite;
   private fogCanvas = document.createElement("canvas");
   private fogSmall = document.createElement("canvas");
@@ -226,24 +257,27 @@ export class WorldView {
 
   constructor(private app: Application, private world: World) {}
 
-  /** Flora/yurt/kamp soft-base; şehir/kale/kule CC0’ye soft-fade çerçevesi. */
+  /** Flora/yurt/kamp — Gemini webp varsa koru; yoksa procedural soft prop. */
   private injectProps(): void {
-    const yurts = yurtTextures(4);
     const palms = palmTextures(5);
     const bushes = bushTextures(4);
-    this.tex["map/yurts"] = yurts[0];
-    // sticker kampın sert dairesel dirt tabanı yerine soft kum kamp
-    this.tex["map/camp"] = propTex("camp", 0);
-    // CC0 köy sticker'ları yerine yurt kampıyla aynı oturuş mantığında prosedürel köy
-    this.tex["map/village"] = propTex("village", 0);
-    this.tex["map/village2"] = propTex("village", 1);
-    // baked canvas'ta "map/oasis" asset'i yok — procedural vaha üret
-    this.tex["map/oasis"] = propTex("oasis", 0);
-    this.tex["flora/palm"] = palms[0];
-    this.tex["flora/saxaul"] = bushes[0];
-    this.tex["flora/bush"] = bushes[1];
-    this.tex["flora/tamarisk"] = bushes[2];
-    yurts.forEach((t, i) => (this.tex[`prop/yurt${i}`] = t));
+    if (!this.tex["map/yurts"]) {
+      const yurts = yurtTextures(6);
+      this.tex["map/yurts"] = yurts[0]!;
+      yurts.forEach((t, i) => (this.tex[`prop/yurt${i}`] = t));
+    } else {
+      for (let i = 0; i < 6; i++) this.tex[`prop/yurt${i}`] = this.tex["map/yurts"]!;
+    }
+    if (!this.tex["map/camp"]) this.tex["map/camp"] = propTex("camp", 0);
+    if (!this.tex["map/village"]) this.tex["map/village"] = propTex("village", 0);
+    if (!this.tex["map/village2"]) this.tex["map/village2"] = propTex("village", 1);
+    if (!this.tex["map/village3"]) this.tex["map/village3"] = propTex("village", 2);
+    if (!this.tex["map/village4"]) this.tex["map/village4"] = propTex("village", 3);
+    if (!this.tex["map/oasis"]) this.tex["map/oasis"] = propTex("oasis", 0);
+    this.tex["flora/palm"] = palms[0]!;
+    this.tex["flora/saxaul"] = bushes[0]!;
+    this.tex["flora/bush"] = bushes[1]!;
+    this.tex["flora/tamarisk"] = bushes[2]!;
     palms.forEach((t, i) => (this.tex[`prop/palm${i}`] = t));
     bushes.forEach((t, i) => (this.tex[`prop/bush${i}`] = t));
     peakTextures().forEach((t, i) => (this.tex[`prop/peak${i}`] = t));
@@ -252,7 +286,8 @@ export class WorldView {
   /** Şehir/kale/kule CC0 dokularını yurt-kamp soft oturuş diline çek. */
   private softenCityAssets(): void {
     for (const k of Object.keys(this.tex)) {
-      if (k.startsWith("cities/") || k === "map/castle" || k === "map/tower" || k === "map/tower_wood" || k === "map/barracks") {
+      // Gemini cutout’ları (castle/serai/camp) zaten alpha’lı — soft-iso sadece eski CC0 şehir/kule
+      if (k.startsWith("cities/") || k === "map/tower" || k === "map/tower_wood" || k === "map/barracks") {
         this.tex[k] = softenIsoTex(this.tex[k]);
       }
     }
@@ -278,13 +313,16 @@ export class WorldView {
       this.layer.addChild(terrain);
     }
     this.layer.addChild(this.pathG);
+    this.layer.addChild(this.routeG);
     this.buildDeco();
     this.layer.addChild(this.deco);
     this.layer.addChild(this.seasonG);
     this.buildPlaces();
     this.layer.addChild(this.scarG);
+    this.layer.addChild(this.realmG);
     this.layer.addChild(this.wallRingG);
     this.layer.addChild(this.places);
+    this.layer.addChild(this.realmLbl);
     this.layer.addChild(this.labels);
     this.layer.addChild(this.units);
     this.layer.addChild(this.fxG);
@@ -555,6 +593,8 @@ export class WorldView {
       const sh = w.short[c.id] ?? 0;
       if (sh >= 3 && game.isExplored(c.x, c.y)) this.smoke(c.x - 30, c.y - 30, Math.min(1, (sh - 2) / 4), sh >= 6 ? 0x2a2420 : 0x6a5c4e, Math.min(1.8, inv));
     }
+    // P2: Eco harita okunurluğu — kıtlık/bolluk rozeti + yük fırsat oku (AoE ‘haritadan oku’)
+    this.drawEcoPins(game, inv);
     if (w.drought && game.isExplored(w.drought.x, w.drought.y)) {
       const d = w.drought;
       const a = 0.14 + Math.sin(this.time * 1.3) * 0.03;
@@ -630,6 +670,168 @@ export class WorldView {
       const sw = 20 * inv;
       g.moveTo(x - sw, y - sw).lineTo(x + sw, y + sw).moveTo(x + sw, y - sw).lineTo(x - sw, y + sw).stroke({ color: 0x8a1010, width: 9 * inv, alpha: 0.95 });
       g.moveTo(x - sw, y - sw).lineTo(x + sw, y + sw).moveTo(x + sw, y - sw).lineTo(x - sw, y + sw).stroke({ color: 0xe03020, width: 5 * inv, alpha: 0.95 });
+    }
+  }
+
+  /** CK-vari ülke: konveks gövde sınırı + soft dolgu + savaş nabzı. */
+  private drawRealms(game: Game, warFacs: Set<FactionId>, zoom: number): void {
+    const g = this.realmG.clear();
+    if (!game.s.free) {
+      this.realmLbl.visible = false;
+      return;
+    }
+    this.realmLbl.visible = true;
+    const zf = zoom < 0.35 ? 1.2 : zoom > 0.9 ? 0.5 : 1;
+    const pos = (id: string) => CITIES.find((c) => c.id === id)!;
+
+    const paintRealm = (key: string, pts: Pt[], col: number, hex: string, war: boolean, label: string) => {
+      if (!pts.length) return;
+      const pulse = war ? 1 + Math.sin(this.time * 2.4) * 0.06 : 1;
+      const cx = pts.reduce((s, p) => s + p.x, 0) / pts.length;
+      const cy = pts.reduce((s, p) => s + p.y, 0) / pts.length;
+      // şehir lekeleri
+      for (const p of pts) {
+        const r = 200 * zf * pulse;
+        g.ellipse(p.x, p.y, r, r * 0.58).fill({ color: col, alpha: (war ? 0.16 : 0.11) * zf });
+      }
+      const hull0 = convexHull(pts);
+      if (hull0.length >= 3) {
+        const hull = inflateHull(hull0, 160 * zf);
+        g.poly(hull.flatMap((p) => [p.x, p.y])).fill({ color: col, alpha: (war ? 0.12 : 0.07) * zf });
+        g.poly(hull.flatMap((p) => [p.x, p.y])).stroke({
+          color: col,
+          width: (war ? 5.5 : 3.5) * zf * pulse,
+          alpha: (war ? 0.72 : 0.48) * Math.min(1, zf + 0.2),
+        });
+        // iç çizgi — CK çift sınır hissi
+        const inner = inflateHull(hull0, 90 * zf);
+        g.poly(inner.flatMap((p) => [p.x, p.y])).stroke({
+          color: 0xffffff,
+          width: 1.2 * zf,
+          alpha: (war ? 0.22 : 0.12) * zf,
+        });
+      } else if (hull0.length === 2) {
+        g.moveTo(hull0[0]!.x, hull0[0]!.y).lineTo(hull0[1]!.x, hull0[1]!.y);
+        g.stroke({ color: col, width: 4 * zf, alpha: 0.4 });
+      }
+      let lb = this.realmLbl.getChildByLabel(key) as Text | null;
+      if (!lb) {
+        lb = new Text({
+          text: label,
+          style: { ...LABEL_STYLE, fontSize: 22, fill: hex, stroke: { color: "#1a0e04", width: 6 } },
+        });
+        lb.label = key;
+        lb.anchor.set(0.5);
+        lb.resolution = 2;
+        this.realmLbl.addChild(lb);
+      }
+      lb.text = war ? `${label} ⚔` : label;
+      lb.style.fill = hex;
+      lb.position.set(cx, cy - 36);
+      lb.alpha = Math.min(0.98, 0.4 + zf * 0.55);
+      lb.scale.set(Math.min(2.4, Math.max(0.9, 0.8 / zoom)));
+      lb.visible = zoom < 1.1;
+    };
+
+    for (const f of FACTION_KEYS) {
+      // fethedilmiş şehirler oyuncu boyasına gider
+      const cities = citiesOf(f).map(pos).filter((c) => !game.s.owned[c.id]);
+      if (!cities.length) continue;
+      paintRealm(f, cities, parseInt(FACTIONS[f].color.slice(1), 16), FACTIONS[f].color, warFacs.has(f), FACTIONS[f].short);
+    }
+    // oyuncu beyliği
+    const mine = CITIES.filter((c) => game.s.owned[c.id]);
+    if (mine.length) paintRealm("me", mine, 0xffd56a, "#ffd56a", false, tr("Senin toprakların"));
+
+    const keep = new Set([...FACTION_KEYS, "me"]);
+    for (const ch of [...this.realmLbl.children]) {
+      const id = ch.label;
+      if (typeof id === "string" && !keep.has(id)) ch.destroy();
+      else if (typeof id === "string" && id !== "me" && FACTION_KEYS.includes(id as FactionId)) {
+        const left = citiesOf(id as FactionId).some((cid) => !game.s.owned[cid]);
+        ch.visible = left && zoom < 1.1;
+      } else if (id === "me") ch.visible = mine.length > 0 && zoom < 1.1;
+    }
+  }
+
+  /** Şehir üstünde kıtlık▲ / bolluk▼ rozeti; elde mal varsa en iyi alıcıya altın fırsat hattı. */
+  private drawEcoPins(game: Game, inv: number): void {
+    const s = game.s;
+    const w = s.wd;
+    if (!w || !s.free) return;
+    const g = this.fxG;
+    const day = game.dayOf().day;
+    for (const c of CITIES) {
+      if (!game.isExplored(c.x, c.y)) continue;
+      const sh = w.short[c.id] ?? 0;
+      const glut = (s.events ?? []).some((e) => e.city === c.id && e.mult < 1 && e.until > day);
+      const dear = (s.events ?? []).some((e) => e.city === c.id && e.mult > 1 && e.until > day);
+      const show = sh >= 3 || dear || glut;
+      if (!show) continue;
+      const hot = sh >= 5 || dear;
+      const bob = Math.sin(this.time * 3.2 + c.x * 0.01) * 5 * inv;
+      const bx = c.x + 52 * inv;
+      const by = c.y - 78 * inv + bob;
+      const fill = hot ? 0xff6a3a : glut ? 0x6fe07a : 0xffd040;
+      const rim = hot ? 0xffd080 : glut ? 0xc8ffb0 : 0xffe8a0;
+      g.circle(bx, by, 15 * inv).fill({ color: 0x1a0e04, alpha: 0.72 });
+      g.circle(bx, by, 12 * inv).fill({ color: fill, alpha: 0.95 });
+      g.circle(bx, by, 12 * inv).stroke({ color: rim, width: 2 * inv, alpha: 0.9 });
+      // ▲ kıtlık / ▼ bolluk
+      if (glut && sh < 3) {
+        g.poly([bx, by + 7 * inv, bx - 6 * inv, by - 4 * inv, bx + 6 * inv, by - 4 * inv]).fill({ color: 0x1a3010, alpha: 0.95 });
+      } else {
+        g.poly([bx, by - 7 * inv, bx - 6 * inv, by + 4 * inv, bx + 6 * inv, by + 4 * inv]).fill({ color: 0x2a1008, alpha: 0.95 });
+      }
+      if (hot) {
+        const pr = (this.time * 1.1 + c.x * 0.002) % 1;
+        g.circle(bx, by, 16 + pr * 22).stroke({ color: fill, width: 2 * inv, alpha: 0.55 * (1 - pr) });
+      }
+    }
+    // Elindeki mal → en kârlı şehir (fırsat hattı)
+    const h = s.hero;
+    const carried = GOOD_KEYS.filter((k) => (h.cargo[k] ?? 0) > 0);
+    if (!carried.length) return;
+    let best: { c: (typeof CITIES)[0]; gain: number; k: Good } | null = null;
+    for (const k of carried) {
+      const paid = Math.round((h.paid[k] ?? 0) / Math.max(1, h.cargo[k] ?? 1));
+      for (const c of CITIES) {
+        if (game.hostile(c.id) || !game.isExplored(c.x, c.y)) continue;
+        const sell = game.sellPrice(c.id, k);
+        const gain = sell - paid;
+        if (gain > 0 && (!best || gain > best.gain)) best = { c, gain, k };
+      }
+    }
+    if (!best || best.gain < 8) return;
+    const { c, gain } = best;
+    const hx = h.x;
+    const hy = h.y;
+    const dx = c.x - hx;
+    const dy = c.y - hy;
+    const dist = Math.hypot(dx, dy) || 1;
+    const n = Math.min(24, Math.max(6, Math.floor(dist / 90)));
+    const ph0 = (this.time * 0.35) % 1;
+    for (let i = 0; i < n; i++) {
+      const t = ((i / n) + ph0) % 1;
+      if (t < 0.08 || t > 0.92) continue;
+      const x = hx + dx * t;
+      const y = hy + dy * t;
+      g.circle(x, y, 5 * inv).fill({ color: 0xffd040, alpha: 0.35 + 0.45 * Math.sin(t * Math.PI) });
+    }
+    // hedefte kâr rozeti
+    const bob = Math.sin(this.time * 4) * 3 * inv;
+    g.circle(c.x, c.y - 110 * inv + bob, 18 * inv).fill({ color: 0x1a1204, alpha: 0.75 });
+    g.circle(c.x, c.y - 110 * inv + bob, 14 * inv).fill({ color: 0xffe08a, alpha: 0.95 });
+    g.circle(c.x, c.y - 110 * inv + bob, 14 * inv).stroke({ color: 0xffd040, width: 2.5 * inv, alpha: 1 });
+    // küçük artı işareti (= kâr)
+    const px = c.x;
+    const py = c.y - 110 * inv + bob;
+    g.rect(px - 1.5 * inv, py - 7 * inv, 3 * inv, 14 * inv).fill({ color: 0x3a2808 });
+    g.rect(px - 7 * inv, py - 1.5 * inv, 14 * inv, 3 * inv).fill({ color: 0x3a2808 });
+    // kâr büyüdükçe rozet nabzı
+    if (gain >= 40) {
+      const pr = (this.time * 1.4) % 1;
+      g.circle(px, py, 16 + pr * 20).stroke({ color: 0xffd040, width: 2 * inv, alpha: 0.5 * (1 - pr) });
     }
   }
 
@@ -734,7 +936,7 @@ export class WorldView {
       }
       return false;
     };
-    for (let y = 3; y < GH - 3; y += 5) for (let x = 3; x < GW - 3; x += 5) {
+    for (let y = 3; y < GH - 3; y += 4) for (let x = 3; x < GW - 3; x += 4) {
       const n = y * GW + x;
       const r = hash(n * 7 + 1);
       const h = height[n], m = moist[n];
@@ -742,15 +944,46 @@ export class WorldView {
       const wx = (x + (hash(n + 2) - 0.5) * 4) * sx, wy = (y + (hash(n + 4) - 0.5) * 4) * sy;
       if (road[Math.floor((wy / H) * NH) * NW + Math.floor((wx / W) * NW)]) continue;
       if (CITIES.some((c) => Math.abs(c.x - wx) < 80 && Math.abs(c.y - wy) < 60)) continue;
-      if (palms.length && m < 0.45 && r < 0.28 && nearRiver(x, y)) {
+      if (palms.length && m < 0.45 && r < 0.36 && nearRiver(x, y)) {
         const p = palms[Math.floor(hash(n + 11) * palms.length)];
         tree(p, wx, wy, 48 + hash(n + 9) * 22, hash(n + 6));
         continue;
       }
-      if (!shrub.length || m > 0.5 || r > (m < 0.25 ? 0.04 : 0.07)) continue;
+      // P0: densite ↑ — bozkır çalıları daha sık (AoE ‘dolu dünya’ okunurluğu)
+      if (!shrub.length || m > 0.55 || r > (m < 0.25 ? 0.14 : 0.2)) continue;
       const sp = shrub[Math.floor(hash(n + 8) * shrub.length)];
       tree(sp, wx, wy, 16 + hash(n + 9) * 10, hash(n + 6));
+      if (r < 0.07 && shrub.length) {
+        const sp2 = shrub[Math.floor(hash(n + 19) * shrub.length)];
+        tree(sp2, wx + (hash(n + 21) - 0.5) * 28, wy + (hash(n + 23) - 0.5) * 18, 12 + hash(n + 25) * 8, hash(n + 27));
+      }
     }
+  }
+
+  /** Köy/oba çevresine yerel çalı kümesi — sticker köyü ‘yerleşim adası’ gibi okutur. */
+  private scatterVillageClusters(villages: { x: number; y: number; yurt?: boolean }[]): void {
+    const shrub = [0, 1, 2, 3].map((i) => this.tex[`prop/bush${i}`]).filter(Boolean);
+    if (!shrub.length || !villages.length) return;
+    const hash = (n: number) => (((n * 2654435761) ^ (n >>> 7) * 40503) >>> 0) / 4294967296;
+    const g = new Container();
+    g.cullable = true;
+    for (let vi = 0; vi < villages.length; vi++) {
+      const v = villages[vi];
+      const n = 3 + Math.floor(hash(vi * 97 + 3) * 3);
+      for (let k = 0; k < n; k++) {
+        const ang = hash(vi * 31 + k * 17) * Math.PI * 2;
+        const dist = 48 + hash(vi * 13 + k * 7) * 55;
+        const s = new Sprite(shrub[Math.floor(hash(vi + k * 9) * shrub.length)]);
+        s.anchor.set(0.5, 0.9);
+        s.position.set(v.x + Math.cos(ang) * dist, v.y + Math.sin(ang) * dist * 0.72);
+        const sc = (0.55 + hash(vi + k) * 0.45) * (14 + hash(k + 2) * 10) / Math.max(1, s.texture.height);
+        s.scale.set(sc * (hash(k + 5) > 0.5 ? 1 : -1), sc);
+        s.tint = v.yurt ? 0xd8c898 : 0xc8d8a8;
+        s.alpha = 0.82;
+        g.addChild(s);
+      }
+    }
+    this.deco.addChild(g);
   }
 
   private label(text: string, x: number, y: number, size = 1): Text {
@@ -765,15 +998,22 @@ export class WorldView {
   private isSoftSeated(key: string): boolean {
     return (
       key === "map/yurts" ||
+      key === "map/yurts2" ||
       key === "map/camp" ||
+      key === "map/oasis" ||
+      key === "map/kurgan" ||
+      key === "map/serai" ||
       key === "map/village" ||
       key === "map/village2" ||
+      key === "map/village3" ||
+      key === "map/village4" ||
       key.startsWith("prop/yurt") ||
       key.startsWith("cities/") ||
       key === "map/castle" ||
       key === "map/tower" ||
       key === "map/tower_wood" ||
-      key === "map/barracks"
+      key === "map/barracks" ||
+      key === "map/siege"
     );
   }
 
@@ -790,12 +1030,20 @@ export class WorldView {
           .ellipse(0, footY + 2, w * 0.4, w * 0.14).fill({ color: 0xb89058, alpha: 0.18 })
           .ellipse(1, footY + 3, w * 0.3, w * 0.1).fill({ color: 0x2a1808, alpha: 0.16 });
     let texKey = key;
-    if (key === "map/yurts") texKey = `prop/yurt${Math.abs(Math.floor(x * 0.13 + y * 0.07)) % 4}`;
-    else if (key === "map/village") texKey = (Math.abs(Math.floor(x + y)) % 2 === 0 && this.tex["map/village2"]) ? "map/village2" : "map/village";
+    if (key === "map/yurts") texKey = `prop/yurt${Math.abs(Math.floor(x * 0.13 + y * 0.07)) % 6}`;
+    else if (key === "map/village") {
+      const vi = Math.abs(Math.floor(x * 0.11 + y * 0.09)) % 4;
+      texKey = vi === 0 ? "map/village" : `map/village${vi + 1}`;
+      if (!this.tex[texKey]) texKey = "map/village";
+    }
     const s = new Sprite(this.t(texKey));
     s.anchor.set(0.5, 0.92);
     s.scale.set(w / Math.max(1, s.texture.width));
     s.label = "img";
+    // Painted vignette dili: gece kampı/photoreal kenarları haritaya uyumlu tint
+    if (key === "map/camp") s.tint = 0xc8b090;
+    else if (key === "map/oasis") s.tint = 0xf0ebe0;
+    else if (key === "map/castle" || key === "map/serai" || key === "map/siege") s.tint = 0xf2e8d8;
     c.addChild(ground, s);
     c.position.set(x, y);
     c.cullable = true;
@@ -837,7 +1085,11 @@ export class WorldView {
   private buildPlaces(): void {
     CITIES.forEach((c) => {
       const cap = c.id === CAPITAL.id;
-      const m = this.place("cities/" + c.id, c.x, c.y, cap ? MAP_W.cityCap : MAP_W.city, CITY_NAME[c.id] + (cap ? " ★" : ""), cap ? 1.25 : 1.05);
+      const sc = CITY_SCALE[c.id] ?? 1;
+      const w = (cap ? MAP_W.cityCap : MAP_W.city) * sc;
+      const m = this.place("cities/" + c.id, c.x, c.y, w, CITY_NAME[c.id] + (cap ? " ★" : ""), cap ? 1.25 : 1.05);
+      const tint = CITY_TINT[c.id];
+      if (tint) m.sp.tint = tint;
       this.cityM.push(m);
     });
     this.buildMarks();
@@ -909,6 +1161,7 @@ export class WorldView {
     // hiyerarşi: şehir(170–210) > kale > köy > kamp > birlik
     this.villageM = s.villages.map((v) => this.place(v.yurt ? "map/yurts" : "map/village", v.x, v.y, v.yurt ? MAP_W.yurt : MAP_W.village, v.name, 0.68));
     this.villageSt = s.villages.map(() => undefined);
+    this.scatterVillageClusters(s.villages);
     this.campM = s.camps.map((c) => this.place("map/camp", c.x, c.y, MAP_W.camp, c.name, 0.68));
     this.campFires = s.camps.map((c) => {
       const f = new Sprite(this.glow);
@@ -944,10 +1197,6 @@ export class WorldView {
     this.heroPortrait(game.face());
   }
 
-  private ring(color: number, r: number): Graphics {
-    return new Graphics().circle(0, 0, r).fill({ color: 0x1a0f06, alpha: 0.9 }).circle(0, 0, r).stroke({ color, width: 4 });
-  }
-
   private mongolM: Container | null = null;
   private mongolG = new Graphics();
   private burnM = new Map<string, Sprite>();
@@ -959,7 +1208,7 @@ export class WorldView {
     g.clear();
     if (p) {
       if (!this.mongolM) {
-        this.mongolM = this.portrait("heroes/boss_hakan", 22, 0xc0392b);
+        this.mongolM = this.portrait("heroes/boss_hakan", 26, 0xc0392b, "mongol");
         const t = new Text({ text: "Moğol Tümeni", style: { ...LABEL_STYLE, fontSize: 14, fill: "#ffb4a0" } });
         t.anchor.set(0.5, 0);
         t.position.set(0, 26);
@@ -988,7 +1237,7 @@ export class WorldView {
       const burning = fallen.some((f) => f.id === c.id);
       const scarred = !burning && game.cityScarred(c.id);
       const m = this.cityM[i];
-      if (m) m.sp.tint = burning ? 0x8a6656 : scarred ? 0xab9684 : 0xffffff;
+      if (m) m.sp.tint = burning ? 0x8a6656 : scarred ? 0xab9684 : CITY_TINT[c.id] ?? 0xffffff;
       let f = this.burnM.get(c.id);
       if (burning && !f) {
         f = new Sprite(this.glow);
@@ -1009,25 +1258,16 @@ export class WorldView {
     });
   }
 
-  private portrait(key: string, r: number, color: number): Container {
-    const c = new Container();
-    c.addChild(this.ring(color, r + 3));
-    const s = new Sprite(this.t(key));
-    s.anchor.set(0.5);
-    const sc = (r * 2.1) / Math.max(s.texture.width, s.texture.height);
-    s.scale.set(sc);
-    s.label = "face";
-    const mask = new Graphics().circle(0, 0, r).fill(0xffffff);
-    s.mask = mask;
-    c.addChild(mask, s);
-    return c;
+  private portrait(key: string, r: number, color: number, kind: TokenKind = "ally"): Container {
+    return mapPortrait(this.t(key), r, kind, color);
   }
 
   heroPortrait(key: string): void {
     const s = this.hero.getChildByLabel("face", true) as Sprite | null;
     if (!s) return;
     s.texture = this.t(key);
-    s.scale.set(44 / Math.max(s.texture.width, s.texture.height));
+    const r = 18;
+    s.scale.set((r * 2.05) / Math.max(1, s.texture.width, s.texture.height));
     this.heroFlag.visible = key !== "heroes/slave";
   }
 
@@ -1078,36 +1318,37 @@ export class WorldView {
     const c = new Container();
     // temas gölgesi — uçan siyah disk değil
     const sh = new Graphics()
-      .ellipse(0, 38, 28, 9).fill({ color: 0xc9a46a, alpha: 0.3 })
-      .ellipse(1, 39, 22, 6).fill({ color: 0x2a1808, alpha: 0.22 });
+      .ellipse(0, 52, 36, 11).fill({ color: 0xc9a46a, alpha: 0.3 })
+      .ellipse(1, 53, 28, 7).fill({ color: 0x2a1808, alpha: 0.22 });
     const flag = new Sprite(this.t("tug"));
     flag.anchor.set(0.5, 1);
-    flag.scale.set(42 / flag.texture.height);
-    flag.position.set(20, -6);
-    const p = this.portrait("heroes/hero1", 14, 0xffd56a);
-    this.heroCount = new Text({ text: "0", style: { ...LABEL_STYLE, fontSize: 20 } });
+    flag.scale.set(36 / flag.texture.height);
+    flag.position.set(22, -4);
+    // minik yüz rozeti — ana okuma full-body Fig
+    const p = this.portrait("heroes/hero1", 10, 0xffd56a, "hero");
+    p.alpha = 0.92;
+    this.heroCount = new Text({ text: "0", style: { ...LABEL_STYLE, fontSize: 16 } });
     this.heroCount.anchor.set(0.5, 0);
-    this.heroCount.position.set(0, 44);
+    this.heroCount.position.set(0, 58);
     this.heroCount.resolution = 2;
     this.heroBars = new Graphics();
     this.heroTamga = new Sprite();
     this.heroTamga.anchor.set(0.5);
-    this.heroTamga.position.set(26, -36);
+    this.heroTamga.position.set(22, -28);
     this.heroHorse = new Sprite();
     this.heroHorse.anchor.set(0.5, 0.8);
-    this.heroHorse.position.set(-4, 30);
+    this.heroHorse.position.set(-4, 42);
     this.heroHorse.visible = false;
     this.gearWeap.anchor.set(0.5);
     this.gearWeap.position.set(-18, 10);
     this.gearWeap.visible = false;
     const badge = new Container();
-    // rozet küçük — asıl görünüm figür; portre baskın olmasın
     badge.addChild(flag, this.heroTamga, p, this.gearG, this.gearWeap);
-    badge.position.set(0, -56);
-    badge.scale.set(0.46);
+    badge.position.set(0, -72);
+    badge.scale.set(0.38);
     this.heroBadge = badge;
-    this.heroFig = new Fig(figureFrames("sword", HERO_STYLE), 44);
-    this.heroFig.position.set(0, 28);
+    this.heroFig = new Fig(figureFrames("sword", HERO_STYLE), 68);
+    this.heroFig.position.set(0, 42);
     sh.position.set(0, 4);
     c.addChild(sh, this.heroHorse, this.heroFig, badge, this.heroCount, this.heroBars);
     this.heroFlag = flag;
@@ -1368,8 +1609,8 @@ export class WorldView {
         const c = new Container();
         const aura = new Graphics();
         aura.label = "aura";
-        const port = this.portrait(b.icon, 30, 0xff4a3a);
-        port.position.set(0, -44);
+        const port = this.portrait(b.icon, 34, 0xc58cff, "boss");
+        port.position.set(0, -48);
         const base = new Sprite(this.t("map/kurgan"));
         base.anchor.set(0.5, 0.8);
         base.scale.set(70 / Math.max(1, base.texture.width));
@@ -1410,20 +1651,38 @@ export class WorldView {
     });
   }
 
-  private caravan(id: number, color: number): Container {
+  private caravan(id: number, color: number, goodIcon = "j_caravan"): Container {
     let c = this.caravansM.get(id);
-    if (c) return c;
+    if (c) {
+      const bub = c.getChildByLabel("bub") as Container | undefined;
+      if (bub) {
+        const face = bub.getChildByLabel("face") as Sprite | undefined;
+        if (face && this.tex[goodIcon]) face.texture = this.t(goodIcon);
+      }
+      return c;
+    }
     c = new Container();
     const sh = new Graphics()
       .ellipse(0, 20, 18, 5.6).fill({ color: 0x000000, alpha: 0.12 })
       .ellipse(0, 20, 13, 4).fill({ color: 0x000000, alpha: 0.16 })
       .ellipse(0, 20, 7, 2.4).fill({ color: 0x000000, alpha: 0.2 });
-    const p = this.portrait("j_caravan", 16, color);
+    const p = this.portrait("j_caravan", 20, color, "caravan");
+    p.position.set(0, -6);
     const ex = new Text({ text: "⚔", style: { ...LABEL_STYLE, fontSize: 22, fill: "#ff5a3c" } });
     ex.anchor.set(0.5, 1);
-    ex.position.set(0, -18);
+    ex.position.set(0, -28);
     ex.label = "ex";
-    c.addChild(sh, p, ex);
+    // Fiyat / mal balonu
+    const bub = new Container();
+    bub.label = "bub";
+    bub.position.set(22, -34);
+    const bg = new Graphics().roundRect(-14, -14, 28, 28, 8).fill({ color: 0x1a1008, alpha: 0.88 }).stroke({ color: 0xffd56a, width: 1.5, alpha: 0.9 });
+    const bi = new Sprite(this.t(goodIcon));
+    bi.anchor.set(0.5);
+    bi.scale.set(22 / Math.max(1, bi.texture.width));
+    bi.label = "face";
+    bub.addChild(bg, bi);
+    c.addChild(sh, p, ex, bub);
     this.units.addChild(c);
     this.caravansM.set(id, c);
     return c;
@@ -1434,43 +1693,60 @@ export class WorldView {
     if (c) return c;
     c = new Container();
     const reg = regionAt(x, y);
-    const st: FigStyle = posse ? { coat: "#2a4a8a", trim: "#d8d8e8", hat: "migfer", hatCol: "#a0a0b0", horse: "#5a3a20" } : nem ? { ...REGION_STYLE[reg.id], cape: "#4a1a6a" } : REGION_STYLE[reg.id];
-    const horsey = posse || reg.mix[2] >= 0.4;
-    const kinds: FigKind[] = horsey ? ["rider", reg.mix[1] >= 0.3 ? "horsearcher" : "rider"] : ["spear", reg.mix[1] >= 0.4 ? "archer" : "sword"];
+    const st: FigStyle = posse
+      ? { coat: "#2a4a8a", trim: "#d8d8e8", hat: "migfer", hatCol: "#a0a0b0", horse: "#5a3a20" }
+      : nem
+        ? { ...REGION_STYLE[reg.id], cape: "#4a1a6a" }
+        : REGION_STYLE[reg.id];
+    // id hash → çeşit: her çete farklı karışım (hepsi atlı olmasın)
+    const roll = (id * 9301 + 49297) % 100;
+    const kinds: FigKind[] = posse
+      ? ["rider", "horsearcher", "spear"]
+      : roll < 28
+        ? ["spear", "spear", "archer"]
+        : roll < 52
+          ? ["archer", "sword", "spear"]
+          : roll < 72
+            ? ["rider", "archer"]
+            : roll < 88
+              ? ["horsearcher", "rider"]
+              : ["sword", "spear", "archer"];
+    const mass = new Graphics();
+    mass.label = "mass";
     const figs = new Container();
     figs.label = "figs";
+    // ilk silüet; orduya göre update’te yenilenir
     kinds.forEach((k, i) => {
-      const f = new Fig(figureFrames(k, st), k === "rider" || k === "horsearcher" ? 46 : 40);
-      f.position.set(i ? -12 : 8, i ? 10 : 14);
+      const mounted = k === "rider" || k === "horsearcher";
+      const f = new Fig(figureFrames(k, st), mounted ? 58 : 52);
+      f.position.set((i - (kinds.length - 1) / 2) * 18, 10 + (i % 2) * 7);
       figs.addChild(f);
     });
-    // figürler zaten gölge taşıyor; ekstra uçan disk yok
-    c.addChild(figs);
-    // rozet sadece nemesis’te — normal haydutlarda çöp-adam + ikon karmaşası olmasın
+    // ayak halkası — üst portre/damla yok; birlik Fig okunur
+    const halo = new Graphics().ellipse(0, 48, 28, 10).stroke({ color: nem ? 0xa64dff : 0xff5a3a, width: 2.2, alpha: 0.5 });
+    c.addChild(mass, halo, figs);
     if (nem) {
-      const p = this.portrait("j_bandit", 22, 0xa64dff);
-      p.scale.set(0.7);
-      p.position.set(0, -56);
-      const glow = new Graphics().circle(0, -56, 28).fill({ color: 0xa64dff, alpha: 0.2 });
+      const glow = new Graphics().ellipse(0, 48, 34, 12).fill({ color: 0xa64dff, alpha: 0.18 });
       glow.label = "glow";
-      c.addChild(glow, p);
+      c.addChild(glow);
       const nl = new Text({ text: nem, style: { ...LABEL_STYLE, fontSize: 14, fill: "#e6c4ff" } });
       nl.anchor.set(0.5, 0);
-      nl.position.set(0, 52);
+      nl.position.set(0, 72);
       nl.resolution = 2;
       c.addChild(nl);
-    } else if (posse) {
-      const ring = new Graphics().circle(0, -48, 10).stroke({ color: 0x4a8cff, width: 3, alpha: 0.85 });
+    }
+    if (posse) {
+      const ring = new Graphics().ellipse(0, 48, 32, 11).stroke({ color: 0x4a8cff, width: 2.5, alpha: 0.85 });
       c.addChild(ring);
     }
-    const t = new Text({ text: "", style: { ...LABEL_STYLE, fontSize: 18, fill: "#ffc4b4" } });
+    const t = new Text({ text: "", style: { ...LABEL_STYLE, fontSize: 15, fill: "#ffc4b4" } });
     t.anchor.set(0.5, 0);
-    t.position.set(0, 42);
+    t.position.set(0, 56);
     t.resolution = 2;
     t.label = "count";
     const ex = new Text({ text: "!", style: { ...LABEL_STYLE, fontSize: 28, fill: "#ff5a3c" } });
     ex.anchor.set(0.5, 1);
-    ex.position.set(0, -62);
+    ex.position.set(0, -8);
     ex.label = "ex";
     c.addChild(t, ex);
     this.units.addChild(c);
@@ -1482,13 +1758,25 @@ export class WorldView {
     let c = this.marchesM.get(id);
     if (c) return c;
     c = new Container();
-    const p = this.portrait("soldier", 14, 0x7fd36a);
+    const figs = new Container();
+    figs.label = "figs";
+    // varsayılan karışık birlik silüeti — güncellemede orduya göre yenilenir
+    (["spear", "archer", "rider"] as FigKind[]).forEach((k, i) => {
+      const f = new Fig(figureFrames(k, TROOP_STYLE), k === "rider" ? 40 : 34);
+      f.position.set((i - 1) * 12, 6 + (i % 2) * 4);
+      figs.addChild(f);
+    });
+    const flag = new Graphics()
+      .rect(-1, -36, 2, 28)
+      .fill(0x3a2410)
+      .poly([1, -36, 16, -30, 1, -24])
+      .fill(0x7fd36a);
     const t = new Text({ text: "", style: { ...LABEL_STYLE, fontSize: 13, fill: "#d4ffc4" } });
     t.anchor.set(0.5, 0);
-    t.position.set(0, 16);
+    t.position.set(0, 28);
     t.resolution = 2;
     t.label = "txt";
-    c.addChild(p, t);
+    c.addChild(figs, flag, t);
     this.units.addChild(c);
     this.marchesM.set(id, c);
     return c;
@@ -1496,13 +1784,28 @@ export class WorldView {
 
   update(dt: number, game: Game, cam: Camera): void {
     const s = game.s;
+    // En kârlı İpek Yolu rotası (hür oyuncuya altın çizgi ipucu)
+    this.routeG.clear();
+    if (s.free && s.hero.lv >= 2) {
+      const rt = bestTradeRoute();
+      if (rt) {
+        const a = cityXY(rt.from);
+        const b = cityXY(rt.to);
+        if (a && b) {
+          const pulse = 0.35 + Math.abs(Math.sin(this.time * 1.4)) * 0.35;
+          this.routeG.moveTo(a.x, a.y).lineTo(b.x, b.y).stroke({ width: 5, color: 0xffd56a, alpha: pulse * 0.55 });
+          this.routeG.moveTo(a.x, a.y).lineTo(b.x, b.y).stroke({ width: 2, color: 0xfff0c0, alpha: pulse });
+        }
+      }
+    }
     this.time += dt;
     this.terrain?.tick(dt, game.season());
     const h = s.hero;
     const moving = !!h.path;
     this.hero.position.set(h.x, h.y);
     const n = armySize(h.army);
-    this.heroCount.text = n > 0 ? String(n) : "";
+    // AoE-tarzı okunur kompozisyon: toplam · mızrak/okçu/atlı
+    this.heroCount.text = n > 0 ? `${n} · ${h.army.spear}/${h.army.archer}/${h.army.horse}` : "";
     this.syncTamga(s.free ? s.tamga : undefined);
     const inv = Math.min(2.0, Math.max(0.7, 0.85 / cam.zoom));
     // orta bant: zoom’dan bağımsız ~okunur silüet; şehir(170–210) hâlâ büyük
@@ -1516,10 +1819,14 @@ export class WorldView {
       this.heroHorse.visible = false;
       const st: FigStyle = { ...HERO_STYLE, horse: hk === "mount_3" ? "#e8e0d0" : hk === "mount_2" ? "#5a3418" : "#8a7a6a" };
       this.heroFig.setFrames(figureFrames(hk ? "rider" : "sword", st));
-      this.heroFig.size = hk ? 48 : 44;
+      this.heroFig.size = hk ? 72 : 68;
     }
     this.heroFig.tick(dt, moving ? game.heroSpeed() : 0, this.face, hk ? 1.25 : 1);
-    this.heroBadge.y = -50 - (moving ? Math.abs(Math.sin(this.time * 9)) * 1.5 : 0);
+    this.heroBadge.y = -72 - (moving ? Math.abs(Math.sin(this.time * 9)) * 1.5 : 0);
+    {
+      const tok = this.heroBadge.children.find((ch) => typeof ch.label === "string" && ch.label.startsWith("tok_")) as Container | undefined;
+      if (tok) tickToken(tok, this.time, "hero");
+    }
     this.syncGear(game);
     this.dustAcc += moving && s.free ? dt : 0;
     while (this.dustAcc > 0.07) {
@@ -1542,7 +1849,7 @@ export class WorldView {
     s.comps.forEach((id, i) => {
       let c = this.compM.get(id);
       if (!c) {
-        c = this.portrait("companions/" + id, 12, 0x8fe07a);
+        c = this.portrait("companions/" + id, 14, 0x8fe07a, "ally");
         this.units.addChildAt(c, 0);
         this.compM.set(id, c);
       }
@@ -1552,18 +1859,16 @@ export class WorldView {
       const escorting = id === s.escort;
       const fx = escorting ? h.x + this.face * 30 : Math.hypot(tx - h.x, ty - h.y) < 8 ? h.x - 26 + i * 26 : tx;
       const fy = escorting ? h.y - 2 : Math.hypot(tx - h.x, ty - h.y) < 8 ? h.y + 30 : ty;
-      c.position.set(c.x + (fx - c.x) * Math.min(1, dt * (escorting ? 9 : 6)), c.y + (fy - c.y) * Math.min(1, dt * (escorting ? 9 : 6)) - (moving ? Math.abs(Math.sin(this.time * 9 + i)) * 2 : 0));
-      c.scale.set(escorting ? inv * 1.1 : inv);
+      const bob = moving ? Math.abs(Math.sin(this.time * (escorting ? 11 : 9) + i)) * (escorting ? 3.2 : 2) : 0;
+      c.position.set(c.x + (fx - c.x) * Math.min(1, dt * (escorting ? 10 : 6)), c.y + (fy - c.y) * Math.min(1, dt * (escorting ? 10 : 6)) - bob);
+      c.scale.set(escorting ? inv * 1.18 : inv);
+      tickToken(c, this.time + i, "ally");
     });
     const ar = h.army;
     const tot = armySize(ar);
-    const figs = Math.min(10, Math.ceil(tot / 4));
-    const kinds: FigKind[] = [];
-    if (figs > 0) {
-      const nh = Math.round((ar.horse / tot) * figs);
-      const na = Math.round((ar.archer / tot) * figs);
-      for (let k = 0; k < figs; k++) kinds.push(k < nh ? "rider" : k < nh + na ? "archer" : "spear");
-    }
+    // P1: daha kalabalık host — M&B yürüyüş yığını (max 16 silüet)
+    const kinds = tot > 0 ? armyKinds(ar, 16) : [];
+    const figs = kinds.length;
     while (this.troops.children.length > figs) this.troops.children[this.troops.children.length - 1].destroy();
     while (this.troops.children.length < figs) {
       const f = new Container();
@@ -1573,22 +1878,31 @@ export class WorldView {
       f.position.set(h.x, h.y);
       this.troops.addChild(f);
     }
+    // kahraman yığın gölgesi
+    let mass = this.hero.getChildByLabel("mass") as Graphics | null;
+    if (!mass) {
+      mass = new Graphics();
+      mass.label = "mass";
+      this.hero.addChildAt(mass, 0);
+    }
+    hostMass(mass, tot);
     const unitOf: Record<FigKind, "spear" | "archer" | "horse"> = { spear: "spear", archer: "archer", rider: "horse", sword: "spear", horsearcher: "horse" };
+    const cols = figs <= 6 ? 3 : 4;
     this.troops.children.forEach((f, k) => {
       const sp = (f as Container).getChildByLabel("fig") as Fig;
-      const lv = s.drill?.[unitOf[kinds[k]]]?.lv ?? 0;
+      const lv = s.drill?.[unitOf[kinds[k]!]]?.lv ?? 0;
       const st: FigStyle = lv >= 4 ? { ...TROOP_STYLE, coat: "#2a3a6a", trim: "#f0d070", cape: "#c8a040", hatCol: "#d8d8e8" } : lv >= 3 ? { ...TROOP_STYLE, cape: "#5a1a12", trim: "#f0c860" } : lv >= 1 ? TROOP_STYLE : { ...TROOP_STYLE, hat: "bork", hatCol: "#5a3a1e" };
-      sp.setFrames(figureFrames(kinds[k], st));
-      sp.size = kinds[k] === "rider" ? 36 : 32;
+      sp.setFrames(figureFrames(kinds[k]!, st));
+      sp.size = kinds[k] === "rider" ? 38 : 34;
       const pdx = f.x;
-      const row = Math.floor(k / 3);
-      const col = (k % 3) - 1;
-      const back = Math.max(0, this.trail.length - 2 - (8 + row * 10) * 2);
+      const row = Math.floor(k / cols);
+      const col = (k % cols) - (cols - 1) / 2;
+      const back = Math.max(0, this.trail.length - 2 - (6 + row * 8) * 2);
       const bx = this.trail[back] ?? h.x;
       const by = this.trail[back + 1] ?? h.y;
       const idle = Math.hypot(bx - h.x, by - h.y) < 6;
-      const ox = idle ? h.x + (col * 26 + (row % 2) * 13) * unitInv : bx + col * 16 * unitInv;
-      const oy = idle ? h.y + (42 + row * 18) * unitInv : by + col * 7 * unitInv;
+      const ox = idle ? h.x + (col * 22 + (row % 2) * 11) * unitInv : bx + col * 14 * unitInv;
+      const oy = idle ? h.y + (38 + row * 16) * unitInv : by + col * 6 * unitInv;
       f.x += (ox - f.x) * Math.min(1, dt * 5);
       f.y += (oy - f.y) * Math.min(1, dt * 5);
       const vx = dt > 0 ? (f.x - pdx) / dt / unitInv : 0;
@@ -1726,12 +2040,36 @@ export class WorldView {
       const vis = game.isExplored(b.x, b.y);
       c.visible = vis;
       const mv = this.walk("b" + b.id, c, b.x, b.y, dt, b.id, 0.25);
-      if (vis) for (const f of (c.getChildByLabel("figs") as Container).children) (f as Fig).tick(dt, mv.v, mv.dir, b.chase ? 1.4 : 1);
-      c.scale.set(unitInv * 0.88);
-      (c.getChildByLabel("count") as Text).text = String(armySize(b.army));
+      const a = b.army;
+      const tot = armySize(a);
+      const mass = c.getChildByLabel("mass") as Graphics | null;
+      if (mass) hostMass(mass, tot, b.chase ? 0x4a1008 : 0x2a1808);
+      const bsig = `${a.spear}|${a.archer}|${a.horse}|${b.posse ? 1 : 0}|${b.nem ?? 0}`;
+      const figs = c.getChildByLabel("figs") as Container;
+      if ((c as Container & { _asig?: string })._asig !== bsig) {
+        (c as Container & { _asig?: string })._asig = bsig;
+        const reg = regionAt(b.x, b.y);
+        const st: FigStyle = b.posse
+          ? { coat: "#2a4a8a", trim: "#d8d8e8", hat: "migfer", hatCol: "#a0a0b0", horse: "#5a3a20" }
+          : b.nem
+            ? { ...REGION_STYLE[reg.id], cape: "#4a1a6a" }
+            : REGION_STYLE[reg.id];
+        figs.removeChildren().forEach((ch) => ch.destroy());
+        const maxF = b.posse || b.nem ? 8 : Math.min(9, 3 + Math.ceil(tot / 12));
+        armyKinds(a, maxF).forEach((k, i, arr) => {
+          const f = new Fig(figureFrames(k, st), k === "rider" || k === "horsearcher" ? 58 : 52);
+          const mid = (arr.length - 1) / 2;
+          f.position.set((i - mid) * 17, 10 + (i % 2) * 7);
+          figs.addChild(f);
+        });
+      }
+      if (vis) for (const f of figs.children) (f as Fig).tick(dt, mv.v, mv.dir, b.chase ? 1.4 : 1);
+      c.scale.set(unitInv * (tot >= 40 || b.chase ? 1 : 0.92));
+      const campName = s.camps[b.camp]?.name ?? tr("Çete");
+      (c.getChildByLabel("count") as Text).text = tot > 0 ? `${campName} · ${tot}` : campName;
       const ex = c.getChildByLabel("ex")!;
       ex.visible = b.chase;
-      ex.y = -58 - Math.abs(Math.sin(this.time * 6)) * 4;
+      ex.y = -12 - Math.abs(Math.sin(this.time * 6)) * 4;
     }
     if (cam.zoom < 0.55) {
       const cell = 120 / cam.zoom;
@@ -1767,13 +2105,19 @@ export class WorldView {
     const liveC = new Set<number>();
     for (const cv of s.caravans) {
       liveC.add(cv.id);
-      const c = this.caravan(cv.id, parseInt(FACTIONS[cv.fac as FactionId].color.slice(1), 16));
+      const goodIcon = GOODS[cv.good]?.icon ?? "j_caravan";
+      const c = this.caravan(cv.id, parseInt(FACTIONS[cv.fac as FactionId].color.slice(1), 16), goodIcon);
       c.visible = game.isExplored(cv.x, cv.y);
       this.walk("c" + cv.id, c, cv.x, cv.y, dt, cv.id, 0.6);
       c.scale.set(inv * 0.9);
       const ex = c.getChildByLabel("ex")!;
       ex.visible = !!cv.raid;
       ex.alpha = 0.6 + Math.abs(Math.sin(this.time * 8)) * 0.4;
+      const bub = c.getChildByLabel("bub");
+      if (bub) {
+        bub.visible = !cv.raid && c.visible;
+        bub.alpha = 0.75 + Math.abs(Math.sin(this.time * 2.2)) * 0.25;
+      }
     }
     for (const mc of s.mycv ?? []) {
       const id = 900000 + mc.id;
@@ -1799,34 +2143,77 @@ export class WorldView {
       if (!e) {
         const col = RIVAL_COL[r.status];
         const c = new Container();
-        const sh = new Graphics()
-          .ellipse(0, 20, 18, 5.6).fill({ color: 0x000000, alpha: 0.12 })
-          .ellipse(0, 20, 13, 4).fill({ color: 0x000000, alpha: 0.16 })
-          .ellipse(0, 20, 7, 2.4).fill({ color: 0x000000, alpha: 0.2 });
-        const glow = new Graphics().circle(0, 0, 32).fill({ color: col, alpha: 0.18 });
+        const mass = new Graphics();
+        mass.label = "mass";
+        const glow = new Graphics().circle(0, -8, 32).fill({ color: col, alpha: 0.18 });
         glow.label = "glow";
-        const p = this.portrait(r.icon, 24, col);
+        const figs = new Container();
+        figs.label = "figs";
+        const p = this.portrait(r.icon, 22, col, "rival");
+        p.position.set(0, -52);
+        p.scale.set(0.85);
         const nl = new Text({ text: `${r.name} ${r.title}`, style: { ...LABEL_STYLE, fontSize: 14, fill: "#" + col.toString(16).padStart(6, "0") } });
         nl.anchor.set(0.5, 0);
-        nl.position.set(0, 30);
+        nl.position.set(0, 36);
         nl.resolution = 2;
         const tg = new Sprite(this.t("tug"));
         tg.anchor.set(0.5, 1);
         tg.scale.set(34 / tg.texture.height);
         tg.tint = col;
-        tg.position.set(20, -14);
-        c.addChild(sh, glow, tg, p, nl);
+        tg.position.set(22, -40);
+        const cnt = new Text({ text: "", style: { ...LABEL_STYLE, fontSize: 15, fill: r.status === "war" ? "#ffc4b4" : "#e8d9b8" } });
+        cnt.anchor.set(0.5, 0);
+        cnt.position.set(0, 54);
+        cnt.resolution = 2;
+        cnt.label = "count";
+        c.addChild(mass, glow, figs, tg, p, nl, cnt);
         this.units.addChild(c);
         e = { c, st: r.status + r.name };
         this.rivalsM.set(r.id, e);
       }
       const c = e.c;
       c.visible = game.isExplored(r.x, r.y);
+      const prevX = c.x;
       this.walk("r" + r.id, c, r.x, r.y, dt, r.id.length * 3.1);
-      c.scale.set(inv);
+      c.scale.set(inv * (r.status === "war" ? 1.08 : 1));
       c.zIndex = r.y;
       const glow = c.getChildByLabel("glow");
       if (glow) glow.scale.set(1 + Math.sin(this.time * (r.status === "war" ? 6 : 2)) * 0.12);
+      const tot = armySize(r.army);
+      const cnt = c.getChildByLabel("count") as Text | null;
+      if (cnt) {
+        cnt.text = tot > 0 ? `${tot} · ${r.army.spear}/${r.army.archer}/${r.army.horse}` : "";
+        cnt.style.fill = r.status === "war" ? "#ffc4b4" : "#e8d9b8";
+      }
+      const mass = c.getChildByLabel("mass") as Graphics | null;
+      if (mass) hostMass(mass, tot, r.status === "war" ? 0x4a1808 : 0x2a1808);
+      const sig = `${r.army.spear}|${r.army.archer}|${r.army.horse}|${r.status}`;
+      const figs = c.getChildByLabel("figs") as Container | null;
+      if (figs && (c as Container & { _asig?: string })._asig !== sig) {
+        (c as Container & { _asig?: string })._asig = sig;
+        figs.removeChildren().forEach((ch) => ch.destroy());
+        const colHex = "#" + RIVAL_COL[r.status]!.toString(16).padStart(6, "0");
+        const st: FigStyle = {
+          ...TROOP_STYLE,
+          coat: r.status === "war" ? "#6a2818" : r.status === "ally" ? "#2a5a28" : "#3a3a5a",
+          trim: colHex,
+          cape: r.status === "war" ? "#8a2010" : undefined,
+          hat: r.status === "war" ? "migfer" : "tolga",
+        };
+        armyKinds(r.army, r.status === "war" ? 9 : 7).forEach((k, i, arr) => {
+          const f = new Fig(figureFrames(k, st), k === "rider" ? 40 : 34);
+          const mid = (arr.length - 1) / 2;
+          f.position.set((i - mid) * 13, 6 + (i % 2) * 5);
+          figs.addChild(f);
+        });
+      }
+      if (figs) {
+        const face = Math.abs(c.x - prevX) > 0.4 ? Math.sign(c.x - prevX) : 1;
+        const spd = Math.abs(c.x - prevX) / Math.max(0.001, dt);
+        figs.children.forEach((ch) => (ch as Fig).tick(dt, spd > 8 ? Math.min(120, spd) : 0, face, 1.1));
+      }
+      const port = c.children.find((ch) => typeof ch.label === "string" && ch.label.startsWith("tok_")) as Container | undefined;
+      if (port) tickToken(port, this.time, "rival");
     });
     const liveM = new Set<number>();
     for (const m of s.marches) {
@@ -1834,6 +2221,20 @@ export class WorldView {
       const c = this.march(m.id);
       this.walk("a" + m.id, c, m.x, m.y, dt, m.id);
       c.scale.set(inv);
+      const sig = `${m.army.spear}|${m.army.archer}|${m.army.horse}`;
+      if ((c as Container & { _asig?: string })._asig !== sig) {
+        (c as Container & { _asig?: string })._asig = sig;
+        const figs = c.getChildByLabel("figs") as Container | null;
+        if (figs) {
+          figs.removeChildren().forEach((ch) => ch.destroy());
+          armyKinds(m.army, 7).forEach((k, i, arr) => {
+            const f = new Fig(figureFrames(k, TROOP_STYLE), k === "rider" ? 40 : 34);
+            const mid = (arr.length - 1) / 2;
+            f.position.set((i - mid) * 12, 6 + (i % 2) * 4);
+            figs.addChild(f);
+          });
+        }
+      }
       const txt = c.getChildByLabel("txt") as Text;
       txt.text = m.phase === "gather" ? `⛏ ${Math.max(0, Math.ceil((m.until - Date.now()) / 1000))}sn` : m.phase === "back" ? `↩ ${Math.round(m.load)}` : `→ ${armySize(m.army)}`;
     }
@@ -1852,22 +2253,41 @@ export class WorldView {
         if (m.label) m.label.visible = e && cam.zoom > minZoom;
       };
       this.villageM.forEach((m, i) => {
-        vis(m, true, 0.45);
+        vis(m, true, 0.34);
         const v = s.villages[i];
+        if (m.label) {
+          const tag = v.state === "ruined" ? tr("harabe") : v.state === "raided" ? tr("baskın") : "";
+          m.label.text = tag ? `${v.name} · ${tag}` : v.name;
+          m.label.style.fill = v.state === "ruined" ? "#9a8070" : v.state === "raided" ? "#c8a070" : "#e8d8c0";
+        }
         if (v.state === this.villageSt[i]) return;
         this.villageSt[i] = v.state;
         const img = m.sp.getChildByLabel("img") as Sprite | null;
         if (!img) return;
         // baskın: toprak kararır; harabe: village2 asset'ine döner + yanık ton
         img.tint = v.state === "ruined" ? 0x7a6050 : v.state === "raided" ? 0xa89078 : 0xffffff;
-        if (!v.yurt && v.state === "ruined" && this.tex["map/village2"]) img.texture = this.tex["map/village2"];
+        if (!v.yurt) {
+          const vi = Math.abs(Math.floor(m.x * 0.11 + m.y * 0.09)) % 4;
+          const base = vi === 0 ? "map/village" : `map/village${vi + 1}`;
+          const tex = v.state === "ruined" ? (this.tex["map/village2"] ?? this.tex[base]) : this.tex[base];
+          if (tex) img.texture = tex;
+        }
       });
-      this.campM.forEach((m, i) => vis(m, s.camps[i].alive, 0.55));
+      this.campM.forEach((m, i) => {
+        const c = s.camps[i];
+        vis(m, true, 0.42);
+        m.sp.alpha = c.alive ? 1 : 0.55;
+        m.sp.tint = c.alive ? 0xffffff : 0x6a5548;
+        if (m.label) {
+          m.label.text = c.alive ? c.name : `${c.name} · ${tr("harabe")}`;
+          m.label.style.fill = c.alive ? "#ffb0a0" : "#9a8070";
+        }
+      });
       this.nodeM.forEach((m) => vis(m));
       this.ruinM.forEach((m, i) => vis(m, !s.ruins[i].looted));
       this.kurganM.forEach((m, i) => {
         const k = s.kurgans[i];
-        vis(m, true, 0.5);
+        vis(m, true, 0.38);
         m.sp.alpha = k.alive ? 1 : k.delved ? 0.35 : 0.6;
         if (m.label) m.label.text = k.alive ? `Kurgan Taşı Sv ${k.tier}` : k.delved ? "Boş Mezar" : TOMBS[tombOf(i)].name;
       });
@@ -1877,7 +2297,8 @@ export class WorldView {
         vis(m, true, 0.35);
         const col = fortColor(f.owner);
         if (m.label) {
-          m.label.text = `${f.name} · ${tr(FORT_TIERS[f.tier].name)}`;
+          const tag = f.threat ? tr("tehdit altında") : f.lost >= 2 ? tr("hasarlı") : "";
+          m.label.text = `${f.name} · ${tr(FORT_TIERS[f.tier].name)}${tag ? ` · ${tag}` : ""}`;
           m.label.style.fill = col;
         }
         const fl = this.kaleF[i];
@@ -1885,11 +2306,34 @@ export class WorldView {
         fl.tint = col;
         fl.alpha = f.threat ? 0.55 + 0.45 * Math.abs(Math.sin(this.time * 4)) : 1;
         const img = m.sp.getChildByLabel("img") as Sprite | null;
-        if (img) img.tint = f.owner === "me" && f.wall <= 0 ? 0xcf8a78 : fortTint(f.tier);
+        if (img) {
+          const base = fortTint(f.tier);
+          img.tint = f.lost >= 2 ? 0xc89878 : f.owner === "me" && f.wall <= 0 ? 0xcf8a78 : base;
+        }
       });
-      this.cityM.forEach((m) => {
+      const warFacs = new Set<FactionId>();
+      for (const war of s.wd?.wars ?? []) {
+        warFacs.add(war.a);
+        warFacs.add(war.b);
+      }
+      this.cityM.forEach((m, i) => {
         m.sp.visible = true;
         if (m.label) m.label.visible = true;
+        const c = CITIES[i];
+        const own = !!s.owned[c.id];
+        const sieged = (s.sieged[c.id] ?? 0) > 0;
+        const fac = factionOf(c.id);
+        const inWar = warFacs.has(fac);
+        const facCol = parseInt(FACTIONS[fac].color.slice(1), 16);
+        const tint = CITY_TINT[c.id] ?? 0xffffff;
+        // savaşta morumsu, barışta hafif devlet tonu
+        m.sp.tint = sieged ? 0xc09080 : own ? tint : inWar ? blendTint(tint, 0xe8d0ff, 0.45) : blendTint(tint, facCol, 0.22);
+        m.sp.alpha = sieged ? 0.82 + 0.08 * Math.sin(this.time * 3) : 1;
+        if (m.label) {
+          m.label.style.fill = own ? fortColor("me") : sieged ? "#ffb090" : inWar ? "#e6c4ff" : FACTIONS[fac].color;
+          const base = CITY_NAME[c.id] + (c.id === CAPITAL.id ? " ★" : "");
+          m.label.text = inWar && !own ? `${base} · ⚔` : base;
+        }
       });
       const bar = document.querySelector(".top")?.getBoundingClientRect();
       const cv = (this.app.canvas as HTMLCanvasElement).getBoundingClientRect();
@@ -1916,19 +2360,37 @@ export class WorldView {
           this.places.addChild(f);
           this.ownF.set(c.id, f);
         }
-        if (f) f.visible = own;
+        if (f) {
+          f.visible = own;
+          if (own) f.alpha = 0.82 + Math.sin(this.time * 2.2 + c.x * 0.01) * 0.12;
+        }
       }
       this.wallRingG.clear();
       for (const c of CITIES) {
         const own = !!s.owned[c.id];
         const cap = c.id === CAPITAL.id;
-        if (!own && !cap) continue;
+        const hostile = !own && game.hostile(c.id);
+        const inWar = warFacs.has(factionOf(c.id));
+        if (!own && !cap && !hostile && !inWar) continue;
         if (!game.isExplored(c.x, c.y)) continue;
         const lv = own ? game.cbl(c.id, "sur") : 0;
-        const w = cap ? MAP_W.cityCap : MAP_W.city;
+        const sc = CITY_SCALE[c.id] ?? 1;
+        const w = (cap ? MAP_W.cityCap : MAP_W.city) * sc;
         const r = w * 0.58 + lv * 12;
-        const alpha = own ? 0.22 + lv * 0.13 : 0.14;
-        this.wallRingG.circle(c.x, c.y, r).stroke({ color: 0xffe9b0, width: 2.5 + lv * 1.4, alpha });
+        // Yakın zoomda (>0.7) silik bir vinyet gibi yumuşasın; başkentin ambiyans halkası her zaman görünsün.
+        const zf = cam.zoom > 0.7 ? 0.8 : 1;
+        const pulse = own || hostile || inWar ? 1 + Math.sin(this.time * 1.8 + c.y * 0.008) * 0.08 : 1;
+        const alpha = (own ? 0.28 + lv * 0.14 : hostile ? 0.22 : inWar ? 0.26 : cap ? 0.22 : 0.16) * zf * pulse;
+        const ringCol = own || cap ? 0xffe9b0 : hostile ? 0xff6a4a : inWar ? 0xc89bff : 0xff6a4a;
+        this.wallRingG.circle(c.x, c.y, r * pulse).stroke({ color: ringCol, width: 2.5 + lv * 1.4, alpha });
+        // Fethedilmiş şehir: yumuşak altın hale — store screenshot’ta diorama okunurluğu.
+        if (own) {
+          this.wallRingG.circle(c.x, c.y - w * 0.08, w * 0.42).fill({ color: 0xffd56a, alpha: 0.07 + Math.sin(this.time * 2 + lv) * 0.02 });
+        } else if (hostile) {
+          this.wallRingG.circle(c.x, c.y - w * 0.06, w * 0.36).fill({ color: 0xff4a3a, alpha: 0.05 + Math.sin(this.time * 2.4) * 0.015 });
+        } else if (inWar) {
+          this.wallRingG.circle(c.x, c.y - w * 0.06, w * 0.38).fill({ color: 0xa64dff, alpha: 0.06 + Math.sin(this.time * 2.6) * 0.02 });
+        }
       }
       const ls = Math.min(2.4, Math.max(0.9, 0.7 / cam.zoom));
       for (const m of [...this.villageM, ...this.campM, ...this.kurganM, ...this.kaleM, ...this.cityM]) if (m.label) m.label.scale.set(ls);
@@ -2049,7 +2511,18 @@ export class WorldView {
       const p = game.targetPos(tg);
       if (p) this.fxG.circle(p.x, p.y, 40 + Math.sin(this.time * 5) * 4).stroke({ color: tg.kind === "bandit" || tg.kind === "camp" ? 0xff6a4a : 0xffe08a, width: 3, alpha: 0.9 });
     }
-    if (s.free) this.drawPulse(game, inv);
+    if (s.free) {
+      this.drawPulse(game, inv);
+      const warFacs = new Set<FactionId>();
+      for (const war of s.wd?.wars ?? []) {
+        warFacs.add(war.a);
+        warFacs.add(war.b);
+      }
+      this.drawRealms(game, warFacs, cam.zoom);
+    } else {
+      this.realmG.clear();
+      this.realmLbl.visible = false;
+    }
 
     if (this.fogDirty) {
       this.fogDirty = false;

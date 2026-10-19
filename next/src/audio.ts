@@ -513,10 +513,12 @@ class SoundSystem {
         this.burst(t, 0.12, 0.35, 1800 + Math.random() * 1200);
         this.tone(140, t, 0.15, 0.25, "sine", 60);
         if (Math.random() < 0.5) this.tone(2400 + Math.random() * 800, t + 0.02, 0.18, 0.05, "triangle");
+        if (Math.random() < 0.35) this.swept(t + 0.01, 0.08, 0.12, "highpass", 2200, 4800, 0.8);
         break;
       case "win":
         [4, 6, 7, 11].forEach((k, i) => this.pluck(n(k) * 2, t + i * 0.13, 0.22, this.fx, 1.8));
         this.burst(t, 0.6, 0.08, 6000);
+        this.ring(t + 0.45, 1318, 0.05, 1.1);
         break;
       case "lose":
         [7, 5, 4, 1, 0].forEach((k, i) => this.pluck(n(k), t + i * 0.2, 0.2, this.fx, 1.6));

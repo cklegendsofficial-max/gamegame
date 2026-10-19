@@ -3,6 +3,9 @@ dist
 release
 *.log
 playtest
+__pycache__/
+*.pyc
+.DS_Store
 
 art/esrgan/
 art/hires/

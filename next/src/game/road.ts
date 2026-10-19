@@ -1,6 +1,7 @@
 import type { Army } from "./data";
 import type { Stat } from "./rpg";
 import type { SeasonId } from "./seasons";
+import type { CompId } from "./story";
 
 export interface RoadFx {
   gold?: number;
@@ -25,6 +26,8 @@ export interface RoadOpt {
   ok: RoadFx & { text: string };
   fail?: RoadFx & { text: string };
   fight?: { army: Army; bonus: number; foe: string };
+  /** Bu seçenek yoldaş becerisiyle açıldıysa rozet için. */
+  comp?: CompId;
 }
 
 export interface RoadCtx {
@@ -33,6 +36,15 @@ export interface RoadCtx {
   cargo: number;
   army: number;
   lv: number;
+  /** Ana destan peşindeyken yol olayları sıklaşır / özel olaylar açılır. */
+  onQuest?: boolean;
+  act?: 1 | 2 | 3;
+  /** Yanındaki yoldaşlar — yol olaylarını renklendirir. */
+  comps: CompId[];
+  /** Yakındaki şehir kimliği (en yakın şehir ~900 birim içindeyse). */
+  city?: string;
+  /** Yanında yürüyen muhafız yoldaş. */
+  escort?: CompId;
 }
 
 export interface RoadEvent {
@@ -44,9 +56,9 @@ export interface RoadEvent {
   opts: (c: RoadCtx) => RoadOpt[];
 }
 
-export const ROAD_STEP = 700;
-export const ROAD_CHANCE = 0.4;
-export const ROAD_PER_DAY = 3;
+export const ROAD_STEP = 620;
+export const ROAD_CHANCE = 0.48;
+export const ROAD_PER_DAY = 4;
 
 export function checkChance(stat: number, dc: number): number {
   return Math.max(0.15, Math.min(0.9, stat / (stat + dc * 0.35)));
@@ -55,7 +67,95 @@ export function checkChance(stat: number, dc: number): number {
 const a = (spear: number, archer: number, horse: number): Army => ({ spear, archer, horse });
 
 export const ROAD_EVENTS: RoadEvent[] = [
+  // ---- Bölgesel olaylar: yalnızca ilgili şehrin çevresinde çıkar ----
   {
+    id: "r_konya_sema",
+    title: "Semazenler",
+    icon: "cities/konya",
+    text: "Konya'nın kapısında beyaz giysili dervişler yavaşça dönüyor. Ney sesi bozkırın rüzgârına karışıyor.",
+    when: (c) => c.city === "konya",
+    opts: () => [
+      { label: "Sessizce izle", ok: { text: "Bir saat durup dinledin. Zihnin durulmuş, adımların hafiflemiş.", xp: 14, kut: 2 } },
+      { label: "Tekkeye bağış bırak", cost: { gold: 25 }, ok: { text: "Şeyh elini göğsüne koydu: \"Yolun açık olsun.\" Sofrada sıcak çorba çıktı.", renown: 3, kut: 2, hp: 0.15 } },
+    ],
+  },
+  {
+    id: "r_bizans_gumruk",
+    title: "Gümrük Memuru",
+    icon: "cities/constantinople",
+    text: "Kostantiniyye surlarının dibinde bir memur defterini açtı: \"Kervan vergisi, yabancı. Mühürlü belgen var mı?\"",
+    when: (c) => c.city === "constantinople" && c.cargo > 0,
+    opts: (c) => [
+      { label: "Vergiyi öde", cost: { gold: 30 + c.lv * 4 }, ok: { text: "Mühür vuruldu. Surların gölgesinde rahatça geçtin.", xp: 8 } },
+      { label: "Pazarlık et", check: { stat: "kar", dc: 11 }, ok: { text: "Memuru güldürdün; vergi yarıya indi, üstüne bir de çay ikram etti.", gold: 20, xp: 18 }, fail: { text: "Memur kaşlarını çattı; yükün bir kısmına el konuldu.", cargo: 0.12 } },
+    ],
+  },
+  {
+    id: "r_kashgar_yesim",
+    title: "Yeşim Satıcısı",
+    icon: "jade",
+    text: "Kaşgar yolunda bir satıcı, çuvalından süt rengi bir yeşim çıkardı. \"Kunlun'dan, efendi. Şans getirir.\"",
+    when: (c) => c.city === "kashgar",
+    opts: () => [
+      { label: "Satın al", cost: { gold: 50 }, check: { stat: "kar", dc: 9 }, ok: { text: "Taş gerçekmiş! Bir tüccar yarın iki katına alacak.", good: 2, renown: 1, xp: 14 }, fail: { text: "Camdan farksız çıktı. Satıcı çoktan ortadan kaybolmuş.", xp: 4 } },
+      { label: "Geç", ok: { text: "Satıcı omuz silkti. \"Başka kervan gelir.\"" } },
+    ],
+  },
+  {
+    id: "r_buhara_kagit",
+    title: "Kâğıt Ustası",
+    icon: "cities/bukhara",
+    text: "Buhara'nın dış mahallesinde bir usta, taze kâğıtları ipe asmış kurutuyor. \"Semerkant kâğıdı değil bu; ama onun ağabeyi.\"",
+    when: (c) => c.city === "bukhara" || c.city === "samarkand",
+    opts: () => [
+      { label: "Ustayı dinle", ok: { text: "Kâğıdın sırrını anlattı: çiğ pamuk, pirinç suyu, sabır. Bir şey öğrendin.", xp: 22 } },
+      { label: "Bir deste satın al", cost: { gold: 20 }, ok: { text: "Defterin sayfaları hazır; yoldaşlar bile tarih tutmak istiyor.", kut: 2, renown: 1 } },
+    ],
+  },
+  {
+    id: "r_merv_kanal",
+    title: "Kurumuş Kanal",
+    icon: "map/oasis",
+    text: "Merv'in tarlalarını besleyen kanal çatlamış; köylüler çamurlu elleriyle sana bakıyor.",
+    when: (c) => c.city === "merv",
+    opts: (c) => [
+      { label: "Kanalı onarmalarına yardım et", check: { stat: "guc", dc: 9 }, ok: { text: "Birlikte taş taşıdınız; su yeniden aktı. Köylüler sana yiyecek yükledi.", food: 40, renown: 3, kut: 2, xp: 20 }, fail: { text: "Taşlar kaydı; yarın yeniden denenecek. Yine de iyi niyetin hatırlandı.", hp: -0.1, renown: 1 } },
+      { label: "Yoluna devam et", ok: { text: c.army > 20 ? "Büyük birliğin ağır adımları toz kaldırdı; köylüler sessizce izledi." : "Köylülerin bakışları omzunda yolculuk ettin.", kut: -1 } },
+    ],
+  },
+  {
+    id: "r_tebriz_hali",
+    title: "Halı Dokuyucuları",
+    icon: "carpets",
+    text: "Tebriz yakınında bir köy halkı dokuduğu halıları yola sermiş, güneşte kurutuyor. Renkler gözü alıyor.",
+    when: (c) => c.city === "tabriz",
+    opts: () => [
+      { label: "Toptan al, kervana yükle", cost: { gold: 60 }, ok: { text: "Halılar develerin sırtında gül bahçesi gibi duruyor. Başka pazarda iyi para eder.", good: 3, xp: 10 } },
+      { label: "Desen öğren", ok: { text: "Yaşlı dokuyucu düğümlerin dilini anlattı: her renk bir dua, her desen bir yol.", xp: 16, kut: 1 } },
+    ],
+  },
+  {
+    id: "r_nisabur_firuze",
+    title: "Firuze Ocağı",
+    icon: "cities/nishapur",
+    text: "Nişabur dağlarında bir madenci, avucunda gök mavisi bir taş tutuyor. \"Ocaktan yeni çıktı. Cebini bana göster.\"",
+    when: (c) => c.city === "nishapur",
+    opts: () => [
+      { label: "Pazarlıkla al", check: { stat: "kar", dc: 10 }, cost: { gold: 35 }, ok: { text: "Taşı sakladın; Rey'de bir kuyumcu iyi para verecek.", gold: 90, xp: 15 }, fail: { text: "Taş soluk çıktı. Madenci gülümseyip uzaklaştı.", xp: 5 } },
+      { label: "Madene bak", ok: { text: "Karanlık galeride gözlerini alıştırdın; ustalar sana güvenmeye başladı.", xp: 12, renown: 1 } },
+    ],
+  },
+  {
+    id: "r_rey_hekim",
+    title: "Gezgin Hekim",
+    icon: "healer",
+    text: "Rey yolunda otlarla dolu torbasını sırtlamış yaşlı bir hekim, yarana bakıp başını salladı.",
+    when: (c) => c.city === "rey",
+    opts: () => [
+      { label: "Tedaviyi kabul et", cost: { gold: 15 }, ok: { text: "Merhem sürüldü, ot çayı içirildi. Yorgunluk kemiklerinden süzüldü.", hp: 0.35, xp: 6 } },
+      { label: "Otları sor", check: { stat: "day", dc: 8 }, ok: { text: "Hangi otun kanı durdurduğunu öğrendin. Torbana bir avuç girdi.", hp: 0.12, xp: 18 }, fail: { text: "Karıştırdın; çayın tadı kötü ama zarar vermedi.", xp: 5 } },
+    ],
+  },  {
     id: "teker",
     title: "Kırık Dingil",
     icon: "j_caravan",
@@ -93,11 +193,22 @@ export const ROAD_EVENTS: RoadEvent[] = [
     icon: "j_bandit",
     text: "Karanlıkta yeşil gözler parladı. Aç bir kurt sürüsü kervanın etrafında daire çiziyor.",
     when: (c) => c.night || c.season === "kis",
-    opts: () => [
-      { label: "Kılıcını çek", check: { stat: "guc", dc: 10 }, ok: { text: "Sürü başını yere serdin; ötekiler karanlığa dağıldı. Postları değerli.", good: 2, xp: 25, renown: 2 }, fail: { text: "Kurtlar saldırdı. Onları kovdun ama kolunda derin dişler var.", hp: -0.22 } },
-      { label: "Ateş yak, bekle", cost: { food: 20 }, ok: { text: "Bütün gece ateşi besledin. Şafakla birlikte sürü çekildi." } },
-      { label: "Kurt Tengri'nin elçisidir, et at", cost: { food: 30 }, ok: { text: "Sürüye bir koyun bıraktın. Yaşlı dişi kurt başını eğip uzaklaştı. Kam olsa \"iyi alamet\" derdi.", kut: 3 } },
-    ],
+    opts: (c) => {
+      const opts: RoadOpt[] = [
+        { label: "Kılıcını çek", check: { stat: "guc", dc: 10 }, ok: { text: "Sürü başını yere serdin; ötekiler karanlığa dağıldı. Postları değerli.", good: 2, xp: 25, renown: 2 }, fail: { text: "Kurtlar saldırdı. Onları kovdun ama kolunda derin dişler var.", hp: -0.22 } },
+        { label: "Ateş yak, bekle", cost: { food: 20 }, ok: { text: "Bütün gece ateşi besledin. Şafakla birlikte sürü çekildi." } },
+        { label: "Kurt Tengri'nin elçisidir, et at", cost: { food: 30 }, ok: { text: "Sürüye bir koyun bıraktın. Yaşlı dişi kurt başını eğip uzaklaştı. Kam olsa \"iyi alamet\" derdi.", kut: 3 } },
+      ];
+      if (c.comps.includes("ferhat")) {
+        opts.unshift({
+          label: "Ferhat iz sürsün",
+          comp: "ferhat",
+          cost: { food: 15 },
+          ok: { text: "Ferhat rüzgârı okudu, sürüye bir koyun bıraktırdı. Kurtlar uzaklaşırken: \"Bu gece av bizim değil.\" Post yerine saygı kazandın.", xp: 18, kut: 2, renown: 1 },
+        });
+      }
+      return opts;
+    },
   },
   {
     id: "yarali",
@@ -131,10 +242,20 @@ export const ROAD_EVENTS: RoadEvent[] = [
     title: "Gezgin Derviş",
     icon: "healer",
     text: "Eski hırkalı bir derviş ateşinin başına davet ediyor. \"Yol uzun, söz kısa; otur da dinle.\"",
-    opts: () => [
-      { label: "Otur, dinle", ok: { text: "Derviş gece boyu Horasan erenlerini, Yesevi'nin hikmetlerini anlattı. Sabah zihnin berrak.", xp: 40 } },
-      { label: "Sadaka ver", cost: { gold: 25 }, ok: { text: "Derviş elini başına koydu, dua etti. Yorgunluğun bir anda geçti.", hp: 0.5, kut: 2 } },
-    ],
+    opts: (c) => {
+      const opts: RoadOpt[] = [
+        { label: "Otur, dinle", ok: { text: "Derviş gece boyu Horasan erenlerini, Yesevi'nin hikmetlerini anlattı. Sabah zihnin berrak.", xp: 40 } },
+        { label: "Sadaka ver", cost: { gold: 25 }, ok: { text: "Derviş elini başına koydu, dua etti. Yorgunluğun bir anda geçti.", hp: 0.5, kut: 2 } },
+      ];
+      if (c.comps.includes("korkut")) {
+        opts.unshift({
+          label: "Korkut'u konuştur",
+          comp: "korkut",
+          ok: { text: "Dede kopuzunu indirdi; dervişle sırayla destan okudular. Ateşin etrafında askerler bile nefesini tuttu.", xp: 55, kut: 3, renown: 2 },
+        });
+      }
+      return opts;
+    },
   },
   {
     id: "terk",
@@ -174,10 +295,22 @@ export const ROAD_EVENTS: RoadEvent[] = [
     title: "Kervansaray Kumarı",
     icon: "coins",
     text: "Bir kervansarayın avlusunda tüccarlar aşık kemiğiyle oynuyor. \"Gel yiğit, şansını dene!\"",
-    opts: () => [
-      { label: "60 altın koy", cost: { gold: 60 }, check: { stat: "cev", dc: 12 }, ok: { text: "Aşıklar \"at\" geldi! Tüccarlar homurdanarak keseyi uzattı.", gold: 150 }, fail: { text: "Aşık \"tava\" düştü. Altınlar başka keseye gitti." } },
-      { label: "Seyret", ok: { text: "Kimin hile yaptığını izledin. Bir dahakine sen de bilirsin.", xp: 8 } },
-    ],
+    opts: (c) => {
+      const opts: RoadOpt[] = [
+        { label: "60 altın koy", cost: { gold: 60 }, check: { stat: "cev", dc: 12 }, ok: { text: "Aşıklar \"at\" geldi! Tüccarlar homurdanarak keseyi uzattı.", gold: 150 }, fail: { text: "Aşık \"tava\" düştü. Altınlar başka keseye gitti." } },
+        { label: "Seyret", ok: { text: "Kimin hile yaptığını izledin. Bir dahakine sen de bilirsin.", xp: 8 } },
+      ];
+      if (c.comps.includes("leyla")) {
+        opts.unshift({
+          label: "Leyla masayı okusun",
+          comp: "leyla",
+          check: { stat: "kar", dc: 8 },
+          ok: { text: "Leyla zarın ağırlığını elinde tarttı: \"Bu masa hileli.\" Tüccarlar utançla kenara çekildi; sen de birkaç akçe kazandın.", gold: 35, xp: 12 },
+          fail: { text: "Leyla yanıldı — ya da masayı bilerek bırakmışlardı. Bir avuç gümüş uçtu.", gold: -25 },
+        });
+      }
+      return opts;
+    },
   },
   {
     id: "elci",
@@ -247,5 +380,77 @@ export const ROAD_EVENTS: RoadEvent[] = [
       { label: "Mallarına bak", cost: { gold: 70 }, ok: { text: "Birkaç balya mal aldın. Doğru şehirde iki katına gider.", good: 2 } },
       { label: "Yol haberlerini sor", ok: { text: "Tüccar hangi geçitte harami olduğunu, hangi kalenin el değiştirdiğini anlattı.", xp: 10 } },
     ],
+  },
+  {
+    id: "menzil",
+    title: "Menzil Ocağı",
+    icon: "map/yurts",
+    text: "Yol kenarında duman tüten bir menzil: yolcular çorba içiyor, atlar dinleniyor. İhtiyar menzilci seni çağırıyor: \"Çorba bedava, haberler para.\"",
+    when: (c) => c.lv >= 3,
+    opts: () => [
+      { label: "Çorba iç, dinlen", ok: { text: "Sıcak çorba ve kısa bir uyku; yorgunluğun dağıldı. Askerlerin de neşelendi.", hp: 0.25, food: 15, xp: 8 } },
+      { label: "Kestirme yol öğren", cost: { gold: 25 }, ok: { text: "Menzilci parmağıyla bir sırtı gösterdi: \"Oradan geçersen yarım gün kazanırsın.\" Ayakların hafifledi.", xp: 12, renown: 1 } },
+      { label: "Geç git", ok: { text: "Elini sallayıp geçtin; ocak dumanı ardından kaldı." } },
+    ],
+  },
+  {
+    id: "ulak",
+    title: "Destan Ulağı",
+    icon: "scroll",
+    text: "Atı köpük içinde bir ulak önüne dikildi. Kemerinde Korkut'un mührü var: \"Yolun doğru, ama acele et. Gökyüzü beklemez.\"",
+    when: (c) => !!c.onQuest && c.lv >= 4,
+    opts: () => [
+      { label: "Ulağın atını al, hızlan", ok: { text: "Taze atın nalı bozkıra vurdu. Hedefin artık daha yakın hissediliyor.", xp: 20, renown: 2 } },
+      { label: "Ulakla birlikte dinlen", cost: { food: 10 }, ok: { text: "Ulak sana kısa bir destan parçası okudu; yüreğin ve bedenin toparlandı.", hp: 0.35, kut: 2, xp: 15 } },
+    ],
+  },
+  {
+    id: "kervan_refah",
+    title: "Refah Kervanı",
+    icon: "j_caravan",
+    text: "İpek yüklü bir kervan yavaş ilerliyor. Kervanbaşı elini kaldırdı: \"Muhafız arıyoruz; payını veririz.\"",
+    when: (c) => c.lv >= 5 && c.army >= 8,
+    opts: (c) => [
+      { label: "Muhafızlık yap", ok: { text: "Kervanı bir geçide kadar korudun. Kervanbaşı kesesini açtı.", gold: 40 + c.lv * 4, renown: 2, xp: 18 } },
+      { label: "Ticaret teklifi", check: { stat: "kar", dc: 10 }, ok: { text: "İyi pazarlık: ucuza mal aldın, doğru şehirde katlanır.", good: 3, xp: 12 }, fail: { text: "Kervanbaşı güldü: \"Bugün fiyat yok.\" El sıkışıp ayrıldınız.", xp: 4 } },
+      { label: "Yoluna devam", ok: { text: "Develerin çanları uzaklaştı." } },
+    ],
+  },
+  {
+    id: "harami_pusu",
+    title: "Geçit Pususu",
+    icon: "j_bandit",
+    text: "Dar bir geçitte kaya düşmüş gibi duruyor… ama kayanın ardından ok kirişleri geriliyor. Haramiler seni bekliyor.",
+    when: (c) => c.lv >= 4,
+    opts: (c) => {
+      const n = 6 + Math.round(c.lv * 0.8);
+      return [
+        { label: "Pusuyu boz (savaş)", fight: { army: a(Math.ceil(n * 0.5), Math.ceil(n * 0.35), Math.floor(n * 0.15)), bonus: 0.12, foe: "Geçit haramileri" }, ok: { text: "Pusu dağıldı; geçit yeniden açıldı.", gold: 35 + c.lv * 5, renown: 3, xp: 25 }, fail: { text: "Oklar yağmur gibi indi; geçitten yaralı çıktın.", hp: -0.22 } },
+        { label: "Geri dön, dolan", cost: { food: 20 }, ok: { text: "Uzun yoldan dolandın. Zaman kaybettin ama kan dökülmedi.", xp: 8 } },
+        { label: "Pazarlık et", check: { stat: "kar", dc: 12 }, cost: { gold: 40 }, ok: { text: "Başa \"yol vergisi\" ödedin; geçit açıldı. Utanç ucuz geldi.", renown: -1, xp: 10 }, fail: { text: "Pazarlık bozuldu; yine de kılıç çekmek zorunda kaldın.", hp: -0.12 } },
+      ];
+    },
+  },
+  {
+    id: "yoldas_nobet",
+    title: "Nöbet Ateşi",
+    icon: "tug",
+    text: "Gece nöbetinde yoldaşın ateşe bir dal attı. \"Konuşsak mı, yoksa rüzgâr yeter mi?\" diye sordu.",
+    when: (c) => c.night && c.comps.length >= 1,
+    opts: (c) => {
+      const who = c.escort && c.comps.includes(c.escort) ? c.escort : c.comps[0];
+      const talk: Record<CompId, string> = {
+        ayse: "Ayşe yaralarını temizlerken eski günleri anlattı. Bağın güçlendi.",
+        korkut: "Korkut kısık sesle bir destan mırıldandı. Ateş bile dinliyor gibiydi.",
+        ferhat: "Ferhat kurt izlerini çizdi kuma: yarın hangi sırtın av vereceğini biliyor.",
+        batu: "Batu kılıcını bileyleyip fısıldadı: \"Yarın kan dökülürse ben önde olurum.\"",
+        leyla: "Leyla keseyi saydı, sonra güldü: \"Bu gece ziyan yok; sabah kazanç konuşuruz.\"",
+        lucia: "Lucia liman rüzgârını anlattı; bozkır bile tuz kokusu aldı.",
+      };
+      return [
+        { label: "Konuş, dinle", ok: { text: talk[who] ?? "Gece boyu fısıldaştınız; sabah yol daha kısa geldi.", xp: 12, kut: 1 } },
+        { label: "Nöbete odaklan", ok: { text: "Sessizlik de bir bağdır. Ateş söndü, yollar dürüst kaldı.", xp: 6 } },
+      ];
+    },
   },
 ];

@@ -16,6 +16,8 @@ export interface MyCaravan {
   trips: number;
   profit: number;
   status: "yol" | "bekle";
+  /** Sigortalı mı (bir yağmayı karşılar) */
+  ins?: boolean;
   log: string[];
 }
 
@@ -31,6 +33,15 @@ export function mycvDays(dist: number): number {
   return Math.max(0.7, Math.min(7, dist / 500));
 }
 
+/** Sigorta bedeli: yağmada ödenen sermayenin %75'i geri gelir (bir kez). */
+export const MYCV_INSURE = 220;
+export const MYCV_INSURE_BACK = 0.75;
+
+/** Yolu bilen kervan: her sefer riski biraz düşürür (en çok %22). */
+export function mycvRoute(c: MyCaravan): number {
+  return Math.min(0.22, c.trips * 0.008);
+}
+
 export function mycvRisk(c: MyCaravan, danger: number): number {
-  return Math.max(0.01, (0.1 + danger) * (1 - c.guards * 0.28));
+  return Math.max(0.01, (0.1 + danger) * (1 - c.guards * 0.28) * (1 - mycvRoute(c)));
 }

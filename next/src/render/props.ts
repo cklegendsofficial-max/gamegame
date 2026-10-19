@@ -109,7 +109,21 @@ function yurtCamp(seed: number): HTMLCanvasElement {
   yurt(g, 96, 58, 38 + rnd() * 4, felt, trim);
   yurt(g, 48, 78, 26 + rnd() * 3, shade(felt, -0.05), trim);
   yurt(g, 142, 74, 24 + rnd() * 3, shade(felt, 0.05), trim);
-  if (rnd() > 0.35) yurt(g, 100, 92, 20, shade(felt, -0.08), trim);
+  if (rnd() > 0.25) yurt(g, 100, 92, 20, shade(felt, -0.08), trim);
+  if (rnd() > 0.5) yurt(g, 30, 68, 18, shade(felt, 0.04), trim);
+  // keçe çit / kazık halkası
+  g.strokeStyle = "rgba(90,60,35,0.42)";
+  g.lineWidth = 2.2;
+  g.beginPath();
+  g.ellipse(96, 108, 74, 20, 0, 0.2, Math.PI * 1.8);
+  g.stroke();
+  for (let i = 0; i < 5; i++) {
+    const a = 0.4 + i * 0.45;
+    const px = 96 + Math.cos(a) * 70;
+    const py = 108 + Math.sin(a) * 18;
+    g.fillStyle = "#5a4030";
+    g.fillRect(px - 1, py - 8, 2.5, 10);
+  }
   const fx = 68 + rnd() * 8;
   const fy = 108;
   const ember = g.createRadialGradient(fx, fy, 0, fx, fy, 22);
@@ -200,28 +214,126 @@ function house(g: Ctx, x: number, y: number, w: number, roof: string, wall: stri
   g.strokeRect(x + w * 0.12, y + w * 0.02, w * 0.1, w * 0.1);
 }
 
-/** Küçük köy sahnesi: 2-3 kerpiç ev + yumuşak kum zemin + soft fade — yurt kampıyla aynı oturuş mantığı. */
-function villageSoft(seed: number): HTMLCanvasElement {
+/** Küçük köy: bölge stiline göre kerpiç / taş / ahşap / yeşil ova — soft fade, sticker kenarı yok. */
+function villageSoft(seed: number, style = 0): HTMLCanvasElement {
   const c = document.createElement("canvas");
   c.width = 192;
   c.height = 144;
   const g = c.getContext("2d")!;
   const rnd = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
-  const wall = ["#d8c8a0", "#e0d2ac", "#cabb94", "#ddc9a4"][Math.floor(rnd() * 4)];
-  const roof = ["#8a3a28", "#7a3220", "#9a4a2e", "#6a4a26"][Math.floor(rnd() * 4)];
+  const palettes = [
+    { wall: ["#d8c8a0", "#e0d2ac", "#cabb94"], roof: ["#8a3a28", "#7a3220", "#9a4a2e"], ground: [180, 140, 85] },
+    { wall: ["#b8b0a0", "#c4bcac", "#a8a090"], roof: ["#5a5048", "#6a5a50", "#4a4038"], ground: [150, 140, 120] },
+    { wall: ["#8a6a40", "#9a7a4a", "#7a5a38"], roof: ["#6a5030", "#5a4828", "#7a5c34"], ground: [140, 120, 70] },
+    { wall: ["#e0d4b8", "#d4c8a8", "#ebe0c4"], roof: ["#6a4a28", "#8a5a30", "#5a3a20"], ground: [120, 150, 80] },
+  ];
+  const pal = palettes[style % 4];
+  const wall = pal.wall[Math.floor(rnd() * pal.wall.length)];
+  const roof = pal.roof[Math.floor(rnd() * pal.roof.length)];
+  const [gr, gg, gb] = pal.ground;
   const sand = g.createRadialGradient(96, 112, 8, 96, 112, 88);
-  sand.addColorStop(0, "rgba(180,140,85,0.38)");
-  sand.addColorStop(0.45, "rgba(170,130,75,0.16)");
-  sand.addColorStop(1, "rgba(170,130,75,0)");
+  sand.addColorStop(0, `rgba(${gr},${gg},${gb},0.4)`);
+  sand.addColorStop(0.45, `rgba(${gr},${gg},${gb},0.16)`);
+  sand.addColorStop(1, `rgba(${gr},${gg},${gb},0)`);
   g.fillStyle = sand;
   g.beginPath();
   g.ellipse(96, 112, 86, 28, 0, 0, Math.PI * 2);
   g.fill();
+  g.strokeStyle = `rgba(${Math.max(40, gr - 60)},${Math.max(40, gg - 50)},${Math.max(20, gb - 35)},0.35)`;
+  g.lineWidth = 7;
+  g.lineCap = "round";
+  g.beginPath();
+  g.moveTo(20, 118);
+  g.quadraticCurveTo(96, 108, 172, 116);
+  g.stroke();
   house(g, 96, 58, 70 + rnd() * 8, roof, wall);
   house(g, 46, 80, 48 + rnd() * 6, shade(roof, -0.08), shade(wall, -0.04));
   house(g, 142, 76, 46 + rnd() * 6, shade(roof, 0.06), shade(wall, 0.05));
-  if (rnd() > 0.4) house(g, 100, 94, 38, shade(roof, -0.12), shade(wall, -0.08));
-  if (rnd() > 0.5) {
+  if (rnd() > 0.22) house(g, 100, 94, 38, shade(roof, -0.12), shade(wall, -0.08));
+  if (rnd() > 0.55) house(g, 28, 70, 34, shade(roof, 0.04), shade(wall, -0.06));
+  // saman yığını — köy silüetine hacim
+  g.fillStyle = "rgba(190,150,70,0.72)";
+  g.beginPath();
+  g.ellipse(158, 108, 14, 7, -0.2, 0, Math.PI * 2);
+  g.fill();
+  g.fillStyle = "rgba(160,120,50,0.55)";
+  g.beginPath();
+  g.ellipse(158, 104, 10, 8, 0, 0, Math.PI * 2);
+  g.fill();
+  // duman — yerleşim canlılığı
+  g.fillStyle = "rgba(200,198,190,0.28)";
+  g.beginPath();
+  g.ellipse(96 + rnd() * 8, 22, 8 + rnd() * 5, 14, 0.15, 0, Math.PI * 2);
+  g.fill();
+  g.fillStyle = "rgba(190,188,180,0.18)";
+  g.beginPath();
+  g.ellipse(102, 10, 6, 10, -0.1, 0, Math.PI * 2);
+  g.fill();
+  // kuyu
+  g.fillStyle = "#6a5a48";
+  g.beginPath();
+  g.ellipse(78, 102, 7, 4, 0, 0, Math.PI * 2);
+  g.fill();
+  g.fillStyle = "#3a4a58";
+  g.beginPath();
+  g.ellipse(78, 101, 4.5, 2.5, 0, 0, Math.PI * 2);
+  g.fill();
+  g.strokeStyle = "#5a4030";
+  g.lineWidth = 1.5;
+  g.beginPath();
+  g.moveTo(72, 100);
+  g.lineTo(72, 90);
+  g.lineTo(84, 90);
+  g.lineTo(84, 100);
+  g.stroke();
+  // çevre çiti — sticker değil, yumuşak halka
+  g.strokeStyle = `rgba(${Math.max(40, gr - 70)},${Math.max(35, gg - 55)},${Math.max(20, gb - 40)},0.4)`;
+  g.lineWidth = 2.5;
+  g.lineCap = "round";
+  g.beginPath();
+  g.ellipse(96, 108, 78, 22, 0, 0.15, Math.PI * 1.85);
+  g.stroke();
+  // stil detayları
+  if (style === 1) {
+    // taş duvar / çit
+    g.strokeStyle = "rgba(80,70,60,0.55)";
+    g.lineWidth = 3;
+    g.beginPath();
+    g.moveTo(28, 108);
+    g.lineTo(60, 104);
+    g.lineTo(60, 96);
+    g.stroke();
+  } else if (style === 2) {
+    // ahşap direk + çit
+    g.fillStyle = "#5a4030";
+    g.fillRect(160, 88, 3, 22);
+    g.fillRect(168, 90, 3, 20);
+    g.strokeStyle = "rgba(90,60,30,0.5)";
+    g.lineWidth = 1.5;
+    g.beginPath();
+    g.moveTo(160, 96);
+    g.lineTo(171, 96);
+    g.moveTo(160, 102);
+    g.lineTo(171, 102);
+    g.stroke();
+  } else if (style === 3) {
+    // yeşil ova: çit + daha fazla ağaç
+    g.strokeStyle = "rgba(70,90,40,0.45)";
+    g.lineWidth = 2;
+    g.beginPath();
+    g.moveTo(24, 110);
+    g.lineTo(55, 106);
+    g.lineTo(55, 98);
+    g.lineTo(24, 102);
+    g.closePath();
+    g.stroke();
+    for (let i = 0; i < 3; i++) {
+      g.fillStyle = `rgba(${50 + i * 20},${110 + i * 15},40,0.65)`;
+      g.beginPath();
+      g.ellipse(150 + i * 10, 96 + (i % 2) * 6, 8 + i, 14, 0, 0, Math.PI * 2);
+      g.fill();
+    }
+  } else if (rnd() > 0.45) {
     g.fillStyle = "rgba(90,130,60,0.55)";
     g.beginPath();
     g.ellipse(154 + rnd() * 6, 100, 9, 13, 0, 0, Math.PI * 2);
@@ -481,6 +593,20 @@ function tower(seed: number): HTMLCanvasElement {
   g.lineTo(78, 120);
   g.closePath();
   g.fill();
+  // tahta bantlar
+  g.strokeStyle = "rgba(30,18,10,0.4)";
+  g.lineWidth = 1.4;
+  for (const y of [55, 78, 100]) {
+    g.beginPath();
+    g.moveTo(36, y);
+    g.lineTo(76, y);
+    g.stroke();
+  }
+  // gözetleme penceresi
+  g.fillStyle = "#1a1008";
+  g.fillRect(48, 58, 16, 12);
+  g.fillStyle = "rgba(255,200,100,0.35)";
+  g.fillRect(50, 60, 12, 8);
   // platform
   g.fillStyle = "#5a3a22";
   g.fillRect(28, 36, 56, 10);
@@ -592,7 +718,7 @@ function peak(kind: 0 | 1 | 2): HTMLCanvasElement {
   return c;
 }
 
-const PROP_VER = "v8";
+const PROP_VER = "v10";
 const cache = new Map<string, Texture>();
 
 function texFrom(c: HTMLCanvasElement): Texture {
@@ -650,7 +776,7 @@ export function propTex(kind: "yurts" | "village" | "palm" | "bush" | "camp" | "
       c = yurtCamp(1000 + variant * 97);
       break;
     case "village":
-      c = villageSoft(7000 + variant * 83);
+      c = villageSoft(7000 + variant * 83, variant % 4);
       break;
     case "palm":
       c = palmTree(2000 + variant * 53);

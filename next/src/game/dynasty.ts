@@ -1,8 +1,9 @@
 import type { FactionId } from "./factions";
 
 export const YEAR_DAYS = 16;
-export const KID_MAX = 3;
-export const KID_EVERY = 10;
+/** Hanedan sim: oğul sancak, kız dünür bağı — 5'e kadar. */
+export const KID_MAX = 5;
+export const KID_EVERY = 8;
 
 export const SON_NAMES = ["Alp", "Tuğrul", "Arslan", "Kaya", "Tolun", "Ertuğ", "Bilge", "Atsız", "Aybars", "Oğuz", "Temür", "Tarkan", "Kılıç", "Yağı", "Togan", "Sungur", "Börü", "Ilgaz"];
 export const DAUGHTER_NAMES = ["Tomris", "Terken", "Altunay", "Gökçe", "Bengü", "Aybike", "Ulduz", "Sırma", "Alaca", "Börte", "Ay", "Kutlu", "Yaruk", "Saru"];

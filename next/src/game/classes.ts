@@ -118,6 +118,17 @@ export const CLASSES: ClassDef[] = [
 
 export type SkillKind = "burst" | "poison" | "evade" | "shield" | "aura" | "fury" | "steal" | "drain" | "stun" | "slayer" | "rally";
 
+/** Savaşta bir kez patlayan sınıf ultiması (Kut barı). */
+export type UltKind = "storm" | "fury" | "shadow" | "dust" | "spirit";
+
+export const CLASS_ULTI: Record<ClassId, { name: string; kind: UltKind; icon: string; text: string }> = {
+  alp: { name: "Gök Gürlemesi", kind: "storm", icon: "ord_nara", text: "Askerlerin gök gibi gümbürder: bu tur ×1.55 vurur, moral +20." },
+  bahadir: { name: "Kan Öfkesi", kind: "fury", icon: "swords", text: "Öfkeyle dalarsın: kahraman ağır vurur, birlik ×1.35." },
+  suikastci: { name: "Gölge İnişi", kind: "shadow", icon: "sk_golge", text: "Gölgeden tek öldürücü darbe; boss ve ordu sarsılır." },
+  hirsiz: { name: "Toz Perdesi", kind: "dust", icon: "sk_duman", text: "Toz kalkar: gelen hasar −%40, düşman morali −18." },
+  kam: { name: "Ata Ruhları", kind: "spirit", icon: "tr_star", text: "Atalar gelir: can yenilenir, birlik toparlanır, moral +25." },
+};
+
 export interface ClassSkill {
   id: string;
   name: string;

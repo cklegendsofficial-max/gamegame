@@ -1,4 +1,5 @@
-import type { Container } from "pixi.js";
+/** Pixi Container veya 3D stub — kamera pan/zoom dönüşümü. */
+export type CamLayer = { scale: { set(z: number): void }; position: { set(x: number, y: number): void } };
 
 export class Camera {
   x = 0;
@@ -15,15 +16,25 @@ export class Camera {
   private ly = 0;
   private pinch = 0;
   private pointers = new Map<number, { x: number; y: number }>();
-  onTap: (wx: number, wy: number) => void = () => {};
+  onTap: (wx: number, wy: number, alt?: { x: number; y: number }) => void = () => {};
+  /** 3D görünümde ekran→dünya (perspektif ışın); yoksa üstten 2D matematik. */
+  picker: ((sx: number, sy: number, lift?: number) => { x: number; y: number } | null) | null = null;
   keys = new Set<string>();
   pad = { x: 0, y: 0 };
+  /** AoE/RTS kenar pan — yalnızca ince işaretçi (fare) cihazlarda. */
+  private edgePan = matchMedia("(pointer: fine)").matches;
+  private overMap = false;
+  private mx = 0;
+  private my = 0;
 
   constructor(private el: HTMLElement, private worldW: number, private worldH: number) {
     el.addEventListener("pointerdown", (e) => this.down(e));
     window.addEventListener("pointermove", (e) => this.move(e));
     window.addEventListener("pointerup", (e) => this.up(e));
     window.addEventListener("pointercancel", (e) => this.up(e));
+    el.addEventListener("pointerleave", () => {
+      if (!this.dragging) this.overMap = false;
+    });
     el.addEventListener("wheel", (e) => {
       e.preventDefault();
       this.zoomAt(e.offsetX, e.offsetY, Math.exp(-e.deltaY * 0.0015));
@@ -53,6 +64,10 @@ export class Camera {
   }
 
   toWorld(sx: number, sy: number): { x: number; y: number } {
+    if (this.picker) {
+      const p = this.picker(sx, sy);
+      if (p) return p;
+    }
     return { x: this.x + (sx - this.w / 2) / this.zoom, y: this.y + (sy - this.h / 2) / this.zoom };
   }
 
@@ -67,6 +82,11 @@ export class Camera {
   }
 
   private zoomAt(sx: number, sy: number, f: number): void {
+    if (this.picker) {
+      this.zoom = Math.min(this.maxZoom, Math.max(this.minZoom, this.zoom * f));
+      this.tx = null;
+      return;
+    }
     const before = this.toWorld(sx, sy);
     this.zoom = Math.min(this.maxZoom, Math.max(this.minZoom, this.zoom * f));
     const after = this.toWorld(sx, sy);
@@ -89,12 +109,20 @@ export class Camera {
   }
 
   private move(e: PointerEvent): void {
+    const r = this.el.getBoundingClientRect();
+    const onCanvas = e.target === this.el || (e.target instanceof Node && this.el.contains(e.target));
+    if (onCanvas || this.dragging) {
+      this.mx = e.clientX - r.left;
+      this.my = e.clientY - r.top;
+      this.overMap = true;
+    } else if (!this.dragging) {
+      this.overMap = false;
+    }
     if (!this.pointers.has(e.pointerId)) return;
     this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (this.pointers.size === 2) {
       const [a, b] = [...this.pointers.values()];
       const d = Math.hypot(a.x - b.x, a.y - b.y);
-      const r = this.el.getBoundingClientRect();
       if (this.pinch > 0) this.zoomAt((a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top, d / this.pinch);
       this.pinch = d;
       this.moved = 99;
@@ -104,11 +132,20 @@ export class Camera {
     const dx = e.clientX - this.lx;
     const dy = e.clientY - this.ly;
     this.moved += Math.abs(dx) + Math.abs(dy);
+    const plx = this.lx;
+    const ply = this.ly;
     this.lx = e.clientX;
     this.ly = e.clientY;
     if (this.moved > 6) {
-      this.x -= dx / this.zoom;
-      this.y -= dy / this.zoom;
+      const a = this.picker?.(plx - r.left, ply - r.top);
+      const b = this.picker?.(e.clientX - r.left, e.clientY - r.top);
+      if (a && b) {
+        this.x += a.x - b.x;
+        this.y += a.y - b.y;
+      } else {
+        this.x -= dx / this.zoom;
+        this.y -= dy / this.zoom;
+      }
       this.tx = null;
       this.clamp();
     }
@@ -122,7 +159,8 @@ export class Camera {
     if (this.dragging && this.moved <= 6) {
       const r = this.el.getBoundingClientRect();
       const p = this.toWorld(e.clientX - r.left, e.clientY - r.top);
-      this.onTap(p.x, p.y);
+      const alt = this.picker?.(e.clientX - r.left, e.clientY - r.top, 38) ?? undefined;
+      this.onTap(p.x, p.y, alt);
     }
     this.dragging = false;
   }
@@ -138,15 +176,25 @@ export class Camera {
     this.zoomAt(this.w / 2, this.h / 2, f);
   }
 
-  update(dt: number, layer: Container): void {
+  update(dt: number, layer: CamLayer): void {
     const k = this.keys;
-    if (k.size || this.pad.x || this.pad.y) {
+    let edx = 0;
+    let edy = 0;
+    if (this.edgePan && this.overMap && !this.dragging && this.pointers.size === 0) {
+      const m = 40;
+      if (this.mx < m) edx = -1;
+      else if (this.mx > this.w - m) edx = 1;
+      if (this.my < m) edy = -1;
+      else if (this.my > this.h - m) edy = 1;
+    }
+    if (k.size || this.pad.x || this.pad.y || edx || edy) {
       const sp = (720 * dt) / this.zoom;
+      const edgeSp = (520 * dt) / this.zoom;
       const dx = (k.has("d") || k.has("arrowright") ? 1 : 0) - (k.has("a") || k.has("arrowleft") ? 1 : 0) + this.pad.x;
       const dy = (k.has("s") || k.has("arrowdown") ? 1 : 0) - (k.has("w") || k.has("arrowup") ? 1 : 0) + this.pad.y;
-      if (dx || dy) {
-        this.x += dx * sp;
-        this.y += dy * sp;
+      if (dx || dy || edx || edy) {
+        this.x += dx * sp + edx * edgeSp;
+        this.y += dy * sp + edy * edgeSp;
         this.tx = null;
       }
     }

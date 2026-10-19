@@ -27,6 +27,10 @@ export interface SiegeCtx {
 export interface SiegeOut {
   loss: number;
   surrender?: boolean;
+  /** Yardım ordusu yarın geliyor — UI son şans seçimi gösterebilir. */
+  reliefSoon?: boolean;
+  /** Yardım bu turda girdi. */
+  reliefArrived?: boolean;
 }
 
 export const SIEGE_MAX_DAY = 14;
@@ -114,7 +118,16 @@ export function siegeDay(r: SiegeRun, act: SiegeAct, c: SiegeCtx): SiegeOut {
     r.morale = Math.max(0, r.morale - 5);
     log(`Gece baskını: ${d} savunmacı kılıçtan geçti, ${loss} askerini kaybettin.`, d > loss ? "good" : "bad");
   }
+  let reliefSoon = false;
+  let reliefArrived = false;
   if (r.relief < 30) r.relief--;
+  if (r.relief === 2) {
+    log("Ufukta toz bulutu: yardım ordusu iki gün sonra burada!", "bad");
+    reliefSoon = true;
+  } else if (r.relief === 1) {
+    log("Yardım ordusunun meşaleleri göründü — yarın kuşatmayı yararlar. Bugün hücum ya da elçi!", "bad");
+    reliefSoon = true;
+  }
   if (r.relief === 0) {
     const add = Math.round(r.gar0 * 0.35);
     r.gar.spear += Math.round(add * 0.4);
@@ -122,6 +135,7 @@ export function siegeDay(r: SiegeRun, act: SiegeAct, c: SiegeCtx): SiegeOut {
     r.gar.horse += Math.round(add * 0.3);
     r.morale = Math.min(100, r.morale + 25);
     log(`Yardım ordusu kuşatmayı yardı! Şehre ${add} taze asker girdi.`, "bad");
+    reliefArrived = true;
   } else if (r.morale > 55 && rnd() < 0.22) {
     const l = Math.max(1, Math.round(c.armyN * 0.04));
     loss += l;
@@ -130,7 +144,10 @@ export function siegeDay(r: SiegeRun, act: SiegeAct, c: SiegeCtx): SiegeOut {
   } else if (r.morale < 35 && rnd() < 0.4) {
     const d = cut(r.gar, 0.06);
     log(`Gece surlardan ip sarkıtıp kaçtılar: ${d} savunmacı firar etti.`, "good");
+  } else if (r.breach >= 50 && r.morale < 45 && rnd() < 0.18) {
+    r.morale = Math.max(0, r.morale - 8);
+    log("Gedikten bir bey kaçtı; kalanlar panik içinde. Moral düştü.", "good");
   }
   r.day++;
-  return { loss };
+  return { loss, reliefSoon, reliefArrived };
 }

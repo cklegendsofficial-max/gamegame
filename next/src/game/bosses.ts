@@ -268,6 +268,11 @@ export const BOSS_KITS: Record<string, BossKit> = {
     moves: [charge("Kara mızrak", "Elçi kara mızrağını sana çevirdi!", 2.2), curse("Erlik'in fermanı", "Elçi bir ferman açtı: ölüm fermanı!", 22)],
     rage: { name: "Kara zırh yarılır", text: "Zırhının altından duman taşıyor!", atk: 1.3, move: summon("Duman askerler", "Dumandan askerler doğuyor!", 0.22) },
   },
+  "Hazar Korsan Kaptanı": {
+    title: "Kıyıların Belası", intro: "\"Bu denizin hakkı bize aittir, kervancı! Haraç ver ya da sulara gömül.\"", arena: "deniz", kin: "korsan", theme: "bozkir",
+    moves: [summon("Kayıklar yanaşır", "Sis içinden kayıklar çıktı: korsanlar güverteye tırmanıyor!", 0.28, [1, 0, 1]), breath("Ok yağmuru", "Direklerden okçular gerildi: güverteyi tarayacaklar!", 1.5), charge("Kancalı kılıç", "Kaptan kancalı kılıcını savurup hücuma kalktı!", 2.1)],
+    rage: { name: "Kara yelken", text: "Kara yelken açıldı: tüm filolar aynı anda saldırıyor!", atk: 1.35, move: curse("Deniz laneti", "Kaptan amuletini kırdı; güverte ıslak ve kaygan!", 24) },
+  },
 };
 
 const MONGOL_KIT: BossKit = {
@@ -277,11 +282,13 @@ const MONGOL_KIT: BossKit = {
   loot: "noyan",
 };
 
-/** Bossun adına göre savaş kiti; "Uyanmış" gibi önekleri tanır. */
+/** Bossun adına göre savaş kiti; "Uyanmış" gibi önekleri tanır. Bölge boss kitleri regions.ts yüklenince BOSS_KITS'e yazılır. */
 export function bossKit(b: Boss | null): BossKit | null {
   if (!b) return null;
-  const n = b.name.replace(/^Uyanmış /, "");
+  const n = b.name.replace(/^Uyanmış /, "").replace(/^tr\(/, "").trim();
   if (BOSS_KITS[n]) return BOSS_KITS[n];
+  const soft = Object.keys(BOSS_KITS).find((k) => n.includes(k) || k.includes(n));
+  if (soft) return BOSS_KITS[soft];
   if (/Noyan|Tümen Başı/.test(n)) return MONGOL_KIT;
   return null;
 }

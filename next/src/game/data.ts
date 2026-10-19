@@ -57,7 +57,7 @@ export const BUILDINGS: BuildingDef[] = [
   { id: "kereste", name: "Kereste Atölyesi", icon: "b_kereste", desc: "Kereste üretir.", produces: "wood", base: 32, cost: { wood: 30, stone: 30, gold: 10 } },
   { id: "tasocagi", name: "Taş Ocağı", icon: "b_tasocagi", desc: "Taş üretir.", produces: "stone", base: 22, cost: { wood: 60, gold: 10 } },
   { id: "carsi", name: "Çarşı", icon: "b_carsi", desc: "Vergi ve ticaretle altın üretir.", produces: "gold", base: 16, cost: { wood: 70, stone: 50 } },
-  { id: "kisla", name: "Kışla", icon: "b_kisla", desc: "Asker eğitir. Seviye arttıkça eğitim hızlanır ve okçu ile atlı açılır.", cost: { wood: 90, stone: 40, gold: 20 } },
+  { id: "kisla", name: "Kışla", icon: "b_kisla", desc: "Asker eğitir. Okçu Kışla 1, atlı Kışla 2 ile açılır; seviye arttıkça eğitim hızlanır.", cost: { wood: 90, stone: 40, gold: 20 } },
   { id: "depo", name: "Ambar", icon: "b_depo", desc: "Kaynak depolama sınırını artırır.", cost: { wood: 80, stone: 60 } },
   { id: "sur", name: "Sur", icon: "b_sur", desc: "Başkentin savunmasını güçlendirir. Akınlara karşı korur.", cost: { stone: 140, wood: 40 } },
 ];
@@ -91,11 +91,18 @@ export function trainSpeed(kislaLv: number): number {
 }
 
 export function unitUnlocked(u: Unit, kislaLv: number): boolean {
-  return u === "spear" || (u === "archer" && kislaLv >= 2) || (u === "horse" && kislaLv >= 4);
+  return u === "spear" || (u === "archer" && kislaLv >= 1) || (u === "horse" && kislaLv >= 2);
 }
 
+/**
+ * Erken oyun (Sv ≤ 12) eski hızda kalır; sonrası yumuşar.
+ * Denetim: eski 1.45^lv eğrisinde odalar ~2.5k XP verirken Sv 20 → 26, Sv 24 → ~120, Sv 28 → ~350
+ * boss savaşı gerekiyordu (Sv 22 kapısı fiilen duvardı). Yeni eğri: Sv 20 → ~5, Sv 24 → ~10, Sv 28 → ~14.
+ */
+const XP_SOFT_LV = 12;
 export function xpNeed(lv: number): number {
-  return Math.round(60 * Math.pow(1.45, lv - 1));
+  if (lv <= XP_SOFT_LV) return Math.round(60 * Math.pow(1.45, lv - 1));
+  return Math.round(60 * Math.pow(1.45, XP_SOFT_LV - 1) * Math.pow(1.18, lv - XP_SOFT_LV));
 }
 
 export const VILLAGE_NAMES = [

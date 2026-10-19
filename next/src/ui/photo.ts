@@ -1,7 +1,9 @@
-import type { Application } from "pixi.js";
 import type { Game } from "../game/game";
 import { audio } from "../audio";
 import { t } from "../i18n";
+
+/** Pixi Application veya Three.js canvas sarmalayıcı. */
+export type PhotoCanvas = { canvas: HTMLCanvasElement; render: () => void };
 
 interface PhotoFilter {
   id: string;
@@ -32,7 +34,7 @@ export class PhotoMode {
   private ov: HTMLElement | null = null;
   private zoomMax = 0;
 
-  constructor(private app: Application, private g: Game) {
+  constructor(private app: PhotoCanvas, private g: Game) {
     window.addEventListener(
       "keydown",
       (e) => {

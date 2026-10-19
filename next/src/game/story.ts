@@ -68,6 +68,8 @@ export interface Chapter {
   scene?: { img: string; text: (g: Game) => string; choices: Choice[] };
   auto?: (g: Game) => boolean;
   outro?: { img: string; title: string; text: (g: Game) => string; cine?: string };
+  /** Sahne savaşı kazanıldıktan ya da auto koşulu sağlandıktan sonra, bölüm ilerlemeden önce gösterilen tek seferlik seçim. */
+  decision?: { img: string; text: (g: Game) => string; choices: Choice[] };
   /** Bölümü kapatan savaş ya da kuşatma sahnesi; kazanılmadan bölüm ilerlemez. */
   stage?: Stage;
   goto: (g: Game) => { x: number; y: number } | null;
@@ -232,6 +234,33 @@ export const ACT2: Chapter[] = [
       win: "Gölgeler şafakla birlikte eridi. Buharalılar surların üstünden adını haykırıyor.",
       lose: "Gölgeler surları aştı; Korkut'la medreseye çekildiniz. Birliğini toparla ve yeniden savun.",
     },
+    decision: {
+      img: "companions/korkut",
+      text: () => "Şafak söktü; gölgeler eridi ama Buhara halkı hâlâ korkuyor. Korkut kopuzunu omzuna astı: <i>\"Şimdi iki yol var, yiğit. Ya şehri ayinle mühürlersin, ya da gölgelerin izini kurganlara kadar sürersin.\"</i>",
+      choices: [
+        {
+          label: "Şehri mühürle (ayin)",
+          why: (g) => (g.s.mats.ruh >= 5 ? null : "5 Ruh Taşı gerekir"),
+          run: (g) => {
+            g.s.mats.ruh -= 5;
+            g.s.renown += 8;
+            (g.s.story.flags ??= []).push("buhara_muhur");
+            g.chron(`${g.s.hero.name}, Buhara surlarında ruh taşı yakıp şehir ayinini mühürledi; medrese kapıları bir daha gölge görmedi.`);
+            g.storyAdvance();
+          },
+        },
+        {
+          label: "İz sür (kurganlara)",
+          run: (g) => {
+            g.addKut(3, "Gölge izi");
+            g.s.renown += 4;
+            (g.s.story.flags ??= []).push("buhara_iz");
+            g.chron(`${g.s.hero.name}, eriyen gölgelerin izini kurganlara doğru sürdü; ayak izleri mor tozda kaldı.`);
+            g.storyAdvance();
+          },
+        },
+      ],
+    },
     goto: () => city("bukhara"),
   },
   {
@@ -248,10 +277,44 @@ export const ACT2: Chapter[] = [
       win: "Bekçilerin zincirleri çözüldü; taş yazıt mor ışıkla aydınlandı.",
       lose: "Bekçiler seni merdivenlere geri itti. Yazıt hâlâ karanlıkta.",
     },
+    decision: {
+      img: "ruh",
+      text: () => "Yazıt mor ışıkla titreşiyor, ama ışık yavaş yavaş sönüyor; kararını çabuk vermelisin.<br><br><i>\"Her harfini taşa, parşömene kazıyabilirsin,\"</i> dedi Korkut, <i>\"ya da sözlerini kendi ruhuna nakşedip Kut olarak taşıyabilirsin. İkisi de bir yolu açar.\"</i>",
+      choices: [
+        {
+          label: "Yazıtı kopyala (parşömen)",
+          run: (g) => {
+            g.s.mats.parsomen += 3;
+            g.s.renown += 5;
+            (g.s.story.flags ??= []).push("yazit_kopya");
+            g.chron(`${g.s.hero.name}, yazıtın her harfini sabırla parşömene kopyaladı; üç parşömen tomarı dolu geri döndü.`);
+            g.storyAdvance();
+          },
+        },
+        {
+          label: "Ezberle (kut)",
+          run: (g) => {
+            g.addKut(4, "Yazıtı ezberledi");
+            g.s.renown += 5;
+            (g.s.story.flags ??= []).push("yazit_ezber");
+            g.chron(`${g.s.hero.name}, yazıtı tek tek ezberledi; sözler kemiklerine işledi, Kut'u biraz daha kendine çekti.`);
+            g.storyAdvance();
+          },
+        },
+      ],
+    },
     outro: {
       img: "ruh",
       title: "Taştaki yazıt",
-      text: () => "Onuncu katın duvarında, mor ışıkla parlayan Göktürk harfleri: <i>\"Doğuda, göğün dağa değdiği yerde, Erlik'in kapısı yedi bey ve bir kamın eliyle mühürlendi. Beyler dağılırsa mühür çözülür.\"</i><br><br>Korkut fısıldadı: <i>\"Beyleri yeniden birleştirmelisin. Kılıçla ya da sözle.\"</i>",
+      text: (g) => {
+        const fl = g.s.story.flags ?? [];
+        const how = fl.includes("yazit_ezber")
+          ? "Sözler artık senin dilinde; parşömene gerek kalmadı."
+          : fl.includes("yazit_kopya")
+            ? "Üç parşömen tomarın mor ışıkla dolu; yazıtın kopyası kemerinde."
+            : "";
+        return `Onuncu katın duvarında, mor ışıkla parlayan Göktürk harfleri: <i>"Doğuda, göğün dağa değdiği yerde, Erlik'in kapısı yedi bey ve bir kamın eliyle mühürlendi. Beyler dağılırsa mühür çözülür."</i>${how ? `<br><br>${how}` : ""}<br><br>Korkut fısıldadı: <i>"Beyleri yeniden birleştirmelisin. Kılıçla ya da sözle."</i>`;
+      },
     },
     goto: (g) => g.nearest(g.s.kurgans.filter((k) => !k.alive && !k.delved)),
   },
@@ -269,10 +332,45 @@ export const ACT2: Chapter[] = [
       win: "Dönekler karanlığa kaçtı. Müttefik beyler yanında savaştığın için sana kılıçlarıyla yemin etti.",
       lose: "Baskıncılar otağı ateşe verdi; beyler dağılmadan önce yeniden toparlan.",
     },
+    decision: {
+      img: "lord_bey",
+      text: () => "Otağ sakinleşti ama birliği nasıl mühürleyeceğine karar vermelisin: beyleri hediyeyle mi kazanacaksın, yoksa kılıcını ortaya dikip gücünü mü göstereceksin?",
+      choices: [
+        {
+          label: "Hediyeyle birleştir",
+          why: (g) => (g.s.res.gold >= 150 ? null : "150 altın gerekir"),
+          run: (g) => {
+            g.pay({ gold: 150 });
+            g.s.renown += 10;
+            (g.s.story.flags ??= []).push("birlik_hediye");
+            g.chron(`${g.s.hero.name}, müttefik beylere kımız kâseleri ve altın hediyeler dağıttı; otağda gülüşmeler yükseldi.`);
+            g.storyAdvance();
+          },
+        },
+        {
+          label: "Kılıçla korkut",
+          run: (g) => {
+            g.addKut(6, "Beyleri kılıçla birleştirdi");
+            g.s.renown += 3;
+            (g.s.story.flags ??= []).push("birlik_kilic");
+            g.chron(`${g.s.hero.name}, kılıcını otağın ortasına sapladı; beyler sessizce tuğlarını eğdi, ama gözlerinde korku vardı.`);
+            g.storyAdvance();
+          },
+        },
+      ],
+    },
     outro: {
       img: "lord_bey",
       title: "Tuğlar bir arada",
-      text: (g) => `Beyler çadırında toplandı; kımız kâseleri elden ele dolaştı. <i>"${g.s.hero.name} nereye, biz oraya."</i><br><br>O gece Kaşgar'dan bir ulak geldi: Tanrı Dağları'nın eteğinde yaşayan yaşlı Umay Kam seni görmek istiyor.`,
+      text: (g) => {
+        const fl = g.s.story.flags ?? [];
+        const seal = fl.includes("birlik_hediye")
+          ? "Hediyelerin hâlâ otağda duruyor; beyler gülerek ant içti."
+          : fl.includes("birlik_kilic")
+            ? "Ortadaki kılıç hâlâ saplı; beyler saygıyla, biraz da korkuyla eğildi."
+            : "";
+        return `Beyler çadırında toplandı; kımız kâseleri elden ele dolaştı. <i>"${g.s.hero.name} nereye, biz oraya."</i>${seal ? `<br><br>${seal}` : ""}<br><br>O gece Kaşgar'dan bir ulak geldi: Tanrı Dağları'nın eteğinde yaşayan yaşlı Umay Kam seni görmek istiyor.`;
+      },
     },
     goto: (g) => {
       const r = g.s.rivals.find((x) => x.status === "peace" || x.status === "war");
@@ -321,7 +419,18 @@ export const ACT3: Chapter[] = [
     scene: {
       img: "heroes/boss_kam",
       text: (g) => `Umay Kam bu kez ateş yakmamıştı. Davulunu dizlerine koymuş, göğe bakıyordu.<br><br><i>"Erlik'i yendin, ${g.s.hero.name}. Ama yeraltı boşalınca gök de sarsıldı. Tengri'nin <b>Kut</b>'u, beylere hükmetme hakkı, Ötüken'den koptu ve göğe savruldu. Kut sahipsiz kalırsa bozkır yüz yıl kardeş kanıyla yıkanır."</i><br><br><i>"Kut, beyleri tek sofrada toplayana, adı yedi iklimde anılana iner. Önce beyleri kurultayda birleştir. Sonra Tengri Dağı sana yolunu gösterecek."</i>`,
-      choices: [{ label: "Kut'un peşine düşeceğim", run: (g) => g.storyAdvance() }],
+      choices: [
+        { label: "Kut'un peşine düşeceğim", run: (g) => g.storyAdvance() },
+        {
+          label: "Önce yalnız meditasyon",
+          run: (g) => {
+            g.addKut(5, "Yalnız meditasyon");
+            (g.s.story.flags ??= []).push("gogun_meditasyon");
+            g.chron(`${g.s.hero.name}, yola çıkmadan önce bozkırda üç gün tek başına oturdu; döndüğünde gözlerinde yeni bir sükûnet vardı.`);
+            g.storyAdvance();
+          },
+        },
+      ],
     },
     stage: {
       title: "Kaşgar Kuşatması",
@@ -330,6 +439,32 @@ export const ACT3: Chapter[] = [
       mix: [2, 2, 2], k: 1, min: 80, bonus: 0.2,
       win: "Kuşatma kuleleri alevler içinde çöktü; yağmacı hanlar Tanrı Dağları'na çekildi.",
       lose: "Yağmacılar surların dibinde tutunuyor. Kaşgar kapılarını kapattı; yeniden saldır.",
+    },
+    decision: {
+      img: "heroes/boss_kam",
+      text: () => "Yenilen yağmacı hanlar diz çökmüş, tuğlarını yere bırakmış. Umay Kam fısıldadı: <i>\"Affetmek de bir ferman, korkutmak da. Hangisini seçersen Kut o yolu hatırlar.\"</i>",
+      choices: [
+        {
+          label: "Affet ve ant al",
+          run: (g) => {
+            g.s.renown += 10;
+            g.addKut(4, "Yağmacı antı");
+            (g.s.story.flags ??= []).push("kashgar_aff");
+            g.chron(`${g.s.hero.name}, yenilen yağmacı hanları affetti; onlar kımız içip ant içti, Kaşgar bir daha kuşatılmadı.`);
+            g.storyAdvance();
+          },
+        },
+        {
+          label: "Tuğlarını yak, dağıt",
+          run: (g) => {
+            g.gain({ gold: 350 });
+            g.s.renown += 4;
+            (g.s.story.flags ??= []).push("kashgar_yakt");
+            g.chron(`${g.s.hero.name}, yağmacı tuğlarını ateşe verdi; hanlar dağlara kaçtı, Kaşgar korkuyla soluklandı.`);
+            g.storyAdvance();
+          },
+        },
+      ],
     },
     goto: () => city("kashgar"),
   },
@@ -346,6 +481,32 @@ export const ACT3: Chapter[] = [
       mix: [2, 1, 2], k: 1, min: 100, bonus: 0.2,
       win: "Asi beyler tuğlarını yere eğdi. Kurultay bir kez daha senin adını andı.",
       lose: "Asiler Semerkant önlerinde tutundu. Ordunu güçlendir ve yeniden karşılarına çık.",
+    },
+    decision: {
+      img: "lord_bey",
+      text: () => "Kurultay sana bir ferman okuma hakkı verdi. Kut'un kaderi henüz Tengri Dağı'nda beklerken, bozkıra şimdiden bir söz vermelisin.",
+      choices: [
+        {
+          label: "Ferman: Kut adaletle paylaşılsın",
+          run: (g) => {
+            g.s.renown += 12;
+            g.addKut(3, "Adalet fermanı");
+            (g.s.story.flags ??= []).push("ferman_adalet");
+            g.chron(`${g.s.hero.name} kurultayda fermanını okudu: Kut hiçbir beyin tekelinde olmayacak. Alkışlar göğe çıktı.`);
+            g.storyAdvance();
+          },
+        },
+        {
+          label: "Ferman: Kut senin elinde kalsın",
+          run: (g) => {
+            g.addKut(10, "Güç fermanı");
+            g.gain({ gold: 400 });
+            (g.s.story.flags ??= []).push("ferman_guc");
+            g.chron(`${g.s.hero.name} fermanını okudu: Kut, Tengri Dağı'na çıkana dek kendi otağında kalacak. Bazı beyler başını salladı, bazıları sessizce öfkelendi.`);
+            g.storyAdvance();
+          },
+        },
+      ],
     },
     outro: {
       img: "ruh",
@@ -418,6 +579,22 @@ export const ENDINGS: Ending[] = [
     img: "heroes/boss_hakan",
     why: (g) => (g.s.mongol?.pact === "join" ? null : "Yalnızca Moğol'a boyun eğenler bu yolu seçebilir"),
     text: (g) => `Kut'u keçeye sardın ve doğuya, Cengiz'in altın otağına götürdün. Büyük Han alevi avucunda tarttı, sonra sana döndü: <i>"Bozkırın kutunu getiren, bozkırın noyanı olur."</i><br><br>Artık ${g.s.mongol?.fallen.length ? `${g.s.mongol.fallen.length} yanmış şehrin` : "bütün İpek Yolu'nun"} vergisi senin defterinden geçiyor. Beyler önünde eğiliyor; ama gözlerinde sadakat değil, korku var.<br><br>Bir zamanlar zincirli bir çocuktun. Şimdi zincirlerin anahtarı senin kemerinde asılı.`,
+  },
+  {
+    id: "kardes",
+    name: "Kardeş Ocağı",
+    label: "Kut'tan vazgeç; Ayşe ile zincirden kurtulanlara ocak kur",
+    img: "companions/ayse",
+    why: (g) => (g.hasComp("ayse") && g.bond("ayse") >= 60 ? null : "Ayşe'yi yoldaşın yapıp bağını 60'ın üstüne çıkarmalısın"),
+    text: (g) => `Kut'un alevine bakıp başını salladın. Yanında duran Ayşe'nin elini tuttun: <i>"Bu alev bana değil, bize gerekli olana yakılsın."</i><br><br>Kut'u almadın; onun yerine Semerkant'ın dışında bir ocak kurdunuz. Zincirden kurtulan her çocuk, her kadın, her yaşlı o ocağın başında bir yer buldu.${g.s.story.familyPath === "anne" ? " Annen de o ocağın en yaşlı başköşesinde oturdu; artık kimse ondan korkmuyor." : ""}<br><br>Ayşe her gece yarasını saran eski bir köle gibi, ocağın etrafında dönüp duruyor. Ozanlar seni Kağan diye anmıyor; <b>Kardeş Ocağı'nın sahibi</b> diyorlar, ki bu bazı kulaklara taçtan daha ağır gelir.`,
+  },
+  {
+    id: "izsurucu",
+    name: "İz Sürücü",
+    label: "Kut'tan vazgeç; Ferhat ile bozkırın sonsuz izini sür",
+    img: "companions/ferhat",
+    why: (g) => (g.hasComp("ferhat") && g.bond("ferhat") >= 60 ? null : "Ferhat'ı yoldaşın yapıp bağını 60'ın üstüne çıkarmalısın"),
+    text: (_g) => `Kut'un mavi alevine son kez baktın, sonra sırtını döndün. Ferhat yanı başındaydı, her zaman olduğu gibi sessiz: <i>"Taht seni bekler, bozkır da. İkisini birden seçemezsin."</i><br><br>İkiniz zirveden indiniz ve bir daha hiçbir otağda uzun kalmadınız. Kaybolan kervanları, saklanan çocukları, yolunu şaşıran göçebeleri bulmak artık senin destanın oldu.<br><br>Hiçbir şehrin tahtına oturmadın ama her şehrin kapısı sana açıktı. Ozanlar seni <b>İz Sürücü</b> diye andı: nereye gitsen, kaybolan bir şey ya da biri seni bulana dek arkanı bırakmadı.`,
   },
 ];
 

@@ -1,8 +1,11 @@
 import { UNIT_KEYS, armySize, type Army, type Unit } from "../game/data";
-import type { Field, Ground, Order, Sky } from "../game/battle";
+import { Battle3D, type B3Item } from "./battle3d";
+import { settings } from "../settings";
+import type { Field, FormLane, FormPose, Ground, Order, Sky } from "../game/battle";
+import { FORM_DEFAULT, FORM_LANE_NAME, FORM_LANE_X, FORM_LANES, UNIT_FORM_NAME } from "../game/battle";
 import { ARENAS, KINS, type Kin } from "../game/bosses";
 import { FIG_PX, FRAMES, REGION_STYLE, TROOP_STYLE, figureSheet, type FigKind, type FigStyle } from "../render/figures";
-import { assetUrl } from "../render/worldView";
+import { assetUrl } from "../render/assets";
 import { t as tr } from "../i18n";
 import { audio } from "../audio";
 
@@ -31,7 +34,7 @@ interface Puff {
   vy: number;
   t0: number;
   life: number;
-  kind: "dust" | "spark" | "blood" | "gold" | "clash";
+  kind: "dust" | "spark" | "blood" | "gold" | "clash" | "shock" | "ember";
 }
 
 interface Callout {
@@ -48,8 +51,13 @@ interface Float {
   color: string;
 }
 
-const BLOCK: Record<Unit, [number, number]> = { archer: [0.04, 0.15], horse: [0.16, 0.28], spear: [0.29, 0.4] };
 const ROWS = 6;
+/** Düşman safları — oyuncu formundan bağımsız sabit. */
+const FOE_BLOCK: Record<Unit, [number, number]> = {
+  archer: FORM_LANE_X.back,
+  horse: FORM_LANE_X.mid,
+  spear: FORM_LANE_X.front,
+};
 const SIDE_COLOR = ["#f0c860", "#e0563f"];
 const UNIT_ICON: Record<Unit, string> = { spear: "u_spear", archer: "u_archer", horse: "u_cavalry" };
 const SPR = 56;
@@ -103,6 +111,7 @@ export class BattleField {
   private sprites = new Map<string, HTMLCanvasElement>();
   private bg: HTMLCanvasElement | null = null;
   private lag = 0;
+  private b3: Battle3D | null = null;
   private frozen = 0;
   private lastReal = performance.now();
   private shake = { t0: 0, amp: 0 };
@@ -110,6 +119,8 @@ export class BattleField {
   heroRing = "#ffd56a";
   private comps: HTMLImageElement[] = [];
 
+  /** 3D sahnede yoldaşlar gerçek figür olarak durur (portre yerine). */
+  compIds: string[] = [];
   setComps(srcs: string[]): void {
     this.comps = srcs.slice(0, 3).map((src) => Object.assign(new Image(), { src }));
   }
@@ -155,6 +166,128 @@ export class BattleField {
     this.flashes.push({ t0: this.clock(), color, dur });
   }
 
+  /** Emir seçildi ama tur henüz işlemedi — sol kanatta altın vinyet + bayrak hissi. */
+  private pendingBanner: { order: Order; t0: number } | null = null;
+  /** Sürükle formasyon. */
+  private form: FormPose = { ...FORM_DEFAULT };
+  private drag: { u: Unit; lx: number; ly: number } | null = null;
+  private formLocked = false;
+  onForm?: (u: Unit, lane: FormLane, pose: FormPose) => void;
+
+  private block(u: Unit): [number, number] {
+    return FORM_LANE_X[this.form[u]];
+  }
+
+  /** Formasyonu uygula ve canlı glyph'leri şeritlere oturt. */
+  setForm(pose: FormPose): void {
+    this.form = { ...pose };
+    const now = this.clock();
+    const alive = this.sides[0].filter((g) => !g.dead);
+    for (const u of UNIT_KEYS) {
+      const band = alive.filter((g) => g.u === u);
+      if (!band.length) continue;
+      const [x0, x1] = this.block(u);
+      const cols = Math.max(1, Math.ceil(band.length / ROWS));
+      band.forEach((gl, j) => {
+        const col = Math.floor(j / ROWS);
+        const row = j % ROWS;
+        const ox = gl.x;
+        const oy = gl.y;
+        gl.x = x0 + ((col + 0.5) / cols) * (x1 - x0);
+        gl.y = (row + 0.5) / ROWS;
+        this.puffs.push({ x: (ox + gl.x) / 2, y: (oy + gl.y) / 2, vx: (gl.x - ox) * 0.4, vy: -0.08, t0: now, life: 380, kind: "dust" });
+      });
+    }
+    this.sides[0].sort((p, q) => p.y - q.y);
+  }
+
+  lockForm(v: boolean): void {
+    this.formLocked = v;
+  }
+
+  private toField(clientX: number, clientY: number): { nx: number; ny: number } {
+    const r = this.cv.getBoundingClientRect();
+    return {
+      nx: (clientX - r.left) / Math.max(1, r.width),
+      ny: (clientY - r.top) / Math.max(1, r.height),
+    };
+  }
+
+  /** Tuval üzerinde birlik sürükleme — boş alan tıklaması false döner (emir döngüsü için). */
+  pointerDown(clientX: number, clientY: number): boolean {
+    if (this.formLocked || this.end) return false;
+    const { nx, ny } = this.toField(clientX, clientY);
+    const u = this.hitUnit(nx, ny);
+    if (!u) return false;
+    this.drag = { u, lx: nx, ly: ny };
+    this.announce(`${UNIT_FORM_NAME[u]} · sürükle`, "#ffe7a8", 0);
+    return true;
+  }
+
+  pointerMove(clientX: number, clientY: number): void {
+    if (!this.drag) return;
+    const { nx, ny } = this.toField(clientX, clientY);
+    this.drag.lx = nx;
+    this.drag.ly = ny;
+  }
+
+  pointerUp(clientX: number, clientY: number): FormLane | null {
+    if (!this.drag) return null;
+    const u = this.drag.u;
+    const { nx } = this.toField(clientX, clientY);
+    this.drag = null;
+    const lane = this.laneAt(nx);
+    const other = UNIT_KEYS.find((v) => v !== u && this.form[v] === lane);
+    const next: FormPose = { ...this.form, [u]: lane };
+    if (other) next[other] = this.form[u];
+    this.setForm(next);
+    this.flash("rgba(255,213,106,0.16)", 320);
+    this.announce(`${UNIT_FORM_NAME[u]} → ${FORM_LANE_NAME[lane]}`, "#ffd56a", 0);
+    this.onForm?.(u, lane, next);
+    return lane;
+  }
+
+  cancelDrag(): void {
+    this.drag = null;
+  }
+
+  private laneAt(nx: number): FormLane {
+    let best: FormLane = "mid";
+    let bestD = 99;
+    for (const L of FORM_LANES) {
+      const [a, b] = FORM_LANE_X[L];
+      const d = Math.abs(nx - (a + b) / 2);
+      if (d < bestD) {
+        bestD = d;
+        best = L;
+      }
+    }
+    return best;
+  }
+
+  private hitUnit(nx: number, ny: number): Unit | null {
+    if (nx > 0.48) return null;
+    const top = HORIZON * 0.85;
+    const mapY = (y: number) => top + y * (1 - top - 0.08);
+    let best: { u: Unit; d: number } | null = null;
+    for (const gl of this.sides[0]) {
+      if (gl.dead) continue;
+      const d = Math.hypot(gl.x - nx, mapY(gl.y) - ny);
+      if (d < 0.1 && (!best || d < best.d)) best = { u: gl.u, d };
+    }
+    return best?.u ?? null;
+  }
+
+  previewOrder(order: Order | undefined, label?: string): void {
+    if (!order) {
+      this.pendingBanner = null;
+      return;
+    }
+    this.pendingBanner = { order, t0: this.clock() };
+    if (label) this.announce(label, "#ffd56a", 0);
+    this.flash("rgba(255,213,106,0.14)", 280);
+  }
+
   /** Boss ikinci evreye geçti: kırmızı yıkama, sarsıntı, portre öfke halkası. */
   rage(text: string): void {
     this.bossRage = true;
@@ -183,7 +316,7 @@ export class BattleField {
       for (const u of UNIT_KEYS) {
         const n = Math.ceil(arm[u] / per);
         const cols = Math.max(1, Math.ceil(n / ROWS));
-        const [x0, x1] = BLOCK[u];
+        const [x0, x1] = s === 0 ? this.block(u) : FOE_BLOCK[u];
         for (let j = 0; j < n; j++) {
           const col = Math.floor(j / ROWS);
           const row = j % ROWS;
@@ -195,6 +328,14 @@ export class BattleField {
       this.sides[s].sort((p, q) => p.y - q.y);
     });
     this.t0 = this.clock() - 10000;
+    if (localStorage.getItem("bf2d") !== "1" && !settings.eco) {
+      try {
+        this.b3 = new Battle3D(field?.ground ?? "bozkir", grounds[field?.ground ?? "bozkir"] ?? null, !!field?.night, !!field?.arena);
+      } catch (e) {
+        console.warn("Battle3D kapalı", e);
+        this.b3 = null;
+      }
+    }
     const loop = () => {
       this.draw();
       this.raf = requestAnimationFrame(loop);
@@ -213,6 +354,8 @@ export class BattleField {
   }
 
   stop(): void {
+    this.b3?.dispose();
+    this.b3 = null;
     cancelAnimationFrame(this.raf);
     this.sfx.forEach(clearTimeout);
   }
@@ -238,19 +381,23 @@ export class BattleField {
     if (order === "ricat") this.calls.push({ text: ev.some((e) => e.includes("yuttu")) ? "Turan taktiği: düşman peşe düştü!" : "Sahte ricat sezildi", t0: now, color: "#ffe39a" });
     else if (this.charge) this.calls.push({ text: "Dön ve vur!", t0: now, color: "#ffd56a" });
     else if (order === "kanat") this.calls.push({ text: "Kanatlar dolanıyor!", t0: now, color: "#ffe39a" });
-    else if (order === "nara") this.calls.push({ text: "Nara!", t0: now, color: "#ffe39a" });
+    else if (order === "nara") this.calls.push({ text: "Nara! Birlik coştu", t0: now, color: "#ffe39a" });
+    else if (order === "yagmur") this.calls.push({ text: "Ok yağmuru!", t0: now, color: "#9ad0ff" });
+    else if (order === "siper") this.calls.push({ text: "Kalkanlar kilit!", t0: now, color: "#c8e0a0" });
+    else if (order === "yedek") this.calls.push({ text: "Yedekler ileri!", t0: now, color: "#9ad0ff" });
     else if (ev.includes("Kritik!")) this.calls.push({ text: "Kritik!", t0: now, color: "#fff" });
     if (ev.includes("Düşman komutanı nara attı!")) this.calls.push({ text: "Düşman komutanı nara attı!", t0: now, color: "#ff9a7a" });
     if (ev.includes("Yedekler meydana indi!")) this.calls.push({ text: "Yedekler meydana indi!", t0: now, color: "#9ad0ff" });
     if (ev.includes("Düşman bozguna uğradı!")) this.calls.push({ text: "Düşman bozguna uğradı!", t0: now + 80, color: "#ffd56a" });
     if (ev.includes("Askerlerin dağıldı!")) this.calls.push({ text: "Askerlerin dağıldı!", t0: now + 80, color: "#ff7a5a" });
-    this.calls = this.calls.filter((c) => now - c.t0 < 1600);
+    const krit = ev.includes("Kritik!");
+    this.calls = this.calls.filter((c) => now - c.t0 < 2600);
     const prev = [this.cur[0], this.cur[1]];
     [a, b].forEach((arm, s) => {
       for (const u of UNIT_KEYS) {
         const lost = this.cur[s][u] - arm[u];
         if (lost > 0) {
-          const [x0, x1] = BLOCK[u];
+          const [x0, x1] = s === 0 ? this.block(u) : FOE_BLOCK[u];
           const fx = (x0 + x1) / 2;
           this.floats.push({ text: `-${lost}`, x: s ? 1 - fx : fx, y: 0.12 + Math.random() * 0.1, t0: now + dur * 0.45, color: s ? "#ffd56a" : "#ff8a6a" });
         }
@@ -259,7 +406,7 @@ export class BattleField {
       for (const u of UNIT_KEYS) {
         const live = this.sides[s].filter((g) => g.u === u && !g.dead);
         const want = arm[u] > 0 ? Math.max(1, Math.ceil(arm[u] / this.per[s])) : 0;
-        const [x0, x1] = BLOCK[u];
+        const [x0, x1] = s === 0 ? this.block(u) : FOE_BLOCK[u];
         for (let k = live.length; k < want; k++) {
           const fx = x0 + Math.random() * (x1 - x0);
           this.sides[s].push({ u, x: s ? 1 - fx : fx, y: 0.06 + Math.random() * 0.88, ph: Math.random() * 6, dead: 0, born: now + Math.random() * dur * 0.2 });
@@ -268,6 +415,8 @@ export class BattleField {
           const g = live.splice(Math.floor(Math.random() * live.length), 1)[0];
           g.dead = now + dur * (0.4 + Math.random() * 0.2);
           for (let q = 0; q < 5; q++) this.puffs.push({ x: g.x, y: g.y, vx: (Math.random() - 0.5) * 0.06, vy: -Math.random() * 0.25, t0: g.dead, life: 420, kind: q < 2 ? "blood" : "spark" });
+          this.puffs.push({ x: g.x, y: g.y, vx: 0, vy: 0, t0: g.dead, life: 380, kind: "shock" });
+          for (let e = 0; e < 3; e++) this.puffs.push({ x: g.x, y: g.y, vx: (Math.random() - 0.5) * 0.1, vy: -0.15 - Math.random() * 0.2, t0: g.dead + e * 30, life: 560, kind: "ember" });
         }
       }
     });
@@ -279,22 +428,35 @@ export class BattleField {
       for (const g of shooters) {
         const f = foes[Math.floor(Math.random() * foes.length)];
         const t0 = now + Math.random() * dur * 0.15;
-        this.arrows.push({ x0: g.x, y0: g.y, x1: f ? f.x : s ? 0.2 : 0.8, y1: f ? f.y : 0.5, t0, t1: t0 + dur * 0.38 });
+        const t1 = t0 + dur * 0.38;
+        const x1 = f ? f.x : s ? 0.2 : 0.8;
+        const y1 = f ? f.y : 0.5;
+        this.arrows.push({ x0: g.x, y0: g.y, x1, y1, t0, t1 });
+        // isabet kıvılcımı
+        for (let q = 0; q < 3; q++) this.puffs.push({ x: x1, y: y1, vx: (Math.random() - 0.5) * 0.04, vy: -Math.random() * 0.12, t0: t1, life: 280, kind: "spark" });
       }
     }
     const front = order === "ricat" ? 0.62 : 0.5;
     const lost = UNIT_KEYS.reduce((n, u) => n + Math.max(0, prev[0][u] - a[u]) + Math.max(0, prev[1][u] - b[u]), 0);
     const melee = Math.min(a.spear + a.horse, b.spear + b.horse);
+    const kinBoost = this.field?.kin && this.field.kin !== "insan" ? 4 : 0;
+    const arenaBoost = this.field?.arena ? 3 : 0;
+    const clashN = Math.min(24, (krit ? 7 : 4) + Math.ceil(melee / 3.5) + (this.charge ? 5 : 0) + kinBoost + arenaBoost);
     if (melee > 0)
-      for (let k = 0; k < Math.min(12, 3 + Math.ceil(melee / 4)); k++)
-        this.puffs.push({ x: front + (Math.random() - 0.5) * 0.08, y: 0.1 + Math.random() * 0.8, vx: 0, vy: 0, t0: now + dur * (0.38 + Math.random() * 0.2), life: 260, kind: "clash" });
-    if (lost > 0) this.shake = { t0: now + dur * 0.42, amp: Math.min(7, 1.5 + lost * 0.25) };
+      for (let k = 0; k < clashN; k++)
+        this.puffs.push({ x: front + (Math.random() - 0.5) * 0.09, y: 0.08 + Math.random() * 0.84, vx: 0, vy: 0, t0: now + dur * (0.36 + Math.random() * 0.22), life: 280, kind: "clash" });
+    if (krit || this.charge || kinBoost)
+      this.puffs.push({ x: front, y: 0.45, vx: 0, vy: 0, t0: now + dur * 0.4, life: 560, kind: "shock" });
+    if (lost > 0) this.shake = { t0: now + dur * 0.42, amp: Math.min(11, 1.8 + lost * 0.3 + (krit ? 2.5 : 0) + (this.charge ? 1.5 : 0)) };
     if (a.archer + b.archer > 0) this.cue("arrow", dur * 0.04);
     if (melee > 0) this.cue("clash", dur * 0.42);
-    if (melee > 10) this.cue("clash", dur * 0.52);
+    if (melee > 8) this.cue("clash", dur * 0.52);
     if (this.charge || order === "kanat" || order === "ricat") this.cue("hoof", 0);
-    for (let k = 0; k < 16; k++) this.puffs.push({ x: front + (Math.random() - 0.5) * 0.14, y: 0.1 + Math.random() * 0.8, vx: (Math.random() - 0.5) * 0.08, vy: -Math.random() * 0.12, t0: now + dur * (0.3 + Math.random() * 0.2), life: 900, kind: "dust" });
-    this.puffs = this.puffs.filter((p) => now - p.t0 < p.life).slice(-160);
+    for (let k = 0; k < 20 + arenaBoost; k++) this.puffs.push({ x: front + (Math.random() - 0.5) * 0.16, y: 0.08 + Math.random() * 0.84, vx: (Math.random() - 0.5) * 0.09, vy: -Math.random() * 0.14, t0: now + dur * (0.28 + Math.random() * 0.22), life: 980, kind: "dust" });
+    if (this.field?.note && Math.random() < 0.55) {
+      this.calls.push({ text: this.field.note.slice(0, 36), t0: now + dur * 0.35, color: "#ffd56a" });
+    }
+    this.puffs = this.puffs.filter((p) => now - p.t0 < p.life).slice(-260);
     this.floats = this.floats.filter((f) => now - f.t0 < 1400).slice(-24);
   }
 
@@ -472,7 +634,7 @@ export class BattleField {
     const now = this.clock();
     const p = (now - this.t0) / this.dur;
     const sk = now - this.shake.t0;
-    const shk = sk > 0 && sk < 320 ? this.shake.amp * (1 - sk / 320) : 0;
+    const shk = !settings.calm && sk > 0 && sk < 320 ? this.shake.amp * (1 - sk / 320) : 0;
     ctx.save();
     if (shk) ctx.translate((Math.random() - 0.5) * shk, (Math.random() - 0.5) * shk * 0.6);
     if (this.epic) {
@@ -486,12 +648,15 @@ export class BattleField {
         ctx.translate(-cx, -h * 0.55);
       }
     }
-    ctx.drawImage(this.ground(), -8, -8, w + 16, h + 16);
-    const size = Math.max(18, Math.min(46, h / 6.2));
+    if (!this.b3 || this.b3.overlay) ctx.drawImage(this.ground(), -8, -8, w + 16, h + 16);
+    const size = Math.max(18, Math.min(58, h / 5.6));
     const top = h * HORIZON;
     const Y = (y: number) => top + y * (h - top - size * 0.9) + size * 0.45;
     const depth = (y: number) => 0.72 + 0.48 * Math.max(0, Math.min(1, y));
-    for (let s = 0; s < 2; s++) this.banner(s ? w - 14 : 14, !s && this.bannerColor ? this.bannerColor : SIDE_COLOR[s], now, s);
+    const drawBanners = () => {
+      for (let s = 0; s < 2; s++) this.banner(s ? w - 14 : 14, !s && this.bannerColor ? this.bannerColor : SIDE_COLOR[s], now, s);
+    };
+    if (!this.b3) drawBanners();
     const live: [Glyph, number][] = [];
     const dead: [Glyph, number][] = [];
     for (let s = 0; s < 2; s++)
@@ -500,6 +665,34 @@ export class BattleField {
         (gl.dead && now >= gl.dead ? dead : live).push([gl, s]);
       }
     live.sort((m, n) => m[0].y - n[0].y);
+    if (this.b3) {
+      const items: B3Item[] = [];
+      for (const [gl, s] of dead.slice(-90)) {
+        const age = now - gl.dead;
+        if (age > 1300) continue;
+        items.push({ key: gl, s: s as 0 | 1, u: gl.u, x: gl.x, y: gl.y, mv: 0, swing: 0, ph: gl.ph, age });
+      }
+      for (const [gl, s] of live) {
+        const dir = s ? -1 : 1;
+        const enter = gl.born ? 1 - Math.min(1, (now - gl.born) / 700) : 0;
+        const lg = this.lunge(s, gl.u, p);
+        const off = lg * dir - enter * enter * 0.35 * dir;
+        const wheel = s === 0 && gl.u === "horse" && (this.order === "kanat" || this.charge) ? Math.sin(Math.PI * Math.min(1, p)) * (gl.y < 0.5 ? -0.12 : 0.12) : 0;
+        const mv = Math.min(1, Math.abs(lg - this.lunge(s, gl.u, Math.max(0, p - 0.04))) * 90 + enter * 2.5);
+        const st = this.end ? 0 : Math.min(1, Math.max(0, (p - 0.3 - (gl.ph % 1) * 0.12) / 0.3));
+        items.push({ key: gl, s: s as 0 | 1, u: gl.u, x: gl.x + off, y: Math.max(0.02, Math.min(0.98, gl.y + wheel)), mv, swing: st > 0.001 && st < 0.999 ? st : 0, ph: gl.ph, age: -1 });
+      }
+      if (!this.b3.overlay)
+        this.compIds.slice(0, 3).forEach((id, i) => {
+          const heroOff = this.lunge(0, "spear", p);
+          items.push({ key: this.comps[i] ?? id, s: 0, u: "spear", x: 0.36 + heroOff * 0.8 - (i === 2 ? 0.05 : 0), y: i === 1 ? 0.3 : i === 2 ? 0.5 : 0.72, mv: Math.min(1, Math.abs(heroOff) * 20), swing: 0, ph: 0.31 + i * 0.17, age: -1, comp: id });
+        });
+      this.b3.render(items, this.cv.clientWidth || w, this.cv.clientHeight || h);
+      ctx.drawImage(this.b3.canvas, -8, -8, w + 16, h + 16);
+      drawBanners();
+      live.length = 0;
+      dead.length = 0;
+    }
     for (const [gl, s] of dead.slice(-90)) {
       const dir = s ? -1 : 1;
       const k = (now - gl.dead) / 900;
@@ -594,6 +787,7 @@ export class BattleField {
     ctx.globalAlpha = 1;
     const heroOff = this.lunge(0, "spear", p);
     this.comps.forEach((img, i) => {
+      if (this.b3 && !this.b3.overlay && this.compIds[i]) return;
       const cy = Y(0.5) + (i === 1 ? -1 : i === 2 ? 0 : 1) * size * 0.95 + (i === 2 ? size * 0.3 : 0);
       const cx = (0.45 + heroOff * 0.8) * w - size * (i === 2 ? 1.25 : 0.7);
       this.portrait(img, cx, cy, size * 0.42, "#8fe07a");
@@ -662,6 +856,29 @@ export class BattleField {
         ctx.arc(x, cy, r * 0.3, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
+      } else if (d.kind === "shock") {
+        const cy = Y(d.y);
+        const r = size * (0.4 + t * 1.8);
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+        ctx.strokeStyle = `rgba(255,220,140,${(1 - t) * 0.85})`;
+        ctx.lineWidth = 2.5 * (1 - t);
+        ctx.beginPath();
+        ctx.arc(x, cy, r, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.strokeStyle = `rgba(255,160,80,${(1 - t) * 0.45})`;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(x, cy, r * 0.65, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      } else if (d.kind === "ember") {
+        const cy = Y(d.y) + d.vy * t * h;
+        const a = (1 - t) * (0.7 + 0.3 * Math.sin(now / 40 + d.x * 20));
+        ctx.fillStyle = `rgba(255,${140 + Math.round(80 * (1 - t))},60,${a})`;
+        ctx.beginPath();
+        ctx.arc(x, cy, 1.5 + (1 - t) * 2.2, 0, Math.PI * 2);
+        ctx.fill();
       } else {
         ctx.fillStyle = d.kind === "blood" ? `rgba(150,20,10,${1 - t})` : `rgba(255,220,140,${1 - t})`;
         ctx.fillRect(x, y, 2, 2);
@@ -671,6 +888,52 @@ export class BattleField {
     if (performance.now() < this.frozen) {
       ctx.fillStyle = "rgba(255,245,220,0.14)";
       ctx.fillRect(0, 0, w, h);
+    }
+    if (this.drag && !this.end) {
+      ctx.save();
+      for (const L of FORM_LANES) {
+        const [a, b] = FORM_LANE_X[L];
+        const hot = this.laneAt(this.drag.lx) === L;
+        ctx.fillStyle = hot ? "rgba(255,213,106,0.18)" : "rgba(255,213,106,0.06)";
+        ctx.fillRect(a * w, 4, (b - a) * w, h - 8);
+        ctx.strokeStyle = hot ? "rgba(255,213,106,0.7)" : "rgba(255,213,106,0.25)";
+        ctx.lineWidth = hot ? 2 : 1;
+        ctx.strokeRect(a * w + 1, 5, (b - a) * w - 2, h - 10);
+        ctx.fillStyle = hot ? "#ffe7a8" : "rgba(255,231,168,0.55)";
+        ctx.font = `bold ${Math.round(Math.min(11, h / 16))}px Georgia, serif`;
+        ctx.textAlign = "center";
+        ctx.fillText(FORM_LANE_NAME[L], ((a + b) / 2) * w, 16);
+      }
+      // sürüklenen birlik hayaleti
+      const [a0, b0] = this.block(this.drag.u);
+      ctx.globalAlpha = 0.55;
+      ctx.fillStyle = "#ffd56a";
+      ctx.beginPath();
+      ctx.arc(this.drag.lx * w, this.drag.ly * h * 0.85 + h * 0.12, Math.min(18, h / 10), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = "#1a0e04";
+      ctx.font = `bold ${Math.round(Math.min(12, h / 14))}px Georgia, serif`;
+      ctx.textAlign = "center";
+      ctx.fillText(UNIT_FORM_NAME[this.drag.u], ((a0 + b0) / 2) * w, h - 8);
+      ctx.restore();
+    }
+    if (this.pendingBanner && !this.end) {
+      const pulse = 0.12 + 0.08 * Math.abs(Math.sin(now / 220));
+      const grad = ctx.createLinearGradient(0, 0, w * 0.42, 0);
+      grad.addColorStop(0, `rgba(255,213,106,${0.22 + pulse})`);
+      grad.addColorStop(1, "rgba(255,213,106,0)");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w * 0.42, h);
+      ctx.strokeStyle = `rgba(255,213,106,${0.45 + pulse})`;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(3, 3, w * 0.38, h - 6);
+      ctx.font = `bold ${Math.round(Math.min(13, h / 14))}px Georgia, serif`;
+      ctx.textAlign = "left";
+      ctx.fillStyle = "#ffe7a8";
+      ctx.globalAlpha = 0.9;
+      ctx.fillText("⚔", 10, 18);
+      ctx.globalAlpha = 1;
     }
     this.flashes = this.flashes.filter((f) => now - f.t0 < f.dur);
     for (const f of this.flashes) {
@@ -693,7 +956,7 @@ export class BattleField {
         for (const u of UNIT_KEYS) {
           const n = this.cur[s][u];
           if (!n) continue;
-          const [x0, x1] = BLOCK[u];
+          const [x0, x1] = s === 0 ? this.block(u) : FOE_BLOCK[u];
           const fx = (x0 + x1) / 2;
           const x = (s ? 1 - fx : fx) * w;
           ctx.lineWidth = 3;
