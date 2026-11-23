@@ -1,0 +1,420 @@
+{
+  "schemaVersion": 1,
+  "packId": "story-form-7",
+  "kind": "story-quest-form",
+  "formIndex": 7,
+  "localeDefault": "tr",
+  "purpose": "Journal reads as drama (not a log); Antenna Op arc beats are visible in evening/street/journal UI — not buried in checklist text.",
+  "addressesScore": {
+    "scoreLatestPath": "internal/rival-porch-score-latest.json",
+    "storyScore": 8.0,
+    "playedAt": "2026-11-23T12:28:00Z",
+    "gaps": [
+      "Journal still log-not-drama",
+      "Long-arc Antenna Op still thin in UI",
+      "Spotlight is onboarding chrome — prop must carry without it"
+    ],
+    "userAsk": "story-form-7 — journal as drama not log; Antenna Op beat visible in UI",
+    "note": "Form-6 covers instigate/stage prop parity. Form-7 is journal + Antenna Op visibility."
+  },
+  "sourcePacks": [
+    "internal/squads/story-form-3.json",
+    "internal/rival-porch-story-content.json",
+    "internal/rival-porch-quests.json"
+  ],
+  "integrator": {
+    "owner": "code owner on cursor/rival-porch-slice-31f7",
+    "noPrFromThisPackAuthor": true,
+    "mergeMode": "patch-overlay",
+    "wire": [
+      "Merge storyForm7 into quests.overlay; normalizeQuestPack passes storyForm7",
+      "renderStoryLog: use journalLayout — Aftermath + Antenna Op beat card FIRST; demote Recent notes below fold or collapse",
+      "Append journalDramaCardsAppend into drama list (merge with form3 cards)",
+      "Replace thin arc beat <li> checklist for arc_kite_antenna with antennaOpJournalBeatCards when form7 present",
+      "renderEvening + renderStreet: inject activeArcBeatBanner when next Antenna Op beat is eligible",
+      "Main quest panel: when mq_antenna_op active, show antennaOpQuestPanelBlurb with current beat title (not only 1/4 counters)",
+      "Fix renderStoryLog undeclared `tr` (use state.locale === 'tr')"
+    ],
+    "doNot": [
+      "Leave journal as recap-first log",
+      "Hide Antenna Op behind quest log only",
+      "Gate beats behind spend"
+    ]
+  },
+  "principles": {
+    "storyNeverGatedBySpend": true,
+    "journalIsDramaNotLog": true,
+    "activeArcBeatMustBeOnStageUi": true,
+    "antennaOpBeatsReadableWithoutOpeningDialogue": true
+  },
+  "journalLayout": {
+    "id": "journal_drama_first",
+    "sectionOrder": [
+      "spine",
+      "aftermathDrama",
+      "activeArcBeat",
+      "arcs",
+      "activeQuests",
+      "streetRep",
+      "recentNotesCollapsed",
+      "unlocks",
+      "ending"
+    ],
+    "recentNotesDefaultCollapsed": true,
+    "recentNotesLabel": {
+      "tr": "Eski notlar (log)",
+      "en": "Older notes (log)"
+    },
+    "heroTease": {
+      "tr": "Drama defteri — omurga + canlı beat, log değil",
+      "en": "Drama journal — spine + living beat, not a log"
+    },
+    "testId": "story-journal-drama-first"
+  },
+  "journalDramaCardsAppend": [
+    {
+      "id": "jdrama_antenna_active",
+      "when": {
+        "flagsAny": [
+          "quest_antenna_active",
+          "arc_kite_antenna_active",
+          "arc_kite_antenna_beat1"
+        ],
+        "flagsNone": [
+          "arc_kite_antenna_complete",
+          "quest_antenna_complete"
+        ]
+      },
+      "tone": "spotlight",
+      "eyebrow": {
+        "tr": "Canlı ark · Arc A",
+        "en": "Living arc · Arc A"
+      },
+      "title": {
+        "tr": "Anten Operasyonu devam ediyor",
+        "en": "Antenna Op is live"
+      },
+      "body": {
+        "tr": "Bu bir checklist değil — çatıda uçurtma, verandada gazete. Aşağıda bugünün beat'ini oku; sokağa çıkıp konuş.",
+        "en": "Not a checklist — kite on the roof, paper on the porch. Read today's beat below; go to the street and talk."
+      },
+      "cta": {
+        "tr": "Sokağa / beat'e git",
+        "en": "Go to street / beat"
+      },
+      "ctaAction": "goto-street",
+      "linksArcId": "arc_kite_antenna",
+      "testId": "journal-drama-antenna-live"
+    },
+    {
+      "id": "jdrama_antenna_peace",
+      "when": {
+        "flagsAll": [
+          "flag_fence_and_kite"
+        ]
+      },
+      "tone": "soft",
+      "eyebrow": {
+        "tr": "Yankı · Arc A",
+        "en": "Aftermath · Arc A"
+      },
+      "title": {
+        "tr": "Barış bayrağı — anten yumuşadı",
+        "en": "Peace flag — antenna softened"
+      },
+      "body": {
+        "tr": "Ortak bayrak antende. Orhan–Leyla çizgisi delindi ama yıkılmadı. Defter bunu drama olarak tutuyor.",
+        "en": "Shared flag on the antenna. Orhan–Leyla line pierced, not toppled. The journal keeps it as drama."
+      },
+      "cta": {
+        "tr": "Sokağı gör",
+        "en": "See the street"
+      },
+      "testId": "journal-drama-antenna-peace"
+    },
+    {
+      "id": "jdrama_antenna_chaos",
+      "when": {
+        "flagsAll": [
+          "flag_kite_chaos_buff"
+        ]
+      },
+      "tone": "sharp",
+      "eyebrow": {
+        "tr": "Yankı · Arc A",
+        "en": "Aftermath · Arc A"
+      },
+      "title": {
+        "tr": "Yüksek uçuş — harita serbest",
+        "en": "High flight — map unrestricted"
+      },
+      "body": {
+        "tr": "Yasak bölge meydan okuma oldu. Defter skor satırı değil — rüzgâr kararı.",
+        "en": "Forbidden zone became a challenge zone. Not a score line — a wind decision."
+      },
+      "cta": {
+        "tr": "Sokağı gör",
+        "en": "See the street"
+      },
+      "testId": "journal-drama-antenna-chaos"
+    }
+  ],
+  "antennaOpJournalBeatCards": [
+    {
+      "beatId": "arc_kite_antenna_beat1",
+      "objectiveId": "mq_antenna_o1",
+      "order": 1,
+      "title": {
+        "tr": "Beat 1 — Takılan uçurtma",
+        "en": "Beat 1 — Snagged kite"
+      },
+      "scene": {
+        "tr": "Leyla'nın ipi Orhan'ın antenine dolandı. Gazete sert kapandı. Mahalle nefesini tuttu.",
+        "en": "Leyla's line snagged Orhan's antenna. The newspaper snapped shut. The block held its breath."
+      },
+      "cast": [
+        "n3",
+        "n4"
+      ],
+      "dialogueTreeId": "dlg_kite_day1",
+      "doneFlag": "arc_kite_antenna_beat1",
+      "cta": {
+        "tr": "Çöz / tartış",
+        "en": "Untangle / argue"
+      },
+      "testId": "antenna-beat-1"
+    },
+    {
+      "beatId": "arc_kite_antenna_beat2",
+      "objectiveId": "mq_antenna_o2",
+      "order": 2,
+      "title": {
+        "tr": "Beat 2 — İp disiplini",
+        "en": "Beat 2 — Line-tension drill"
+      },
+      "scene": {
+        "tr": "Cem 'ip gerdirme disiplini' diyor. Leyla güler: uçurtma plan dinlemez. Sen ortadasın.",
+        "en": "Cem pitches line-tension drills. Leyla laughs: kites don't take orders. You're in the middle."
+      },
+      "cast": [
+        "n2",
+        "n3"
+      ],
+      "dialogueTreeId": "dlg_kite_day2",
+      "requiresFlags": [
+        "arc_kite_antenna_beat1"
+      ],
+      "doneFlag": "arc_kite_antenna_beat2",
+      "cta": {
+        "tr": "Cem'i dinle",
+        "en": "Hear Cem"
+      },
+      "testId": "antenna-beat-2"
+    },
+    {
+      "beatId": "arc_kite_antenna_beat3",
+      "objectiveId": "mq_antenna_o3",
+      "order": 3,
+      "title": {
+        "tr": "Beat 3 — İki versiyon",
+        "en": "Beat 3 — Two versions"
+      },
+      "scene": {
+        "tr": "Merve iki afiş anlatıyor. Hangisini doğrularsan sokak onu 'gerçek' sayacak.",
+        "en": "Merve has two posters. Whichever you confirm becomes the street's truth."
+      },
+      "cast": [
+        "n1",
+        "n3",
+        "n4"
+      ],
+      "dialogueTreeId": "dlg_kite_day3",
+      "requiresFlags": [
+        "arc_kite_antenna_beat2"
+      ],
+      "doneFlag": "arc_kite_antenna_beat3",
+      "cta": {
+        "tr": "Versiyon seç",
+        "en": "Pick a version"
+      },
+      "testId": "antenna-beat-3"
+    },
+    {
+      "beatId": "arc_kite_antenna_beat4",
+      "objectiveId": "mq_antenna_o4",
+      "order": 4,
+      "title": {
+        "tr": "Beat 4 — Bayrak veya kaos",
+        "en": "Beat 4 — Flag or chaos"
+      },
+      "scene": {
+        "tr": "Çatıda ip, verandada gazete. Son seçim: ortak bayrak + özür, ya da daha yüksek uçuş.",
+        "en": "Line on the roof, paper on the porch. Final call: shared flag + apology, or fly higher."
+      },
+      "cast": [
+        "n3",
+        "n4"
+      ],
+      "dialogueTreeId": "dlg_kite_day4",
+      "requiresFlags": [
+        "arc_kite_antenna_beat3"
+      ],
+      "doneFlagAny": [
+        "flag_fence_and_kite",
+        "flag_kite_chaos_buff"
+      ],
+      "cta": {
+        "tr": "Son seçimi yap",
+        "en": "Make the final call"
+      },
+      "testId": "antenna-beat-4"
+    }
+  ],
+  "activeArcBeatBanner": {
+    "id": "antenna_op_live_banner",
+    "arcId": "arc_kite_antenna",
+    "questId": "mq_antenna_op",
+    "screens": [
+      "evening",
+      "street"
+    ],
+    "priority": 95,
+    "when": {
+      "flagsAny": [
+        "quest_antenna_active",
+        "arc_kite_antenna_active"
+      ],
+      "flagsNone": [
+        "arc_kite_antenna_complete",
+        "quest_antenna_complete"
+      ]
+    },
+    "pick": "first antennaOpJournalBeatCards entry whose requiresFlags met and doneFlag not set",
+    "template": {
+      "tr": "Anten Operasyonu · {beatTitle} — {sceneShort}",
+      "en": "Antenna Op · {beatTitle} — {sceneShort}"
+    },
+    "cta": {
+      "tr": "Beat'i oyna",
+      "en": "Play the beat"
+    },
+    "ctaAction": "open-neighbor",
+    "ctaNeighborFromCast0": true,
+    "testId": "antenna-op-live-banner",
+    "cssClass": "rp-arc-beat-banner"
+  },
+  "antennaOpQuestPanelBlurb": {
+    "whenQuestId": "mq_antenna_op",
+    "activeBlurb": {
+      "tr": "Arc A canlı: uçurtma ↔ anten. Bugünün beat'i panoda — sadece 2/4 sayacı değil.",
+      "en": "Arc A live: kite ↔ antenna. Today's beat is on the board — not just a 2/4 counter."
+    },
+    "testId": "antenna-op-quest-blurb"
+  },
+  "antennaOpStreetWhisper": {
+    "when": {
+      "flagsAny": [
+        "quest_antenna_active",
+        "arc_kite_antenna_beat1"
+      ],
+      "flagsNone": [
+        "arc_kite_antenna_complete"
+      ]
+    },
+    "linesByBeat": {
+      "arc_kite_antenna_beat1": {
+        "tr": "◈ Anten Operasyonu Beat 1: uçurtma antene dolandı",
+        "en": "◈ Antenna Op Beat 1: kite snagged on antenna"
+      },
+      "arc_kite_antenna_beat2": {
+        "tr": "◈ Beat 2 bekliyor: Cem'in ip disiplini",
+        "en": "◈ Beat 2 waiting: Cem's line-tension drill"
+      },
+      "arc_kite_antenna_beat3": {
+        "tr": "◈ Beat 3: Merve'nin iki versiyonu",
+        "en": "◈ Beat 3: Merve's two versions"
+      },
+      "arc_kite_antenna_beat4": {
+        "tr": "◈ Beat 4: bayrak mı, yüksek uçuş mu?",
+        "en": "◈ Beat 4: peace flag or fly higher?"
+      }
+    },
+    "testId": "antenna-op-street-whisper"
+  },
+  "cssAppend": "\n/* story-form-7 — journal drama + Antenna Op beat UI */\n.journal-drama-list { display: grid; gap: 0.75rem; margin: 0.5rem 0 1rem; }\n.journal-drama {\n  padding: 0.85rem 1rem;\n  border-radius: 10px;\n  background: linear-gradient(135deg, rgba(40,24,16,.92), rgba(20,14,10,.88));\n  border: 1px solid rgba(232,180,120,.35);\n  color: #f2e6d8;\n}\n.journal-drama.soft { border-color: rgba(180,200,160,.4); }\n.journal-drama.sharp { border-color: rgba(196,92,62,.55); }\n.journal-drama.spotlight { box-shadow: 0 0 0 1px rgba(232,180,120,.25), 0 8px 24px rgba(0,0,0,.35); }\n.journal-drama .rp-kicker { margin: 0 0 0.25rem; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.8; }\n.journal-drama h3 { margin: 0 0 0.35rem; font-size: 1.05rem; }\n.antenna-beat-card {\n  padding: 0.75rem 0.9rem;\n  margin: 0.4rem 0;\n  border-left: 3px solid #e8b478;\n  background: rgba(18,12,8,.75);\n  color: #f2e6d8;\n}\n.antenna-beat-card.is-done { opacity: 0.65; border-left-color: #7a9a6a; }\n.antenna-beat-card.is-live { border-left-color: #c45c3e; box-shadow: inset 0 0 0 1px rgba(196,92,62,.35); }\n.antenna-beat-card h4 { margin: 0 0 0.25rem; font-size: 0.95rem; }\n.rp-arc-beat-banner {\n  position: relative;\n  z-index: 7;\n  margin: 0.4rem 0.75rem;\n  padding: 0.55rem 0.75rem;\n  border-radius: 8px;\n  background: rgba(18,12,8,.88);\n  color: #f2e6d8;\n  border: 1px solid rgba(232,180,120,.45);\n  display: flex;\n  gap: 0.5rem;\n  align-items: center;\n  justify-content: space-between;\n  flex-wrap: wrap;\n}\n.recap-list.is-collapsed { max-height: 0; overflow: hidden; opacity: 0; }\ndetails.journal-log-fold > summary {\n  cursor: pointer;\n  color: rgba(242,230,216,.7);\n  font-size: 0.85rem;\n}\n",
+  "integratorSnippet": {
+    "language": "js",
+    "comment": "Journal drama-first + Antenna Op live banner",
+    "pseudo": "\nfunction storyForm7() {\n  return state.questPack?.storyForm7 || state.storyForm7 || null;\n}\n\nfunction antennaOpLiveBeat() {\n  const form = storyForm7();\n  const cards = form?.antennaOpJournalBeatCards || [];\n  for (const c of cards) {\n    const req = c.requiresFlags || [];\n    if (req.length && !req.every((f) => storyFlag(f))) continue;\n    if (c.doneFlag && storyFlag(c.doneFlag)) continue;\n    if (c.doneFlagAny?.some((f) => storyFlag(f))) continue;\n    return c;\n  }\n  return null;\n}\n\nfunction antennaOpLiveBannerHtml() {\n  const form = storyForm7();\n  const ban = form?.activeArcBeatBanner;\n  if (!ban || !whenFlagsOk(ban.when)) return \"\";\n  const beat = antennaOpLiveBeat();\n  if (!beat) return \"\";\n  const sceneShort = loc(beat.scene);\n  const short = sceneShort.length > 72 ? sceneShort.slice(0, 70) + \"…\" : sceneShort;\n  const title = loc(beat.title);\n  const line = (state.locale === \"tr\" ? ban.template.tr : ban.template.en)\n    .replace(\"{beatTitle}\", title)\n    .replace(\"{sceneShort}\", short);\n  const neighbor = beat.cast?.[0] || \"n3\";\n  return `<div class=\"rp-arc-beat-banner\" data-testid=\"${ban.testId}\">\n    <span>${line}</span>\n    <button class=\"rp-btn rp-btn--primary\" type=\"button\" data-action=\"open-neighbor\" data-id=\"${neighbor}\">${loc(ban.cta)}</button>\n  </div>`;\n}\n\nfunction antennaOpJournalHtml() {\n  const cards = storyForm7()?.antennaOpJournalBeatCards || [];\n  if (!cards.length) return \"\";\n  const live = antennaOpLiveBeat()?.beatId;\n  return `<div class=\"antenna-beat-list\" data-testid=\"antenna-op-journal-beats\">\n    ${cards.map((c) => {\n      const done = c.doneFlag ? storyFlag(c.doneFlag) : (c.doneFlagAny||[]).some((f) => storyFlag(f));\n      const isLive = c.beatId === live;\n      return `<article class=\"antenna-beat-card ${done?\"is-done\":\"\"} ${isLive?\"is-live\":\"\"}\" data-testid=\"${c.testId}\">\n        <h4>${loc(c.title)}</h4>\n        <p>${loc(c.scene)}</p>\n        ${isLive ? `<button class=\"btn btn-ember\" type=\"button\" data-action=\"open-neighbor\" data-id=\"${c.cast[0]}\">${loc(c.cta)}</button>` : \"\"}\n      </article>`;\n    }).join(\"\")}\n  </div>`;\n}\n\n// renderStoryLog: merge form3 + form7 journalDramaCardsAppend\n// Place Aftermath + antennaOpJournalHtml BEFORE arc checklist\n// Wrap recap in <details class=\"journal-log-fold\"><summary>Older notes</summary>...\n// renderEvening/renderStreet: prepend antennaOpLiveBannerHtml()\n"
+  },
+  "echoFollowUpsAppend": [
+    {
+      "id": "echo_form7_antenna_beat_ui",
+      "priority": 93,
+      "when": {
+        "flagsAny": [
+          "quest_antenna_active",
+          "arc_kite_antenna_beat1"
+        ],
+        "flagsNone": [
+          "arc_kite_antenna_complete"
+        ],
+        "slots": [
+          "evening",
+          "street"
+        ]
+      },
+      "speakerId": "n3",
+      "headline": {
+        "tr": "Anten Operasyonu — beat panoda",
+        "en": "Antenna Op — beat on the board"
+      },
+      "body": {
+        "tr": "Akşam/sokak bandında bugünün beat'i yazıyor. Defterde de drama kartı — log satırı değil.",
+        "en": "Evening/street banner names today's beat. Journal has a drama card — not a log line."
+      },
+      "cta": {
+        "tr": "Beat'e git",
+        "en": "Go to beat"
+      }
+    }
+  ],
+  "acceptanceChecks": [
+    {
+      "id": "journal_drama_first",
+      "desc": "Story journal shows Aftermath/drama + Antenna beat cards above Recent notes; Recent notes collapsed or labeled as log. testid story-journal-drama-first on layout root optional."
+    },
+    {
+      "id": "antenna_beats_in_journal",
+      "desc": "While Antenna Op active, journal lists 4 beat cards (antenna-beat-1..4) with scene prose; live beat marked is-live + CTA."
+    },
+    {
+      "id": "antenna_banner_evening_street",
+      "desc": "Evening and street show antenna-op-live-banner with current beat title when arc active and incomplete."
+    },
+    {
+      "id": "not_checklist_only",
+      "desc": "Player can identify current Antenna Op beat without opening dialogue — banner or journal card alone suffices."
+    }
+  ],
+  "playtestScript": [
+    "Advance to mq_antenna_op / arc_kite_antenna active",
+    "Evening: assert [data-testid=antenna-op-live-banner] names Beat 1 scene",
+    "Street: same banner or whisper visible",
+    "Journal: Aftermath/drama section above notes; antenna-beat-1 is-live",
+    "Complete beat1 → banner advances to Beat 2 copy",
+    "Recent notes not the first thing eye hits"
+  ],
+  "newStoryFlags": [],
+  "meta": {
+    "squad": "story-quest",
+    "formIndex": 7,
+    "shipTrigger": "user: journal as drama not log; Antenna Op beat visible in UI (story still 8.0 < 8.5)",
+    "nextPackWhen": "story category < 8.5",
+    "dependsOnForms": [
+      3,
+      6
+    ],
+    "implementationNote": "UI presentation pack for journal + Antenna Op. Content-only; integrator wires banners into evening/street/journal."
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "packId": "ux-session-6",
+  "schemaVersion": 1,
+  "scoreReact": {
+    "buildCommit": "2828d35",
+    "overall": 7.8,
+    "gameplay": 7.5,
+    "gap": "Fight entry brittle without Show me / exact 3 picks"
+  },
+  "practiceLobby": {
+    "oneTapEnterArena": true,
+    "showMeLineup": [
+      "n2",
+      "n4",
+      "n1"
+    ],
+    "skipDraft": true,
+    "armCallDockSec": 2.2,
+    "fallbackStartOnlyCta": true,
+    "picksLockedAfterShowMe": true,
+    "forbidForceEnableInSmoke": true
+  },
+  "copy": {
+    "showMe": {
+      "tr": "G\u00f6ster",
+      "en": "Show me"
+    },
+    "startOnly": {
+      "tr": "Ba\u015fla \u2014 Rekabeti g\u00f6r",
+      "en": "Start \u2014 see Rivalry"
+    }
+  },
+  "acceptanceChecks": [
+    "show_me_enters_screen_fight_without_force_enable",
+    "call_dock_arms_after_show_me_entry",
+    "no_draft_gate_on_show_me_path",
+    "pick_count_matches_borders_after_show_me",
+    "settle_still_absent_production"
+  ]
+}

@@ -1,0 +1,197 @@
+/* Rival Porch — visual-fix-8
+   2828d35 gaps (while fix-7 comic waits):
+   1) Fight float spam → readable pad-anchored hits (not particle soup)
+   2) Day1 street seed-text heavy → clay + busts, not diamond essays
+   Paste after fix-3/5. Does not change letterbox / hotspot hit sizes.
+*/
+
+/* ── A. Fight floats — tame the soup ────────────────────────────────────── */
+
+.rp-screen--fight {
+  --rp-float-max-visible: 3;
+  --rp-float-hit-px: 15;
+  --rp-float-proc-px: 18;
+  --rp-float-rise: 28px;
+  --rp-float-ms: 620ms;
+}
+
+.rp-float-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.rp-float {
+  position: absolute;
+  left: var(--fx, 50%);
+  top: var(--fy, 50%);
+  transform: translate(-50%, -50%);
+  margin: 0;
+  padding: 0;
+  font-family: var(--rp-font-ui, "Source Sans 3", sans-serif);
+  font-weight: 700;
+  font-size: var(--rp-float-hit-px);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--tea-cream, #F2E6D8);
+  text-shadow:
+    0 1px 0 color-mix(in srgb, var(--mud-night, #1A1612) 85%, transparent),
+    0 0 2px color-mix(in srgb, var(--mud-night, #1A1612) 90%, transparent);
+  white-space: nowrap;
+  animation: rp-float-rise var(--rp-float-ms) ease-out forwards;
+  will-change: transform, opacity;
+}
+
+.rp-float--hit {
+  color: var(--neon-sign, #FF6B4A);
+  font-size: var(--rp-float-hit-px);
+}
+.rp-float--heal {
+  color: #7dcf9a;
+  font-size: 14px;
+}
+.rp-float--proc,
+.rp-float--rivalry {
+  color: #f0c14a;
+  font-size: var(--rp-float-proc-px);
+  letter-spacing: 0.04em;
+}
+.rp-float--dodge,
+.rp-float--miss {
+  color: #b8b0a8;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Only ONE emphasis float at a time reads big — others stay small */
+.rp-float-layer[data-busy="true"] .rp-float--hit {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+@keyframes rp-float-rise {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -40%) scale(0.92);
+  }
+  12% {
+    opacity: 1;
+    transform: translate(-50%, -55%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% - var(--rp-float-rise))) scale(1);
+  }
+}
+
+/* Hard cap: hide overflow floats beyond the newest N (JS sets data-slot) */
+.rp-float[data-slot="3"],
+.rp-float[data-slot="4"],
+.rp-float[data-slot="5"],
+.rp-float[data-slot="6"] {
+  display: none !important;
+}
+
+/* Kill particle / sparkle spam if present */
+.rp-screen--fight .rp-particle,
+.rp-screen--fight .rp-hit-spark-swarm,
+.rp-screen--fight .rp-float-trail,
+.rp-screen--fight .damage-number-stack {
+  display: none !important;
+}
+
+/* Log = one quiet ticker, not a second float wall */
+.rp-screen--fight .rp-log,
+.rp-screen--fight .rp-fight-log {
+  max-height: 1.35em;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 11px;
+  opacity: 0.75;
+  text-align: center;
+}
+
+/* HP flash is enough for routine chips — floats optional for small hits */
+.rp-screen--fight .rp-hp.is-flash > i {
+  filter: brightness(1.35);
+  transition: filter 120ms ease;
+}
+
+/* ── B. Day1 street — less seed-text, more clay ─────────────────────────── */
+
+.rp-screen--street {
+  --rp-street-seed-mode: whisper; /* not essay */
+}
+
+/* Diamond consequence / Arc A seed essays OFF on Day1 first viewport */
+.rp-screen--street .rp-consequence-list,
+.rp-screen--street .rp-hud-consequence,
+.rp-screen--street .rp-street-agenda,
+.rp-screen--street .rp-mid__bullets,
+.rp-screen--street .rp-seed-list,
+.rp-screen--street .rp-world-seeds,
+.rp-screen--street [data-seed-bullets],
+.rp-screen--street .rp-spine-card ul,
+.rp-screen--street .rp-hud-top ul {
+  display: none !important;
+}
+
+/* One optional seed whisper chip (prop icon + ≤1 line) — not two diamonds */
+.rp-screen--street .rp-seed-whisper {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: calc(var(--rp-dock-h, 72px) + 8px + var(--rp-safe-bottom, 0px));
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-height: 34px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 48%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tea-cream, #F2E6D8) 14%, transparent);
+  font-size: 11px;
+  line-height: 1.2;
+  pointer-events: none;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.rp-screen--street .rp-seed-whisper img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  flex: none;
+}
+
+/* Spine stays ONE ellipsized chip (reinforce fix-5) */
+.rp-screen--street .rp-hud-quest,
+.rp-screen--street .rp-quest-banner,
+.rp-screen--street .rp-spine-banner {
+  max-height: 34px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Day1: no “Arc A seed” essay in HUD — prop chip on Leyla hotspot instead */
+.rp-screen--street .rp-hotspot[data-n="n3"].is-seed .rp-hotspot__bust {
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--porch-lamp, #E8A045) 70%, transparent),
+    0 0 14px 2px color-mix(in srgb, var(--porch-lamp, #E8A045) 35%, transparent);
+}
+.rp-screen--street .rp-hotspot__seed-prop {
+  position: absolute;
+  right: -4px;
+  top: -4px;
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  pointer-events: none;
+  z-index: 2;
+  filter: drop-shadow(0 1px 2px #000);
+}

@@ -1568,7 +1568,7 @@
         "type": "synergy_badge_pulse",
         "synergyId": "syn_rivalry",
         "showTooltipOnce": true,
-        "requireAck": true,
+        "requireAck": false,
         "ackLabel": {
           "tr": "Rekabeti gördüm",
           "en": "I see Rivalry"
@@ -1579,7 +1579,9 @@
         "lines": {
           "tr": "Rekabet rozeti yandı. İki etiket yan yana — eşik bekleniyor.",
           "en": "Rivalry badge lit. Two tags side by side — waiting on the threshold."
-        }
+        },
+        "autoAckMs": 1200,
+        "mergeIntoCallResolve": true
       },
       {
         "id": "prac_first_hit",

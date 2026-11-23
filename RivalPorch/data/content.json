@@ -883,7 +883,7 @@
     },
     "fight.title": {
       "tr": "Otomatik Dövüş",
-      "en": "Auto Fight"
+      "en": "Porch tempo"
     },
     "fight.skip": {
       "tr": "Atla",
@@ -1056,6 +1056,14 @@
     "idle.overnight_done": {
       "tr": "Gece geçti. Gün {day}.",
       "en": "Night passed. Day {day}."
+    },
+    "fight.mode_tempo": {
+      "tr": "Porch tempo",
+      "en": "Porch tempo"
+    },
+    "fight.tempo_steer": {
+      "tr": "Tempo — dokunarak yönlendir",
+      "en": "Tempo — steer with taps"
     }
   },
   "meta": {

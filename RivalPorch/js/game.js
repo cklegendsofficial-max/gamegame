@@ -1125,6 +1125,67 @@ function storyForm5() {
   return state.questPack?.storyForm5 || state.storyForm5 || null;
 }
 
+function storyForm6() {
+  return state.questPack?.storyForm6 || state.storyForm6 || null;
+}
+
+function storyForm7() {
+  return state.questPack?.storyForm7 || state.storyForm7 || null;
+}
+
+function antennaOpLiveBeat() {
+  const cards = storyForm7()?.antennaOpJournalBeatCards || [];
+  for (const c of cards) {
+    const req = c.requiresFlags || [];
+    if (req.length && !req.every((f) => storyFlag(f))) continue;
+    if (c.doneFlag && storyFlag(c.doneFlag)) continue;
+    if (c.doneFlagAny?.some((f) => storyFlag(f))) continue;
+    return c;
+  }
+  return null;
+}
+
+function antennaOpLiveBannerHtml() {
+  const form = storyForm7();
+  const ban = form?.activeArcBeatBanner;
+  if (!ban || !whenFlagsOk(ban.when || {})) return "";
+  const beat = antennaOpLiveBeat();
+  if (!beat) return "";
+  const sceneShortRaw = loc(beat.scene) || "";
+  const short = sceneShortRaw.length > 72 ? `${sceneShortRaw.slice(0, 70)}…` : sceneShortRaw;
+  const title = loc(beat.title);
+  const tpl = ban.template || {};
+  const line = (state.locale === "tr" ? tpl.tr : tpl.en || tpl.tr || "")
+    .replace("{beatTitle}", title)
+    .replace("{sceneShort}", short);
+  const neighbor = beat.cast?.[0] || "n3";
+  return `<div class="rp-arc-beat-banner" data-testid="${ban.testId || "antenna-op-live-banner"}">
+    <span>${line}</span>
+    <button class="rp-btn rp-btn--primary" type="button" data-action="open-neighbor" data-id="${neighbor}">${loc(ban.cta)}</button>
+  </div>`;
+}
+
+function antennaOpJournalHtml() {
+  const cards = storyForm7()?.antennaOpJournalBeatCards || [];
+  if (!cards.length) return "";
+  const live = antennaOpLiveBeat()?.beatId;
+  return `<div class="antenna-beat-list" data-testid="antenna-op-journal-beats">
+    ${cards
+      .map((c) => {
+        const done = c.doneFlag
+          ? storyFlag(c.doneFlag)
+          : (c.doneFlagAny || []).some((f) => storyFlag(f));
+        const isLive = c.beatId === live;
+        return `<article class="antenna-beat-card ${done ? "is-done" : ""} ${isLive ? "is-live" : ""}" data-testid="${c.testId}">
+        <h4>${loc(c.title)}</h4>
+        <p>${loc(c.scene)}</p>
+        ${isLive ? `<button class="btn btn-ember" type="button" data-action="open-neighbor" data-id="${c.cast?.[0] || "n3"}">${loc(c.cta)}</button>` : ""}
+      </article>`;
+      })
+      .join("")}
+  </div>`;
+}
+
 function whenFlagsOk(when = {}) {
   const day = state.save.dayIndex || 1;
   if (when.dayIndexMin != null && day < when.dayIndexMin) return false;
@@ -1135,12 +1196,25 @@ function whenFlagsOk(when = {}) {
   return true;
 }
 
-/** story-form-5 revised: SVG/lived stage prop — NOT chip-only. */
+/** form6 wins instigate/stage SVG; form5 mediate shared-string stays. */
+function day2StreetStagePropsMerged() {
+  const f5 = storyForm5()?.day2StreetStageProps || {};
+  const f6 = storyForm6()?.day2StreetStageProps || {};
+  return { ...f5, ...f6 };
+}
+
+function day2HotspotMutationsMerged() {
+  const f5 = storyForm5()?.hotspotMutations || {};
+  const f6 = storyForm6()?.hotspotMutations || {};
+  return { ...f5, ...f6 };
+}
+
+/** story-form-5/6: SVG/lived stage prop — NOT chip-only / emoji stubs. */
 function day2StreetStageHtml() {
-  const form = storyForm5();
   const day = state.save.dayIndex || 1;
-  if (!form || day < 2) return "";
-  const props = form.day2StreetStageProps || {};
+  if (day < 2) return "";
+  const props = day2StreetStagePropsMerged();
+  if (!Object.keys(props).length) return "";
   const pick = storyFlag("cold_open_mediate")
     ? props.mediate
     : storyFlag("cold_open_instigate")
@@ -1153,8 +1227,7 @@ function day2StreetStageHtml() {
 }
 
 function mutateHotspotHtml(n, baseBtnHtml) {
-  const form = storyForm5();
-  const muts = form?.hotspotMutations || {};
+  const muts = day2HotspotMutationsMerged();
   const mut = Object.values(muts).find(
     (m) =>
       whenFlagsOk(m.when || { dayIndexMin: 2 }) &&
@@ -1164,7 +1237,7 @@ function mutateHotspotHtml(n, baseBtnHtml) {
   const isPrimary = mut.neighborId === n.id;
   const bubble = isPrimary ? mut.speechBubble : mut.alsoSpeechBubble;
   const cls = isPrimary ? mut.addClass || [] : mut.alsoAddClass || [];
-  const tid = isPrimary ? mut.testId : "";
+  const tid = isPrimary ? mut.testId : mut.alsoTestId || "";
   const suffix = isPrimary && mut.nameSuffix ? loc(mut.nameSuffix) : "";
   let html = baseBtnHtml;
   if (cls.length) html = html.replace('class="rp-hotspot', `class="rp-hotspot ${cls.join(" ")}`);
@@ -1180,8 +1253,22 @@ function mutateHotspotHtml(n, baseBtnHtml) {
   return html.replace("</button>", `${bub}</button>`);
 }
 
+function pickDay2EnterSpotlight() {
+  const f5 = storyForm5();
+  const f6 = storyForm6();
+  const map = {
+    ...(f5?.day2EnterSpotlights || {}),
+    ...(f6?.day2EnterSpotlights || {}),
+  };
+  if (f5?.day2EnterSpotlight && !map.mediate) map.mediate = f5.day2EnterSpotlight;
+  if (storyFlag("cold_open_mediate") && map.mediate) return map.mediate;
+  if (storyFlag("cold_open_instigate") && map.instigate) return map.instigate;
+  if (storyFlag("cold_open_stage") && map.stage) return map.stage;
+  return f5?.day2EnterSpotlight || null;
+}
+
 function day2EnterSpotlightHtml(screen = "street") {
-  const spot = storyForm5()?.day2EnterSpotlight;
+  const spot = pickDay2EnterSpotlight();
   if (!spot || !(spot.screens || ["street"]).includes(screen)) return "";
   if (!whenFlagsOk(spot.when)) return "";
   return `<div class="rp-day2-spotlight" data-testid="${spot.testId || "story-day2-enter-spotlight"}" role="dialog">
@@ -1356,47 +1443,40 @@ function renderEvening() {
       "evening.locked",
       state.locale === "tr" ? "Akşam bitmez — Cem Prova'da düdük çalıyor." : "Evening won't end — Cem's still whistling Practice."
     );
+  // ux-session-7: one next action — mid is title + ≤1 support + ONE primary (no checklist)
+  const primaryAction = endEnabled ? "end-evening" : cta.action;
+  const primaryLabel = endEnabled ? endLabel : cta.label;
+  const primaryTestId = endEnabled ? "end-evening" : "evening-primary";
+  const supportLine = (support || "").slice(0, state.uxPack7?.eveningHome?.maxSupportChars || 90);
 
   screen.innerHTML = `
     ${stageLayer("street")}
     ${hudHtml()}
     ${streetPropOverlayHtml("evening")}
     ${day2StreetStageHtml()}
-    <div class="rp-mid rp-evening-card rp-evening-card--thin">
-      <p class="rp-kicker">${state.locale === "tr" ? "Ana" : "Main"} · ${mainTitle}</p>
+    ${antennaOpLiveBannerHtml()}
+    <div class="rp-mid rp-evening-card rp-evening-card--thin" data-testid="evening-mid">
       <h2 class="rp-night-title">${loc(dayHeadline())}</h2>
-      <div class="rp-progress">
-        <img src="${goldBust(faceId)}" alt="" width="40" height="40" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" />
-        <div class="rp-progress__bar" aria-valuenow="${mainDone}" aria-valuemax="${mainTotal}"><i style="width:${Math.round((mainDone / Math.max(1, mainTotal)) * 100)}%"></i></div>
-        <span>${fillTemplate(uxStr("evening.progress.beats", state.locale === "tr" ? "Vuruş {n}/{max}" : "Beats {n}/{max}"), { n: mainDone, max: mainTotal })}</span>
-      </div>
-      <p class="rp-mid__line">${support}</p>
-      ${echoBannerHtml()}
+      ${supportLine ? `<p class="rp-mid__line">${supportLine}</p>` : ""}
+      <button id="btn-end-evening" class="rp-btn rp-btn--primary rp-end-evening" type="button" data-action="${primaryAction}" data-testid="${primaryTestId}" data-next-action="${endEnabled ? "end_evening" : cta.id}" data-end-evening="1" data-end-enabled="${endEnabled}" ${!endEnabled && cta.action === "end-evening" ? "disabled" : ""}>${primaryLabel}</button>
       ${
         mainAgenda?.ready
-          ? `<button class="rp-btn rp-btn--primary" type="button" data-action="quest-complete" data-id="${mainAgenda.quest.id}">${state.locale === "tr" ? "Tepsideki ödülü aç" : "Open the tray reward"}</button>`
+          ? `<button class="rp-btn" type="button" data-action="quest-complete" data-id="${mainAgenda.quest.id}">${state.locale === "tr" ? "Tepsideki ödülü aç" : "Open the tray reward"}</button>`
           : ""
       }
     </div>
-    <footer class="rp-dock">
-      <button id="btn-end-evening" class="rp-btn rp-btn--primary rp-end-evening" type="button" data-action="${endEnabled ? "end-evening" : cta.action}" data-testid="${endEnabled ? "end-evening" : "evening-primary"}" data-end-evening="1" data-end-enabled="${endEnabled}" ${endEnabled ? "" : (cta.action === "end-evening" ? "disabled" : "")}>${endEnabled ? endLabel : cta.label}</button>
-      <button class="rp-btn" type="button" data-action="open-quests">${state.locale === "tr" ? "Görevler" : "Quests"}</button>
+    <footer class="rp-dock rp-dock--tertiary">
+      <button class="rp-btn rp-btn--ghost" type="button" data-action="open-quests">${state.locale === "tr" ? "Görevler" : "Quests"}</button>
+      <button class="rp-btn rp-btn--ghost" type="button" data-action="open-story-log">${state.locale === "tr" ? "···" : "···"}</button>
       ${
         endEnabled
-          ? `<button class="rp-btn" type="button" data-action="goto-street" data-testid="go-overnight" data-overnight-link hidden style="display:none"></button><button class="rp-btn" type="button" data-action="goto-street">${state.locale === "tr" ? "Sokak" : "Street"}</button>`
-          : `<button class="rp-btn ${st.cupRequired && !st.cupDone ? "rp-btn--ember" : ""}" type="button" data-action="goto-cup" data-testid="practice-match">${isCupNight() ? t("cup.season_night") : t("cup.practice")}${st.cupRequired && !st.cupDone ? " ★" : ""}</button>`
-      }
-    </footer>
-    <div class="rp-dock-extra">
-      <button class="rp-btn rp-btn--ghost" type="button" data-action="open-shop">${t("shop.title")}</button>
-      <button class="rp-btn rp-btn--ghost" type="button" data-action="open-story-log">${state.locale === "tr" ? "Hikâye" : "Journal"}</button>
-      ${
-        endEnabled
-          ? `<button class="rp-btn rp-btn--ghost rp-go-overnight" type="button" data-action="end-evening" data-testid="go-overnight" data-overnight-link data-end-enabled="true">${state.locale === "tr" ? "Geceye geç" : "Go overnight"}</button>`
-          : `<button id="btn-end-evening-ghost" class="rp-btn rp-btn--ghost rp-end-evening" type="button" data-action="end-evening" data-testid="end-evening" data-end-evening="1" disabled data-end-enabled="false">${endLabel}</button>`
+          ? `<button class="rp-btn rp-btn--ghost" type="button" data-action="goto-street">${state.locale === "tr" ? "Sokak" : "Street"}</button>`
+          : cta.action !== "goto-cup"
+            ? `<button class="rp-btn rp-btn--ghost ${st.cupRequired && !st.cupDone ? "rp-btn--ember" : ""}" type="button" data-action="goto-cup" data-testid="practice-match">${isCupNight() ? t("cup.season_night") : t("cup.practice")}</button>`
+            : `<button class="rp-btn rp-btn--ghost" type="button" data-action="goto-street">${state.locale === "tr" ? "Sokak" : "Street"}</button>`
       }
       ${day1EscapeChipHtml(endEnabled)}
-    </div>
+    </footer>
     ${endEnabled ? "" : `<p class="street-hint" data-testid="end-evening-hint">${lockedCopy}</p>`}
   `;
   requestAnimationFrame(() => Ux4.paintEndEveningControls(state, state.locale));
@@ -1456,6 +1536,7 @@ function renderStreet() {
     ${day2StreetStageHtml()}
     ${hudHtml()}
     ${streetPropOverlayHtml("street")}
+    ${antennaOpLiveBannerHtml()}
     ${day2EnterSpotlightHtml("street")}
     <button class="rp-chip rp-back" type="button" data-action="goto-evening">${t("common.back")}</button>
     <div class="rp-hotspots" role="list">${spots}</div>
@@ -2066,9 +2147,21 @@ function renderStoryLog() {
   }).join("");
   applyDay2ColdRewrite();
   const day = state.save.dayIndex || 1;
-  const dramaCards = (state.questPack?.storyForm3?.journalDramaCards || [])
-    .filter((c) => (c.when?.dayIndexMin || 2) <= day)
-    .filter((c) => (c.when?.flagsAny || []).some((f) => storyFlag(f)) || (c.when?.flagsAll || []).every((f) => storyFlag(f)))
+  const tr = state.locale === "tr";
+  const form7 = storyForm7();
+  const layout = form7?.journalLayout;
+  const dramaSrc = [
+    ...(state.questPack?.storyForm3?.journalDramaCards || []),
+    ...(form7?.journalDramaCardsAppend || []),
+  ];
+  const dramaCards = dramaSrc
+    .filter((c) => (c.when?.dayIndexMin || 1) <= day)
+    .filter(
+      (c) =>
+        !(c.when?.flagsAny || c.when?.flagsAll) ||
+        (c.when?.flagsAny || []).some((f) => storyFlag(f)) ||
+        ((c.when?.flagsAll || []).length && (c.when?.flagsAll || []).every((f) => storyFlag(f)))
+    )
     .map(
       (c) => `<article class="journal-drama ${c.tone || ""}">
         <p class="rp-kicker">${loc(c.eyebrow)}</p>
@@ -2081,32 +2174,37 @@ function renderStoryLog() {
   const consequenceBits = (state.save.journalConsequenceBeats || [])
     .map((b) => `<li><strong>${loc(b.title)}</strong> — ${loc(b.body)}</li>`)
     .join("");
+  const heroTease = loc(layout?.heroTease) || (tr ? "Drama defteri — omurga + canlı beat" : "Drama journal — spine + living beat");
+  const notesLabel = loc(layout?.recentNotesLabel) || (tr ? "Eski notlar (log)" : "Older notes (log)");
   screen.innerHTML = `
     ${hudHtml()}
-    <div class="art-hero journal-hero" style="background-image:${stageBg(ART.streetHero, ART.streetHeroFallback)}">
+    <div class="art-hero journal-hero" style="background-image:${stageBg(ART.streetHero, ART.streetHeroFallback)}" data-testid="${layout?.testId || "story-journal-drama-first"}">
       <div class="art-hero-scrim">
-        <div class="topbar"><h2>${state.locale === "tr" ? "Hikâye defteri" : "Story journal"}</h2>
+        <div class="topbar"><h2>${tr ? "Hikâye defteri" : "Story journal"}</h2>
           <button class="btn btn-secondary" type="button" data-action="goto-evening">${t("common.back")}</button>
         </div>
-        <p class="evening-cup-tease">${state.locale === "tr" ? "ANA GÖREV omurgası · ark izleri" : "MAIN QUEST spine · arc marks"}</p>
+        <p class="evening-cup-tease">${heroTease}</p>
         <div class="spine-strip">${spine || ""}</div>
       </div>
     </div>
     ${dramaCards ? `<h3 class="section-label">${tr ? "Yankı" : "Aftermath"}</h3><div class="journal-drama-list">${dramaCards}</div>` : ""}
+    ${antennaOpJournalHtml()}
     ${consequenceBits ? `<h3 class="section-label">${tr ? "Yankı / Sonuç" : "Consequence"}</h3><ul class="agenda-list">${consequenceBits}</ul>` : ""}
-    <h3 class="section-label">${state.locale === "tr" ? "Arklar" : "Arcs"}</h3>
+    <h3 class="section-label">${tr ? "Arklar" : "Arcs"}</h3>
     <div class="arc-list">${arcs}</div>
-    <h3 class="section-label">${state.locale === "tr" ? "Aktif görevler" : "Active quests"}</h3>
+    <h3 class="section-label">${tr ? "Aktif görevler" : "Active quests"}</h3>
     <ul class="agenda-list">${questBits}</ul>
-    <div class="btn-row"><button class="btn btn-teal" type="button" data-action="open-quests">${state.locale === "tr" ? "Görev defteri" : "Quest log"}</button></div>
-    <h3 class="section-label">${state.locale === "tr" ? "Mahalle ünü" : "Street rep"}</h3>
+    <div class="btn-row"><button class="btn btn-teal" type="button" data-action="open-quests">${tr ? "Görev defteri" : "Quest log"}</button></div>
+    <h3 class="section-label">${tr ? "Mahalle ünü" : "Street rep"}</h3>
     <p class="muted">${repLine}</p>
-    <h3 class="section-label">${state.locale === "tr" ? "Son notlar" : "Recent notes"}</h3>
-    <ul class="agenda-list recap-list">${recap}</ul>
-    <h3 class="section-label">${state.locale === "tr" ? "Hikâye ödülleri" : "Story unlocks"}</h3>
-    <p class="muted">${unlockBits.length ? unlockBits.join(", ") : state.locale === "tr" ? "Henüz yok" : "None yet"}</p>
-    <h3 class="section-label">${state.locale === "tr" ? "Sezon sonu" : "Season end"}</h3>
-    <p class="muted">${ending ? loc(ending.title) : state.locale === "tr" ? "28. günden sonra kilitlenir" : "Locks after day 28"}</p>
+    <details class="journal-log-fold" ${layout?.recentNotesDefaultCollapsed === false ? "open" : ""}>
+      <summary>${notesLabel}</summary>
+      <ul class="agenda-list recap-list">${recap}</ul>
+    </details>
+    <h3 class="section-label">${tr ? "Hikâye ödülleri" : "Story unlocks"}</h3>
+    <p class="muted">${unlockBits.length ? unlockBits.join(", ") : tr ? "Henüz yok" : "None yet"}</p>
+    <h3 class="section-label">${tr ? "Sezon sonu" : "Season end"}</h3>
+    <p class="muted">${ending ? loc(ending.title) : tr ? "28. günden sonra kilitlenir" : "Locks after day 28"}</p>
     ${ending ? `<p>${loc(ending.summary)}</p>` : ""}`;
   showScreen("screen-story");
 }
@@ -2636,7 +2734,7 @@ function resumeFightLoop(battle) {
       if (battle.paused) break;
       combatTick(battle);
     }
-    battle.floaters = (battle.floaters || []).filter((f) => battle.elapsed - f.t < 0.85);
+    battle.floaters = cappedFloaters((battle.floaters || []).filter((f) => battle.elapsed - f.t < 0.85));
     updateFightUI(battle);
     const bothAlive = battle.allies.some((u) => u.alive) && battle.enemies.some((u) => u.alive);
     const minPrac = state.mechFix5?.pauseAutoFightForCall?.minPracticeFightSec || state.combatPack?.practiceCup?.minPracticeFightSec || 12;
@@ -2657,6 +2755,22 @@ function resumeFightLoop(battle) {
       for (const u of [...battle.allies, ...battle.enemies]) {
         if (u.alive && u.hp < 1) u.hp = 1;
       }
+    }
+    // Second mid-fight decision after Call resolved (~5.8s)
+    if (
+      battle.practice &&
+      battle.actionUsed &&
+      !battle.secondCallUsed &&
+      !battle.secondCallOffered &&
+      battle.elapsed >= 5.8 &&
+      battle.allies.some((u) => u.alive) &&
+      battle.enemies.some((u) => u.alive)
+    ) {
+      battle.secondCallOffered = true;
+      battle.paused = true;
+      updateFightUI(battle);
+      showSecondFightChoice(battle);
+      return;
     }
     // Practice hard gate: don't finish until porch call resolved
     if (battle.practice && !battle.actionUsed && (timeUp || !bothAlive)) {
@@ -2683,6 +2797,22 @@ function applyBeatFlags(beat) {
   saveNow();
 }
 
+
+function clearRivalryAck(battle, reason = "ack") {
+  if (!battle) return;
+  battle.rivalryAckPending = false;
+  clearTimeout(battle._rivalryAckTimer);
+  state.save.storyFlags = state.save.storyFlags || {};
+  state.save.storyFlags.syn_taught_syn_rivalry = true;
+  state.save.storyFlags.practice_cup_rivalry_pop_seen = true;
+  if (!battle.actionOffered) hideFightActions();
+  if (battle.paused && !battle.actionOffered && !battle.cannotDismissPorch) {
+    battle.paused = false;
+    resumeFightLoop(battle);
+  }
+  saveNow();
+}
+
 function runScriptedMoments(battle) {
   if (!battle.scripted?.length) return;
   for (const beat of battle.scripted) {
@@ -2699,14 +2829,21 @@ function runScriptedMoments(battle) {
       if (beat.cameraShakeId) stageShake(Combat.shakeClass(state.combatPack?.juiceHints, beat.cameraShakeId));
       applyBeatFlags(beat);
       if (beat.requireAck) {
+        // PriorityFix 7.8: never strand on Rivalry ack — auto-clear quickly; Call resolve also clears
         battle.paused = true;
+        battle.rivalryAckPending = true;
         const bar = document.getElementById("fight-actions");
-        if (bar) {
+        if (bar && !battle.actionOffered) {
           const ack = loc(beat.ackLabel) || (state.locale === "tr" ? "Anladım — Rekabet" : "Got it — Rivalry");
           bar.innerHTML = `<p class="fight-action-prompt">${loc(beat.lines) || ack}</p>
-            <div class="btn-row wrap"><button class="btn btn-ember" type="button" data-action="ack-rivalry">${ack}</button></div>`;
+            <div class="btn-row wrap"><button class="btn btn-ember" type="button" data-action="ack-rivalry" data-testid="ack-rivalry">${ack}</button></div>`;
           bar.hidden = false;
         }
+        clearTimeout(battle._rivalryAckTimer);
+        battle._rivalryAckTimer = setTimeout(() => {
+          if (!battle.rivalryAckPending || battle.finished) return;
+          clearRivalryAck(battle, "auto");
+        }, beat.autoAckMs || 1200);
       }
     } else if (beat.type === "forced_hit") {
       const u = battle.allies.find((a) => a.id === beat.targetNeighborId || a.mirrorOf === beat.targetNeighborId);
@@ -2754,6 +2891,72 @@ function runScriptedMoments(battle) {
       stageShake("shake-medium");
     }
   }
+}
+
+
+function showSecondFightChoice(battle) {
+  const bar = document.getElementById("fight-actions");
+  if (!bar) return;
+  const tr = state.locale === "tr";
+  bar.setAttribute("data-testid", "second-fight-choice");
+  bar.innerHTML = `
+    <p class="fight-action-prompt">${tr ? "İkinci hamle — skor değişsin" : "Second move — swing the score"}</p>
+    <div class="btn-row wrap">
+      <button class="btn btn-ember" type="button" data-action="second-focus" data-testid="second-focus">${tr ? "Focus+" : "Focus+"}</button>
+      <button class="btn btn-teal" type="button" data-action="second-prop" data-testid="second-prop">${tr ? "Prop+" : "Prop+"}</button>
+      <button class="btn btn-secondary" type="button" data-action="second-swap" data-testid="second-swap">${tr ? "Swap+" : "Swap+"}</button>
+    </div>`;
+  bar.hidden = false;
+}
+
+function applySecondFightChoice(kind) {
+  const battle = state.battle;
+  if (!battle || battle.secondCallUsed) return;
+  battle.secondCallUsed = true;
+  battle.playerAgencyActions = (battle.playerAgencyActions || 0) + 1;
+  const before = battle.allies.reduce((s, u) => s + Math.max(0, u.hp), 0);
+  if (kind === "focus") {
+    const foe = battle.enemies.filter((u) => u.alive).sort((a, b) => b.atk - a.atk)[0];
+    if (foe) {
+      battle.focusTargetSlot = foe.slot;
+      battle.focusUntil = (battle.elapsed || 0) + 5;
+      battle.focusDmgBonus = 0.22;
+      const dmg = Math.max(8, Math.floor(foe.maxHp * 0.08));
+      foe.hp = Math.max(1, foe.hp - dmg);
+      battle.floaters.push({ side: foe.side, slot: foe.slot, dmg, t: battle.elapsed });
+    }
+  } else if (kind === "prop") {
+    const ally = battle.allies.filter((u) => u.alive).sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
+    if (ally) {
+      const heal = Math.max(10, Math.floor(ally.maxHp * 0.12));
+      ally.hp = Math.min(ally.maxHp, ally.hp + heal);
+      battle.floaters.push({ side: ally.side, slot: ally.slot, heal, t: battle.elapsed });
+      battle.atkBuffUntil = (battle.elapsed || 0) + 4;
+      battle.atkBuffPct = 0.1;
+    }
+  } else if (kind === "swap") {
+    const alive = battle.allies.filter((u) => u.alive);
+    if (alive.length >= 2) {
+      const a = alive[0], b = alive[alive.length - 1];
+      const tmp = a.slot; a.slot = b.slot; b.slot = tmp;
+      showSynProc(state.locale === "tr" ? "Swap+" : "Swap+");
+    }
+  }
+  const after = battle.allies.reduce((s, u) => s + Math.max(0, u.hp), 0);
+  const delta = after - before;
+  toast(
+    state.locale === "tr"
+      ? `İkinci hamle · skor ${before}→${after} (${delta >= 0 ? "+" : ""}${delta})`
+      : `Second move · score ${before}→${after} (${delta >= 0 ? "+" : ""}${delta})`,
+    1600
+  );
+  state.save.storyFlags = state.save.storyFlags || {};
+  state.save.storyFlags.practice_second_call_done = true;
+  hideFightActions();
+  battle.paused = false;
+  updateFightUI(battle);
+  resumeFightLoop(battle);
+  saveNow();
 }
 
 function showFightActions(battle) {
@@ -2837,6 +3040,8 @@ function applyPorchCall(callId) {
   const battle = state.battle;
   if (!battle || battle.actionUsed) return;
   clearTimeout(battle._porchTimeout);
+  // Merge Rivalry ack into Call resolve — never strand after pick
+  if (battle.rivalryAckPending) clearRivalryAck(battle, "call_resolve");
   const opt =
     (battle.porchCallOptions || []).find((o) => o.id === callId) ||
     state.combatPack?.porchCalls?.options?.find((o) => o.id === callId);
@@ -2859,6 +3064,7 @@ function applyPorchCall(callId) {
     saveNow();
   }
   battle.actionUsed = true;
+  battle.playerAgencyActions = (battle.playerAgencyActions || 0) + 1;
   battle.cannotDismissPorch = false;
   battle.porchCallArmed = false;
   // Visible swing bias for Practice teach readability
@@ -3214,11 +3420,13 @@ function renderFight(battle) {
     <div class="topbar fight-top"><h2>${t("fight.title")}</h2>
       ${canSkip ? `<button class="btn btn-secondary" type="button" data-action="skip-fight">${t("fight.skip")}</button>` : `<span class="chip rivalry">${tr ? "Prova — atlama yok" : "Practice — no skip"}</span>`}
     </div>
+    <p class="street-hint muted" data-testid="porch-tempo-label">${tr ? "Porch tempo — dokunarak yönlendir" : "Porch tempo — steer with taps"}</p>
     ${coachBanner}
     <div class="fight-hud" style="margin-bottom:0.35rem">
       <span id="ally-hp-total" class="hud-ally"></span><span id="fight-timer">0.0s</span><span id="enemy-hp-total" class="hud-enemy"></span>
     </div>
-    <div class="rp-arena" aria-live="polite">
+    <div class="rp-arena rp-screen--fight" aria-live="polite">
+      <div class="rp-float-layer" id="rp-float-layer" aria-hidden="true"></div>
       <div class="rp-arena__label enemy">${tr ? "Rakip" : "Rival"}</div>
       <div class="rp-pads rp-pads--enemy" id="enemy-pads"></div>
       <div class="rp-arena__vs">VS</div>
@@ -3230,6 +3438,10 @@ function renderFight(battle) {
       <button class="btn btn-ember rp-cta-pulse" type="button" id="btn-porch-call-ready" data-action="open-porch-call" data-testid="porch-call-ready">${tr ? "Çağrı!" : "Call!"}</button>
       <span class="muted" id="porch-call-ready-hint">${tr ? "Veranda Çağrısı hazır — bas" : "Porch Call ready — tap"}</span>
     </div>
+    <div class="rp-between-dock" id="between-call-dock" data-testid="between-call-dock" hidden>
+      <button class="btn btn-teal" type="button" data-action="between-cheer-pulse" data-testid="between-cheer-pulse">${tr ? "Alkış" : "Cheer"}</button>
+      <span class="muted">${tr ? "Hedef / Tut için pad'e dokun" : "Tap pads to Mark / Hold"}</span>
+    </div>
     <div class="fight-actions" id="fight-actions" hidden></div>
     <p class="fight-log muted" id="fight-log"></p>`;
   screen._battle = battle;
@@ -3239,20 +3451,28 @@ function renderFight(battle) {
   }
 }
 
+function cappedFloaters(floaters = []) {
+  // visual-fix-8: ≤3 simultaneous floats
+  const sorted = [...floaters].sort((a, b) => (b.t || 0) - (a.t || 0));
+  return sorted.slice(0, 3);
+}
+
 function unitCard(u, side, floaters = []) {
   const pct = Math.max(0, Math.round((u.hp / u.maxHp) * 100));
-  const floater = floaters
+  const floater = cappedFloaters(floaters)
     .filter((f) => f.side === side && f.slot === u.slot)
-    .map((f) => {
-      if (f.heal) return `<span class="heal-floater">+${f.heal}</span>`;
-      if (f.dodge) return `<span class="dodge-floater">${state.locale === "tr" ? "kaç!" : "dodge"}</span>`;
-      if (f.rivalry) return `<span class="dmg-floater rivalry-floater">−${f.dmg}!</span>`;
-      return `<span class="dmg-floater">−${f.dmg}</span>`;
+    .map((f, i) => {
+      if (f.heal) return `<span class="rp-float rp-float--heal heal-floater" data-slot="${i}">+${f.heal}</span>`;
+      if (f.dodge) return `<span class="rp-float rp-float--dodge dodge-floater" data-slot="${i}">${state.locale === "tr" ? "kaç!" : "dodge"}</span>`;
+      if (f.rivalry || f.proc) return `<span class="rp-float rp-float--proc dmg-floater rivalry-floater" data-slot="${i}">−${f.dmg}!</span>`;
+      return `<span class="rp-float rp-float--hit dmg-floater" data-slot="${i}">−${f.dmg}</span>`;
     })
     .join("");
   const face = goldBust(u.mirrorOf || u.id);
   const ember = u._rivalryCrossed ? " is-rivalry-ember" : "";
-  return `<div class="unit-slot rp-unit rp-arena-unit ${side === "enemy" ? "enemy rp-unit--enemy" : "ally rp-unit--you"} ${u.alive ? "" : "dead"}${ember}" data-side="${side}" data-slot="${u.slot}">
+  const markHint = side === "enemy" ? ` data-action="between-focus-tap" data-testid="between-focus-tap" data-slot="${u.slot}"` : "";
+  const holdHint = side === "ally" && (u.slot ?? 0) < 3 ? ` data-action="between-hold-lane" data-testid="between-hold-lane" data-slot="${u.slot}"` : "";
+  return `<div class="unit-slot rp-unit rp-arena-unit ${side === "enemy" ? "enemy rp-unit--enemy" : "ally rp-unit--you"} ${u.alive ? "" : "dead"}${ember}" data-side="${side}" data-slot="${u.slot}"${markHint}${holdHint}>
     <div class="unit-name rp-unit__name">${u.name}</div>
     <img src="${face}" alt="${u.name}" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" />
     <div class="hp-track rp-hp"><i style="width:${pct}%"></i><span class="hp-num">${Math.max(0, Math.round(u.hp))}/${u.maxHp}</span></div>
@@ -3345,10 +3565,138 @@ function updateFightUI(battle) {
         : (tr ? "Çağrı!" : "Call!");
     }
   }
+  // mechanics-fix-8: between-call Mark/Cheer/Hold after first Call
+  const between = document.getElementById("between-call-dock");
+  if (between) {
+    const modalOpen = !!(battle.paused && (battle.actionOffered || battle.secondCallOffered) && !document.getElementById("fight-actions")?.hidden);
+    const showBetween = !!(
+      battle.practice &&
+      battle.actionUsed &&
+      !battle.finished &&
+      !modalOpen
+    );
+    between.hidden = !showBetween;
+  }
+}
+
+function betweenCallWindowOpen(battle) {
+  if (!battle?.practice || battle.finished || !battle.actionUsed) return false;
+  if (battle.paused && (battle.actionOffered || battle.secondCallOffered || battle.cannotDismissPorch)) {
+    const bar = document.getElementById("fight-actions");
+    if (bar && !bar.hidden) return false;
+  }
+  return true;
+}
+
+function applyBetweenCheer() {
+  const battle = state.battle;
+  if (!betweenCallWindowOpen(battle)) return;
+  if ((battle.cheerUses || 0) >= 2) {
+    toast(state.locale === "tr" ? "Alkış bitti" : "Cheer spent");
+    return;
+  }
+  if (battle.cheerCdUntil && battle.elapsed < battle.cheerCdUntil) return;
+  battle.cheerUses = (battle.cheerUses || 0) + 1;
+  battle.cheerCdUntil = (battle.elapsed || 0) + 5;
+  battle.atkBuffUntil = (battle.elapsed || 0) + 2.5;
+  battle.atkBuffPct = 0.1;
+  const ally = battle.allies.find((u) => u.alive);
+  if (ally) {
+    battle.floaters = battle.floaters || [];
+    battle.floaters.push({ side: ally.side, slot: ally.slot, heal: 4, t: battle.elapsed, proc: true });
+  }
+  state.save.storyFlags = state.save.storyFlags || {};
+  state.save.storyFlags.practice_between_cheer_pulse = true;
+  battle.playerAgencyActions = (battle.playerAgencyActions || 0) + 1;
+  toast(state.locale === "tr" ? "Alkış — tempo buff" : "Cheer — tempo buff");
+  stageShake("shake-light");
+  updateFightUI(battle);
+  saveNow();
+}
+
+function applyBetweenFocusTap(slot) {
+  const battle = state.battle;
+  if (!betweenCallWindowOpen(battle)) return;
+  if (battle.focusCdUntil && battle.elapsed < battle.focusCdUntil) return;
+  const foe = battle.enemies.find((u) => u.alive && String(u.slot) === String(slot)) || battle.enemies.find((u) => u.alive);
+  if (!foe) return;
+  battle.focusTargetSlot = foe.slot;
+  battle.focusUntil = (battle.elapsed || 0) + 3;
+  battle.focusDmgBonus = 0.12;
+  battle.focusCdUntil = (battle.elapsed || 0) + 4;
+  const dmg = Math.max(4, Math.floor(foe.maxHp * 0.04));
+  foe.hp = Math.max(1, foe.hp - dmg);
+  battle.floaters = battle.floaters || [];
+  battle.floaters.push({ side: foe.side, slot: foe.slot, dmg, t: battle.elapsed, proc: true });
+  state.save.storyFlags = state.save.storyFlags || {};
+  state.save.storyFlags.practice_between_focus_tap = true;
+  battle.playerAgencyActions = (battle.playerAgencyActions || 0) + 1;
+  toast(state.locale === "tr" ? "Hedef işaretlendi" : "Target marked");
+  updateFightUI(battle);
+  saveNow();
+}
+
+function applyBetweenHoldLane(slot) {
+  const battle = state.battle;
+  if (!betweenCallWindowOpen(battle)) return;
+  if (battle.holdCdUntil && battle.elapsed < battle.holdCdUntil) return;
+  const ally =
+    battle.allies.find((u) => u.alive && String(u.slot) === String(slot) && (u.slot ?? 0) < 3) ||
+    battle.allies.find((u) => u.alive && (u.slot ?? 0) < 3);
+  if (!ally) return;
+  battle.tauntUnitId = ally.id;
+  battle.tauntUntil = (battle.elapsed || 0) + 3;
+  battle.tauntRedirect = 0.25;
+  battle.holdCdUntil = (battle.elapsed || 0) + 5;
+  const heal = Math.max(3, Math.floor(ally.maxHp * 0.03));
+  ally.hp = Math.min(ally.maxHp, ally.hp + heal);
+  battle.floaters = battle.floaters || [];
+  battle.floaters.push({ side: ally.side, slot: ally.slot, heal, t: battle.elapsed, proc: true });
+  state.save.storyFlags = state.save.storyFlags || {};
+  state.save.storyFlags.practice_between_hold_lane = true;
+  battle.playerAgencyActions = (battle.playerAgencyActions || 0) + 1;
+  toast(state.locale === "tr" ? "Ön sıra tutuluyor" : "Holding the front");
+  updateFightUI(battle);
+  saveNow();
+}
+
+function practiceBetweenAgencyOk(battle) {
+  const flags = state.save.storyFlags || {};
+  const keys = [
+    "practice_cup_porch_call_done",
+    "practice_second_decision_done",
+    "practice_between_focus_tap",
+    "practice_between_cheer_pulse",
+    "practice_between_hold_lane",
+  ];
+  const hit = keys.filter((k) => flags[k]).length;
+  if (hit >= 2) return true;
+  if ((battle.playerAgencyActions || 0) >= 2) return true;
+  return false;
 }
 
 function endFight(battle) {
   if (battle.finished) return;
+  // mechanics-fix-8: practice finish needs between-call agency, not spectator KO
+  if (battle.practice && !practiceBetweenAgencyOk(battle) && !battle._agencyForced) {
+    battle._agencyForced = true;
+    battle.paused = true;
+    const bar = document.getElementById("fight-actions");
+    if (bar) {
+      const tr = state.locale === "tr";
+      bar.innerHTML = `<p class="fight-action-prompt">${tr ? "Tempo — bir dokunuş daha" : "Tempo — one more steer"}</p>
+        <div class="btn-row wrap">
+          <button class="btn btn-teal" type="button" data-action="between-cheer-pulse" data-testid="between-cheer-pulse">${tr ? "Alkış" : "Cheer"}</button>
+          <button class="btn btn-ember" type="button" data-action="between-focus-tap" data-slot="1" data-testid="between-focus-tap">${tr ? "Hedef" : "Mark"}</button>
+          <button class="btn btn-secondary" type="button" data-action="between-hold-lane" data-slot="1" data-testid="between-hold-lane">${tr ? "Tut" : "Hold"}</button>
+        </div>`;
+      bar.hidden = false;
+    }
+    const between = document.getElementById("between-call-dock");
+    if (between) between.hidden = false;
+    toast(state.locale === "tr" ? "Porch tempo — dokun" : "Porch tempo — tap to steer");
+    return;
+  }
   battle.finished = true;
   if (state.fightTimer) {
     clearInterval(state.fightTimer);
@@ -3515,15 +3863,35 @@ function renderComic() {
     const at = Math.min(panelDefs.length, ins.afterPanelIndex ?? 1);
     panelDefs = [...panelDefs.slice(0, at), { textTemplate: ins.textTemplate || ins.text }, ...panelDefs.slice(at)];
   }
-  const panels = panelDefs
-    .map((p, i) => {
-      const imgId = r.team[i % Math.max(1, r.team.length)];
-      return `<article class="comic-panel" style="animation-delay:${i * 0.08}s">
-        <img src="${goldBust(imgId)}" alt="" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" />
-        <p>${fillTemplate(loc(p.textTemplate || p.text), vars)}</p>
-      </article>`;
-    })
-    .join("");
+  while (panelDefs.length < 3) {
+    panelDefs.push({
+      textTemplate: { tr: "Porch hatırladı.", en: "The porch remembered." },
+      text: { tr: "Porch hatırladı.", en: "The porch remembered." },
+    });
+  }
+  const mvpId = r.mvpId || r.team?.[0] || "n2";
+  const rivalId = r.rivalId || r.enemyTeam?.[0] || state.enemyLineup?.[0] || "n6";
+  const synergyId = r.synergyId || (r.synergy || "").toLowerCase();
+  const captions = panelDefs.slice(0, 3).map((p) => fillTemplate(loc(p.textTemplate || p.text), vars));
+  const kickoff =
+    captions[0] ||
+    (state.locale === "tr"
+      ? "Porch Cup açıldı. Işıklar yandı."
+      : "Porch Cup kicks off. Your porch lights the stage.");
+  const clash =
+    captions[1] ||
+    (synergyId.includes("rival")
+      ? state.locale === "tr"
+        ? "Rekabet çağrısı — skor sallanır."
+        : "Rivalry call — the score swings."
+      : state.locale === "tr"
+        ? "Çağrı vurdu. Blok izliyor."
+        : "Call lands. The block is watching.");
+  const punch =
+    captions[2] ||
+    (state.locale === "tr"
+      ? `MVP ${r.mvp}. Blok yarın konuşacak.`
+      : `MVP ${r.mvp}. The block will talk tomorrow.`);
   const shareText = fillTemplate(loc(state.content.uiStrings["comic.share_text"]), vars);
   const banner = state.questPack?.storyForm3?.comicRememberBanner || state.stories?.porchCupNarrative?.comicRememberBanner;
   let remember = "";
@@ -3534,21 +3902,52 @@ function renderComic() {
     state.save.storyFlags = state.save.storyFlags || {};
     state.save.storyFlags.comic_cold_echo_seen = true;
   }
+  const showVfx = /rival/.test(synergyId) || storyFlag("syn_taught_syn_rivalry");
+  // visual-fix-7: 3-panel clay strip with wave3 stage/bust art
   document.getElementById("screen-comic").innerHTML = `
     ${hudHtml()}
-    <div class="topbar"><h2>${t("comic.title")}</h2>
-      <button class="btn btn-secondary" type="button" data-action="goto-evening">${t("common.continue")}</button>
-    </div>
-    <p class="result-banner ${r.won ? "win" : "lose"}">${r.won ? t("common.win") : t("common.lose")}</p>
-    <p class="street-hint muted">${t("fight.hp_total")}: ${r.allyHp} vs ${r.enemyHp} · MVP ${r.mvp}</p>
-    ${r.rewardLine ? `<p class="reward-breakdown">${state.locale === "tr" ? "Ödül" : "Rewards"}: ${r.rewardLine}</p>` : ""}
-    ${remember}
-    <div class="comic-panels">${panels}</div>
-    <div class="btn-row">
-      <button class="btn btn-primary" type="button" data-action="share-copy" data-text="${encodeURIComponent(shareText)}">${t("comic.copy_text")}</button>
-      <button class="btn btn-teal" type="button" data-action="share-export">${t("comic.export_image")}</button>
-      <button class="btn btn-secondary" type="button" data-action="share-native" data-text="${encodeURIComponent(shareText)}">${t("comic.share")}</button>
-    </div>`;
+    <section class="rp-screen rp-screen--comic" data-testid="screen-comic">
+      <div class="rp-stage" data-stage="arena" data-wave="3" aria-hidden="true">
+        <img class="rp-stage__img" src="${ART.arenaStage}" alt="" onerror="this.src='${ART.arenaStageFallback}'" />
+        <div class="rp-stage__vignette"></div>
+      </div>
+      <header class="rp-comic-chrome">
+        <h1>${t("comic.title")}</h1>
+        <button type="button" class="rp-btn rp-btn--ghost btn btn-secondary" data-action="goto-evening">${t("common.continue")}</button>
+      </header>
+      <div class="rp-comic-result">
+        <strong>${r.won ? t("common.win") : t("common.lose")}</strong>
+        ${t("fight.hp_total")}: ${r.allyHp} vs ${r.enemyHp} · MVP ${r.mvp}
+      </div>
+      ${remember}
+      <div class="rp-comic-strip comic-panels" data-export-root="true" data-testid="comic-strip">
+        <figure class="rp-comic-panel rp-comic-panel--kickoff comic-panel comic-panel--clay" data-testid="comic-panel-1">
+          <span class="rp-comic-panel__badge">1</span>
+          <img class="rp-comic-panel__art" src="${ART.arenaStage}" alt="" width="640" height="360" onerror="this.src='${ART.arenaStageFallback}'" />
+          <figcaption class="rp-comic-panel__caption">${kickoff}</figcaption>
+        </figure>
+        <figure class="rp-comic-panel rp-comic-panel--clash comic-panel comic-panel--clay" data-testid="comic-panel-2">
+          <span class="rp-comic-panel__badge">2</span>
+          <img class="rp-comic-panel__art" src="${goldBust(mvpId)}" alt="${r.mvp || ""}" width="512" height="512" onerror="this.src='${MESHY_BUSTS.n2}'" />
+          <img class="rp-comic-panel__art" src="${goldBust(rivalId)}" alt="rival" width="512" height="512" onerror="this.src='${MESHY_BUSTS.n6}'" />
+          <img class="rp-comic-panel__vfx" src="${ART.vfxRivalry}" alt="" ${showVfx ? "" : "hidden"} />
+          <span class="rp-comic-panel__vs">VS</span>
+          <figcaption class="rp-comic-panel__caption">${clash}</figcaption>
+        </figure>
+        <figure class="rp-comic-panel rp-comic-panel--punch comic-panel comic-panel--clay" data-testid="comic-panel-3">
+          <span class="rp-comic-panel__badge">3</span>
+          <img class="rp-comic-panel__art rp-comic-panel__art--stage" src="${ART.arenaStage}" alt="" width="640" height="360" onerror="this.src='${ART.arenaStageFallback}'" />
+          <img class="rp-comic-panel__bust" src="${goldBust(mvpId)}" alt="MVP" width="256" height="256" onerror="this.src='${MESHY_BUSTS.n2}'" />
+          <figcaption class="rp-comic-panel__caption">${punch}</figcaption>
+        </figure>
+      </div>
+      ${r.rewardLine ? `<div class="rp-comic-rewards">${state.locale === "tr" ? "Ödül" : "Rewards"}: ${r.rewardLine}</div>` : ""}
+      <footer class="rp-dock rp-dock--comic btn-row">
+        <button class="btn btn-primary rp-btn" type="button" data-action="share-copy" data-comic-copy data-text="${encodeURIComponent(shareText)}">${t("comic.copy_text")}</button>
+        <button class="btn btn-teal rp-btn" type="button" data-action="share-export" data-comic-export>${t("comic.export_image")}</button>
+        <button class="btn btn-secondary rp-btn rp-btn--primary" type="button" data-action="goto-evening" data-comic-continue>${t("common.continue")}</button>
+      </footer>
+    </section>`;
 }
 
 async function copyShare(text) {
@@ -4147,6 +4546,39 @@ function onAction(action, target) {
     case "force-overnight-story":
       forceOvernightStoryProve();
       break;
+    case "second-focus":
+      applySecondFightChoice("focus");
+      break;
+    case "second-prop":
+      applySecondFightChoice("prop");
+      break;
+    case "second-swap":
+      applySecondFightChoice("swap");
+      break;
+    case "between-cheer-pulse":
+      applyBetweenCheer();
+      if (state.battle && !state.battle.finished && practiceBetweenAgencyOk(state.battle) && state.battle._agencyForced) {
+        hideFightActions();
+        state.battle.paused = false;
+        endFight(state.battle);
+      }
+      break;
+    case "between-focus-tap":
+      applyBetweenFocusTap(target.dataset.slot);
+      if (state.battle && !state.battle.finished && practiceBetweenAgencyOk(state.battle) && state.battle._agencyForced) {
+        hideFightActions();
+        state.battle.paused = false;
+        endFight(state.battle);
+      }
+      break;
+    case "between-hold-lane":
+      applyBetweenHoldLane(target.dataset.slot);
+      if (state.battle && !state.battle.finished && practiceBetweenAgencyOk(state.battle) && state.battle._agencyForced) {
+        hideFightActions();
+        state.battle.paused = false;
+        endFight(state.battle);
+      }
+      break;
     case "open-porch-call": {
       const b = state.battle;
       if (!b || b.actionUsed || b.finished) break;
@@ -4160,7 +4592,7 @@ function onAction(action, target) {
       break;
     }
     case "ack-day2-spotlight": {
-      const spot = storyForm5()?.day2EnterSpotlight;
+      const spot = pickDay2EnterSpotlight();
       state.save.storyFlags = state.save.storyFlags || {};
       for (const f of spot?.setsFlagsOnAck || ["day2_mediate_spotlight_ack", "day2_prop_ack"]) {
         state.save.storyFlags[f] = true;
@@ -4211,21 +4643,42 @@ function onAction(action, target) {
       break;
     }
     case "ack-rivalry": {
-      const b = state.battle;
-      state.save.storyFlags = state.save.storyFlags || {};
-      state.save.storyFlags.syn_taught_syn_rivalry = true;
-      saveNow();
-      hideFightActions();
-      if (b) {
-        b.paused = false;
-        resumeFightLoop(b);
-      }
+      clearRivalryAck(state.battle, "tap");
       break;
     }
     case "syn-show-me": {
-      const msg = applyShowMePractice();
-      toast(msg);
+      // ux-session-6: preferred oneTapEnterArena — Show me IS the arena tap
+      const ux6 = state.uxPack6?.practiceLobby || {};
+      const oneTap = ux6.oneTapEnterArena !== false;
+      applyShowMePractice();
+      state.showMeApplied = true;
+      state.picksLockedAfterShowMe = !!ux6.picksLockedAfterShowMe;
+      state.save.storyFlags = state.save.storyFlags || {};
+      state.save.storyFlags.practice_show_me_applied = true;
+      state.save.storyFlags.practice_draft_ready = true;
+      saveNow();
+      if (oneTap) {
+        // same tick: seed roster + enter screen-fight (skip draft / second lobby)
+        startFight();
+        break;
+      }
+      // fallback: single Start CTA enabled, no force-enable from outside
+      toast(
+        state.locale === "tr" ? "Kadrosu kilit — Başla" : "Roster locked — Start"
+      );
       renderCupLobby();
+      clearTimeout(state._showMeEnterTimer);
+      state._showMeEnterTimer = setTimeout(() => {
+        if (!document.getElementById("screen-cup")?.classList.contains("active")) return;
+        const btn = document.querySelector(
+          '[data-testid="start-fight"], #btn-start-fight, [data-action="start-fight"]'
+        );
+        if (btn) {
+          btn.disabled = false;
+          btn.classList.add("rp-cta-pulse");
+          btn.focus?.();
+        }
+      }, 50);
       break;
     }
     case "share-copy":
@@ -4269,7 +4722,7 @@ async function tryPullStorePacks() {
 
 async function boot() {
   try {
-    const [content, economy, stories, ladder, depthMeta, questPack, combatPack, densityPack, uxPack, uxPack2, uxPack3, uxPack4, uxPack5, mechFix4, mechFix5, mechFix6] = await Promise.all([
+    const [content, economy, stories, ladder, depthMeta, questPack, combatPack, densityPack, uxPack, uxPack2, uxPack3, uxPack4, uxPack5, uxPack6, uxPack7, mechFix4, mechFix5, mechFix6, mechFix7, mechFix8] = await Promise.all([
       fetch("data/content.json").then((r) => r.json()),
       fetch("data/economy.json").then((r) => r.json()),
       fetch("data/stories.json").then((r) => r.json()),
@@ -4283,9 +4736,13 @@ async function boot() {
       fetch("data/ux-session-3.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
       fetch("data/ux-session-4.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
       fetch("data/ux-session-5.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      fetch("data/ux-session-6.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      fetch("data/ux-session-7.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
       fetch("data/mechanics-fix-4.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
       fetch("data/mechanics-fix-5.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
       fetch("data/mechanics-fix-6.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      fetch("data/mechanics-fix-7.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      fetch("data/mechanics-fix-8.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
     ]);
     state.content = content;
     state.economy = economy;
@@ -4300,21 +4757,29 @@ async function boot() {
     state.uxPack3 = uxPack3;
     state.uxPack4 = uxPack4;
     state.uxPack5 = uxPack5;
+    state.uxPack6 = uxPack6;
+    state.uxPack7 = uxPack7;
     state.mechFix4 = mechFix4;
     state.mechFix5 = mechFix5;
     state.mechFix6 = mechFix6;
+    state.mechFix7 = mechFix7;
+    state.mechFix8 = mechFix8;
     state.storyForm2 = questPack?.storyForm2 || null;
     state.storyForm3 = questPack?.storyForm3 || null;
     state.storyForm4 = questPack?.storyForm4 || null;
     state.storyForm5 = questPack?.storyForm5 || null;
-    if (uxPack2?.strings || uxPack3?.copy || uxPack5) {
+    state.storyForm6 = questPack?.storyForm6 || null;
+    state.storyForm7 = questPack?.storyForm7 || null;
+    if (uxPack2?.strings || uxPack3?.copy || uxPack5 || uxPack6 || uxPack7) {
       state.uxPack = {
         ...(uxPack || {}),
         ...(uxPack2 || {}),
         ...(uxPack3 || {}),
         ...(uxPack4 || {}),
         ...(uxPack5 || {}),
-        strings: { ...(uxPack?.strings || {}), ...(uxPack2?.strings || {}), ...(uxPack5?.copy || {}) },
+        ...(uxPack6 || {}),
+        ...(uxPack7 || {}),
+        strings: { ...(uxPack?.strings || {}), ...(uxPack2?.strings || {}), ...(uxPack5?.copy || {}), ...(uxPack6?.copy || {}) },
       };
     }
     // ?coldAudit=1 → settle visible immediately
@@ -4389,6 +4854,50 @@ async function boot() {
       };
       killTimeout(combatPack);
       if (combatPack.porchCalls?.window) combatPack.porchCalls.window.timeoutDefaultCallId = null;
+    }
+    // mechanics-fix-7: mid-fight Rivalry never blocks; second decision after Call
+    if (mechFix7 && combatPack) {
+      const autoMs = mechFix7.mergeRivalryAckIntoCall?.midFightRivalryPop?.autoClearMs || 1400;
+      const patchMoments = (moments) => {
+        if (!Array.isArray(moments)) return;
+        for (const m of moments) {
+          if (!m || typeof m !== "object") continue;
+          const id = m.id || "";
+          if (id === "prac_rivalry_after_call" || (id.includes("rivalry") && m.tSec >= 4)) {
+            m.requireAck = false;
+            m.blocking = false;
+            m.autoAckMs = autoMs;
+          }
+          if (id === "prac_rivalry_arm" && (m.tSec || 0) > 2) {
+            // keep lobby arm; if mid-fight reuse, demote
+            if ((m.tSec || 0) >= 4) m.requireAck = false;
+          }
+        }
+        const ids = new Set(moments.map((m) => m.id));
+        if (!ids.has("prac_second_decision")) {
+          moments.push({
+            id: "prac_second_decision_arm",
+            tSec: 5.5,
+            type: "coach_tip",
+            lines: { tr: "İkinci hamle yaklaşıyor", en: "Second move incoming" },
+          });
+          moments.push({
+            id: "prac_second_decision",
+            tSec: 5.8,
+            type: "second_decision_modal",
+            forceOpen: true,
+          });
+        }
+      };
+      const walk7 = (obj) => {
+        if (!obj || typeof obj !== "object") return;
+        if (Array.isArray(obj.scriptedMoments)) patchMoments(obj.scriptedMoments);
+        for (const v of Object.values(obj)) {
+          if (v && typeof v === "object") walk7(v);
+        }
+      };
+      walk7(combatPack);
+      walk7(densityPack);
     }
     if (combatPack) Combat.applySynergyPools(state.content, combatPack);
     // Merge economy uiStrings over content placeholders for shop/pass
