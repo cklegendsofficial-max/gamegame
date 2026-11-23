@@ -6736,3 +6736,48 @@ body[data-first10="1"] .rp-dock [data-testid="practice-match"] {
 .rp-dock--street .rp-cta-lamp {
   flex: 1 1 60%;
 }
+
+/* ux-rewrite-6 — Snag line wraps; never mid-word ellipsis */
+[data-testid="snag-day1-beat"],
+.rp-snag-line,
+.rp-snag-prompt,
+[data-testid="snag-day1-beat"] p {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: none;
+  max-width: min(100%, 22rem);
+  line-height: 1.35;
+  -webkit-line-clamp: unset;
+  display: block;
+}
+.rp-snag-day1 {
+  max-height: none;
+  overflow: visible;
+}
+.rp-open-book-day1 {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 72%;
+  z-index: 6;
+  padding: 0.45rem 0.6rem;
+  background: rgba(12, 8, 6, 0.82);
+  border: 1px solid rgba(196, 165, 116, 0.45);
+  color: #f2e6d8;
+  font-size: 12px;
+}
+.rp-defteri-snag-echo {
+  margin: 0.35rem 0 0;
+  font-size: 12px;
+  color: #f2e6d8;
+}
+.comic-remember--snag {
+  margin: 0.5rem 0;
+  padding: 0.5rem 0.65rem;
+  background: rgba(18, 12, 8, 0.85);
+  border: 1px solid rgba(232, 160, 69, 0.35);
+  color: #f2e6d8;
+}

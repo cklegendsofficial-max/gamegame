@@ -396,8 +396,8 @@
         ]
       },
       "porchJob": {
-        "tr": "çit nöbeti",
-        "en": "fence sit"
+        "tr": "gazete nöbeti",
+        "en": "paper sit"
       },
       "porchWant": {
         "tr": "01:12’de uyumak",
@@ -617,8 +617,8 @@
       "id": "syn_tea_circle",
       "nameKey": "synergy.tea_circle.name",
       "name": {
-        "tr": "Çay Çemberi",
-        "en": "Tea Circle"
+        "tr": "Demlik halkası",
+        "en": "Demlik circle"
       },
       "tagsRequired": [
         "Tea",
@@ -640,8 +640,8 @@
       "id": "syn_rivalry",
       "nameKey": "synergy.rivalry.name",
       "name": {
-        "tr": "Rekabet",
-        "en": "Rivalry"
+        "tr": "Düdük dedikodusu",
+        "en": "Whistle gossip"
       },
       "tagsRequired": [
         "Rivalry",
@@ -663,8 +663,8 @@
       "id": "syn_neon_night",
       "nameKey": "synergy.neon_night.name",
       "name": {
-        "tr": "Neon Gece",
-        "en": "Neon Night"
+        "tr": "Çatı parıltısı",
+        "en": "Roof flash"
       },
       "tagsRequired": [
         "Neon",
@@ -770,8 +770,8 @@
           "spd": 6
         },
         "porchJob": {
-          "tr": "çit nöbeti",
-          "en": "fence sit"
+          "tr": "gazete nöbeti",
+          "en": "paper sit"
         }
       },
       {

@@ -15,8 +15,21 @@ import * as Density from "./density.js";
 import * as EndEvening from "./endEvening.js";
 import * as Ux4 from "./uxSession4Nuclear.js";
 import * as UxFirst from "./uxFirstSession.js";
-import { spreadPorchNiches, seatPorchNiches, mudPorchDoorframes } from "./porchNiches.js";
+import { spreadPorchNiches, seatPorchNiches, mudPorchDoorframes, readablePorchNames } from "./porchNiches.js";
 import { mountAffinityToast } from "./uxToasts.js";
+
+/** Cup/fight facing labels — never Rivalry/Chaos/Fence/Neon/Oven taxonomy */
+function porchSynLabel(synOrId) {
+  const id = typeof synOrId === "string" ? synOrId : synOrId?.id;
+  const tr = state.locale === "tr";
+  if (id === "syn_rivalry") return tr ? "Düdük" : "Whistle";
+  if (id === "syn_tea_circle") return tr ? "Demlik" : "Demlik";
+  if (id === "syn_neon_night") return tr ? "Çatı" : "Roof";
+  const stake = id ? porchStakeFor(id) : null;
+  if (stake?.headline) return stake.headline;
+  if (synOrId && typeof synOrId === "object") return loc(synOrId.name) || id || "";
+  return id || "";
+}
 
 const KIT_PROP_SRC = {
   hold_fence: "assets/rival-porch/meshy/props/prop-hero-gazete.png",
@@ -986,7 +999,7 @@ function synergyCoachHtml(pickedIds = []) {
     const focus = nextTeach?.id === s.id && !on;
     const stake = porchStakeFor(s.id);
     const body = stake?.body || loc(s.rules?.description) || "";
-    const title = stake?.headline || loc(s.name);
+    const title = stake?.headline || porchSynLabel(s);
     return `<div class="syn-coach-card ${on ? "on" : ""} ${focus ? "focus" : ""}">
       <div class="syn-coach-title">${on ? "✓ " : focus ? "★ " : ""}${title}</div>
       <p>${body}</p>
@@ -996,11 +1009,11 @@ function synergyCoachHtml(pickedIds = []) {
   const nextStake = nextTeach ? porchStakeFor(nextTeach.id) : null;
   const head = nextTeach
     ? tr
-      ? `Önce bu dedikodu: ${nextStake?.headline || loc(nextTeach.name)}`
-      : `Lock this gossip first: ${nextStake?.headline || loc(nextTeach.name)}`
+      ? `Önce bu dedikodu: ${nextStake?.headline || porchSynLabel(nextTeach)}`
+      : `Lock this gossip first: ${nextStake?.headline || porchSynLabel(nextTeach)}`
     : tr
-      ? "Düdük sıkışınca · demlik ayakta · neon açılış"
-      : "Whistle when cornered · pot keeps standing · neon opening";
+      ? "Düdük sıkışınca · demlik ayakta · çatı parıltısı"
+      : "Whistle when cornered · pot keeps standing · roof flash";
   return `<div class="syn-coach">
     <h3 class="section-label">${tr ? "Veranda dedikodusu" : "Porch gossip"}</h3>
     <p class="muted">${head}</p>
@@ -1123,14 +1136,23 @@ function defteriPorchChainHtml() {
     const e = state.save.quests?.entries?.[row.questId];
     const def = Quests.questDef(state.questPack, row.questId);
     let st = "locked";
-    if (e?.status === "complete" || e?.status === "done" || e?.status === "completed") st = "done";
+    if (row.questId === "mq_antenna_op" && storyFlag("snag_day1_choice_done")) st = "done";
+    else if (row.questId === "mq_ledger_tray" && storyFlag("open_book_day1_beat_done")) st = "peek";
+    else if (row.questId === "mq_ledger_tray" && storyFlag("snag_day1_choice_done")) st = "tease";
+    else if (e?.status === "complete" || e?.status === "done" || e?.status === "completed") st = "done";
     else if (e?.status === "active") st = "active";
     else if (def && Quests.availableQuests(state.questPack, state.save).some((q) => q.id === row.questId)) st = "available";
     const title = loc(row.title) || loc(def?.title) || row.questId;
-    const mark = st === "done" ? "✓" : st === "active" ? "●" : st === "available" ? "○" : "·";
+    const mark = st === "done" || st === "peek" ? "✓" : st === "active" ? "●" : st === "available" || st === "tease" ? "○" : "·";
     return `<span class="rp-porch-chain__item is-${st}" data-quest="${row.questId}" data-state="${st}">${mark} ${title}</span>`;
   });
-  return `<div class="rp-porch-chain" data-testid="defteri-porch-chain">${bits.join('<span class="rp-porch-chain__arrow">→</span>')}</div>`;
+  let echo = "";
+  if (storyFlag("flag_snag_untangle")) {
+    echo = `<p class="rp-defteri-snag-echo" data-testid="defteri-snag-echo-untangle">${tr ? "Çözüldü — ip birlikte indi" : "Untangled — line came down together"}</p>`;
+  } else if (storyFlag("flag_snag_cut")) {
+    echo = `<p class="rp-defteri-snag-echo" data-testid="defteri-snag-echo-cut">${tr ? "Kesildi — Leyla öfkeli" : "Cut — Leyla’s sharp"}</p>`;
+  }
+  return `<div class="rp-porch-chain" data-testid="defteri-porch-chain">${bits.join('<span class="rp-porch-chain__arrow">→</span>')}</div>${echo}`;
 }
 
 function renderQuestLog() {
@@ -1338,9 +1360,62 @@ function resolveSnagDay1Choice(branch) {
     bumpAffinity("n4", 1);
   }
   document.body.dataset.snagChoice = branch;
+  queueOpenBookDay1Beat();
   saveNow();
   renderStreet();
   showScreen("screen-street");
+}
+
+function queueOpenBookDay1Beat() {
+  const f = state.save.storyFlags || (state.save.storyFlags = {});
+  if (f.open_book_day1_beat_done || f.open_book_day1_queued) return;
+  f.open_book_day1_queued = true;
+  f.natural_ledger_tease = true;
+}
+
+function openBookDay1StreetHtml() {
+  if (!storyFlag("snag_day1_choice_done") || storyFlag("open_book_day1_beat_done")) return "";
+  if (!storyFlag("open_book_day1_queued") && !storyFlag("natural_ledger_tease")) return "";
+  const tr = state.locale === "tr";
+  return `<div class="rp-open-book-day1" data-testid="open-book-day1-beat">
+    <p>${tr ? "Merve: Uçurtma sustu. Defter hâlâ kapalı — ama tepsi kimlere bakıyor, gör." : "Merve: Kite went quiet. Book’s still closed — but watch who the tray looks at."}</p>
+    <button type="button" class="rp-btn rp-btn--primary" data-action="open-book-day1" data-testid="open-book-day1-cta">${tr ? "Deftere bak" : "Look at the book"}</button>
+  </div>`;
+}
+
+function resolveOpenBookDay1Beat() {
+  const f = state.save.storyFlags || (state.save.storyFlags = {});
+  f.open_book_day1_beat_done = true;
+  f.natural_ledger_tease = true;
+  saveNow();
+  toast(state.locale === "tr"
+    ? "Bir satır erken açılırsa mahalle duyar. Bugün sadece bak."
+    : "One early line and the block hears. Today you only look.");
+  renderStreet();
+  showScreen("screen-street");
+}
+
+function snagComicLine(branch) {
+  const tr = state.locale === "tr";
+  if (branch === "untangle") {
+    return tr
+      ? "Orhan: İpi birlikte çektik. Bu maçta gazetem geç kapandı."
+      : "Orhan: We pulled the line together. My paper closed late for this match.";
+  }
+  return tr
+    ? "Leyla: KESTİN. Arenada rüzgârım öfkeli."
+    : "Leyla: You CUT it. My wind in the arena is angry.";
+}
+
+function paintSnagComicEcho() {
+  const branch = storyFlag("flag_snag_untangle") ? "untangle" : storyFlag("flag_snag_cut") ? "cut" : null;
+  if (!branch) return "";
+  document.body.dataset.snagComicEcho = branch;
+  const line = snagComicLine(branch);
+  return `<div class="comic-remember comic-remember--snag" data-testid="comic-remember-snag">
+      <strong>${state.locale === "tr" ? "Çatı hatırladı" : "The roof remembered"}</strong>
+      <p data-testid="comic-echo-snag-${branch}">${line}</p>
+    </div>`;
 }
 
 function neighborVoice(id, field) {
@@ -1367,11 +1442,11 @@ function snagDay1StreetHtml() {
     </div>`;
   }
   const line = storyFlag("cold_open_instigate") || storyFlag("cold_open_stage")
-    ? (tr ? "Leyla: İpim hâlâ onun demirinde. Bugün indirmeden gece olmaz." : "Leyla: My line’s still in his iron. Night doesn’t start until it’s down.")
-    : (tr ? "Orhan: Antende paçavra. Ya çöz ya kes — yarın mahalle konuşur." : "Orhan: Rag on the aerial. Untangle or cut — tomorrow the block talks.");
+    ? (tr ? "Leyla: İpim hâlâ demirde. İndirmeden gece olmaz." : "Leyla: My line’s still in his iron. Night waits.")
+    : (tr ? "Orhan: Antende paçavra. Ya çöz ya kes." : "Orhan: Rag on the aerial. Untangle or cut.");
   return `<div class="rp-snag-day1" data-testid="snag-day1-beat" data-snag="1" data-snag-choice-pending="1">
     <span class="rp-snag-day1__prop" aria-hidden="true"></span>
-    <p class="rp-snag-prompt">${line}</p>
+    <p class="rp-snag-prompt rp-snag-line">${line}</p>
     <div class="rp-snag-choice" data-testid="snag-choice-row">
       <button type="button" class="rp-btn rp-btn--primary" data-action="snag-choice" data-snag="untangle" data-testid="snag-choice-untangle">${tr ? "Çöz — birlikte çek" : "Untangle — pull together"}</button>
       <button type="button" class="rp-btn rp-btn--ember" data-action="snag-choice" data-snag="cut" data-testid="snag-choice-cut">${tr ? "Kes — utanç bitsin" : "Cut — end the shame"}</button>
@@ -2809,7 +2884,7 @@ function renderStreet() {
     ${day10MainChipHtml()}
     ${mqStreetChipHtml()}
     <button class="rp-chip rp-back" type="button" data-action="goto-evening">${t("common.back")}</button>
-    ${snagDay1StreetHtml()}<div class="rp-hotspots" role="list" data-testid="${coldWins || oneSignal ? "street-layer-cold-wins" : "street-hotspots"}">${spots}</div>
+    ${snagDay1StreetHtml()}${openBookDay1StreetHtml()}<div class="rp-hotspots" role="list" data-testid="${coldWins || oneSignal ? "street-layer-cold-wins" : "street-hotspots"}">${spots}</div>
     ${""}
     ${day2Line}
     ${yieldNpc}
@@ -2822,6 +2897,7 @@ function renderStreet() {
     armMech15DecibelLived();
     seatPorchNiches(document);
     mudPorchDoorframes(document);
+    readablePorchNames(document);
   });
 }
 
@@ -3580,13 +3656,13 @@ function renderCupLobby() {
       ? loc(state.combatPack?.lobbyAutoAdvance?.onShowMe?.coachLine) ||
         (state.locale === "tr" ? "Roster hazır — Start'a bas, arenaya gir." : "Roster set — tap Start to enter the arena.")
       : state.locale === "tr"
-        ? "3 pick hazır — Start ile arenaya gir (Rekabet önerilir)."
-        : "3 picks ready — Start enters the arena (Rivalry recommended)."
+        ? "3 pick hazır — Start ile arenaya gir."
+        : "3 picks ready — Start enters the arena."
     : synsNow.length
       ? synsNow.map(synDesc).join(" · ")
       : state.locale === "tr"
-        ? "3 komşu seç veya Göster"
-        : "Pick 3 neighbors or Show me";
+        ? "3 komşu seç veya Göster — düdük+gazete ya da demlik+tepsi"
+        : "Pick 3 or Show me — seat whistle with paper, or demlik with tray";
   const startLabel = ready
     ? loc(startLabels.enabled) || (state.locale === "tr" ? "Start — arena" : "Start — arena")
     : loc(startLabels.disabledNeedPicks) || (state.locale === "tr" ? "3 komşu seç veya Göster" : "Pick 3 or Show me");
@@ -4283,7 +4359,7 @@ function runScriptedMoments(battle) {
         battle.rivalryAckPending = true;
         const bar = document.getElementById("fight-actions");
         if (bar && !battle.actionOffered) {
-          const ack = loc(beat.ackLabel) || (state.locale === "tr" ? "Anladım — Rekabet" : "Got it — Rivalry");
+          const ack = loc(beat.ackLabel) || (state.locale === "tr" ? "Anladım — Düdük" : "Got it — Whistle");
           bar.innerHTML = `<p class="fight-action-prompt">${loc(beat.lines) || ack}</p>
             <div class="btn-row wrap"><button class="btn btn-ember" type="button" data-action="ack-rivalry" data-testid="ack-rivalry">${ack}</button></div>`;
           bar.hidden = false;
@@ -4875,7 +4951,7 @@ function combatTick(battle) {
     const syns = attacker.side === "ally" ? battle.enemySyn : battle.allySyn;
     const neon = syns.find((s) => s.rules.type === "opening_dodge");
     if (neon && battle.elapsed <= neon.rules.windowSec && Math.random() < neon.rules.dodgeChance) {
-      if (attacker.side === "enemy") showSynProc(loc(neon.name));
+      if (attacker.side === "enemy") showSynProc(porchSynLabel(neon));
       battle.floaters = battle.floaters || [];
       battle.floaters.push({
         side: target.side,
@@ -4959,7 +5035,7 @@ function combatTick(battle) {
           stageShake("shake-medium");
           showSynProc(
             state.locale === "tr"
-              ? "Rekabet! Düşük HP → daha sert vuruş"
+              ? "Köşeye sıkışınca düdük sertleşir"
               : "When cornered, the whistle gets mean"
           );
           if (state.practiceMode || battle.practice) {
@@ -5009,8 +5085,8 @@ function combatTick(battle) {
           healed += amt;
         }
         if (healed && side === "ally") {
-          battle.log.unshift(`${loc(tea.name)} +${healed}`);
-          showSynProc(loc(tea.name));
+          battle.log.unshift(`${porchSynLabel(tea)} +${healed}`);
+          showSynProc(porchSynLabel(tea));
         }
       }
     }
@@ -5082,10 +5158,10 @@ function flashUnit(side, slot) {
 }
 
 function renderFight(battle) {
-  const allyPills = battle.allySyn.map((s) => `<span class="chip ${s.tagsRequired[0].toLowerCase()}">${loc(s.name)}</span>`).join("");
-  const enemyPills = battle.enemySyn.map((s) => `<span class="chip ${s.tagsRequired[0].toLowerCase()}">Bot · ${loc(s.name)}</span>`).join("");
-  const synPills = allyPills || enemyPills ? allyPills + enemyPills : `<span class="muted">${t("synergy.active")}: —</span>`;
   const tr = state.locale === "tr";
+  const allyPills = battle.allySyn.map((s) => `<span class="chip stake">${porchSynLabel(s)}</span>`).join("");
+  const enemyPills = battle.enemySyn.map((s) => `<span class="chip stake">${tr ? "Rakip · " : "Foe · "}${porchSynLabel(s)}</span>`).join("");
+  const synPills = allyPills || enemyPills ? allyPills + enemyPills : `<span class="muted">${t("synergy.active")}: —</span>`;
   state.save.storyFlags = state.save.storyFlags || {};
   for (const s of battle.allySyn) {
     state.save.storyFlags[`syn_taught_${s.id}`] = true;
@@ -5098,7 +5174,7 @@ function renderFight(battle) {
     if (s.id === "syn_rivalry") return tr ? "Sıkışınca" : "When cornered";
     if (s.id === "syn_tea_circle") return tr ? "Paylaşılan demlik" : "Shared pour";
     if (s.id === "syn_neon_night") return tr ? "Açılış parıltısı" : "Opening flash";
-    return loc(s.name);
+    return porchSynLabel(s);
   };
   const coachBanner = battle.allySyn.length
     ? `<div class="syn-fight-tip rp-fight-tip">${battle.allySyn.map(teachLine).join(" · ")}</div>`
@@ -5109,7 +5185,7 @@ function renderFight(battle) {
     ${stageLayer("arena")}
     ${hudHtml()}
     <div class="topbar fight-top"><h2 data-testid="fight-phase-chip" id="fight-phase-chip">${tr ? "Açılış" : "Opening"}</h2>
-      ${canSkip ? `<button class="btn btn-secondary" type="button" data-action="skip-fight">${t("fight.skip")}</button>` : `<span class="chip rivalry">${tr ? "Prova" : "Practice"}</span>`}
+      ${canSkip ? `<button class="btn btn-secondary" type="button" data-action="skip-fight">${t("fight.skip")}</button>` : `<span class="chip stake">${tr ? "Prova" : "Practice"}</span>`}
     </div>
     <p class="street-hint muted" data-testid="porch-phase-hint">${tr ? "Prop’lar konuşur — bir Veranda Çağrısı" : "Props talk — one Porch Call"}</p>
     ${coachBanner}
@@ -5138,7 +5214,7 @@ function renderFight(battle) {
   screen._battle = battle;
   updateFightUI(battle);
   if (battle.allySyn[0]) {
-    setTimeout(() => showSynProc(loc(battle.allySyn[0].name)), 400);
+    setTimeout(() => showSynProc(porchSynLabel(battle.allySyn[0])), 400);
   }
 }
 
@@ -5663,36 +5739,32 @@ function renderComic() {
       : "Porch Cup kicks off. Your porch lights the stage.");
   const clash =
     captions[1] ||
-    (synergyId.includes("rival")
-      ? state.locale === "tr"
-        ? "Rekabet çağrısı — skor sallanır."
-        : "Rivalry call — the score swings."
-      : state.locale === "tr"
-        ? "Çağrı vurdu. Blok izliyor."
-        : "Call lands. The block is watching.");
+    (state.locale === "tr"
+      ? "Çağrı vurdu. Blok izliyor."
+      : "Call lands. The block is watching.");
   let punch =
     captions[2] ||
     (state.locale === "tr"
       ? `MVP ${r.mvp}. Blok yarın konuşacak.`
       : `MVP ${r.mvp}. The block will talk tomorrow.`);
-  // story-rewrite-5: Day1 Snag fork echoes Cup comic (before week-2 rules)
-  const snagEchoRules = state.stories?.porchCupNarrative?.comicEchoRules || [];
-  const snagEcho = snagEchoRules.find((r) => r.ifFlag && storyFlag(r.ifFlag));
+  // story-rewrite-6: always paint Snag branch on Practice + Cup comic
+  const snagBanner = paintSnagComicEcho();
   let comicEchoHtml = "";
-  if (snagEcho) {
-    punch = loc(snagEcho.line) || punch;
-    comicEchoHtml = `<p class="comic-echo-tag" data-testid="${snagEcho.panelTestId || "comic-echo-snag"}">${loc(snagEcho.line)}</p>`;
-  }
-  // story-form-11: match comic A→V / Volume accord echoes
-  const comicEcho = (storyForm11()?.matchComicHandoffEchoes || []).find((e) => whenFlagsOk(e.when || {}));
-  if (!snagEcho && comicEcho) {
-    punch = loc(comicEcho.panel) || punch;
-    comicEchoHtml = `<p class="comic-echo-tag" data-testid="${comicEcho.testId || "comic-echo-av-handoff"}">${loc(comicEcho.captionTag)}</p>`;
+  if (snagBanner) {
+    const branch = storyFlag("flag_snag_untangle") ? "untangle" : "cut";
+    punch = snagComicLine(branch);
+    comicEchoHtml = `<p class="comic-echo-tag" data-testid="comic-echo-snag-${branch}">${punch}</p>`;
+  } else {
+    const comicEcho = (storyForm11()?.matchComicHandoffEchoes || []).find((e) => whenFlagsOk(e.when || {}));
+    if (comicEcho) {
+      punch = loc(comicEcho.panel) || punch;
+      comicEchoHtml = `<p class="comic-echo-tag" data-testid="${comicEcho.testId || "comic-echo-av-handoff"}">${loc(comicEcho.captionTag)}</p>`;
+    }
   }
   const shareText = fillTemplate(loc(state.content.uiStrings["comic.share_text"]), vars);
   const banner = state.questPack?.storyForm3?.comicRememberBanner || state.stories?.porchCupNarrative?.comicRememberBanner;
-  let remember = "";
-  if (banner && (banner.when?.flagsAny || []).some((f) => storyFlag(f))) {
+  let remember = snagBanner || "";
+  if (!remember && banner && (banner.when?.flagsAny || []).some((f) => storyFlag(f))) {
     const flag = ["cold_open_mediate", "cold_open_instigate", "cold_open_stage"].find((f) => storyFlag(f));
     const body = flag ? banner.bodyByFlag?.[flag] : null;
     remember = `<div class="comic-remember"><strong>${loc(banner.title)}</strong><p>${loc(body) || ""}</p></div>`;
@@ -6242,6 +6314,9 @@ function onAction(action, target) {
       break;
     case "snag-choice":
       resolveSnagDay1Choice(target.dataset.snag);
+      break;
+    case "open-book-day1":
+      resolveOpenBookDay1Beat();
       break;
     case "focus-snag": {
       const row = document.querySelector("[data-testid='snag-choice-row']");

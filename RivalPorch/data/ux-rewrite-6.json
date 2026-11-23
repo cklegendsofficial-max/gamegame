@@ -1,0 +1,27 @@
+{
+  "packId": "ux-rewrite-6",
+  "schemaVersion": 1,
+  "scoreReact": {
+    "buildCommit": "8ace86f",
+    "overall": 7.9,
+    "gameplay": 8.0,
+    "pf": "Snag line never truncates mid-word on 390"
+  },
+  "snagLine": {
+    "testId": "snag-day1-beat",
+    "viewport": 390,
+    "forbid": ["ellipsis", "nowrap", "line-clamp-1", "mid-word-…"],
+    "css": {
+      "whiteSpace": "normal",
+      "overflow": "visible",
+      "textOverflow": "clip",
+      "overflowWrap": "break-word"
+    },
+    "preferShortCopy": true
+  },
+  "acceptanceChecks": [
+    "viewport_390_full_sentence_visible",
+    "no_mid_word_ellipsis_in_snag_dom",
+    "no_blo_ellipsis_screenshot"
+  ]
+}
