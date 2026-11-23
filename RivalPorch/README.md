@@ -35,8 +35,15 @@ Open **http://localhost:4173** (not `file://` — JSON loads via fetch).
 
 Earn rates + catalog: `data/economy.json` (copied from Project `internal/rival-porch-economy.json`).  
 Session agenda sidecar: `data/depth-meta.json`.  
-Stories: `data/stories.json` (until store story pack lands).  
+Stories: `data/stories.json` — store pack schemaVersion 2 (3 arcs, 16 dialogue trees, 34 daily events, endings, unlocks).  
 Ladder: `data/ladder.json`.
+
+### Story loop
+- Week focus + active **arc beat** on the evening agenda
+- Neighbor **Sahne** opens branching dialogue (affinity / rep / flags)
+- **Sokak olayı** draws from the 34-event weighted pool
+- Persistence: `storyFlags`, `arcs`, `reputation`, `seenDailyEvents`, `completedTrees`, `storyUnlocks`
+- Affinity scale **0–100**; Season 1 endings evaluate from day 28+
 
 ## Meshy hooks
 
