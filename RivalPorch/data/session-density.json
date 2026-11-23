@@ -1608,7 +1608,7 @@
         "requireVisibleFloat": true,
         "lines": {
           "tr": "Rekabet! Düşük HP → daha sert vuruş",
-          "en": "Rivalry! Low HP → harder hits"
+          "en": "When cornered, the whistle gets mean"
         }
       },
       {
@@ -1735,7 +1735,7 @@
         ],
         "lines": {
           "tr": "Rekabet! Düşük HP → daha sert vuruş",
-          "en": "Rivalry! Low HP → harder hits"
+          "en": "When cornered, the whistle gets mean"
         }
       }
     ],

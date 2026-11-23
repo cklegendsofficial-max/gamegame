@@ -15,7 +15,7 @@ import * as Density from "./density.js";
 import * as EndEvening from "./endEvening.js";
 import * as Ux4 from "./uxSession4Nuclear.js";
 import * as UxFirst from "./uxFirstSession.js";
-import { spreadPorchNiches, seatPorchNiches, mudPorchDoorframes, readablePorchNames } from "./porchNiches.js";
+import { spreadPorchNiches, seatPorchNiches, seatNichesInStage, mudPorchDoorframes, readablePorchNames } from "./porchNiches.js";
 import { mountAffinityToast } from "./uxToasts.js";
 
 /** Cup/fight facing labels — never Rivalry/Chaos/Fence/Neon/Oven taxonomy */
@@ -262,6 +262,7 @@ function syncEndEveningUnlock() {
 
 /** Atomic Practice finish — nuclear force BOTH flags (ux-session-4). */
 function onPracticeResolved(reason = "fight_finish") {
+  enterPracticeEnd("onPracticeResolved");
   state.save.storyFlags = state.save.storyFlags || {};
   EndEvening.markPracticeCleared(state.save, reason);
   Ux4.forcePracticeFlags(state, reason);
@@ -311,6 +312,25 @@ function shouldShowPracticeSettle() {
   if (!state.practiceMode && !practiceCupRequired()) return false;
   if (canEndEvening()) return false;
   return true;
+}
+
+function enterPracticeEnd(reason = "practice_end") {
+  // ux-rewrite-7: tear Practice-done / Call confirm thrash; one dock CTA
+  document
+    .querySelectorAll(
+      "[data-testid='practice-done-modal'], .rp-modal--practice, .rp-modal--practice-done, .rp-call-confirm, .rp-overlay--fight, [data-testid='porch-call-modal'], [data-testid='porch-call-modal-2']"
+    )
+    .forEach((n) => n.remove());
+  const dock = document.querySelector(".rp-dock, #screen-evening .rp-dock, #screen-comic .rp-dock");
+  if (dock) {
+    dock.style.zIndex = "6";
+    dock.style.pointerEvents = "auto";
+  }
+  document.body.dataset.practiceEnd = reason;
+  try {
+    window.__RP_SMOKE__ = window.__RP_SMOKE__ || {};
+    window.__RP_SMOKE__.practiceEndClean = { reason, at: Date.now() };
+  } catch { /* optional */ }
 }
 
 function practiceSettleHtml() {
@@ -975,7 +995,26 @@ function hudHtml() {
 function porchStakeFor(synId) {
   const row = (state.combatPack?.synergyStakes || []).find((s) => s.synergyId === synId);
   if (!row) return null;
-  return { headline: loc(row.headline), body: loc(row.body), fire: loc(row.fireVoice) };
+  return {
+    headline: loc(row.headline),
+    body: loc(row.body),
+    fire: loc(row.fireVoice),
+    cupLabel: loc(row.cupLabel),
+    whoNeighborIds: row.whoNeighborIds || [],
+    whoJobs: row.whoJobs || [],
+  };
+}
+
+function stakeWhoLine(stake) {
+  const ids = stake?.whoNeighborIds || [];
+  if (!ids.length) return "";
+  return ids
+    .map((id) => {
+      const n = neighborById(id);
+      return n ? loc(n.name) : id;
+    })
+    .filter(Boolean)
+    .join(" · ");
 }
 
 function synergyCoachHtml(pickedIds = []) {
@@ -990,20 +1029,20 @@ function synergyCoachHtml(pickedIds = []) {
   const nextTeach =
     defs.find((s) => !seen[`syn_taught_${s.id}`]) || defs[0];
   const tipFor = (s) => {
-    const examples = unlockedNeighbors()
-      .filter((n) => s.tagsRequired.includes(n.synergyTag))
-      .slice(0, 3)
+    const stake = porchStakeFor(s.id);
+    // mechanics-rewrite-7: Who = stake.whoNeighborIds only (never Chaos tag pool)
+    const examples = stakeWhoLine(stake) || unlockedNeighbors()
+      .filter((n) => (stake?.whoNeighborIds || []).includes(n.id))
       .map((n) => loc(n.name))
       .join(" · ");
     const on = active.some((a) => a.id === s.id);
     const focus = nextTeach?.id === s.id && !on;
-    const stake = porchStakeFor(s.id);
     const body = stake?.body || loc(s.rules?.description) || "";
-    const title = stake?.headline || porchSynLabel(s);
-    return `<div class="syn-coach-card ${on ? "on" : ""} ${focus ? "focus" : ""}">
+    const title = stake?.cupLabel || stake?.headline || porchSynLabel(s);
+    return `<div class="syn-coach-card ${on ? "on" : ""} ${focus ? "focus" : ""}" data-synergy="${s.id}">
       <div class="syn-coach-title">${on ? "✓ " : focus ? "★ " : ""}${title}</div>
       <p>${body}</p>
-      <p class="muted">${tr ? "Kim:" : "Who:"} ${examples || "—"}</p>
+      <p class="muted" data-testid="gossip-who-${s.id}">${tr ? "Kim:" : "Who:"} ${examples || "—"}</p>
     </div>`;
   };
   const nextStake = nextTeach ? porchStakeFor(nextTeach.id) : null;
@@ -1374,25 +1413,110 @@ function queueOpenBookDay1Beat() {
 }
 
 function openBookDay1StreetHtml() {
-  if (!storyFlag("snag_day1_choice_done") || storyFlag("open_book_day1_beat_done")) return "";
-  if (!storyFlag("open_book_day1_queued") && !storyFlag("natural_ledger_tease")) return "";
+  if (!storyFlag("snag_day1_choice_done")) return "";
   const tr = state.locale === "tr";
-  return `<div class="rp-open-book-day1" data-testid="open-book-day1-beat">
-    <p>${tr ? "Merve: Uçurtma sustu. Defter hâlâ kapalı — ama tepsi kimlere bakıyor, gör." : "Merve: Kite went quiet. Book’s still closed — but watch who the tray looks at."}</p>
-    <button type="button" class="rp-btn rp-btn--primary" data-action="open-book-day1" data-testid="open-book-day1-cta">${tr ? "Deftere bak" : "Look at the book"}</button>
+  // Lived residue after tray choice
+  if (storyFlag("flag_open_book_tray_can") || storyFlag("flag_open_book_tray_peri")) {
+    const can = storyFlag("flag_open_book_tray_can");
+    const residue = can
+      ? (tr ? "Tepsi: Can’ın fincanı önde." : "Tray: Can’s cup at the front.")
+      : (tr ? "Tepsi: Peri’nin fincanı önde." : "Tray: Peri’s cup at the front.");
+    const tid = can ? "open-book-residue-can" : "open-book-residue-peri";
+    return `<div class="rp-open-book-day1 is-lived" data-testid="open-book-day1-beat" data-open-book-state="lived" data-open-book-phase="lived">
+      <p class="rp-open-book-residue" data-testid="${tid}">${residue}</p>
+    </div>`;
+  }
+  if (storyFlag("open_book_day1_beat_done") && storyFlag("open_book_day1_lived_done")) return "";
+  if (!storyFlag("open_book_day1_queued") && !storyFlag("natural_ledger_tease")) return "";
+  return `<div class="rp-open-book-day1" data-testid="open-book-day1-beat" data-open-book-phase="reveal">
+    <p class="rp-open-book-prompt">${tr ? "Merve bir satır açtı — tepsi kime önce bakıyor?" : "Merve opened one line — who does the tray seat first?"}</p>
+    <div class="rp-open-book-tray" data-testid="open-book-tray-choice">
+      <button type="button" class="rp-btn rp-btn--primary" data-action="open-book-tray" data-tray="can" data-testid="open-book-tray-can">${tr ? "Tepsi önce Can’a" : "Tray seats Can first"}</button>
+      <button type="button" class="rp-btn rp-btn--ember" data-action="open-book-tray" data-tray="peri" data-testid="open-book-tray-peri">${tr ? "Tepsi önce Peri’ye" : "Tray seats Peri first"}</button>
+    </div>
   </div>`;
 }
 
 function resolveOpenBookDay1Beat() {
+  // Compat: old peek CTA → open tray choice UI (never “only look”)
   const f = state.save.storyFlags || (state.save.storyFlags = {});
-  f.open_book_day1_beat_done = true;
+  f.open_book_day1_queued = true;
   f.natural_ledger_tease = true;
   saveNow();
-  toast(state.locale === "tr"
-    ? "Bir satır erken açılırsa mahalle duyar. Bugün sadece bak."
-    : "One early line and the block hears. Today you only look.");
   renderStreet();
   showScreen("screen-street");
+}
+
+function resolveOpenBookTrayChoice(who) {
+  const tr = state.locale === "tr";
+  const f = state.save.storyFlags || (state.save.storyFlags = {});
+  const tray = who === "peri" ? "peri" : "can";
+  f.open_book_day1_beat_done = true;
+  f.open_book_day1_lived_done = true;
+  f.natural_ledger_tease = true;
+  f.open_book_day1_queued = false;
+  if (tray === "can") {
+    f.flag_open_book_tray_can = true;
+    delete f.flag_open_book_tray_peri;
+  } else {
+    f.flag_open_book_tray_peri = true;
+    delete f.flag_open_book_tray_can;
+  }
+  // Merve porchLine override — named ledger line
+  state.save.neighborVoiceOverrides = state.save.neighborVoiceOverrides || {};
+  state.save.neighborVoiceOverrides.n1 = {
+    ...(state.save.neighborVoiceOverrides.n1 || {}),
+    porchLine: tray === "can"
+      ? { tr: "İlk satır: Can önde. Neon duymasın diye kısa tuttum.", en: "First line: Can up front. Kept it short so Neon doesn’t hear." }
+      : { tr: "İlk satır: Peri önde. Set’ten önce fincan.", en: "First line: Peri up front. Cup before the set." },
+  };
+  bumpAffinity("n1", 1);
+  bumpAffinity(tray === "can" ? "n6" : "n5", 1);
+  saveNow();
+  toast(tray === "can"
+    ? (tr ? "Defter: tepsi Can’ı öne aldı." : "Book: tray seated Can first.")
+    : (tr ? "Defter: tepsi Peri’yi öne aldı." : "Book: tray seated Peri first."));
+  renderStreet();
+  showScreen("screen-street");
+}
+
+function openBookCupGossipHtml() {
+  const tr = state.locale === "tr";
+  if (storyFlag("flag_open_book_tray_can")) {
+    return `<span class="chip on" data-testid="cup-gossip-open-book-can">${tr ? "Defter: tepsi Can’ı öne aldı" : "Book: tray seated Can first"}</span>`;
+  }
+  if (storyFlag("flag_open_book_tray_peri")) {
+    return `<span class="chip on" data-testid="cup-gossip-open-book-peri">${tr ? "Defter: tepsi Peri’yi öne aldı" : "Book: tray seated Peri first"}</span>`;
+  }
+  return "";
+}
+
+function paintOpenBookComicEcho() {
+  const tr = state.locale === "tr";
+  if (storyFlag("flag_open_book_tray_can")) {
+    return `<div class="comic-remember comic-remember--open-book" data-testid="comic-echo-open-book-can">
+      <strong>${tr ? "Defter hatırladı" : "The book remembered"}</strong>
+      <p>${tr ? "Tepsi Can’ı öne aldı." : "Tray seated Can first."}</p>
+    </div>`;
+  }
+  if (storyFlag("flag_open_book_tray_peri")) {
+    return `<div class="comic-remember comic-remember--open-book" data-testid="comic-echo-open-book-peri">
+      <strong>${tr ? "Defter hatırladı" : "The book remembered"}</strong>
+      <p>${tr ? "Tepsi Peri’yi öne aldı." : "Tray seated Peri first."}</p>
+    </div>`;
+  }
+  return "";
+}
+
+function openBookOvernightBit() {
+  const tr = state.locale === "tr";
+  if (storyFlag("flag_open_book_tray_can")) {
+    return tr ? "Gece yazdı: tepsi Can’ın fincanını önde tuttu." : "Night wrote: tray kept Can’s cup at the front.";
+  }
+  if (storyFlag("flag_open_book_tray_peri")) {
+    return tr ? "Gece yazdı: tepsi Peri’nin fincanını önde tuttu." : "Night wrote: tray kept Peri’s cup at the front.";
+  }
+  return "";
 }
 
 function snagComicLine(branch) {
@@ -1456,13 +1580,13 @@ function snagDay1StreetHtml() {
 
 function snagCupGossipHtml() {
   const tr = state.locale === "tr";
+  let snag = "";
   if (storyFlag("flag_snag_untangle")) {
-    return `<span class="chip on" data-testid="cup-gossip-snag-untangle">${tr ? "Çatı: ip birlikte indi" : "Roof: line came down together"}</span>`;
+    snag = `<span class="chip on" data-testid="cup-gossip-snag-untangle">${tr ? "Çatı: ip birlikte indi" : "Roof: line came down together"}</span>`;
+  } else if (storyFlag("flag_snag_cut")) {
+    snag = `<span class="chip on" data-testid="cup-gossip-snag-cut">${tr ? "Çatı: ip kesildi — Leyla öfkeli" : "Roof: line cut — Leyla’s sharp"}</span>`;
   }
-  if (storyFlag("flag_snag_cut")) {
-    return `<span class="chip on" data-testid="cup-gossip-snag-cut">${tr ? "Çatı: ip kesildi — Leyla öfkeli" : "Roof: line cut — Leyla’s sharp"}</span>`;
-  }
-  return "";
+  return snag + openBookCupGossipHtml();
 }
 
 function streetDockHtml() {
@@ -2527,6 +2651,7 @@ function renderOvernight(payoff) {
   const whisper = questHudWhisper();
   const bitsSrc = [
     spine.hook,
+    openBookOvernightBit() || null,
     ...(payoff?.lines || []).slice(0, 1),
     echo ? loc(echo.body) : null,
   ]
@@ -2898,6 +3023,7 @@ function renderStreet() {
     seatPorchNiches(document);
     mudPorchDoorframes(document);
     readablePorchNames(document);
+    seatNichesInStage(document);
   });
 }
 
@@ -4639,6 +4765,12 @@ function applySecondFightChoice(kind, opts = {}) {
 function showFightActions(battle) {
   const bar = document.getElementById("fight-actions");
   if (!bar) return;
+  // ux-rewrite-7: after first Practice Call, never reopen pick stack
+  if ((battle.practice || state.practiceMode) && (battle.kit_call_fired || battle.actionUsed || storyFlag("practice_cup_porch_call_done"))) {
+    bar.hidden = true;
+    bar.innerHTML = "";
+    return;
+  }
   const tr = state.locale === "tr";
   const synIds = (battle.allySyn || []).map((s) => s.id);
   let opts =
@@ -4752,6 +4884,10 @@ function paintKitBoardChange(battle) {
 function applyPorchCall(callId) {
   const battle = state.battle;
   if (!battle || battle.actionUsed) return;
+  // ux-rewrite-7: Practice ≤1 Call — further clicks no-op
+  if ((battle.practice || state.practiceMode) && (battle.kit_call_fired || storyFlag("practice_cup_porch_call_done"))) {
+    return;
+  }
   clearTimeout(battle._porchTimeout);
   // Merge Rivalry ack into Call resolve — never strand after pick
   if (battle.rivalryAckPending) clearRivalryAck(battle, "call_resolve");
@@ -4773,10 +4909,17 @@ function applyPorchCall(callId) {
   stageShake(Combat.shakeClass(state.combatPack?.juiceHints, opt.cameraShakeId) || "shake-medium");
   state.save.storyFlags = state.save.storyFlags || {};
   state.save.storyFlags.porch_call_resolved = true;
+  battle.kit_call_fired = true;
   if (state.practiceMode || practiceCupRequired()) {
     state.save.storyFlags.practice_cup_porch_call_done = true;
+    state.save.storyFlags.kit_call_fired = true;
     for (const f of battle._porchResolveFlags || []) state.save.storyFlags[f] = true;
     saveNow();
+    // Disable Call CTAs after first Practice Call
+    document.querySelectorAll('[data-action="porch-call"], [data-action="open-porch-call"], [data-testid="porch-call-ready"]').forEach((btn) => {
+      btn.setAttribute("aria-disabled", "true");
+      btn.disabled = true;
+    });
   }
   battle.actionUsed = true;
   battle.firstCallId = callId;
@@ -5093,11 +5236,24 @@ function combatTick(battle) {
   }
 }
 
+function sanitizeFightChrome(text) {
+  let s = String(text || "");
+  // mechanics-rewrite-7: zero Low HP / harder hits / Rivalry! in overlays
+  if (/Low HP|harder hits|Rivalry!|Rekabet!|düşük HP|hasar sert|under \d+%\s*HP|HP dips/i.test(s)) {
+    const stake = porchStakeFor("syn_rivalry");
+    s = stake?.fire || stake?.headline || (state.locale === "tr" ? "Sıkışınca" : "When cornered");
+  }
+  s = s.replace(/Rivalry!?/gi, state.locale === "tr" ? "Düdük" : "Whistle");
+  s = s.replace(/Rekabet!?/gi, "Düdük");
+  return s;
+}
+
 function showSynProc(text) {
   const stage =
     document.querySelector("#screen-fight.active .rp-arena") ||
     document.querySelector("#screen-fight.active .fight-stage");
   if (!stage) return;
+  text = sanitizeFightChrome(text);
   let node = stage.querySelector(".syn-proc");
   if (!node) {
     node = document.createElement("div");
@@ -5105,6 +5261,13 @@ function showSynProc(text) {
     stage.appendChild(node);
   }
   node.textContent = text;
+  try {
+    window.__RP_SMOKE__ = window.__RP_SMOKE__ || {};
+    const pat = /Low HP|harder hits|Rivalry!/i;
+    const hit = pat.test(String(text || ""));
+    window.__RP_SMOKE__.lowHpResidual = window.__RP_SMOKE__.lowHpResidual || { bodyHits: 0, overlayHits: 0, comicHits: 0, pattern: String(pat) };
+    if (hit) window.__RP_SMOKE__.lowHpResidual.overlayHits += 1;
+  } catch { /* smoke optional */ }
   node.classList.remove("pop");
   void node.offsetWidth;
   node.classList.add("pop");
@@ -5231,7 +5394,11 @@ function unitCard(u, side, floaters = []) {
     .map((f, i) => {
       if (f.heal) return `<span class="rp-float rp-float--heal heal-floater" data-slot="${i}">+${f.heal}</span>`;
       if (f.dodge) return `<span class="rp-float rp-float--dodge dodge-floater" data-slot="${i}">${state.locale === "tr" ? "kaç!" : "dodge"}</span>`;
-      if (f.rivalry || f.proc) return `<span class="rp-float rp-float--proc dmg-floater rivalry-floater" data-slot="${i}">−${f.dmg}!</span>`;
+      if (f.rivalrySticky) {
+        const voice = sanitizeFightChrome(porchStakeFor("syn_rivalry")?.fire || (state.locale === "tr" ? "Sıkışınca" : "When cornered"));
+        return `<span class="rp-float rp-float--proc dmg-floater rivalry-floater" data-slot="${i}" data-testid="rivalry-sticky-float">${voice}</span>`;
+      }
+      if (f.rivalry || f.proc) return `<span class="rp-float rp-float--proc dmg-floater rivalry-floater" data-slot="${i}">−${f.dmg || 0}!</span>`;
       return `<span class="rp-float rp-float--hit dmg-floater" data-slot="${i}">−${f.dmg}</span>`;
     })
     .join("");
@@ -5747,8 +5914,9 @@ function renderComic() {
     (state.locale === "tr"
       ? `MVP ${r.mvp}. Blok yarın konuşacak.`
       : `MVP ${r.mvp}. The block will talk tomorrow.`);
-  // story-rewrite-6: always paint Snag branch on Practice + Cup comic
+  // story-rewrite-6/7: Snag + Open Book lived echoes on Practice + Cup comic
   const snagBanner = paintSnagComicEcho();
+  const openBookBanner = paintOpenBookComicEcho();
   let comicEchoHtml = "";
   if (snagBanner) {
     const branch = storyFlag("flag_snag_untangle") ? "untangle" : "cut";
@@ -5761,9 +5929,12 @@ function renderComic() {
       comicEchoHtml = `<p class="comic-echo-tag" data-testid="${comicEcho.testId || "comic-echo-av-handoff"}">${loc(comicEcho.captionTag)}</p>`;
     }
   }
+  if (openBookBanner) {
+    comicEchoHtml += openBookBanner;
+  }
   const shareText = fillTemplate(loc(state.content.uiStrings["comic.share_text"]), vars);
   const banner = state.questPack?.storyForm3?.comicRememberBanner || state.stories?.porchCupNarrative?.comicRememberBanner;
-  let remember = snagBanner || "";
+  let remember = (snagBanner || "") + (openBookBanner || "");
   if (!remember && banner && (banner.when?.flagsAny || []).some((f) => storyFlag(f))) {
     const flag = ["cold_open_mediate", "cold_open_instigate", "cold_open_stage"].find((f) => storyFlag(f));
     const body = flag ? banner.bodyByFlag?.[flag] : null;
@@ -6317,6 +6488,9 @@ function onAction(action, target) {
       break;
     case "open-book-day1":
       resolveOpenBookDay1Beat();
+      break;
+    case "open-book-tray":
+      resolveOpenBookTrayChoice(target.dataset.tray);
       break;
     case "focus-snag": {
       const row = document.querySelector("[data-testid='snag-choice-row']");

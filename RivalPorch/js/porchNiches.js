@@ -1,6 +1,12 @@
-/** visual-rewrite-3/4/5/6 — spread X, seat doors, mud jambs, readable names */
+/** visual-rewrite-3/4/5/6/7 — spread X, seat doors, mud jambs, readable names, wave4 recess imgs */
 
 const MUD = "rgb(90, 67, 50)"; // #5A4332 — auditor acceptance literal
+const DOOR_BASE = "assets/rival-porch/meshy/wave4/doors";
+
+function doorNicheSrc(n) {
+  const i = ((Number(n) || 1) - 1) % 6 + 1;
+  return `${DOOR_BASE}/door-niche-n${i}.png`;
+}
 
 export function spreadPorchNiches(root = document) {
   return seatPorchNiches(root);
@@ -38,6 +44,68 @@ export function seatPorchNiches(root = document) {
   ).forEach((n) => n.remove());
   mudPorchDoorframes(root);
   readablePorchNames(root);
+  seatNichesInStage(root);
+}
+
+/** visual-rewrite-7 — clay door-recess img behind each bust */
+export function seatNichesInStage(root = document) {
+  const street = root.querySelector(".rp-screen--street, #screen-street");
+  if (!street) return;
+  const stage = street.querySelector(".rp-stage, .rp-stage__img");
+  if (stage) {
+    if (stage.classList?.contains("rp-stage")) stage.dataset.wave = "4";
+    const img = street.querySelector(".rp-stage__img");
+    if (img && !img.dataset.wave4Tried) {
+      img.dataset.wave4Tried = "1";
+      const wave4 = "assets/rival-porch/meshy/wave4/heroes/hero-street-six-porch-portrait.png";
+      const prev = img.getAttribute("src");
+      img.setAttribute("src", wave4);
+      img.onerror = () => {
+        img.onerror = null;
+        if (prev) img.setAttribute("src", prev);
+      };
+    }
+  }
+  street.querySelectorAll(".rp-hotspot").forEach((el, i) => {
+    el.classList.add("is-stage-seated", "is-porch-door");
+    el.dataset.n ||= String(i + 1);
+    const n = el.dataset.n || String(i + 1);
+    let frame = el.querySelector(".rp-hotspot__doorframe");
+    if (frame && frame.tagName !== "IMG") {
+      const img = document.createElement("img");
+      img.className = "rp-hotspot__doorframe";
+      img.alt = "";
+      img.width = 56;
+      img.height = 84;
+      img.src = doorNicheSrc(n);
+      img.setAttribute("aria-hidden", "true");
+      frame.replaceWith(img);
+      frame = img;
+    } else if (!frame) {
+      const img = document.createElement("img");
+      img.className = "rp-hotspot__doorframe";
+      img.alt = "";
+      img.width = 56;
+      img.height = 84;
+      img.src = doorNicheSrc(n);
+      img.setAttribute("aria-hidden", "true");
+      el.insertBefore(img, el.firstChild);
+      frame = img;
+    } else if (frame.tagName === "IMG") {
+      frame.src = doorNicheSrc(n);
+      frame.width = 56;
+      frame.height = 84;
+    }
+    // Clear CSS-only mud border so recess plate reads as architecture
+    if (frame) {
+      frame.style.removeProperty("border");
+      frame.style.removeProperty("border-color");
+      frame.style.removeProperty("background");
+      frame.style.removeProperty("background-color");
+      frame.style.removeProperty("box-shadow");
+      frame.style.removeProperty("outline-color");
+    }
+  });
 }
 
 export function mudPorchDoorframes(root = document) {
@@ -55,13 +123,15 @@ export function mudPorchDoorframes(root = document) {
       frame.setAttribute("aria-hidden", "true");
       el.insertBefore(frame, el.firstChild);
     }
-    // Hollow jamb — transparent fill, mud border (visual-rewrite-6)
-    frame.style.setProperty("background", "transparent", "important");
-    frame.style.setProperty("background-color", "transparent", "important");
-    frame.style.setProperty("border", `4px solid ${MUD}`, "important");
-    frame.style.setProperty("border-color", MUD, "important");
-    frame.style.setProperty("box-shadow", `inset 0 0 0 1px ${MUD}`, "important");
-    frame.style.setProperty("outline-color", MUD, "important");
+    // Hollow jamb — transparent fill, mud border (visual-rewrite-6); rewrite-7 upgrades to img
+    if (frame.tagName !== "IMG") {
+      frame.style.setProperty("background", "transparent", "important");
+      frame.style.setProperty("background-color", "transparent", "important");
+      frame.style.setProperty("border", `4px solid ${MUD}`, "important");
+      frame.style.setProperty("border-color", MUD, "important");
+      frame.style.setProperty("box-shadow", `inset 0 0 0 1px ${MUD}`, "important");
+      frame.style.setProperty("outline-color", MUD, "important");
+    }
 
     const bust = el.querySelector(".rp-hotspot__bust");
     if (bust) {
@@ -81,7 +151,7 @@ export function readablePorchNames(root = document) {
 
   street.querySelectorAll(".rp-hotspot").forEach((el, i) => {
     const frame = el.querySelector(".rp-hotspot__doorframe");
-    if (frame) {
+    if (frame && frame.tagName !== "IMG") {
       frame.style.setProperty("background", "transparent", "important");
       frame.style.setProperty("background-color", "transparent", "important");
       frame.style.setProperty("border", `4px solid ${MUD}`, "important");

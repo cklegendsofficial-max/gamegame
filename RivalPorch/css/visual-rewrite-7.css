@@ -1,0 +1,218 @@
+/* Rival Porch — visual-REWRITE-7
+   Auditor 0c05f88 overall 8.2 / visual 8.3.
+   PF: Seat hollow niches into clay stage architecture; stop Cup neon clip.
+   Assets: media/rival-porch/meshy/wave4/doors/door-niche-n*.png
+   Paste AFTER visual-rewrite-6.css. Packs only — no push.
+*/
+
+.rp-screen--street {
+  --rp-mud-door: rgb(90, 67, 50);
+  --rp-door-asset: url("../assets/rival-porch/meshy/wave4/doors/door-recess-plate.png");
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   A. Stage — prefer wave4 portrait porch crop (doors in architecture)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.rp-screen--street .rp-stage[data-wave="4"],
+.rp-screen--street .rp-stage[src*="wave4/heroes/hero-street"] {
+  object-fit: cover !important;
+  object-position: center 38% !important; /* porch door band */
+}
+
+.rp-screen--street .rp-stage {
+  object-position: center 40% !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   B. Door-recess IMAGE seats niche into clay (not float CSS ring alone)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.rp-screen--street .rp-hotspot.is-stage-seated,
+.rp-screen--street .rp-hotspot.is-porch-door {
+  width: 66px !important;
+  min-width: 62px !important;
+  height: 118px !important;
+  min-height: 110px !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+/* Real clay door-recess plate behind bust */
+.rp-screen--street .rp-hotspot__doorframe,
+.rp-screen--street img.rp-hotspot__doorframe {
+  content: none !important;
+  position: absolute !important;
+  left: 50% !important;
+  top: 0 !important;
+  transform: translateX(-50%) !important;
+  width: 56px !important;
+  height: 84px !important;
+  display: block !important;
+  object-fit: fill !important;
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  filter: none !important;
+  outline: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Fallback when doorframe is still a span (no img yet) */
+.rp-screen--street span.rp-hotspot__doorframe {
+  background-image: var(--rp-door-asset) !important;
+  background-size: 100% 100% !important;
+  background-repeat: no-repeat !important;
+  background-color: transparent !important;
+  border: 0 !important;
+  /* kill rewrite-5/6 solid/hollow CSS-only frames that float */
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Bust sits INSIDE the recess aperture */
+.rp-screen--street .rp-hotspot__bust {
+  position: relative !important;
+  z-index: 1 !important;
+  width: 38px !important;
+  height: 50px !important;
+  margin: 14px 0 0 !important;
+  border-radius: 18px 18px 2px 2px / 24px 24px 2px 2px !important;
+  border: 2px solid rgb(90, 67, 50) !important;
+  border-color: rgb(90, 67, 50) !important;
+  outline: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  object-fit: cover !important;
+  object-position: center 20% !important;
+}
+
+/* Kill CSS-only ::after mud cards from rewrite-5 */
+.rp-screen--street .rp-hotspot::after,
+.rp-screen--street .rp-hotspot::before {
+  content: none !important;
+  display: none !important;
+}
+
+/* Name sill under recess */
+.rp-screen--street .rp-hotspot__name {
+  z-index: 2 !important;
+  margin-top: 4px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  min-height: 28px !important;
+  max-width: 64px !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  color: #f2e6d8 !important;
+  background: rgba(26, 22, 18, 0.88) !important;
+  border: 1px solid rgb(90, 67, 50) !important;
+  border-radius: 3px !important;
+}
+
+/* Align into mid-stage porch door band (architecture, not HUD strip) */
+.rp-screen--street .rp-hotspot[data-n="1"],
+.rp-screen--street .rp-hotspots > .rp-hotspot:nth-of-type(1) {
+  left: max(4px, 1.5vw) !important;
+  top: 42% !important;
+}
+.rp-screen--street .rp-hotspot[data-n="2"],
+.rp-screen--street .rp-hotspots > .rp-hotspot:nth-of-type(2) {
+  left: max(64px, 16vw) !important;
+  top: 36% !important;
+}
+.rp-screen--street .rp-hotspot[data-n="3"],
+.rp-screen--street .rp-hotspots > .rp-hotspot:nth-of-type(3) {
+  left: max(124px, 31vw) !important;
+  top: 42% !important;
+}
+.rp-screen--street .rp-hotspot[data-n="4"],
+.rp-screen--street .rp-hotspots > .rp-hotspot:nth-of-type(4) {
+  left: max(184px, 46vw) !important;
+  top: 36% !important;
+}
+.rp-screen--street .rp-hotspot[data-n="5"],
+.rp-screen--street .rp-hotspots > .rp-hotspot:nth-of-type(5) {
+  left: max(244px, 61vw) !important;
+  top: 42% !important;
+}
+.rp-screen--street .rp-hotspot[data-n="6"],
+.rp-screen--street .rp-hotspots > .rp-hotspot:nth-of-type(6) {
+  left: max(298px, 75vw) !important;
+  top: 36% !important;
+}
+
+/* Per-n door asset hooks (integrator can set --door-src inline) */
+.rp-screen--street .rp-hotspot[data-n="1"] span.rp-hotspot__doorframe {
+  background-image: url("../assets/rival-porch/meshy/wave4/doors/door-niche-n1.png") !important;
+}
+.rp-screen--street .rp-hotspot[data-n="2"] span.rp-hotspot__doorframe {
+  background-image: url("../assets/rival-porch/meshy/wave4/doors/door-niche-n2.png") !important;
+}
+.rp-screen--street .rp-hotspot[data-n="3"] span.rp-hotspot__doorframe {
+  background-image: url("../assets/rival-porch/meshy/wave4/doors/door-niche-n3.png") !important;
+}
+.rp-screen--street .rp-hotspot[data-n="4"] span.rp-hotspot__doorframe {
+  background-image: url("../assets/rival-porch/meshy/wave4/doors/door-niche-n4.png") !important;
+}
+.rp-screen--street .rp-hotspot[data-n="5"] span.rp-hotspot__doorframe {
+  background-image: url("../assets/rival-porch/meshy/wave4/doors/door-niche-n5.png") !important;
+}
+.rp-screen--street .rp-hotspot[data-n="6"] span.rp-hotspot__doorframe {
+  background-image: url("../assets/rival-porch/meshy/wave4/doors/door-niche-n6.png") !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   C. Cup — stop PORCH CUP neon clipping pick grid (Baker Can / Peri)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.rp-screen--cup .rp-cup-neon,
+.rp-screen--cup .rp-porch-cup-sign,
+.rp-screen--cup .rp-stage-neon,
+.rp-screen--cup [data-testid="cup-neon"],
+.rp-screen--cup [data-ui="porch-cup-neon"],
+.rp-screen--cup .rp-neon-sign,
+.rp-screen--cup img[alt*="PORCH CUP" i],
+.rp-screen--cup img[src*="neon"],
+.rp-screen--cup img[src*="porch-cup"] {
+  position: absolute !important;
+  top: 2% !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  bottom: auto !important;
+  max-height: 10% !important;
+  max-width: 55% !important;
+  width: auto !important;
+  object-fit: contain !important;
+  opacity: 0 !important; /* hard kill over pick grid — brand lives in title */
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
+
+/* If neon is baked into stage PNG, vignette/crop it out of pick band */
+.rp-screen--cup .rp-stage,
+.rp-screen--cup .rp-stage[data-stage="arena"] {
+  object-position: center 62% !important; /* push neon sign out of bust row */
+}
+
+.rp-screen--cup .rp-pick-grid,
+.rp-screen--cup .rp-cup-grid,
+.rp-screen--cup [data-testid="cup-pick-grid"],
+.rp-screen--cup .rp-cup-cards {
+  position: relative !important;
+  z-index: 4 !important;
+}
+
+.rp-screen--cup .rp-cup-card,
+.rp-screen--cup .rp-pick-grid .rp-hotspot,
+.rp-screen--cup .rp-cup-grid img {
+  position: relative !important;
+  z-index: 5 !important;
+}

@@ -2481,12 +2481,24 @@
   "synergyStakes": [
     {
       "synergyId": "syn_rivalry",
+      "cupLabel": {
+        "tr": "Düdük dedikodusu",
+        "en": "Whistle gossip"
+      },
+      "whoNeighborIds": [
+        "n2",
+        "n4"
+      ],
+      "whoJobs": [
+        "whistle",
+        "paper sit"
+      ],
       "headline": {
         "tr": "Köşeye sıkışınca düdük sertleşir",
         "en": "Whistle tightens when someone’s cornered"
       },
       "body": {
-        "tr": "Cem’in düdüğü + Orhan’ın çiti: biri kötü yaralanınca imza vuruş sertleşir.",
+        "tr": "Cem’in düdüğü + Orhan’ın gazetesi: biri kötü yaralanınca imza vuruş sertleşir.",
         "en": "Cem’s whistle + Orhan’s paper: when someone’s hurt bad, their signature gets mean."
       },
       "fireVoice": {
@@ -2496,6 +2508,18 @@
     },
     {
       "synergyId": "syn_tea_circle",
+      "cupLabel": {
+        "tr": "Demlik çemberi",
+        "en": "Demlik circle"
+      },
+      "whoNeighborIds": [
+        "n1",
+        "n6"
+      ],
+      "whoJobs": [
+        "tea hand",
+        "warm tray"
+      ],
       "headline": {
         "tr": "Demlik + tepsi verandayı ayakta tutar",
         "en": "Demlik + tray keep the porch standing"
@@ -2511,6 +2535,18 @@
     },
     {
       "synergyId": "syn_neon_night",
+      "cupLabel": {
+        "tr": "Çatı parıltısı",
+        "en": "Roof flash"
+      },
+      "whoNeighborIds": [
+        "n5",
+        "n3"
+      ],
+      "whoJobs": [
+        "bass cans",
+        "kite kid"
+      ],
       "headline": {
         "tr": "Çatı parıltısı açılır",
         "en": "Roof flash opens"

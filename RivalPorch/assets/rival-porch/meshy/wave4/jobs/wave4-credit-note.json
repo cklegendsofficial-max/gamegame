@@ -1,0 +1,25 @@
+{
+  "wave": 4,
+  "purpose": "seat hollow niches into clay stage architecture",
+  "meshy_credits_spent_this_pod": 0,
+  "fal_usd_spent_this_pod": 0,
+  "blockers": {
+    "MESHY_API_KEY": "absent in cloud agent pod",
+    "fal": "CK Legends account balance_exhausted (403)"
+  },
+  "assets_this_pack": {
+    "source": "reused wave3 Meshy clay hero crops (0 new generative credits)",
+    "heroes": ["heroes/hero-street-six-porch-portrait.png"],
+    "doors": ["doors/door-recess-n1.png", "…n6.png"]
+  },
+  "recommended_meshy_on_ckgames4": {
+    "cap_left_wave3": 473,
+    "jobs": [
+      {"type": "T2I nano-banana", "stem": "hero-street-six-doors-916", "credits": 6, "note": "9:16 six door recesses mid-band"},
+      {"type": "T2I optional", "stem": "door-recess-plate", "credits": 6, "note": "single reusable mud niche plate alpha"},
+      {"type": "I23D optional", "stem": "hero-street-six-doors", "credits": 15, "note": "only if 3D stage needed"}
+    ],
+    "max_spend": 27,
+    "style_block": "media/rival-porch/meshy/prompts/style-block.txt"
+  }
+}
