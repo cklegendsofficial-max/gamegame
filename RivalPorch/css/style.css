@@ -3184,3 +3184,57 @@ html, body, #app, .app {
   font-size: 11px;
   background: color-mix(in srgb, var(--mud-night, #1A1612) 42%, transparent);
 }
+
+/* ===== R16c: fight stage unbury (r15 arena unread) ===== */
+#screen-fight .topbar.fight-top,
+#screen-fight .syn-fight-tip,
+#screen-fight .fight-hud {
+  position: relative;
+  z-index: 5;
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 35%, transparent) !important;
+  backdrop-filter: blur(4px);
+  padding: 4px 8px !important;
+  margin: 0 !important;
+  font-size: 0.72rem;
+}
+#screen-fight .syn-fight-tip { max-height: 1.4em; overflow: hidden; opacity: 0.8; }
+#screen-fight .fight-log { opacity: 0.55; font-size: 0.65rem; max-height: 1.2em; overflow: hidden; }
+#screen-fight .synergy-pills {
+  position: absolute;
+  left: 8px; right: 8px;
+  bottom: calc(8px + var(--rp-safe-bottom, 0px));
+  z-index: 5;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0.9;
+}
+#screen-fight .rp-arena {
+  top: calc(var(--rp-safe-top, 0px) + 72px) !important;
+  bottom: 48px !important;
+  min-height: 58dvh !important;
+}
+#screen-fight .rp-pad.rp-arena-pad,
+#screen-fight .rp-arena-unit {
+  width: 68px !important;
+}
+#screen-fight .rp-arena-unit img,
+#screen-fight .rp-unit img {
+  width: 58px !important;
+  height: 58px !important;
+}
+#screen-fight .fight-actions {
+  position: absolute;
+  left: 8px; right: 8px;
+  bottom: calc(52px + var(--rp-safe-bottom, 0px));
+  z-index: 7;
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 55%, transparent);
+  border-radius: 14px;
+  padding: 8px;
+}
+/* Keep title cover letterbox dead */
+#screen-title .rp-stage[data-wave="3"] .rp-stage__img {
+  object-fit: cover !important;
+  object-position: center 48% !important;
+  transform: scale(1.1) !important;
+  transform-origin: center 48% !important;
+}
