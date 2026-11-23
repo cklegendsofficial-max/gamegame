@@ -2674,8 +2674,8 @@ function renderNeighbor(id) {
       ${n.drama ? `<button class="btn btn-ember" type="button" data-action="drama" data-id="${id}">${t("neighbor.drama")}</button>` : ""}
     </div>
     <p class="muted action-hints">${state.locale === "tr"
-      ? "Sahne: ilişki + hikâye · Hediye: gündem errand · Konuş: hızlı bağ · Drama: trait"
-      : "Scene: bond + story · Gift: agenda errand · Talk: quick bond · Drama: traits"}</p>`;
+      ? "Sahne: ilişki · Hediye: poğaça/çay · Konuş: hızlı bağ · Drama: mahalle dedikodusu"
+      : "Scene: bond · Gift: pastry/tea · Talk: quick bond · Drama: porch gossip"}</p>`;
 }
 
 function startStory(id) {
@@ -3979,22 +3979,33 @@ function resumeFightLoop(battle) {
     // mechanics-rewrite-1: ONE Porch Call only — no Call II / tempo insurance
     battle.secondCallUsed = true;
     battle.callTwoArmed = false;
-    // Phase chip: Opening → Your call → Close
+    // Phase chip from kit engine (Opening → Call → Close)
     const phaseEl = document.getElementById("fight-phase-chip");
     if (phaseEl) {
       const tr = state.locale === "tr";
-      if (!battle.actionUsed && battle.elapsed < 8) phaseEl.textContent = tr ? "Açılış" : "Opening";
-      else if (!battle.actionUsed || battle.actionOffered) phaseEl.textContent = tr ? "Senin çağrın" : "Your call";
+      const ph = battle.phase || (!battle.actionUsed && battle.elapsed < 3.5 ? "opening" : battle.actionUsed ? "close" : "call");
+      if (ph === "opening") phaseEl.textContent = tr ? "Açılış" : "Opening";
+      else if (ph === "call" || (!battle.actionUsed && (battle.actionOffered || battle.elapsed >= 2))) phaseEl.textContent = tr ? "Senin çağrın" : "Your call";
       else phaseEl.textContent = tr ? "Kapanış" : "Close";
     }
-    // Soft signature FX pulses in opening
-    if (battle.elapsed > 1.2 && !battle._sigFx1) {
-      battle._sigFx1 = true;
-      document.querySelector(".rp-unit--you")?.classList.add("rp-sig-whistle");
-    }
-    if (battle.elapsed > 2.8 && !battle._sigFx2) {
-      battle._sigFx2 = true;
-      document.querySelector(".rp-unit--enemy")?.classList.add("rp-sig-bass");
+    // Prop signature VFX from kit log (not anonymous ATK ticks)
+    const sig = (battle.signatureLog || []).slice(-1)[0];
+    if (sig && sig.id !== battle._lastSigFxId) {
+      battle._lastSigFxId = sig.id;
+      const vfx = sig.propId || sig.id || "";
+      const node = document.querySelector(`.unit-slot[data-side="ally"][data-id="${sig.neighborId}"], .rp-pad[data-id="${sig.neighborId}"], .rp-unit--you`);
+      if (node) {
+        const cls = vfx.includes("whistle") || sig.id === "whistle_mark" ? "rp-sig-whistle"
+          : vfx.includes("bass") || sig.id === "bass_drop" ? "rp-sig-bass"
+          : vfx.includes("kite") || sig.id === "kite_cut" ? "rp-sig-kite"
+          : vfx.includes("fence") || sig.id === "hold_fence" ? "rp-sig-fence"
+          : vfx.includes("steam") || sig.id === "pour" ? "rp-sig-pour"
+          : "rp-sig-warm";
+        node.classList.add(cls);
+        setTimeout(() => node.classList.remove(cls), 900);
+      }
+      const log = document.getElementById("fight-log");
+      if (log) log.textContent = `${sig.id} · ${sig.propId || "prop"}`;
     }
     // Practice hard gate: don't finish until porch call resolved
     if (battle.practice && !battle.actionUsed && (timeUp || !bothAlive)) {
