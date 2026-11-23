@@ -65,6 +65,7 @@ export function defaultSave(economy, depthMeta) {
     unlockedNeighbors: ["n1", "n2", "n3", "n4", "n5", "n6"],
     cupHistory: [],
     coldOpenDone: false,
+    quests: { entries: {}, lastClaimed: [] },
   };
 }
 
@@ -107,6 +108,10 @@ export function loadSave(economy, depthMeta) {
       storyUnlocks: {
         skins: data.storyUnlocks?.skins || [],
         unitMods: data.storyUnlocks?.unitMods || [],
+      },
+      quests: {
+        entries: data.quests?.entries || {},
+        lastClaimed: data.quests?.lastClaimed || [],
       },
     };
     if ((data.version || 0) < 4) {

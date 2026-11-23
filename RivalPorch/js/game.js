@@ -5,6 +5,7 @@ import {
   addPassXp, claimPassReward,
 } from "./wallet.js";
 import * as Story from "./story.js";
+import * as Quests from "./quests.js";
 
 const DAY1_BUSTS = {
   n1: "assets/rival-porch/bust-n1-aunt-merve.png",
@@ -15,11 +16,24 @@ const DAY1_BUSTS = {
   n6: "assets/rival-porch/bust-n6-baker-can.png",
 };
 
+const MESHY_BUSTS = {
+  n1: "assets/rival-porch/meshy/fig-bust-n1-aunt-merve.png",
+  n2: "assets/rival-porch/meshy/fig-bust-n2-coach-cem.png",
+  n3: "assets/rival-porch/meshy/fig-bust-n3-kid-leyla.png",
+  n4: "assets/rival-porch/meshy/fig-bust-n4-mr-orhan.png",
+  n5: "assets/rival-porch/meshy/fig-bust-n5-dj-peri.png",
+  n6: "assets/rival-porch/meshy/fig-bust-n6-baker-can.png",
+};
+
 const ART = {
-  streetHero: "assets/rival-porch/street-hero.png",
-  arenaStage: "assets/rival-porch/arena-stage.png",
+  // Meshy clay environments as primary stage — gold busts stay for face readability on cards
+  streetHero: "assets/rival-porch/meshy/env-street-block.png",
+  streetHeroFallback: "assets/rival-porch/street-hero.png",
+  arenaStage: "assets/rival-porch/meshy/env-arena-stage.png",
+  arenaStageFallback: "assets/rival-porch/arena-stage.png",
   busts: { ...DAY1_BUSTS },
-  meshyRoot: "art/meshy/",
+  meshyBusts: { ...MESHY_BUSTS },
+  meshyRoot: "assets/rival-porch/meshy/",
 };
 
 const UNIT_STATS = {
@@ -52,6 +66,8 @@ const state = {
   fightTimer: null,
   pickCount: 3,
   botMult: 1,
+  questPack: null,
+  questTab: "active",
 };
 
 const el = { app: document.getElementById("app"), canvas: document.getElementById("share-canvas") };
@@ -270,6 +286,7 @@ function buildShell() {
     <section class="screen screen-street" id="screen-street"></section>
     <section class="screen screen-neighbor" id="screen-neighbor"></section>
     <section class="screen" id="screen-story"></section>
+    <section class="screen" id="screen-quests"></section>
     <section class="screen" id="screen-event"></section>
     <section class="screen" id="screen-cup"></section>
     <section class="screen" id="screen-draft"></section>
@@ -280,9 +297,157 @@ function buildShell() {
   `;
 }
 
+function stageBg(primary, fallback) {
+  return `url("${primary}"), url("${fallback}")`;
+}
+
+function noteQuestHits(hits) {
+  if (!hits?.length) return;
+  const first = hits[0];
+  const def = Quests.questDef(state.questPack, first.questId);
+  const title = loc(def?.title) || first.questId;
+  if (first.questComplete) {
+    toast((state.locale === "tr" ? "Görev hazır · " : "Quest ready · ") + title);
+  } else {
+    toast(`${title}: ${first.progress}/${first.need}`);
+  }
+}
+
+function grantQuestRewards(rewards = {}) {
+  const delta = {};
+  if (rewards.porch_coins) delta.porch_coins = rewards.porch_coins;
+  if (rewards.neon_thread) delta.neon_thread = rewards.neon_thread;
+  if (rewards.clay_tokens) delta.clay_tokens = rewards.clay_tokens;
+  if (Object.keys(delta).length) grant(state.save, delta);
+  if (rewards.passXp) addPassXp(state.save, rewards.passXp);
+  if (rewards.rep) Story.bumpRep(state.save, rewards.rep);
+}
+
+function emitQuestEvent(event) {
+  if (!state.questPack) return;
+  const hits = Quests.applyQuestEvent(state.save, state.questPack, event);
+  noteQuestHits(hits);
+  saveNow();
+}
+
+function worldStreetLines() {
+  const list = Quests.activeWorldConsequences(state.save, state.questPack);
+  return list
+    .map((w) => loc(w.streetVisual))
+    .filter(Boolean)
+    .slice(-3);
+}
+
+function worldCupLines() {
+  const list = Quests.activeWorldConsequences(state.save, state.questPack);
+  return list
+    .map((w) => loc(w.cupLobby))
+    .filter(Boolean)
+    .slice(-3);
+}
+
+function renderQuestLog() {
+  const screen = document.getElementById("screen-quests");
+  const tr = state.locale === "tr";
+  const tab = state.questTab || "active";
+  Quests.ensureQuestSave(state.save);
+  Quests.autoOfferArcQuests(state.questPack, state.save);
+  const tabs = [
+    ["active", tr ? "Aktif" : "Active"],
+    ["available", tr ? "Al" : "Available"],
+    ["done", tr ? "Bitti" : "Done"],
+  ];
+  const tabBtns = tabs
+    .map(
+      ([id, label]) =>
+        `<button class="tab-btn ${tab === id ? "active" : ""}" type="button" data-action="quest-tab" data-id="${id}">${label}</button>`
+    )
+    .join("");
+
+  let body = "";
+  if (tab === "available") {
+    const list = Quests.availableQuests(state.questPack, state.save);
+    body = list.length
+      ? list
+          .map((q) => {
+            const objs = (q.objectives || [])
+              .map((o) => `<li>○ ${loc(o.label)}</li>`)
+              .join("");
+            const rewardBits = [];
+            if (q.rewards?.porch_coins) rewardBits.push(`+${q.rewards.porch_coins} 🪙`);
+            if (q.rewards?.neon_thread) rewardBits.push(`+${q.rewards.neon_thread} 🧵`);
+            return `<article class="quest-card art-card">
+              <h3>${loc(q.title)}</h3>
+              <p class="muted">${loc(q.blurb)}</p>
+              <ul class="quest-obj">${objs}</ul>
+              <p class="quest-reward">${rewardBits.join(" · ") || "—"}</p>
+              <button class="btn btn-primary" type="button" data-action="quest-accept" data-id="${q.id}">${tr ? "Kabul et" : "Accept"}</button>
+            </article>`;
+          })
+          .join("")
+      : `<p class="muted">${tr ? "Şu an alınacak görev yok." : "No quests to accept right now."}</p>`;
+  } else if (tab === "done") {
+    const list = Quests.completedQuests(state.questPack, state.save);
+    body = list.length
+      ? list
+          .map((q) => {
+            const e = state.save.quests.entries[q.id];
+            return `<article class="quest-card done art-card">
+              <h3>✓ ${loc(q.title)}</h3>
+              <p class="muted">${tr ? `Gün ${e?.completedDay || "—"}` : `Day ${e?.completedDay || "—"}`}</p>
+            </article>`;
+          })
+          .join("")
+      : `<p class="muted">${tr ? "Henüz biten görev yok." : "No completed quests yet."}</p>`;
+  } else {
+    const list = Quests.activeQuests(state.questPack, state.save);
+    body = list.length
+      ? list
+          .map((q) => {
+            const e = state.save.quests.entries[q.id];
+            const objs = (q.objectives || [])
+              .map((o) => {
+                const have = e?.progress?.[o.id] || 0;
+                const need = o.count || 1;
+                const ok = have >= need;
+                return `<li class="${ok ? "done" : ""}">${ok ? "✓" : "○"} ${loc(o.label)} <span class="agenda-hint">${have}/${need}</span></li>`;
+              })
+              .join("");
+            const ready = Quests.questReadyToComplete(q, e);
+            return `<article class="quest-card art-card ${ready ? "ready" : ""}">
+              <h3>${loc(q.title)}</h3>
+              <p class="muted">${loc(q.blurb)}</p>
+              <ul class="quest-obj agenda-list">${objs}</ul>
+              ${
+                ready
+                  ? `<button class="btn btn-ember" type="button" data-action="quest-complete" data-id="${q.id}">${tr ? "Ödülü topla" : "Claim reward"}</button>`
+                  : `<p class="muted">${tr ? "Hedefleri tamamla" : "Finish the objectives"}</p>`
+              }
+            </article>`;
+          })
+          .join("")
+      : `<p class="muted">${tr ? "Aktif görev yok — Available'dan kabul et." : "No active quests — accept one from Available."}</p>
+         <button class="btn btn-primary" type="button" data-action="quest-tab" data-id="available">${tr ? "Görevlere bak" : "Browse quests"}</button>`;
+  }
+
+  screen.innerHTML = `
+    ${hudHtml()}
+    <div class="art-hero quest-hero" style="background-image:${stageBg(ART.streetHero, ART.streetHeroFallback)}">
+      <div class="art-hero-scrim">
+        <div class="topbar"><h2>${tr ? "Görev Defteri" : "Quest Log"}</h2>
+          <button class="btn btn-secondary" type="button" data-action="goto-evening">${t("common.back")}</button>
+        </div>
+        <p class="evening-cup-tease">${tr ? "Kabul et · ilerle · tamamla. Arklar buradan yaşar." : "Accept · progress · complete. Arcs live here."}</p>
+        <div class="tab-row">${tabBtns}</div>
+      </div>
+    </div>
+    <div class="quest-list">${body}</div>`;
+  showScreen("screen-quests");
+}
+
 function renderTitle() {
   const screen = document.getElementById("screen-title");
-  screen.style.backgroundImage = `url("${ART.streetHero}")`;
+  screen.style.backgroundImage = stageBg(ART.streetHero, ART.streetHeroFallback);
   const hasSave = state.save.dayIndex > 1 || state.save.evening.checkin || state.save.cupHistory.length;
   const stake = state.locale === "tr"
     ? "Karşı Sırt bu Cumartesi Cup'a geliyor. Bu akşam üç kapı, bir seçim, bir sahne."
@@ -331,7 +496,7 @@ function dayHeadline() {
 
 function renderColdOpen() {
   const screen = document.getElementById("screen-cold");
-  screen.style.backgroundImage = `url("${ART.streetHero}")`;
+  screen.style.backgroundImage = stageBg(ART.streetHero, ART.streetHeroFallback);
   const tr = state.locale === "tr";
   screen.innerHTML = `
     <div class="cold-open">
@@ -390,9 +555,18 @@ function resolveColdOpen(cid) {
   for (const [id, d] of p.aff) bumpAffinity(id, d);
   Story.bumpRep(state.save, p.rep);
   for (const f of p.flags) Story.setFlag(state.save, f);
+  // Seeds Antenna Op main quest drama objective
+  Story.setFlag(state.save, "arc_kite_antenna_seed");
+  Story.setFlag(state.save, "arc_kite_antenna_seed_resolved");
   state.save.coldOpenDone = true;
   if (!state.save.storyRecap) state.save.storyRecap = [];
   state.save.storyRecap.unshift({ day: 1, text: loc(p.note) });
+  Quests.ensureQuestSave(state.save);
+  // Soft-start: auto-accept Welcome main quest so evening has real objectives day 1
+  if (state.questPack && !Quests.isAccepted(state.save, "mq_welcome_porch")) {
+    Quests.acceptQuest(state.save, state.questPack, "mq_welcome_porch");
+  }
+  emitQuestEvent({ type: "flag", flag: "arc_kite_antenna_seed_resolved" });
   saveNow();
   const fb = Story.formatChoiceSummary(
     { affinity: p.aff.map(([id, delta]) => ({ id, delta })), rep: Object.entries(p.rep).map(([id, delta]) => ({ id, delta })) },
@@ -486,28 +660,87 @@ function renderEvening() {
       : state.locale === "tr"
         ? `Cup'a ${untilCup} gün`
         : `${untilCup} day${untilCup === 1 ? "" : "s"} to Cup`;
+
+  Quests.ensureQuestSave(state.save);
+  Quests.autoOfferArcQuests(state.questPack, state.save);
+  Quests.syncQuestProgressFromWorld(state.save, state.questPack);
+  const activeQ = Quests.activeQuests(state.questPack, state.save);
+  const availN = Quests.availableQuests(state.questPack, state.save).length;
+  const mainAgenda = Quests.mainQuestAgenda(state.questPack, state.save, state.locale);
+  const questStrip = activeQ.length
+    ? activeQ
+        .slice(0, 2)
+        .map((q) => {
+          const e = state.save.quests.entries[q.id];
+          const done = (q.objectives || []).filter((o) => Quests.objectiveDone(e, o)).length;
+          const total = (q.objectives || []).length;
+          const ready = Quests.questReadyToComplete(q, e);
+          return `<button class="quest-chip ${ready ? "ready" : ""}" type="button" data-action="open-quests">
+            <strong>${loc(q.title)}</strong>
+            <span>${done}/${total}${ready ? (state.locale === "tr" ? " · topla" : " · claim") : ""}</span>
+          </button>`;
+        })
+        .join("")
+    : `<button class="quest-chip" type="button" data-action="open-quests">${
+        state.locale === "tr"
+          ? availN
+            ? `${availN} görev seni bekliyor`
+            : "Görev defteri"
+          : availN
+            ? `${availN} quests waiting`
+            : "Quest log"
+      }</button>`;
+
+  const worldBits = worldStreetLines();
+  const mainBlock = mainAgenda
+    ? `<div class="main-quest-panel">
+        <h3 class="section-label">${state.locale === "tr" ? "Ana görev" : "Main quest"} · ${mainAgenda.title}</h3>
+        <ul class="agenda-list">
+          ${mainAgenda.objectives
+            .map(
+              (o) =>
+                `<li class="${o.done ? "done" : ""}">${o.done ? "✓" : "○"} ${o.label} <span class="agenda-hint">${o.have}/${o.need}</span></li>`
+            )
+            .join("")}
+        </ul>
+        ${
+          mainAgenda.ready
+            ? `<button class="btn btn-ember" type="button" data-action="quest-complete" data-id="${mainAgenda.quest.id}">${state.locale === "tr" ? "Ana görev ödülünü topla" : "Claim main quest reward"}</button>`
+            : ""
+        }
+      </div>`
+    : `<p class="street-hint">${state.locale === "tr" ? "Henüz ana görev yok — Görevler → Available." : "No main quest yet — Quests → Available."}</p>`;
+
   screen.innerHTML = `
     ${hudHtml()}
-    <div class="topbar"><h2>${loc(dayHeadline())}</h2>
-      <button class="btn btn-secondary" type="button" data-action="open-ladder">${t("meta.ladder")}</button>
+    <div class="art-hero evening-hero" style="background-image:${stageBg(ART.streetHero, ART.streetHeroFallback)}">
+      <div class="art-hero-scrim">
+        <div class="topbar"><h2>${loc(dayHeadline())}</h2>
+          <button class="btn btn-secondary" type="button" data-action="open-ladder">${t("meta.ladder")}</button>
+        </div>
+        <p class="muted evening-meta">${fillTemplate(t("day.streak"), { n: state.save.checkinStreak })} · ${state.save.moodLabel || "calm"}${dom ? ` · ${Story.repLabel(dom, state.locale)}` : ""} · <strong class="cup-countdown">${cupCount}</strong></p>
+        <p class="prompt evening-week">${loc(week?.title)} — ${loc(week?.focus)}</p>
+        ${arcBeat
+          ? `<p class="arc-banner">🎭 <strong>${loc(arcBeat.arc.title)}</strong> — ${loc(arcBeat.beat.prompt)}
+              <span class="chip tea">${(arcBeat.arc.neighbors || []).map((id) => loc(neighborById(id)?.name) || id).slice(0, 3).join(" · ")}</span></p>`
+          : `<p class="muted">${state.locale === "tr" ? "Kapıları gez — her komşunun kendi sahnesi var." : "Walk the doors — each neighbor has their own scene."}</p>`}
+        ${cupTease}
+        ${worldBits.length ? `<p class="world-consequence">${worldBits.map((l) => `◈ ${l}`).join(" · ")}</p>` : ""}
+        <div class="quest-strip">${questStrip}</div>
+      </div>
     </div>
-    <p class="muted">${fillTemplate(t("day.streak"), { n: state.save.checkinStreak })} · ${state.save.moodLabel || "calm"}${dom ? ` · ${Story.repLabel(dom, state.locale)}` : ""} · <strong class="cup-countdown">${cupCount}</strong></p>
-    <div class="dialog-box evening-hook" style="min-height:auto;margin-bottom:0.5rem">
-      <p class="prompt" style="margin:0 0 0.35rem">${loc(week?.title)} — ${loc(week?.focus)}</p>
-      ${arcBeat
-        ? `<p class="muted" style="margin:0">🎭 ${loc(arcBeat.arc.title)}: ${loc(arcBeat.beat.prompt)} <span class="chip tea">${(arcBeat.arc.neighbors || []).map((id) => loc(neighborById(id)?.name) || id).slice(0, 3).join(" · ")}</span></p>`
-        : `<p class="muted" style="margin:0">${state.locale === "tr" ? "Kapıları gez — her komşunun kendi sahnesi var." : "Walk the doors — each neighbor has their own scene."}</p>`}
-      ${cupTease}
-    </div>
-    <ul class="agenda-list">
+    ${mainBlock}
+    <h3 class="section-label">${state.locale === "tr" ? "Akşam ritüeli" : "Evening ritual"}</h3>
+    <ul class="agenda-list agenda-compact">
       ${items.map((i) => `<li class="${i.ok ? "done" : ""}">${i.ok ? "✓" : "○"} ${i.label}${i.hint && !i.ok ? ` <span class="agenda-hint">${i.hint}</span>` : ""}</li>`).join("")}
     </ul>
     <div class="btn-row">
       <button class="btn btn-primary" type="button" data-action="goto-street">${t("street.header")}</button>
-      <button class="btn btn-teal" type="button" data-action="open-shop">${t("shop.title")}</button>
+      <button class="btn btn-teal" type="button" data-action="open-quests">${state.locale === "tr" ? "Görevler" : "Quests"}</button>
       <button class="btn btn-ember" type="button" data-action="goto-cup">${isCupNight() ? t("cup.season_night") : t("cup.practice")}</button>
     </div>
     <div class="btn-row">
+      <button class="btn btn-secondary" type="button" data-action="open-shop">${t("shop.title")}</button>
       <button class="btn btn-secondary" type="button" data-action="open-story-log">${state.locale === "tr" ? "Hikâye defteri" : "Story ledger"}</button>
       <button class="btn btn-rose" type="button" data-action="end-evening" ${st.complete ? "" : "disabled"}>${t("evening.end")}</button>
     </div>
@@ -521,12 +754,19 @@ function renderStreet() {
     .slice(0, 12)
     .map((n) => {
       const done = state.save.evening.visits.includes(n.id);
-      return `<button class="hotspot ${done ? "visited" : ""}" type="button" data-action="open-neighbor" data-id="${n.id}" aria-label="${loc(n.name)}">
-        <img class="bust-mini" src="${bust(n.id)}" alt="" onerror="this.src='${DAY1_BUSTS.n1}'" />
+      const meshy = ART.meshyBusts[n.id] || bust(n.id);
+      return `<button class="hotspot clay-spot ${done ? "visited" : ""}" type="button" data-action="open-neighbor" data-id="${n.id}" aria-label="${loc(n.name)}">
+        <img class="bust-mini" src="${meshy}" alt="" onerror="this.src='${bust(n.id)}'" />
         <span class="label">${loc(n.name)}${done ? " ✓" : ""}</span>
       </button>`;
     })
     .join("");
+
+  const activeQ = Quests.activeMainQuest(state.questPack, state.save) || Quests.activeQuests(state.questPack, state.save)[0];
+  const questHint = activeQ
+    ? `<p class="street-quest-hint"><button type="button" data-action="open-quests">${loc(activeQ.title)}</button> — ${Quests.progressSummary(activeQ, state.save.quests.entries[activeQ.id], state.locale).split(" · ")[0] || ""}</p>`
+    : "";
+  const worldBits = worldStreetLines();
 
   screen.innerHTML = `
     ${hudHtml()}
@@ -534,14 +774,19 @@ function renderStreet() {
       <h2>${t("street.header")}</h2>
       <button class="btn btn-secondary" type="button" data-action="goto-evening">${t("common.back")}</button>
     </div>
-    <div class="street-stage" style="background-image:url('${ART.streetHero}')">
+    <div class="street-stage clay-stage" style="background-image:${stageBg(ART.streetHero, ART.streetHeroFallback)}">
+      <div class="prop-row" aria-hidden="true">
+        <span class="prop-chip">🫖</span><span class="prop-chip">🪁</span><span class="prop-chip">📰</span><span class="prop-chip">🎧</span>
+      </div>
       <div class="hotspots hotspots-wrap">${spots}</div>
+      ${worldBits.length ? `<div class="world-banner">${worldBits.map((l) => `<span>◈ ${l}</span>`).join("")}</div>` : ""}
     </div>
+    ${questHint}
     <p class="street-hint">${t("street.hint_tap_neighbor")}</p>
     <div class="mood-bar">
       <button class="btn btn-rose" type="button" data-action="checkin" ${state.save.evening.checkin ? "disabled" : ""}>${t("street.porch_checkin")}</button>
       <button class="btn btn-secondary" type="button" data-action="street-event" ${state.save.evening.streetEvent ? "disabled" : ""}>${t("street.event")}</button>
-      <button class="btn btn-teal" type="button" data-action="open-shop">${t("shop.gifts")}</button>
+      <button class="btn btn-teal" type="button" data-action="open-quests">${state.locale === "tr" ? "Görevler" : "Quests"}</button>
     </div>`;
 }
 
@@ -734,10 +979,14 @@ function finishDialogue() {
       st.complete = true;
       Story.resolveArcRewards(state.stories, state.save, ctx.arc);
     }
+    emitQuestEvent({ type: "arc_beat", arcId: ctx.arc.id, beatId: ctx.beat.id });
   }
   if (ctx?.kind === "cup_eve") state.save.evening.cupEveDone = true;
   if (ctx?.neighborId && !state.save.evening.visits.includes(ctx.neighborId)) {
     state.save.evening.visits.push(ctx.neighborId);
+  }
+  if (ctx?.neighborId) {
+    emitQuestEvent({ type: "visit_scene", neighborId: ctx.neighborId });
   }
   // Remember plain-language beats for story ledger
   if (!state.save.storyRecap) state.save.storyRecap = [];
@@ -798,6 +1047,7 @@ function doGift(id) {
       <p class="choice-feedback">−${affordable.cost.porch_coins} 🪙 · ${loc(affordable.name)} · ${t("neighbor.affinity")} +${gain}</p>
       <p class="muted">${tr ? "Errand ✓ — akşam gündemine dönebilirsin." : "Errand ✓ — you can return to the evening agenda."}</p>
     </div>`;
+  emitQuestEvent({ type: "gift", neighborId: id });
   toast(tr ? `Hediye onay · ${loc(n.name)} +${gain}` : `Gift confirmed · ${loc(n.name)} +${gain}`);
 }
 
@@ -807,6 +1057,7 @@ function doTalk(id) {
   const line = lines[Math.floor(Math.random() * Math.max(1, lines.length))] || { text: { tr: "…", en: "…" } };
   bumpAffinity(id, 3);
   applyDailyEarn(state.save, state.economy, "talk");
+  emitQuestEvent({ type: "talk", neighborId: id });
   saveNow();
   renderNeighbor(id);
   document.getElementById("neighbor-dialog").innerHTML = `<p>${loc(line.text)}</p>`;
@@ -865,6 +1116,7 @@ function porchCheckin() {
     grant(state.save, { porch_coins: state.depthMeta.streak.bonusPorchCoins || 15 });
     toast(`Streak ${state.save.checkinStreak}! +${state.depthMeta.streak.bonusPorchCoins} 🪙`);
   } else toast(t("street.mood_tea"));
+  emitQuestEvent({ type: "checkin" });
   saveNow();
   renderStreet();
 }
@@ -914,6 +1166,7 @@ function resolveEvent(cid) {
     text: `${loc(ev.title)} → ${loc(choice.label)}`,
   });
   state.save.storyRecap = state.save.storyRecap.slice(0, 24);
+  emitQuestEvent({ type: "street_event", eventId: ev.id });
   saveNow();
   const fb = Story.formatChoiceSummary(summary, state.locale, (nid) => loc(neighborById(nid)?.name));
   const screen = document.getElementById("screen-event");
@@ -1024,12 +1277,24 @@ function renderStoryLog() {
   const arcs = (state.stories.arcs || [])
     .map((a) => {
       const st = state.save.arcs?.[a.id];
+      const beats = a.beats || [];
+      const doneBeats = beats.filter((b) => state.save.storyFlags?.[b.id + "_done"] || state.save.storyFlags?.[b.id]).length;
       const status = st?.complete
         ? state.locale === "tr" ? "bitti" : "done"
         : st
           ? state.locale === "tr" ? "devam" : "open"
           : state.locale === "tr" ? "kilitli" : "locked";
-      return `<li class="${st?.complete ? "done" : ""}">${st?.complete ? "✓" : st ? "●" : "○"} ${loc(a.title)} <span class="agenda-hint">${status}</span></li>`;
+      const beatLine = beats
+        .map((b) => {
+          const ok = !!(state.save.storyFlags?.[b.id + "_done"] || state.save.storyFlags?.[b.id]);
+          return `<li class="${ok ? "done" : ""}">${ok ? "✓" : "○"} ${loc(b.prompt)}</li>`;
+        })
+        .join("");
+      return `<article class="arc-card art-card ${st?.complete ? "done" : st ? "open" : "locked"}">
+        <h3>${st?.complete ? "✓ " : st ? "● " : "○ "}${loc(a.title)} <span class="agenda-hint">${status} · ${doneBeats}/${beats.length}</span></h3>
+        <p class="muted">${(a.neighbors || []).map((id) => loc(neighborById(id)?.name) || id).join(" · ")}</p>
+        <ul class="agenda-list quest-obj">${beatLine || `<li class="muted">—</li>`}</ul>
+      </article>`;
     })
     .join("");
   const repLine = Object.entries(state.save.reputation || {})
@@ -1043,13 +1308,25 @@ function renderStoryLog() {
     ...(unlocks.skins || []).map((id) => id.replace(/^skin_/, "")),
     ...(unlocks.unitMods || []).map((id) => id.replace(/^mod_/, "")),
   ];
+  const activeQ = Quests.activeQuests(state.questPack, state.save);
+  const questBits = activeQ.length
+    ? activeQ.map((q) => `<li>● ${loc(q.title)}</li>`).join("")
+    : `<li class="muted">${state.locale === "tr" ? "Aktif görev yok" : "No active quests"}</li>`;
   screen.innerHTML = `
     ${hudHtml()}
-    <div class="topbar"><h2>${state.locale === "tr" ? "Hikâye defteri" : "Story ledger"}</h2>
-      <button class="btn btn-secondary" type="button" data-action="goto-evening">${t("common.back")}</button>
+    <div class="art-hero journal-hero" style="background-image:${stageBg(ART.streetHero, ART.streetHeroFallback)}">
+      <div class="art-hero-scrim">
+        <div class="topbar"><h2>${state.locale === "tr" ? "Hikâye defteri" : "Story journal"}</h2>
+          <button class="btn btn-secondary" type="button" data-action="goto-evening">${t("common.back")}</button>
+        </div>
+        <p class="evening-cup-tease">${state.locale === "tr" ? "Ark ilerlemesi · seçim izleri · görevler" : "Arc progress · choice marks · quests"}</p>
+      </div>
     </div>
     <h3 class="section-label">${state.locale === "tr" ? "Arklar" : "Arcs"}</h3>
-    <ul class="agenda-list">${arcs}</ul>
+    <div class="arc-list">${arcs}</div>
+    <h3 class="section-label">${state.locale === "tr" ? "Aktif görevler" : "Active quests"}</h3>
+    <ul class="agenda-list">${questBits}</ul>
+    <div class="btn-row"><button class="btn btn-teal" type="button" data-action="open-quests">${state.locale === "tr" ? "Görev defteri" : "Quest log"}</button></div>
     <h3 class="section-label">${state.locale === "tr" ? "Mahalle ünü" : "Street rep"}</h3>
     <p class="muted">${repLine}</p>
     <h3 class="section-label">${state.locale === "tr" ? "Son notlar" : "Recent notes"}</h3>
@@ -1102,6 +1379,7 @@ function renderCupLobby() {
       ? "Aynı etiketlerden 2+ seç → sinerji"
       : "Pick 2+ matching tags → synergy";
 
+  const cupWorld = worldCupLines();
   screen.innerHTML = `
     ${hudHtml()}
     <div class="topbar"><h2>${t("cup.lobby_title")}</h2>
@@ -1109,7 +1387,8 @@ function renderCupLobby() {
     </div>
     <p class="street-hint">${fillTemplate(t("cup.week"), { week: weekNumber(), mult: state.botMult.toFixed(2) })} · ${isCupNight() ? t("cup.season_night") : t("cup.practice")}</p>
     <p class="muted">${econT(state.economy, state.locale, "cup.flair.free_ok")}</p>
-    <div class="arena-hero" style="background-image:url('${ART.arenaStage}')"></div>
+    <div class="arena-hero clay-stage" style="background-image:${stageBg(ART.arenaStage, ART.arenaStageFallback)}"></div>
+    ${cupWorld.length ? `<p class="world-consequence">${cupWorld.map((l) => `◈ ${l}`).join(" · ")}</p>` : ""}
     <p class="street-hint">${fillTemplate(t("cup.picks"), { n: state.pickCount })} (${list.length} ${state.locale === "tr" ? "açık" : "unlocked"})</p>
     <div class="pick-grid pick-grid-dense">${cards}</div>
     <div class="synergy-pills" style="justify-content:center">${preview}</div>
@@ -1582,7 +1861,7 @@ function renderFight(battle) {
     <div class="fight-hud" style="margin-bottom:0.35rem">
       <span id="ally-hp-total" class="hud-ally"></span><span id="fight-timer">0.0s</span><span id="enemy-hp-total" class="hud-enemy"></span>
     </div>
-    <div class="fight-stage" style="background-image:url('${ART.arenaStage}')">
+    <div class="fight-stage clay-stage" style="background-image:${stageBg(ART.arenaStage, ART.arenaStageFallback)}">
       <div class="fight-side-label enemy-label">${tr ? "Rakip" : "Rival"}</div>
       <div class="fight-lane-label">${tr ? "ön" : "front"}</div>
       <div class="fight-row front" id="enemy-front"></div>
@@ -1700,6 +1979,8 @@ function endFight(battle) {
   state.save.cupHistory = state.save.cupHistory.slice(0, 20);
   if (isCupNight()) state.save.evening.cupDone = true;
   unlockNeighborsIfReady();
+  emitQuestEvent({ type: "cup_finish", won });
+  if (syn) emitQuestEvent({ type: "cup_synergy", synergy: syn.id || syn.name });
   saveNow();
   renderComic();
   showScreen("screen-comic");
@@ -1799,6 +2080,7 @@ function exportShareImage() {
       a.click();
       URL.revokeObjectURL(url);
       toast(state.locale === "tr" ? "Görsel indirildi" : "Image downloaded");
+      emitQuestEvent({ type: "share" });
     });
   };
   ctx.fillStyle = "#1A1612";
@@ -2239,6 +2521,37 @@ function onAction(action, target) {
     case "open-story-log":
       renderStoryLog();
       break;
+    case "open-quests":
+      state.questTab = "active";
+      renderQuestLog();
+      break;
+    case "quest-tab":
+      state.questTab = target.dataset.id || "active";
+      renderQuestLog();
+      break;
+    case "quest-accept": {
+      const ok = Quests.acceptQuest(state.save, state.questPack, target.dataset.id);
+      if (ok) {
+        const def = Quests.questDef(state.questPack, target.dataset.id);
+        toast((state.locale === "tr" ? "Görev alındı · " : "Quest accepted · ") + loc(def?.title));
+        saveNow();
+        state.questTab = "active";
+        renderQuestLog();
+      }
+      break;
+    }
+    case "quest-complete": {
+      const rewards = Quests.completeQuest(state.save, state.questPack, target.dataset.id, grantQuestRewards);
+      if (rewards) {
+        const def = Quests.questDef(state.questPack, target.dataset.id);
+        toast((state.locale === "tr" ? "Görev bitti · " : "Quest complete · ") + loc(def?.title));
+        saveNow();
+        if (document.getElementById("screen-evening")?.classList.contains("active")) renderEvening();
+        else if (document.getElementById("screen-quests")?.classList.contains("active")) renderQuestLog();
+        else renderEvening();
+      }
+      break;
+    }
     case "gift":
       doGift(target.dataset.id);
       break;
@@ -2311,29 +2624,44 @@ el.app.addEventListener("click", (e) => {
   onAction(target.dataset.action, target);
 });
 
+async function loadQuestPack() {
+  const stub = await fetch("data/quests.json").then((r) => r.json());
+  // Optional overlay copied from Project store worker pack
+  let overlay = null;
+  try {
+    const r = await fetch("data/quests.overlay.json");
+    if (r.ok) overlay = await r.json();
+  } catch {
+    /* no overlay yet */
+  }
+  return Quests.mergeQuestPacks(stub, overlay);
+}
+
 async function tryPullStorePacks() {
-  // Optional live pulls are store-side; in-repo copies are authoritative for the build.
-  // When store files appear, operators can copy into data/. We attempt same-origin stubs only.
+  // Store quest pack is copied into data/quests.overlay.json by the agent when ready.
 }
 
 async function boot() {
   try {
-    const [content, economy, stories, ladder, depthMeta] = await Promise.all([
+    const [content, economy, stories, ladder, depthMeta, questPack] = await Promise.all([
       fetch("data/content.json").then((r) => r.json()),
       fetch("data/economy.json").then((r) => r.json()),
       fetch("data/stories.json").then((r) => r.json()),
       fetch("data/ladder.json").then((r) => r.json()),
       fetch("data/depth-meta.json").then((r) => r.json()),
+      loadQuestPack(),
     ]);
     state.content = content;
     state.economy = economy;
     state.stories = stories;
     state.ladder = ladder;
     state.depthMeta = depthMeta;
+    state.questPack = questPack;
     // Merge economy uiStrings over content placeholders for shop/pass
     state.content.uiStrings = { ...state.content.uiStrings, ...economy.uiStrings };
     const hadSave = !!localStorage.getItem("rivalPorch.save.v4");
     state.save = loadSave(economy, depthMeta);
+    Quests.ensureQuestSave(state.save);
     const navLang = (navigator.language || "").toLowerCase().startsWith("tr") ? "tr" : "en";
     // Fresh profiles follow the browser; existing saves keep their locale.
     if (!hadSave) state.save.locale = navLang;
@@ -2341,6 +2669,7 @@ async function boot() {
     for (const n of content.neighbors) ensureNeighborState(n.id);
     Story.syncWeekArcs(state.stories, state.save);
     Story.applyStoryUnlocks(state.stories, state.save);
+    Quests.autoOfferArcQuests(state.questPack, state.save);
     saveNow();
     buildShell();
     document.documentElement.lang = state.locale;

@@ -1,0 +1,1843 @@
+{
+  "schemaVersion": 1,
+  "questPackId": "rival-porch-season1-quests",
+  "localeDefault": "tr",
+  "sourceBible": "docs/rival-porch-story-bible.md",
+  "storyContent": "internal/rival-porch-story-content.json",
+  "economy": "internal/rival-porch-economy.json",
+  "designDoc": "docs/rival-porch-quest-design.md",
+  "principles": {
+    "storyNeverGatedBySpend": true,
+    "payToWin": false,
+    "softFailsOnly": true,
+    "mainQuestsMinTrackedSteps": 3,
+    "visibleWorldConsequencesRequired": true
+  },
+  "dayCalendar": {
+    "seasonDays": 28,
+    "weekMap": [
+      { "week": 1, "days": [1, 7], "label": { "tr": "Yeni Veranda", "en": "New Porch" } },
+      { "week": 2, "days": [8, 14], "label": { "tr": "Anten ve İp", "en": "Antenna & Line" } },
+      { "week": 3, "days": [15, 21], "label": { "tr": "Gece ve Desibel", "en": "Night & Decibel" } },
+      { "week": 4, "days": [22, 28], "label": { "tr": "Defter Kapanışı", "en": "Ledger Closing" } }
+    ]
+  },
+  "quests": [
+    {
+      "id": "mq_welcome_porch",
+      "type": "main",
+      "title": {
+        "tr": "Yeni Veranda",
+        "en": "New Porch"
+      },
+      "summary": {
+        "tr": "Aşağı Sırt'a taşındın. Üç kapı çal, çay check-in yap, ilk Cup'a hazırlan.",
+        "en": "You just moved into Lower Ridge. Knock three doors, tea check-in, prep for Cup 1."
+      },
+      "giver": "n1",
+      "week": 1,
+      "dayWindow": { "start": 1, "end": 7 },
+      "unlockRequires": {
+        "flagsAll": []
+      },
+      "setsFlagsOnStart": ["quest_welcome_active", "arc_kite_antenna_seed"],
+      "objectives": [
+        {
+          "id": "mq_welcome_o1",
+          "order": 1,
+          "kind": "checkin",
+          "label": {
+            "tr": "Sabah çay check-in yap",
+            "en": "Do the morning tea check-in"
+          },
+          "track": { "type": "action", "actionId": "porch_checkin", "count": 1 },
+          "dialogueTreeId": null,
+          "dailyEventId": "de_01_tea_checkin",
+          "setsFlags": ["welcome_checkin_done"],
+          "worldConsequenceId": "wc_welcome_teapot_steam"
+        },
+        {
+          "id": "mq_welcome_o2",
+          "order": 2,
+          "kind": "talk",
+          "label": {
+            "tr": "Üç komşuyla konuş (affinity ≥ 10)",
+            "en": "Talk to three neighbors (affinity ≥ 10)"
+          },
+          "track": {
+            "type": "affinityAny",
+            "count": 3,
+            "min": 10
+          },
+          "setsFlags": ["welcome_met_three"],
+          "worldConsequenceId": "wc_welcome_three_doors_open"
+        },
+        {
+          "id": "mq_welcome_o3",
+          "order": 3,
+          "kind": "drama",
+          "label": {
+            "tr": "Uçurtma tohum olayını çöz (Arc A seed)",
+            "en": "Resolve the kite seed incident (Arc A seed)"
+          },
+          "track": { "type": "flag", "flag": "arc_kite_antenna_seed_resolved" },
+          "dailyEventId": "de_11_kite_forecast",
+          "setsFlags": ["arc_kite_antenna_seed_resolved"],
+          "worldConsequenceId": "wc_kite_string_on_antenna"
+        },
+        {
+          "id": "mq_welcome_o4",
+          "order": 4,
+          "kind": "cup",
+          "label": {
+            "tr": "Cup 1'i tamamla (galibiyet şart değil)",
+            "en": "Finish Cup 1 (win optional)"
+          },
+          "track": { "type": "cupComplete", "cupId": "cup_w1" },
+          "cupId": "cup_w1",
+          "setsFlags": ["quest_welcome_complete"],
+          "worldConsequenceId": "wc_cup1_gossip_board"
+        }
+      ],
+      "rewards": {
+        "porch_coins": 40,
+        "neon_thread": 0,
+        "rep": { "rep_mediator": 2, "rep_stage": 2 },
+        "unlocks": [],
+        "flags": ["quest_welcome_complete"]
+      },
+      "failure": null,
+      "expire": {
+        "soft": true,
+        "onDay": 8,
+        "effect": {
+          "tr": "Merve 'geç kaldın ama kapılar hâlâ açık' der; ödül %50.",
+          "en": "Merve says you're late but doors stay open; half rewards."
+        },
+        "rewardMultiplier": 0.5
+      },
+      "links": {
+        "arcId": null,
+        "dialogueTreeIds": ["dlg_cup_eve_generic"],
+        "cupUnlocks": ["cup_w1"],
+        "seasonWeekId": "w1"
+      }
+    },
+    {
+      "id": "mq_antenna_op",
+      "type": "main",
+      "title": {
+        "tr": "Anten Operasyonu",
+        "en": "Antenna Op"
+      },
+      "summary": {
+        "tr": "Leyla'nın uçurtması ↔ Orhan'ın anteni. Dört gün, iki yol: bayraklı barış veya yüksek kaos.",
+        "en": "Leyla's kite ↔ Orhan's antenna. Four days, two paths: peace flag or high chaos."
+      },
+      "giver": "n3",
+      "week": 2,
+      "dayWindow": { "start": 8, "end": 14 },
+      "unlockRequires": {
+        "flagsAny": ["quest_welcome_complete", "arc_kite_antenna_seed_resolved"]
+      },
+      "setsFlagsOnStart": ["arc_kite_antenna_active", "quest_antenna_active"],
+      "objectives": [
+        {
+          "id": "mq_antenna_o1",
+          "order": 1,
+          "kind": "arc_beat",
+          "label": {
+            "tr": "Takılan uçurtmayı çöz / tartış",
+            "en": "Untangle or argue the snagged kite"
+          },
+          "track": { "type": "flag", "flag": "arc_kite_antenna_beat1" },
+          "arcBeatId": "arc_kite_antenna_beat1",
+          "dialogueTreeId": "dlg_kite_day1",
+          "setsFlags": ["arc_kite_antenna_beat1"],
+          "worldConsequenceId": "wc_kite_snag_visible"
+        },
+        {
+          "id": "mq_antenna_o2",
+          "order": 2,
+          "kind": "arc_beat",
+          "label": {
+            "tr": "Cem'in ip disiplini teklifini dinle",
+            "en": "Hear Cem's line-tension drill pitch"
+          },
+          "track": { "type": "flag", "flag": "arc_kite_antenna_beat2" },
+          "arcBeatId": "arc_kite_antenna_beat2",
+          "dialogueTreeId": "dlg_kite_day2",
+          "setsFlags": ["arc_kite_antenna_beat2", "secret_leyla_map_peek"],
+          "worldConsequenceId": "wc_leyla_map_chalk"
+        },
+        {
+          "id": "mq_antenna_o3",
+          "order": 3,
+          "kind": "arc_beat",
+          "label": {
+            "tr": "Merve'nin iki versiyonundan birini doğrula",
+            "en": "Confirm one of Merve's two versions"
+          },
+          "track": { "type": "flag", "flag": "arc_kite_antenna_beat3" },
+          "arcBeatId": "arc_kite_antenna_beat3",
+          "dialogueTreeId": "dlg_kite_day3",
+          "setsFlags": ["arc_kite_antenna_beat3"],
+          "worldConsequenceId": "wc_gossip_two_posters"
+        },
+        {
+          "id": "mq_antenna_o4",
+          "order": 4,
+          "kind": "arc_beat",
+          "label": {
+            "tr": "Barış bayrağı veya daha yüksek uçuş",
+            "en": "Peace flag or fly higher"
+          },
+          "track": { "type": "flagAny", "flags": ["flag_fence_and_kite", "flag_kite_chaos_buff"] },
+          "arcBeatId": "arc_kite_antenna_beat4",
+          "dialogueTreeId": "dlg_kite_day4",
+          "setsFlags": ["arc_kite_antenna_complete", "quest_antenna_complete"],
+          "worldConsequenceId": "wc_antenna_resolution_branch",
+          "branchConsequences": {
+            "peace": "wc_antenna_flag_flies",
+            "chaos": "wc_kite_higher_chaos"
+          }
+        }
+      ],
+      "rewards": {
+        "porch_coins": 60,
+        "neon_thread": 1,
+        "rep": { "rep_mediator": 3, "rep_instigator": 3 },
+        "unlocksBranch": {
+          "peace": ["unlock_skin_orhan_antenna_flag", "flag_fence_and_kite", "orhan_softened"],
+          "chaos": ["unlock_unit_mod_leyla_wind", "flag_kite_chaos_buff"]
+        },
+        "cupEcho": true
+      },
+      "failure": null,
+      "expire": {
+        "soft": true,
+        "onDay": 15,
+        "effect": {
+          "tr": "Uçurtma ipi kendi kendine çözülür; unlock kaçabilir, Cup echo zayıf kalır.",
+          "en": "The line untangles itself; unlock may be missed, Cup echo weak."
+        },
+        "setsFlags": ["arc_kite_antenna_soft_fail"]
+      },
+      "links": {
+        "arcId": "arc_kite_antenna",
+        "dialogueTreeIds": [
+          "dlg_kite_day1",
+          "dlg_kite_day2",
+          "dlg_kite_day3",
+          "dlg_kite_day4"
+        ],
+        "cupUnlocks": ["cup_w2"],
+        "seasonWeekId": "w2"
+      }
+    },
+    {
+      "id": "mq_decibel_accord",
+      "type": "main",
+      "title": {
+        "tr": "Desibel Antlaşması",
+        "en": "Decibel Accord"
+      },
+      "summary": {
+        "tr": "Peri'nin seti, Orhan'ın uykusu, Merve'nin mahalle kararı. Kal ya da kariyer.",
+        "en": "Peri's set, Orhan's sleep, Merve's block vote. Stay or career."
+      },
+      "giver": "n5",
+      "week": 3,
+      "dayWindow": { "start": 15, "end": 21 },
+      "unlockRequires": {
+        "flagsAny": ["arc_kite_antenna_complete", "quest_antenna_complete", "cup_w2_done"]
+      },
+      "setsFlagsOnStart": ["arc_volume_war_active", "quest_volume_active"],
+      "objectives": [
+        {
+          "id": "mq_volume_o1",
+          "order": 1,
+          "kind": "arc_beat",
+          "label": {
+            "tr": "01:12 bas şokunu yaşa",
+            "en": "Survive the 01:12 bass shock"
+          },
+          "track": { "type": "flag", "flag": "arc_volume_war_beat1" },
+          "arcBeatId": "arc_volume_war_beat1",
+          "dialogueTreeId": "dlg_volume_day1",
+          "setsFlags": ["arc_volume_war_beat1"],
+          "worldConsequenceId": "wc_bass_windows_rattle"
+        },
+        {
+          "id": "mq_volume_o2",
+          "order": 2,
+          "kind": "arc_beat",
+          "label": {
+            "tr": "KULAKLIK notunu oku / yanıtla",
+            "en": "Read / answer the HEADPHONES note"
+          },
+          "track": { "type": "flag", "flag": "arc_volume_war_beat2" },
+          "arcBeatId": "arc_volume_war_beat2",
+          "dialogueTreeId": "dlg_volume_day2",
+          "setsFlags": ["arc_volume_war_beat2"],
+          "worldConsequenceId": "wc_headphones_note_door"
+        },
+        {
+          "id": "mq_volume_o3",
+          "order": 3,
+          "kind": "arc_beat",
+          "label": {
+            "tr": "Can'ın gece poğaça diplomasisine katıl",
+            "en": "Join Can's midnight pastry diplomacy"
+          },
+          "track": { "type": "flag", "flag": "arc_volume_war_beat3" },
+          "arcBeatId": "arc_volume_war_beat3",
+          "dialogueTreeId": "dlg_volume_day3",
+          "setsFlags": ["arc_volume_war_beat3", "night_bakery_open"],
+          "worldConsequenceId": "wc_night_bakery_glow"
+        },
+        {
+          "id": "mq_volume_o4",
+          "order": 4,
+          "kind": "arc_beat",
+          "label": {
+            "tr": "Peri'nin teklif sırrını duy",
+            "en": "Hear Peri's offer secret"
+          },
+          "track": { "type": "flag", "flag": "arc_volume_war_beat4" },
+          "arcBeatId": "arc_volume_war_beat4",
+          "dialogueTreeId": "dlg_volume_day4",
+          "setsFlags": ["arc_volume_war_beat4", "secret_peri_offer_tease"],
+          "worldConsequenceId": "wc_train_ticket_peek"
+        },
+        {
+          "id": "mq_volume_o5",
+          "order": 5,
+          "kind": "arc_beat",
+          "label": {
+            "tr": "Antlaşma veya kariyer yolu seç",
+            "en": "Choose accord or career path"
+          },
+          "track": {
+            "type": "flagAny",
+            "flags": ["flag_peri_stay", "flag_peri_leaving_threat"]
+          },
+          "arcBeatId": "arc_volume_war_beat5",
+          "dialogueTreeId": "dlg_volume_day5",
+          "setsFlags": ["arc_volume_war_complete", "quest_volume_complete"],
+          "worldConsequenceId": "wc_volume_resolution_branch",
+          "branchConsequences": {
+            "accord": "wc_quiet_neon_hours",
+            "career": "wc_peri_suitcase_porch"
+          }
+        }
+      ],
+      "rewards": {
+        "porch_coins": 70,
+        "neon_thread": 2,
+        "rep": { "rep_mediator": 4, "rep_instigator": 2, "rep_oven": 2 },
+        "unlocksBranch": {
+          "accord": [
+            "unlock_skin_peri_quiet_set",
+            "flag_peri_stay",
+            "flag_quiet_neon"
+          ],
+          "career": [
+            "unlock_unit_mod_peri_club_aoe",
+            "flag_peri_leaving_threat"
+          ]
+        },
+        "cupEcho": true
+      },
+      "failure": null,
+      "expire": {
+        "soft": true,
+        "onDay": 22,
+        "effect": {
+          "tr": "Bas kendi kendine kısılır; Peri kalma bayrağı belirsiz kalır.",
+          "en": "Bass fades on its own; Peri stay flag stays ambiguous."
+        },
+        "setsFlags": ["arc_volume_war_soft_fail"]
+      },
+      "links": {
+        "arcId": "arc_volume_war",
+        "dialogueTreeIds": [
+          "dlg_volume_day1",
+          "dlg_volume_day2",
+          "dlg_volume_day3",
+          "dlg_volume_day4",
+          "dlg_volume_day5"
+        ],
+        "cupUnlocks": ["cup_w3"],
+        "seasonWeekId": "w3"
+      }
+    },
+    {
+      "id": "mq_ledger_tray",
+      "type": "main",
+      "title": {
+        "tr": "Defter ve Tepsi",
+        "en": "Ledger & Tray"
+      },
+      "summary": {
+        "tr": "Merve'nin defteri, Can'ın gururu, Tea Circle'ın gerçek anlamı.",
+        "en": "Merve's ledger, Can's pride, what Tea Circle really means."
+      },
+      "giver": "n6",
+      "week": 4,
+      "dayWindow": { "start": 22, "end": 26 },
+      "unlockRequires": {
+        "flagsAny": ["arc_volume_war_complete", "quest_volume_complete", "cup_w3_done"]
+      },
+      "setsFlagsOnStart": ["arc_tea_ledger_active", "quest_ledger_active"],
+      "objectives": [
+        {
+          "id": "mq_ledger_o1",
+          "order": 1,
+          "kind": "arc_beat",
+          "label": {
+            "tr": "Poğaça kıtlığını yönet",
+            "en": "Manage the pastry shortage"
+          },
+          "track": { "type": "flag", "flag": "arc_tea_ledger_beat1" },
+          "arcBeatId": "arc_tea_ledger_beat1",
+          "dialogueTreeId": "dlg_tea_day1",
+          "setsFlags": ["arc_tea_ledger_beat1"],
+          "worldConsequenceId": "wc_bakery_queue_split"
+        },
+        {
+          "id": "mq_ledger_o2",
+          "order": 2,
+          "kind": "arc_beat",
+          "label": {
+            "tr": "Merve'nin 'ben biliyorum' duvarını aş",
+            "en": "Crack Merve's 'I know' wall"
+          },
+          "track": { "type": "flag", "flag": "arc_tea_ledger_beat2" },
+          "arcBeatId": "arc_tea_ledger_beat2",
+          "dialogueTreeId": "dlg_tea_day2",
+          "setsFlags": ["arc_tea_ledger_beat2"],
+          "worldConsequenceId": "wc_teapot_ledger_silhouette"
+        },
+        {
+          "id": "mq_ledger_o3",
+          "order": 3,
+          "kind": "arc_beat",
+          "label": {
+            "tr": "Can'a yardım et (gurur veya güven)",
+            "en": "Help Can (pride or trust)"
+          },
+          "track": { "type": "flag", "flag": "arc_tea_ledger_beat3" },
+          "arcBeatId": "arc_tea_ledger_beat3",
+          "dialogueTreeId": "dlg_tea_day3",
+          "setsFlags": ["arc_tea_ledger_beat3", "can_helped"],
+          "worldConsequenceId": "wc_can_tray_shared"
+        },
+        {
+          "id": "mq_ledger_o4",
+          "order": 4,
+          "kind": "arc_beat",
+          "label": {
+            "tr": "Defteri aç: borç = iyilik zinciri",
+            "en": "Open the ledger: debt = favor chain"
+          },
+          "track": { "type": "flag", "flag": "arc_tea_ledger_complete" },
+          "arcBeatId": "arc_tea_ledger_beat4",
+          "dialogueTreeId": "dlg_tea_day4",
+          "setsFlags": [
+            "arc_tea_ledger_complete",
+            "secret_merve_ledger_revealed",
+            "secret_can_ledger_debt_revealed",
+            "flag_ledger_closed_kind",
+            "quest_ledger_complete"
+          ],
+          "worldConsequenceId": "wc_tea_circle_street_heal"
+        }
+      ],
+      "rewards": {
+        "porch_coins": 80,
+        "neon_thread": 2,
+        "rep": { "rep_oven": 8, "rep_mediator": 5 },
+        "unlocks": [
+          "unlock_synergy_flavor_tea_circle_story",
+          "unlock_skin_merve_ledger_cozy"
+        ],
+        "cupEcho": true
+      },
+      "failure": null,
+      "expire": {
+        "soft": true,
+        "onDay": 27,
+        "effect": {
+          "tr": "Defter kapalı kalır; Tea Circle flavor unlock kaçabilir.",
+          "en": "Ledger stays closed; Tea Circle flavor unlock may be missed."
+        },
+        "setsFlags": ["flag_ledger_private", "arc_tea_ledger_soft_fail"]
+      },
+      "links": {
+        "arcId": "arc_tea_ledger",
+        "dialogueTreeIds": [
+          "dlg_tea_day1",
+          "dlg_tea_day2",
+          "dlg_tea_day3",
+          "dlg_tea_day4"
+        ],
+        "cupUnlocks": ["cup_w4_finale"],
+        "seasonWeekId": "w4"
+      }
+    },
+    {
+      "id": "mq_season_finale",
+      "type": "main",
+      "title": {
+        "tr": "Porch Cup Finali",
+        "en": "Porch Cup Final"
+      },
+      "summary": {
+        "tr": "Üç arc'ın artçısı + Aşağı Sırt final Cup'ı. Ending track'ini kilitle.",
+        "en": "Aftershocks of three arcs + Lower Ridge final Cup. Lock your ending track."
+      },
+      "giver": "system",
+      "week": 4,
+      "dayWindow": { "start": 26, "end": 28 },
+      "unlockRequires": {
+        "flagsAny": ["quest_ledger_complete", "arc_tea_ledger_complete", "arc_tea_ledger_soft_fail"]
+      },
+      "setsFlagsOnStart": ["quest_finale_active"],
+      "objectives": [
+        {
+          "id": "mq_finale_o1",
+          "order": 1,
+          "kind": "talk",
+          "label": {
+            "tr": "Cuma kulis: draft niyetini söyle",
+            "en": "Friday backstage: declare draft intent"
+          },
+          "track": { "type": "dialogueComplete", "dialogueTreeId": "dlg_cup_eve_generic" },
+          "dialogueTreeId": "dlg_cup_eve_generic",
+          "setsFlags": ["finale_eve_done"],
+          "worldConsequenceId": "wc_street_rehearsal_lights"
+        },
+        {
+          "id": "mq_finale_o2",
+          "order": 2,
+          "kind": "cup",
+          "label": {
+            "tr": "Porch Cup Finali'ni oyna",
+            "en": "Play the Porch Cup Final"
+          },
+          "track": { "type": "cupComplete", "cupId": "cup_w4_finale" },
+          "cupId": "cup_w4_finale",
+          "setsFlags": ["cup_w4_done"],
+          "worldConsequenceId": "wc_finale_comic_echo"
+        },
+        {
+          "id": "mq_finale_o3",
+          "order": 3,
+          "kind": "eval",
+          "label": {
+            "tr": "Pazar artçısı: ending branch'ini gör",
+            "en": "Sunday aftershock: see your ending branch"
+          },
+          "track": { "type": "flag", "flag": "season1_ending_shown" },
+          "dailyEventId": "de_27_sunday_recap",
+          "setsFlags": ["season1_ending_shown", "quest_finale_complete"],
+          "worldConsequenceId": "wc_ending_street_mood"
+        }
+      ],
+      "rewards": {
+        "porch_coins": 120,
+        "neon_thread": 3,
+        "rep": { "rep_stage": 5 },
+        "unlocks": [],
+        "endingEval": true
+      },
+      "failure": null,
+      "expire": null,
+      "links": {
+        "arcId": null,
+        "dialogueTreeIds": ["dlg_cup_eve_generic"],
+        "cupUnlocks": ["cup_w4_finale"],
+        "seasonWeekId": "w4",
+        "endings": true
+      }
+    },
+    {
+      "id": "sq_cem_knee",
+      "type": "side",
+      "title": {
+        "tr": "Düdük Altındaki Kart",
+        "en": "Card Under the Whistle"
+      },
+      "summary": {
+        "tr": "Cem dizini saklıyor. Soft yol açılırsa Cup'ta Moral Molası birimi gelir.",
+        "en": "Cem hides his knee. Soft path unlocks Morale Break in Cup."
+      },
+      "giver": "n2",
+      "week": 2,
+      "dayWindow": { "start": 9, "end": 20 },
+      "unlockRequires": {
+        "affinity": { "n2": 25 },
+        "flagsAny": ["arc_kite_antenna_beat2", "quest_antenna_active"]
+      },
+      "objectives": [
+        {
+          "id": "sq_cem_o1",
+          "order": 1,
+          "kind": "talk",
+          "label": {
+            "tr": "Cem'le antrenman sonrası konuş",
+            "en": "Talk to Cem after drills"
+          },
+          "track": { "type": "talk", "neighborId": "n2", "count": 1 },
+          "setsFlags": ["cem_knee_hint"],
+          "worldConsequenceId": "wc_cem_limp_idle"
+        },
+        {
+          "id": "sq_cem_o2",
+          "order": 2,
+          "kind": "gift",
+          "label": {
+            "tr": "Yumuşak hediye ver (porch_coins 20–40)",
+            "en": "Give a soft gift (20–40 porch_coins)"
+          },
+          "track": { "type": "gift", "neighborId": "n2", "count": 1 },
+          "spendSink": {
+            "currency": "porch_coins",
+            "min": 20,
+            "max": 40,
+            "fair": true,
+            "power": false
+          },
+          "setsFlags": ["cem_gift_soft"],
+          "worldConsequenceId": "wc_cem_whistle_pouch_glow"
+        },
+        {
+          "id": "sq_cem_o3",
+          "order": 3,
+          "kind": "dialogue",
+          "label": {
+            "tr": "Diz sırrını koru veya yumuşat",
+            "en": "Protect or soften the knee secret"
+          },
+          "track": { "type": "dialogueComplete", "dialogueTreeId": "dlg_cem_knee" },
+          "dialogueTreeId": "dlg_cem_knee",
+          "setsFlags": ["cem_soft_path", "secret_cem_knee_revealed"],
+          "worldConsequenceId": "wc_cem_morale_bench"
+        }
+      ],
+      "rewards": {
+        "porch_coins": 25,
+        "neon_thread": 1,
+        "rep": { "rep_mediator": 4 },
+        "unlocks": ["unlock_unit_mod_cem_morale"],
+        "affinity": { "n2": 8 }
+      },
+      "failure": {
+        "ifFlags": ["cem_knee_exposed_harsh"],
+        "effect": {
+          "tr": "Cem kapanır; Moral Molası kilitli kalır, Rivalry egosu artar.",
+          "en": "Cem shuts down; Morale Break stays locked, Rivalry ego rises."
+        },
+        "rep": { "rep_instigator": 2 }
+      },
+      "expire": {
+        "soft": true,
+        "onDay": 21,
+        "effect": {
+          "tr": "Fizyo kartı kaybolur; yan görev kapanır.",
+          "en": "Physio card vanishes; side quest closes."
+        }
+      },
+      "links": {
+        "arcId": null,
+        "dialogueTreeIds": ["dlg_cem_knee"],
+        "cupUnlocks": ["unlock_unit_mod_cem_morale"],
+        "seasonWeekId": "w2"
+      }
+    },
+    {
+      "id": "sq_orhan_letters",
+      "type": "side",
+      "title": {
+        "tr": "Gazete Arası Notlar",
+        "en": "Notes in the Newspaper"
+      },
+      "summary": {
+        "tr": "Orhan'ı yumuşatmadan mektup katmanı açılmaz. Hediye spam'i yetmez.",
+        "en": "Orhan's letter layer won't open without softening. Gift spam won't cut it."
+      },
+      "giver": "n4",
+      "week": 2,
+      "dayWindow": { "start": 10, "end": 24 },
+      "unlockRequires": {
+        "affinity": { "n4": 35 },
+        "flagsAny": ["kite_path_apology", "kite_path_coop", "orhan_softened"]
+      },
+      "objectives": [
+        {
+          "id": "sq_orhan_o1",
+          "order": 1,
+          "kind": "drama",
+          "label": {
+            "tr": "Grumpy'yi drama seçimiyle yumuşat",
+            "en": "Soften Grumpy via a drama choice"
+          },
+          "track": { "type": "flag", "flag": "orhan_softened" },
+          "setsFlags": ["orhan_softened"],
+          "worldConsequenceId": "wc_orhan_second_cup"
+        },
+        {
+          "id": "sq_orhan_o2",
+          "order": 2,
+          "kind": "talk",
+          "label": {
+            "tr": "Gazete katlama meditasyonuna eşlik et",
+            "en": "Sit with his newspaper-fold meditation"
+          },
+          "track": { "type": "talk", "neighborId": "n4", "count": 2 },
+          "dailyEventId": "de_12_newspaper_fold",
+          "setsFlags": ["orhan_fold_shared"],
+          "worldConsequenceId": "wc_orhan_empty_chair_lit"
+        },
+        {
+          "id": "sq_orhan_o3",
+          "order": 3,
+          "kind": "dialogue",
+          "label": {
+            "tr": "Gönderilmemiş notları dinle (sakla veya tut)",
+            "en": "Hear the unsent notes (hold or keep private)"
+          },
+          "track": { "type": "dialogueComplete", "dialogueTreeId": "dlg_orhan_letters" },
+          "dialogueTreeId": "dlg_orhan_letters",
+          "setsFlags": ["secret_orhan_letters_revealed"],
+          "worldConsequenceId": "wc_orhan_letters_tucked"
+        }
+      ],
+      "rewards": {
+        "porch_coins": 30,
+        "neon_thread": 0,
+        "rep": { "rep_mediator": 5 },
+        "unlocks": [],
+        "affinity": { "n4": 10 },
+        "flags": ["secret_orhan_letters_held"]
+      },
+      "failure": null,
+      "expire": {
+        "soft": true,
+        "onDay": 25,
+        "effect": {
+          "tr": "Notlar gazete arasında kalır; sır açılmaz.",
+          "en": "Notes stay in the paper; secret unopened."
+        }
+      },
+      "links": {
+        "arcId": "arc_kite_antenna",
+        "dialogueTreeIds": ["dlg_orhan_letters"],
+        "cupUnlocks": [],
+        "seasonWeekId": "w2"
+      }
+    },
+    {
+      "id": "sq_leyla_wind_map",
+      "type": "side",
+      "title": {
+        "tr": "Rüzgâr Haritası",
+        "en": "Wind Map"
+      },
+      "summary": {
+        "tr": "Leyla'nın çatı haritasını tamamla; kaos veya güvenli koridor.",
+        "en": "Finish Leyla's rooftop map; chaos lane or safe corridor."
+      },
+      "giver": "n3",
+      "week": 2,
+      "dayWindow": { "start": 8, "end": 14 },
+      "unlockRequires": {
+        "flagsAny": ["arc_kite_antenna_beat2", "secret_leyla_map_peek"]
+      },
+      "objectives": [
+        {
+          "id": "sq_leyla_o1",
+          "order": 1,
+          "kind": "explore",
+          "label": {
+            "tr": "Çatıda üç rüzgâr noktasını işaretle",
+            "en": "Mark three wind points on the roof"
+          },
+          "track": { "type": "action", "actionId": "mark_wind_point", "count": 3 },
+          "setsFlags": ["leyla_map_partial"],
+          "worldConsequenceId": "wc_chalk_arrows_roof"
+        },
+        {
+          "id": "sq_leyla_o2",
+          "order": 2,
+          "kind": "talk",
+          "label": {
+            "tr": "Orhan antenini 'yasak' mı 'paylaşım' mı yap",
+            "en": "Mark Orhan's antenna forbidden or shared"
+          },
+          "track": { "type": "choice", "choiceId": "leyla_map_antenna_zone" },
+          "setsFlags": ["leyla_map_zone_set"],
+          "worldConsequenceId": "wc_antenna_zone_marker"
+        },
+        {
+          "id": "sq_leyla_o3",
+          "order": 3,
+          "kind": "gift",
+          "label": {
+            "tr": "Uçurtma ipi hediyesi (15–25 coins)",
+            "en": "Gift kite string (15–25 coins)"
+          },
+          "track": { "type": "gift", "neighborId": "n3", "count": 1 },
+          "spendSink": {
+            "currency": "porch_coins",
+            "min": 15,
+            "max": 25,
+            "fair": true,
+            "power": false
+          },
+          "setsFlags": ["secret_leyla_map", "sq_leyla_map_complete"],
+          "worldConsequenceId": "wc_leyla_map_complete_pin"
+        }
+      ],
+      "rewards": {
+        "porch_coins": 20,
+        "neon_thread": 1,
+        "rep": { "rep_instigator": 2, "rep_stage": 1 },
+        "affinity": { "n3": 6 }
+      },
+      "failure": null,
+      "expire": {
+        "soft": true,
+        "onDay": 15,
+        "effect": {
+          "tr": "Harita yağmurda silinir; Cup chaos buff yolu zayıflar.",
+          "en": "Rain washes the map; Cup chaos path weakens."
+        }
+      },
+      "links": {
+        "arcId": "arc_kite_antenna",
+        "dialogueTreeIds": ["dlg_kite_day2"],
+        "cupUnlocks": ["unlock_unit_mod_leyla_wind"],
+        "seasonWeekId": "w2"
+      }
+    },
+    {
+      "id": "sq_night_bakery",
+      "type": "side",
+      "title": {
+        "tr": "Gece Fırını",
+        "en": "Night Bakery"
+      },
+      "summary": {
+        "tr": "Can gece poğaçası açarsa Soft + Neon köprüsü kurulur.",
+        "en": "If Can opens midnight pastries, Soft + Neon bridge forms."
+      },
+      "giver": "n6",
+      "week": 3,
+      "dayWindow": { "start": 15, "end": 21 },
+      "unlockRequires": {
+        "flagsAny": ["arc_volume_war_beat2", "de_14_night_bakery_seen"]
+      },
+      "objectives": [
+        {
+          "id": "sq_night_o1",
+          "order": 1,
+          "kind": "event",
+          "label": {
+            "tr": "Gece fırını olayını tetikle",
+            "en": "Trigger the night bakery event"
+          },
+          "track": { "type": "dailyEvent", "dailyEventId": "de_14_night_bakery" },
+          "dailyEventId": "de_14_night_bakery",
+          "setsFlags": ["night_bakery_open"],
+          "worldConsequenceId": "wc_night_bakery_glow"
+        },
+        {
+          "id": "sq_night_o2",
+          "order": 2,
+          "kind": "gift",
+          "label": {
+            "tr": "Peri veya Orhan'a poğaça götür (spend sink)",
+            "en": "Carry pastry to Peri or Orhan (spend sink)"
+          },
+          "track": { "type": "gift", "neighborIdAny": ["n5", "n4"], "count": 1 },
+          "spendSink": {
+            "currency": "porch_coins",
+            "min": 15,
+            "max": 30,
+            "fair": true,
+            "power": false,
+            "note": "Buys delivery tray flair only; affinity from Soft path"
+          },
+          "setsFlags": ["night_pastry_delivered"],
+          "worldConsequenceId": "wc_pastry_trail_neon"
+        },
+        {
+          "id": "sq_night_o3",
+          "order": 3,
+          "kind": "talk",
+          "label": {
+            "tr": "Can'la Soft diplomasiyi kapat",
+            "en": "Close Soft diplomacy with Can"
+          },
+          "track": { "type": "talk", "neighborId": "n6", "count": 1 },
+          "setsFlags": ["sq_night_bakery_complete", "can_helped"],
+          "worldConsequenceId": "wc_oven_soft_neon_bridge"
+        }
+      ],
+      "rewards": {
+        "porch_coins": 35,
+        "neon_thread": 1,
+        "rep": { "rep_oven": 5, "rep_mediator": 2 },
+        "affinity": { "n6": 6, "n5": 3 }
+      },
+      "failure": null,
+      "expire": {
+        "soft": true,
+        "onDay": 22,
+        "effect": {
+          "tr": "Fırın gece kapanır; Soft köprü kurulmaz.",
+          "en": "Bakery stays dark at night; Soft bridge never forms."
+        }
+      },
+      "links": {
+        "arcId": "arc_volume_war",
+        "dialogueTreeIds": ["dlg_volume_day3"],
+        "cupUnlocks": [],
+        "seasonWeekId": "w3"
+      }
+    },
+    {
+      "id": "sq_tea_circle_gifts",
+      "type": "side",
+      "title": {
+        "tr": "Demlik Zinciri",
+        "en": "Teapot Chain"
+      },
+      "summary": {
+        "tr": "Merve'ye üç gün çay hediyesi — fair affinity sink, hikâye kilidi değil.",
+        "en": "Three days of tea gifts to Merve — fair affinity sink, not a story gate."
+      },
+      "giver": "n1",
+      "week": 1,
+      "dayWindow": { "start": 2, "end": 18 },
+      "unlockRequires": {
+        "flagsAny": ["welcome_checkin_done", "quest_welcome_active"]
+      },
+      "objectives": [
+        {
+          "id": "sq_tea_o1",
+          "order": 1,
+          "kind": "gift",
+          "label": {
+            "tr": "1. çay hediyesi",
+            "en": "1st tea gift"
+          },
+          "track": { "type": "gift", "neighborId": "n1", "count": 1 },
+          "spendSink": {
+            "currency": "porch_coins",
+            "min": 15,
+            "max": 25,
+            "fair": true,
+            "power": false
+          },
+          "worldConsequenceId": "wc_merve_extra_cup"
+        },
+        {
+          "id": "sq_tea_o2",
+          "order": 2,
+          "kind": "gift",
+          "label": {
+            "tr": "2. çay hediyesi (farklı gün)",
+            "en": "2nd tea gift (another day)"
+          },
+          "track": { "type": "gift", "neighborId": "n1", "count": 2, "distinctDays": true },
+          "spendSink": {
+            "currency": "porch_coins",
+            "min": 15,
+            "max": 30,
+            "fair": true,
+            "power": false
+          },
+          "worldConsequenceId": "wc_merve_gossip_board_warm"
+        },
+        {
+          "id": "sq_tea_o3",
+          "order": 3,
+          "kind": "gift",
+          "label": {
+            "tr": "3. çay hediyesi + kısa sohbet",
+            "en": "3rd tea gift + short talk"
+          },
+          "track": { "type": "compound", "all": [
+            { "type": "gift", "neighborId": "n1", "count": 3, "distinctDays": true },
+            { "type": "talk", "neighborId": "n1", "count": 1 }
+          ]},
+          "spendSink": {
+            "currency": "porch_coins",
+            "min": 15,
+            "max": 40,
+            "fair": true,
+            "power": false
+          },
+          "setsFlags": ["sq_tea_circle_gifts_complete", "arc_tea_ledger_seed"],
+          "worldConsequenceId": "wc_tea_circle_seed_steam"
+        }
+      ],
+      "rewards": {
+        "porch_coins": 15,
+        "neon_thread": 1,
+        "rep": { "rep_mediator": 3, "rep_oven": 1 },
+        "affinity": { "n1": 12 }
+      },
+      "failure": null,
+      "expire": null,
+      "links": {
+        "arcId": "arc_tea_ledger",
+        "dialogueTreeIds": [],
+        "cupUnlocks": ["unlock_synergy_flavor_tea_circle_story"],
+        "seasonWeekId": "w1"
+      }
+    },
+    {
+      "id": "sq_porch_lamp_decor",
+      "type": "side",
+      "title": {
+        "tr": "Veranda Lambası",
+        "en": "Porch Lamp"
+      },
+      "summary": {
+        "tr": "Dekor hedefi: lamba slotu. Uzun oturum sink'i; savaş gücü yok.",
+        "en": "Decor goal: lamp slot. Long-session sink; zero combat power."
+      },
+      "giver": "system",
+      "week": 1,
+      "dayWindow": { "start": 3, "end": 28 },
+      "unlockRequires": {
+        "flagsAny": ["welcome_met_three"]
+      },
+      "objectives": [
+        {
+          "id": "sq_lamp_o1",
+          "order": 1,
+          "kind": "earn",
+          "label": {
+            "tr": "150 porch_coins biriktir (veya 3 neon_thread)",
+            "en": "Bank 150 porch_coins (or 3 neon_thread)"
+          },
+          "track": {
+            "type": "walletOr",
+            "options": [
+              { "currency": "porch_coins", "amount": 150 },
+              { "currency": "neon_thread", "amount": 3 }
+            ]
+          },
+          "worldConsequenceId": "wc_lamp_shop_highlight"
+        },
+        {
+          "id": "sq_lamp_o2",
+          "order": 2,
+          "kind": "spend",
+          "label": {
+            "tr": "Lamba slotunu satın al",
+            "en": "Buy the lamp slot"
+          },
+          "track": { "type": "decorOwned", "slot": "lamp" },
+          "spendSink": {
+            "id": "decoration_goal_slot",
+            "slot": "lamp",
+            "currency": "porch_coins",
+            "typical": 150,
+            "or_neon_thread": 3,
+            "fair": true,
+            "power": false
+          },
+          "setsFlags": ["decor_lamp_owned"],
+          "worldConsequenceId": "wc_player_porch_lamp_on"
+        },
+        {
+          "id": "sq_lamp_o3",
+          "order": 3,
+          "kind": "social",
+          "label": {
+            "tr": "Bir komşu lambanı fark etsin (talk)",
+            "en": "Have a neighbor notice your lamp (talk)"
+          },
+          "track": { "type": "talk", "neighborIdAny": ["n1", "n4", "n6"], "count": 1 },
+          "setsFlags": ["sq_porch_lamp_complete"],
+          "worldConsequenceId": "wc_neighbor_compliments_lamp"
+        }
+      ],
+      "rewards": {
+        "porch_coins": 20,
+        "neon_thread": 0,
+        "rep": { "rep_stage": 2 },
+        "cosmetic": { "poseHint": "warm_lamp_idle" }
+      },
+      "failure": null,
+      "expire": null,
+      "links": {
+        "arcId": null,
+        "dialogueTreeIds": [],
+        "cupUnlocks": [],
+        "seasonWeekId": "w1",
+        "economySinkId": "decoration_goal_slot"
+      }
+    },
+    {
+      "id": "sq_cup_entry_flair",
+      "type": "side",
+      "title": {
+        "tr": "Kulis Işığı",
+        "en": "Lobby Lights"
+      },
+      "summary": {
+        "tr": "Opsiyonel Cup giriş kozmetiği. Entry ücretsiz kalır; flair sadece görsel.",
+        "en": "Optional Cup entry cosmetic. Entry stays free; flair is visual only."
+      },
+      "giver": "system",
+      "week": 1,
+      "dayWindow": { "start": 5, "end": 28 },
+      "unlockRequires": {
+        "flagsAny": ["quest_welcome_complete", "cup_w1_done"]
+      },
+      "objectives": [
+        {
+          "id": "sq_flair_o1",
+          "order": 1,
+          "kind": "cup",
+          "label": {
+            "tr": "Herhangi bir Cup'ı bitir",
+            "en": "Finish any Cup"
+          },
+          "track": { "type": "cupCompleteAny", "count": 1 },
+          "worldConsequenceId": "wc_lobby_default"
+        },
+        {
+          "id": "sq_flair_o2",
+          "order": 2,
+          "kind": "spend",
+          "label": {
+            "tr": "Opsiyonel: giriş flair'i al (40 coins veya 1 thread)",
+            "en": "Optional: buy entry flair (40 coins or 1 thread)"
+          },
+          "track": { "type": "cosmeticOwned", "itemId": "cup_entry_flair_basic" },
+          "optional": true,
+          "spendSink": {
+            "id": "cup_entry_flair",
+            "porch_coins": 40,
+            "or_neon_thread": 1,
+            "requiredForEntry": false,
+            "fair": true,
+            "power": false
+          },
+          "worldConsequenceId": "wc_lobby_sparkle"
+        },
+        {
+          "id": "sq_flair_o3",
+          "order": 3,
+          "kind": "share",
+          "label": {
+            "tr": "Maç çizgi romanını paylaş (ilk share ödülü)",
+            "en": "Share match comic (first-share reward)"
+          },
+          "track": { "type": "shareComic", "count": 1 },
+          "setsFlags": ["sq_cup_flair_complete"],
+          "worldConsequenceId": "wc_comic_shared_pin"
+        }
+      ],
+      "rewards": {
+        "porch_coins": 25,
+        "neon_thread": 1,
+        "rep": { "rep_stage": 3 }
+      },
+      "failure": null,
+      "expire": null,
+      "links": {
+        "arcId": null,
+        "dialogueTreeIds": [],
+        "cupUnlocks": [],
+        "seasonWeekId": "w1",
+        "economySinkId": "cup_entry_flair"
+      }
+    },
+    {
+      "id": "sq_gossip_repair",
+      "type": "side",
+      "title": {
+        "tr": "Yanlış Dedikodu",
+        "en": "Wrong Rumor"
+      },
+      "summary": {
+        "tr": "Merve yanlış yaydı. Düzeltmek Arabulucu, yaymak Kışkırtıcı track'i şişirir.",
+        "en": "Merve spread it wrong. Fix it for Mediator, amplify for Instigator."
+      },
+      "giver": "n1",
+      "week": 2,
+      "dayWindow": { "start": 8, "end": 16 },
+      "unlockRequires": {
+        "dailyEventSeen": "de_15_gossip_wrong"
+      },
+      "objectives": [
+        {
+          "id": "sq_gossip_o1",
+          "order": 1,
+          "kind": "event",
+          "label": {
+            "tr": "Yanlış dedikodu olayını aç",
+            "en": "Open the wrong-rumor event"
+          },
+          "track": { "type": "dailyEvent", "dailyEventId": "de_15_gossip_wrong" },
+          "dailyEventId": "de_15_gossip_wrong",
+          "setsFlags": ["gossip_wrong_active"],
+          "worldConsequenceId": "wc_wrong_poster_street"
+        },
+        {
+          "id": "sq_gossip_o2",
+          "order": 2,
+          "kind": "choice",
+          "label": {
+            "tr": "Düzelt veya büyüt",
+            "en": "Correct or amplify"
+          },
+          "track": {
+            "type": "flagAny",
+            "flags": ["gossip_repaired", "gossip_amplified"]
+          },
+          "branchConsequences": {
+            "repair": "wc_poster_torn_down",
+            "amplify": "wc_poster_extra_copies"
+          },
+          "worldConsequenceId": "wc_gossip_branch"
+        },
+        {
+          "id": "sq_gossip_o3",
+          "order": 3,
+          "kind": "talk",
+          "label": {
+            "tr": "Etkilenen komşuyla konuş",
+            "en": "Talk to the affected neighbor"
+          },
+          "track": { "type": "talk", "neighborIdAny": ["n5", "n4", "n6"], "count": 1 },
+          "setsFlags": ["sq_gossip_repair_complete"],
+          "worldConsequenceId": "wc_street_mood_after_gossip"
+        }
+      ],
+      "rewards": {
+        "porch_coins": 30,
+        "neon_thread": 0,
+        "repBranch": {
+          "repair": { "rep_mediator": 4 },
+          "amplify": { "rep_instigator": 5 }
+        }
+      },
+      "failure": null,
+      "expire": {
+        "soft": true,
+        "onDay": 17,
+        "effect": {
+          "tr": "Dedikodu unutulur; track bonus kaçırılır.",
+          "en": "Rumor fades; track bonus missed."
+        }
+      },
+      "links": {
+        "arcId": null,
+        "dialogueTreeIds": [],
+        "cupUnlocks": [],
+        "seasonWeekId": "w2"
+      }
+    },
+    {
+      "id": "sq_rival_ridge_scout",
+      "type": "side",
+      "title": {
+        "tr": "Karşı Sırt Keşfi",
+        "en": "Rival Ridge Scout"
+      },
+      "summary": {
+        "tr": "Bot mahalleyi 'hikâye aynası' olarak tanı. Sahne Amiri track'i besler.",
+        "en": "Meet the bot street as story-mirror. Feeds Stage Manager track."
+      },
+      "giver": "n2",
+      "week": 3,
+      "dayWindow": { "start": 16, "end": 27 },
+      "unlockRequires": {
+        "cupWinsMin": 1
+      },
+      "objectives": [
+        {
+          "id": "sq_rival_o1",
+          "order": 1,
+          "kind": "talk",
+          "label": {
+            "tr": "Cem'den Karşı Sırt brifingi al",
+            "en": "Get Rival Ridge briefing from Cem"
+          },
+          "track": { "type": "talk", "neighborId": "n2", "count": 1 },
+          "setsFlags": ["rival_briefing"],
+          "worldConsequenceId": "wc_rival_poster_bakkal"
+        },
+        {
+          "id": "sq_rival_o2",
+          "order": 2,
+          "kind": "cup",
+          "label": {
+            "tr": "Bir Cup'ta Rivalry veya Neon sinerjisi yakala",
+            "en": "Trigger Rivalry or Neon synergy in a Cup"
+          },
+          "track": {
+            "type": "cupSynergyAny",
+            "tags": ["Rivalry", "Neon"]
+          },
+          "setsFlags": ["rival_synergy_seen"],
+          "worldConsequenceId": "wc_synergy_spotlight_street"
+        },
+        {
+          "id": "sq_rival_o3",
+          "order": 3,
+          "kind": "share",
+          "label": {
+            "tr": "Comic frame craft veya share (sink opsiyonel)",
+            "en": "Comic frame craft or share (optional sink)"
+          },
+          "track": {
+            "type": "or",
+            "options": [
+              { "type": "shareComic", "count": 1 },
+              { "type": "cosmeticOwned", "itemId": "frame_chalk_grid" }
+            ]
+          },
+          "spendSink": {
+            "id": "comic_frame_craft",
+            "optional": true,
+            "porch_coins": 100,
+            "or_neon_thread": 3,
+            "fair": true,
+            "power": false
+          },
+          "setsFlags": ["sq_rival_scout_complete"],
+          "worldConsequenceId": "wc_rival_comic_frame"
+        }
+      ],
+      "rewards": {
+        "porch_coins": 40,
+        "neon_thread": 1,
+        "rep": { "rep_stage": 6 }
+      },
+      "failure": null,
+      "expire": {
+        "soft": true,
+        "onDay": 28,
+        "effect": {
+          "tr": "Karşı Sırt efsanesi eksik kalır; ending_cup_legend zorlaşır.",
+          "en": "Rival Ridge legend stays thin; ending_cup_legend harder."
+        }
+      },
+      "links": {
+        "arcId": null,
+        "dialogueTreeIds": [],
+        "cupUnlocks": [],
+        "seasonWeekId": "w3",
+        "economySinkId": "comic_frame_craft"
+      }
+    },
+    {
+      "id": "sq_peri_quiet_hours",
+      "type": "side",
+      "title": {
+        "tr": "Sessiz Saatler",
+        "en": "Quiet Hours"
+      },
+      "summary": {
+        "tr": "Antlaşma sonrası sessiz saat tabelasını as. Peri kalırsa quiet set güçlenir.",
+        "en": "Post quiet-hours sign after the accord. Strengthens quiet set if Peri stays."
+      },
+      "giver": "n4",
+      "week": 3,
+      "dayWindow": { "start": 18, "end": 25 },
+      "unlockRequires": {
+        "flagsAll": ["arc_volume_war_beat4"]
+      },
+      "objectives": [
+        {
+          "id": "sq_quiet_o1",
+          "order": 1,
+          "kind": "talk",
+          "label": {
+            "tr": "Orhan ve Peri ile saat aralığını konuş",
+            "en": "Negotiate the hour window with Orhan and Peri"
+          },
+          "track": {
+            "type": "talk",
+            "neighborIdAll": ["n4", "n5"],
+            "countEach": 1
+          },
+          "setsFlags": ["quiet_hours_negotiated"],
+          "worldConsequenceId": "wc_draft_hours_chalk"
+        },
+        {
+          "id": "sq_quiet_o2",
+          "order": 2,
+          "kind": "spend",
+          "label": {
+            "tr": "Tabela dekoru (sign slot) — opsiyonel kozmetik",
+            "en": "Sign decor (sign slot) — optional cosmetic"
+          },
+          "track": { "type": "decorOwned", "slot": "sign" },
+          "optional": true,
+          "spendSink": {
+            "id": "decoration_goal_slot",
+            "slot": "sign",
+            "typicalCostPorchCoins": 150,
+            "fair": true,
+            "power": false
+          },
+          "worldConsequenceId": "wc_quiet_hours_sign"
+        },
+        {
+          "id": "sq_quiet_o3",
+          "order": 3,
+          "kind": "flag",
+          "label": {
+            "tr": "Desibel çözümünü bekle (kal / git)",
+            "en": "Await volume resolution (stay / leave)"
+          },
+          "track": {
+            "type": "flagAny",
+            "flags": ["flag_peri_stay", "flag_peri_leaving_threat", "flag_quiet_neon"]
+          },
+          "setsFlags": ["sq_quiet_hours_complete"],
+          "worldConsequenceId": "wc_neon_dim_schedule"
+        }
+      ],
+      "rewards": {
+        "porch_coins": 25,
+        "neon_thread": 1,
+        "rep": { "rep_mediator": 4 },
+        "flagsBoost": ["flag_quiet_neon"]
+      },
+      "failure": null,
+      "expire": {
+        "soft": true,
+        "onDay": 26,
+        "effect": {
+          "tr": "Tabela asılmaz; quiet neon flag zayıf kalır.",
+          "en": "No sign posted; quiet neon flag stays weak."
+        }
+      },
+      "links": {
+        "arcId": "arc_volume_war",
+        "dialogueTreeIds": ["dlg_volume_day5"],
+        "cupUnlocks": ["unlock_skin_peri_quiet_set"],
+        "seasonWeekId": "w3"
+      }
+    }
+  ],
+  "worldConsequences": [
+    {
+      "id": "wc_welcome_teapot_steam",
+      "streetVisual": {
+        "tr": "Oyuncu verandasında ince çay buharı.",
+        "en": "Thin tea steam on the player porch."
+      },
+      "npcIdle": null,
+      "cupLobby": null
+    },
+    {
+      "id": "wc_welcome_three_doors_open",
+      "streetVisual": {
+        "tr": "Üç komşu kapısı aralık; selam animasyonu.",
+        "en": "Three neighbor doors ajar; greeting idle."
+      }
+    },
+    {
+      "id": "wc_kite_string_on_antenna",
+      "streetVisual": {
+        "tr": "Antende ince uçurtma ipi asılı — Arc A tohumu.",
+        "en": "Thin kite string on the antenna — Arc A seed."
+      }
+    },
+    {
+      "id": "wc_cup1_gossip_board",
+      "streetVisual": {
+        "tr": "Bakkal camında ilk Cup skoru yazılır.",
+        "en": "First Cup score chalked on the corner-shop window."
+      }
+    },
+    {
+      "id": "wc_kite_snag_visible",
+      "streetVisual": {
+        "tr": "Uçurtma antene dolanmış; Orhan gazeteyi kalkan tutar.",
+        "en": "Kite tangled on antenna; Orhan holds paper like a shield."
+      },
+      "npcIdle": { "n4": "grumpy_shield", "n3": "kite_stuck" }
+    },
+    {
+      "id": "wc_leyla_map_chalk",
+      "streetVisual": {
+        "tr": "Çatıda tebeşir okları belirir.",
+        "en": "Chalk arrows appear on the roof."
+      }
+    },
+    {
+      "id": "wc_gossip_two_posters",
+      "streetVisual": {
+        "tr": "Sokağa iki çelişkili afiş asılır.",
+        "en": "Two conflicting posters go up on the street."
+      }
+    },
+    {
+      "id": "wc_antenna_resolution_branch",
+      "streetVisual": {
+        "tr": "Çözüm günü: anten ya bayraklı ya daha yüksek uçuş izi.",
+        "en": "Resolution day: antenna either flagged or scarred by higher flight."
+      }
+    },
+    {
+      "id": "wc_antenna_flag_flies",
+      "streetVisual": {
+        "tr": "Küçük ortak bayrak antende sallanır.",
+        "en": "Tiny shared flag flutters on the antenna."
+      },
+      "cupLobby": "orhan_flag_skin_preview"
+    },
+    {
+      "id": "wc_kite_higher_chaos",
+      "streetVisual": {
+        "tr": "Uçurtma daha yüksekte; çamaşır ipleri titrer.",
+        "en": "Kite flies higher; laundry lines shiver."
+      },
+      "cupLobby": "leyla_wind_mod_preview"
+    },
+    {
+      "id": "wc_bass_windows_rattle",
+      "streetVisual": {
+        "tr": "Gece pencereleri titreşir; mercan neon pulse.",
+        "en": "Night windows rattle; coral neon pulses."
+      },
+      "npcIdle": { "n5": "dj_set_loud", "n4": "light_on_angry" }
+    },
+    {
+      "id": "wc_headphones_note_door",
+      "streetVisual": {
+        "tr": "Peri kapısında gazete mürekkepli KULAKLIK notu.",
+        "en": "HEADPHONES note in newspaper ink on Peri's door."
+      }
+    },
+    {
+      "id": "wc_night_bakery_glow",
+      "streetVisual": {
+        "tr": "Fırın gece közü yanar; Soft aura sokağa sızar.",
+        "en": "Bakery night ember glows; Soft aura leaks onto the street."
+      },
+      "npcIdle": { "n6": "tray_night_route" }
+    },
+    {
+      "id": "wc_train_ticket_peek",
+      "streetVisual": {
+        "tr": "Kulaklık kutusundan tren bileti ucu görünür.",
+        "en": "Edge of a train ticket peeks from the headphone case."
+      }
+    },
+    {
+      "id": "wc_volume_resolution_branch",
+      "streetVisual": {
+        "tr": "Neon ya kısılır ya sertleşir — seçime göre.",
+        "en": "Neon either dims or hardens — by choice."
+      }
+    },
+    {
+      "id": "wc_quiet_neon_hours",
+      "streetVisual": {
+        "tr": "Sessiz saat tabelası + kısık neon.",
+        "en": "Quiet-hours sign + dim neon."
+      },
+      "cupLobby": "peri_quiet_set_preview"
+    },
+    {
+      "id": "wc_peri_suitcase_porch",
+      "streetVisual": {
+        "tr": "Peri verandasında yarım açık bavul.",
+        "en": "Half-open suitcase on Peri's porch."
+      },
+      "cupLobby": "peri_club_aoe_preview"
+    },
+    {
+      "id": "wc_bakery_queue_split",
+      "streetVisual": {
+        "tr": "Poğaça kuyruğu ikiye ayrılır: Cup kadrosu vs sokak.",
+        "en": "Pastry queue splits: Cup roster vs whole street."
+      }
+    },
+    {
+      "id": "wc_teapot_ledger_silhouette",
+      "streetVisual": {
+        "tr": "Merve'nin demliğinin yanında defter silüeti.",
+        "en": "Ledger silhouette beside Merve's teapot."
+      }
+    },
+    {
+      "id": "wc_can_tray_shared",
+      "streetVisual": {
+        "tr": "Ortak tepsi standı verandalar arasında.",
+        "en": "Shared tray stand between porches."
+      }
+    },
+    {
+      "id": "wc_tea_circle_street_heal",
+      "streetVisual": {
+        "tr": "Sokak boyunca yumuşak heal buharı (flavor).",
+        "en": "Soft heal steam along the street (flavor)."
+      },
+      "cupLobby": "tea_circle_story_synergy"
+    },
+    {
+      "id": "wc_street_rehearsal_lights",
+      "streetVisual": {
+        "tr": "Cuma gecesi prova ışıkları yanar.",
+        "en": "Friday rehearsal lights come on."
+      }
+    },
+    {
+      "id": "wc_finale_comic_echo",
+      "streetVisual": {
+        "tr": "Final comic panelleri bakkal vitrinine yansır.",
+        "en": "Final comic panels reflect in the shop window."
+      }
+    },
+    {
+      "id": "wc_ending_street_mood",
+      "streetVisual": {
+        "tr": "Dominant itibar track'ine göre sokak rengi/mood.",
+        "en": "Street tint/mood by dominant reputation track."
+      }
+    },
+    {
+      "id": "wc_cem_limp_idle",
+      "npcIdle": { "n2": "subtle_limp" }
+    },
+    {
+      "id": "wc_cem_whistle_pouch_glow",
+      "streetVisual": {
+        "tr": "Düdük kılıfı hafif parlar (kart ipucu).",
+        "en": "Whistle pouch faintly glows (card hint)."
+      }
+    },
+    {
+      "id": "wc_cem_morale_bench",
+      "streetVisual": {
+        "tr": "Antrenman bankında 'moral molası' şişesi.",
+        "en": "'Morale break' bottle on the drill bench."
+      },
+      "cupLobby": "cem_morale_mod_preview"
+    },
+    {
+      "id": "wc_orhan_second_cup",
+      "streetVisual": {
+        "tr": "Orhan'ın masasında ikinci boş bardak durur.",
+        "en": "Second empty cup stays on Orhan's table."
+      }
+    },
+    {
+      "id": "wc_orhan_empty_chair_lit",
+      "streetVisual": {
+        "tr": "Boş sandalye loş ışıkta.",
+        "en": "Empty chair in soft light."
+      }
+    },
+    {
+      "id": "wc_orhan_letters_tucked",
+      "streetVisual": {
+        "tr": "Gazete arasından not köşesi görünür, sonra kaybolur.",
+        "en": "Note corner peeks from the paper, then tucks away."
+      }
+    },
+    {
+      "id": "wc_chalk_arrows_roof",
+      "streetVisual": {
+        "tr": "Çatı antenleri arasında tebeşir okları.",
+        "en": "Chalk arrows between rooftop antennas."
+      }
+    },
+    {
+      "id": "wc_antenna_zone_marker",
+      "streetVisual": {
+        "tr": "Antende yasak veya paylaşım işareti.",
+        "en": "Forbidden or shared marker on the antenna."
+      }
+    },
+    {
+      "id": "wc_leyla_map_complete_pin",
+      "streetVisual": {
+        "tr": "Tamamlanmış rüzgâr haritası çatıya iğnelenir.",
+        "en": "Finished wind map pinned on the roof."
+      }
+    },
+    {
+      "id": "wc_pastry_trail_neon",
+      "streetVisual": {
+        "tr": "Poğaça tepsi izi neon yansımasıyla.",
+        "en": "Pastry-tray trail with neon reflection."
+      }
+    },
+    {
+      "id": "wc_oven_soft_neon_bridge",
+      "streetVisual": {
+        "tr": "Fırın–Peri verandası arasında Soft+Neon köprü ışığı.",
+        "en": "Soft+Neon bridge light between bakery and Peri porch."
+      }
+    },
+    {
+      "id": "wc_merve_extra_cup",
+      "streetVisual": {
+        "tr": "Merve demliğinde fazla bardak.",
+        "en": "Extra cup on Merve's teapot tray."
+      }
+    },
+    {
+      "id": "wc_merve_gossip_board_warm",
+      "streetVisual": {
+        "tr": "Dedikodu panosu sıcak ton alır.",
+        "en": "Gossip board warms in tone."
+      }
+    },
+    {
+      "id": "wc_tea_circle_seed_steam",
+      "streetVisual": {
+        "tr": "Üç verandada eşzamanlı çay buharı.",
+        "en": "Simultaneous tea steam on three porches."
+      }
+    },
+    {
+      "id": "wc_lamp_shop_highlight",
+      "streetVisual": {
+        "tr": "Dükkânda lamba slotu vurgulanır.",
+        "en": "Lamp slot highlighted in shop."
+      }
+    },
+    {
+      "id": "wc_player_porch_lamp_on",
+      "streetVisual": {
+        "tr": "Oyuncu verandası gece yanar.",
+        "en": "Player porch lamp glows at night."
+      }
+    },
+    {
+      "id": "wc_neighbor_compliments_lamp",
+      "streetVisual": {
+        "tr": "Komşu selamı lambaya bakar.",
+        "en": "Neighbor greeting glances at the lamp."
+      }
+    },
+    {
+      "id": "wc_lobby_default",
+      "cupLobby": "default"
+    },
+    {
+      "id": "wc_lobby_sparkle",
+      "cupLobby": "entry_flair_vfx"
+    },
+    {
+      "id": "wc_comic_shared_pin",
+      "streetVisual": {
+        "tr": "Paylaşılan comic pin'i bakkalda.",
+        "en": "Shared comic pin on the corner shop."
+      }
+    },
+    {
+      "id": "wc_wrong_poster_street",
+      "streetVisual": {
+        "tr": "Yanlış dedikodu afişi asılı.",
+        "en": "Wrong-rumor poster hung."
+      }
+    },
+    {
+      "id": "wc_gossip_branch",
+      "streetVisual": {
+        "tr": "Afiş ya yırtılır ya çoğalır.",
+        "en": "Poster either torn down or multiplied."
+      }
+    },
+    {
+      "id": "wc_poster_torn_down",
+      "streetVisual": {
+        "tr": "Afiş yırtık köşede kalır.",
+        "en": "Torn poster corner remains."
+      }
+    },
+    {
+      "id": "wc_poster_extra_copies",
+      "streetVisual": {
+        "tr": "Üç kopya afiş yan yana.",
+        "en": "Three poster copies side by side."
+      }
+    },
+    {
+      "id": "wc_street_mood_after_gossip",
+      "streetVisual": {
+        "tr": "Sokak mood'u onarım/kaos tonuna kayar.",
+        "en": "Street mood shifts toward repair or chaos."
+      }
+    },
+    {
+      "id": "wc_rival_poster_bakkal",
+      "streetVisual": {
+        "tr": "Karşı Sırt ayna afişi bakkalda.",
+        "en": "Rival Ridge mirror poster at the shop."
+      }
+    },
+    {
+      "id": "wc_synergy_spotlight_street",
+      "streetVisual": {
+        "tr": "Sinerji spotlight izi kaldırımda.",
+        "en": "Synergy spotlight trail on the curb."
+      }
+    },
+    {
+      "id": "wc_rival_comic_frame",
+      "streetVisual": {
+        "tr": "Özel comic frame vitrinde.",
+        "en": "Special comic frame in the window."
+      }
+    },
+    {
+      "id": "wc_draft_hours_chalk",
+      "streetVisual": {
+        "tr": "Kaldırımda saat aralığı tebeşirle.",
+        "en": "Hour window chalked on the curb."
+      }
+    },
+    {
+      "id": "wc_quiet_hours_sign",
+      "streetVisual": {
+        "tr": "Sessiz saat tabelası asılı.",
+        "en": "Quiet-hours sign posted."
+      }
+    },
+    {
+      "id": "wc_neon_dim_schedule",
+      "streetVisual": {
+        "tr": "Neon programa göre kısılır.",
+        "en": "Neon dims on a schedule."
+      }
+    }
+  ],
+  "meta": {
+    "mainCount": 5,
+    "sideCount": 10,
+    "totalQuests": 15,
+    "minObjectivesMain": 3,
+    "spendSinkQuestIds": [
+      "sq_cem_knee",
+      "sq_leyla_wind_map",
+      "sq_night_bakery",
+      "sq_tea_circle_gifts",
+      "sq_porch_lamp_decor",
+      "sq_cup_entry_flair",
+      "sq_rival_ridge_scout",
+      "sq_peri_quiet_hours"
+    ],
+    "implementation": "Load with stories.json; quest engine advances objectives via flags/actions; worldConsequences drive street/cup visuals"
+  }
+}

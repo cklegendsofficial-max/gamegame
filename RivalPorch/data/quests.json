@@ -1,0 +1,186 @@
+{
+  "schemaVersion": 1,
+  "source": "stub",
+  "note": "Replace/merge when Project store internal/rival-porch-quests.json lands",
+  "quests": [
+    {
+      "id": "q_antenna_op",
+      "arcId": "arc_kite_antenna",
+      "title": { "tr": "Anten Operasyonu", "en": "Antenna Op" },
+      "blurb": {
+        "tr": "Leyla'nın ipi Orhan'ın anteninde. Mahalleyi ayıran mı, birleştiren mi olacaksın?",
+        "en": "Leyla's string is in Orhan's antenna. Split the block — or stitch it?"
+      },
+      "acceptDayMin": 1,
+      "neighbors": ["n3", "n4"],
+      "objectives": [
+        {
+          "id": "talk_leyla",
+          "type": "visit_scene",
+          "neighborId": "n3",
+          "label": { "tr": "Leyla ile uçurtma sahnesini bitir", "en": "Finish Leyla's kite scene" },
+          "count": 1
+        },
+        {
+          "id": "talk_orhan",
+          "type": "visit_scene",
+          "neighborId": "n4",
+          "label": { "tr": "Orhan ile anten sahnesini bitir", "en": "Finish Orhan's antenna scene" },
+          "count": 1
+        },
+        {
+          "id": "arc_beat",
+          "type": "arc_beat",
+          "arcId": "arc_kite_antenna",
+          "label": { "tr": "Anten arkının bir beat'ini tamamla", "en": "Complete one Antenna Op arc beat" },
+          "count": 1
+        }
+      ],
+      "rewards": {
+        "porch_coins": 40,
+        "neon_thread": 1,
+        "passXp": 0.5,
+        "flags": ["quest_antenna_op_done"]
+      }
+    },
+    {
+      "id": "q_porch_round",
+      "arcId": null,
+      "title": { "tr": "Veranda Turu", "en": "Porch Round" },
+      "blurb": {
+        "tr": "Üç kapı çal, bir hediye ver, mahalleyi ısıt.",
+        "en": "Knock three doors, give one gift, warm the block."
+      },
+      "acceptDayMin": 1,
+      "neighbors": ["n1", "n2", "n6"],
+      "objectives": [
+        {
+          "id": "visits_3",
+          "type": "visit_any",
+          "label": { "tr": "3 komşu sahnesi", "en": "3 neighbor scenes" },
+          "count": 3
+        },
+        {
+          "id": "gift_1",
+          "type": "gift",
+          "label": { "tr": "1 hediye ver", "en": "Give 1 gift" },
+          "count": 1
+        },
+        {
+          "id": "checkin",
+          "type": "checkin",
+          "label": { "tr": "Veranda check-in", "en": "Porch check-in" },
+          "count": 1
+        }
+      ],
+      "rewards": {
+        "porch_coins": 25,
+        "passXp": 0.3,
+        "flags": ["quest_porch_round_done"]
+      }
+    },
+    {
+      "id": "q_practice_cup",
+      "arcId": null,
+      "title": { "tr": "Isınma Cup'ı", "en": "Warmup Cup" },
+      "blurb": {
+        "tr": "Formasyon kur, bir practice Cup oyna. Synergy'yi dene.",
+        "en": "Set a formation, play a practice Cup. Taste a synergy."
+      },
+      "acceptDayMin": 1,
+      "neighbors": ["n2", "n4", "n1"],
+      "objectives": [
+        {
+          "id": "cup_play",
+          "type": "cup_finish",
+          "label": { "tr": "Bir Cup maçı bitir", "en": "Finish one Cup match" },
+          "count": 1
+        },
+        {
+          "id": "synergy",
+          "type": "cup_synergy",
+          "label": { "tr": "Aktif synergy ile bitir", "en": "Finish with an active synergy" },
+          "count": 1
+        }
+      ],
+      "rewards": {
+        "porch_coins": 30,
+        "neon_thread": 1,
+        "passXp": 0.4,
+        "flags": ["quest_practice_cup_done"]
+      }
+    },
+    {
+      "id": "q_tea_ledger",
+      "arcId": "arc_tea_ledger",
+      "title": { "tr": "Çay Defteri", "en": "Tea Ledger" },
+      "blurb": {
+        "tr": "Merve'nin demliği kaynıyor. Defter satırları mahalleyi şekillendirir.",
+        "en": "Merve's pot is boiling. Ledger lines shape the block."
+      },
+      "acceptDayMin": 2,
+      "neighbors": ["n1", "n6"],
+      "objectives": [
+        {
+          "id": "visit_merve",
+          "type": "visit_scene",
+          "neighborId": "n1",
+          "label": { "tr": "Merve porch sahnesi", "en": "Merve porch scene" },
+          "count": 1
+        },
+        {
+          "id": "visit_can",
+          "type": "visit_scene",
+          "neighborId": "n6",
+          "label": { "tr": "Can fırın sahnesi", "en": "Can bakery scene" },
+          "count": 1
+        }
+      ],
+      "rewards": {
+        "porch_coins": 35,
+        "passXp": 0.4,
+        "flags": ["quest_tea_ledger_done"]
+      }
+    },
+    {
+      "id": "q_decibel",
+      "arcId": "arc_volume_war",
+      "title": { "tr": "Desibel Antlaşması", "en": "Decibel Accord" },
+      "blurb": {
+        "tr": "Peri'nin bass'i Orhan'ın uykusunu bölüyor. Antlaşma mı, drop mu?",
+        "en": "Peri's bass cracks Orhan's sleep. Accord — or drop?"
+      },
+      "acceptDayMin": 3,
+      "neighbors": ["n5", "n4"],
+      "objectives": [
+        {
+          "id": "visit_peri",
+          "type": "visit_scene",
+          "neighborId": "n5",
+          "label": { "tr": "Peri set sahnesi", "en": "Peri set scene" },
+          "count": 1
+        },
+        {
+          "id": "visit_orhan_vol",
+          "type": "visit_scene",
+          "neighborId": "n4",
+          "label": { "tr": "Orhan kural sahnesi", "en": "Orhan rules scene" },
+          "count": 1
+        },
+        {
+          "id": "arc_vol",
+          "type": "arc_beat",
+          "arcId": "arc_volume_war",
+          "label": { "tr": "Desibel ark beat'i", "en": "Decibel arc beat" },
+          "count": 1
+        }
+      ],
+      "rewards": {
+        "porch_coins": 45,
+        "neon_thread": 1,
+        "passXp": 0.5,
+        "flags": ["quest_decibel_done"]
+      }
+    }
+  ]
+}
