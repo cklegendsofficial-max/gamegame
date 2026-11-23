@@ -1,0 +1,669 @@
+{
+  "schemaVersion": 1,
+  "sliceId": "rival-porch-day1",
+  "localeDefault": "tr",
+  "neighbors": [
+    {
+      "id": "n1",
+      "nameKey": "neighbor.n1.name",
+      "name": { "tr": "Merve Teyze", "en": "Aunt Merve" },
+      "trait": "Gossip",
+      "role": "Support buffer",
+      "synergyTag": "Tea",
+      "prop": { "id": "prop_demlik", "nameKey": "prop.demlik", "label": { "tr": "Demlik", "en": "Teapot" } },
+      "bustAssetHint": "bust_aunt_merve",
+      "giftLines": [
+        {
+          "id": "n1_gift_tea",
+          "itemTag": "tea",
+          "text": {
+            "tr": "Ay canım, demliği tazeledin! Mahalle bunları konuşacak.",
+            "en": "Oh sweetie, you topped up the pot! The street will talk about this."
+          },
+          "affinityDelta": 2
+        },
+        {
+          "id": "n1_gift_gossip",
+          "itemTag": "pastry",
+          "text": {
+            "tr": "Bu börekle üç kapı birden yumuşar. Anlattırırım hepsini.",
+            "en": "This pastry softens three doors at once. I'll get every story."
+          },
+          "affinityDelta": 1
+        }
+      ],
+      "talkLines": [
+        {
+          "id": "n1_talk_porch",
+          "text": {
+            "tr": "Dün gece 3. kattakiler yine geç yattı. Ben sadece çay demliyorum tabii.",
+            "en": "Third floor stayed up late again. Me? Just brewing tea, of course."
+          }
+        },
+        {
+          "id": "n1_talk_cup",
+          "text": {
+            "tr": "Kupada kim kimle yan yana? Söyle, ben zaten biliyorum gibi.",
+            "en": "Who's next to who in the Cup? Tell me—I already almost know."
+          }
+        }
+      ],
+      "drama": {
+        "id": "n1_drama_whisper",
+        "prompt": {
+          "tr": "Merve Teyze, komşu kavgasını herkese mi anlatsın, yoksa arabulucu mu olsun?",
+          "en": "Should Aunt Merve broadcast the neighbor spat—or mediate quietly?"
+        },
+        "choices": [
+          {
+            "id": "n1_c_spread",
+            "label": {
+              "tr": "Herkese fısılda",
+              "en": "Whisper it around"
+            },
+            "traitDeltas": { "Gossip": 2, "Soft": -1 },
+            "affinityDelta": 1
+          },
+          {
+            "id": "n1_c_mediate",
+            "label": {
+              "tr": "Arabuluculuk yap",
+              "en": "Mediate instead"
+            },
+            "traitDeltas": { "Gossip": -1, "Soft": 2 },
+            "affinityDelta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "n2",
+      "nameKey": "neighbor.n2.name",
+      "name": { "tr": "Antrenör Cem", "en": "Coach Cem" },
+      "trait": "Rival",
+      "role": "Bruiser",
+      "synergyTag": "Rivalry",
+      "prop": { "id": "prop_duduk", "nameKey": "prop.duduk", "label": { "tr": "Düdük", "en": "Whistle" } },
+      "bustAssetHint": "bust_coach_cem",
+      "giftLines": [
+        {
+          "id": "n2_gift_whistle",
+          "itemTag": "sport",
+          "text": {
+            "tr": "Bu düdükle rakipler titrer. İyi hamle.",
+            "en": "With this whistle, rivals flinch. Solid move."
+          },
+          "affinityDelta": 2
+        },
+        {
+          "id": "n2_gift_snack",
+          "itemTag": "protein",
+          "text": {
+            "tr": "Enerji barı? Antrenman sonrası şart. Teşekkürler şampiyon.",
+            "en": "Energy bar? Post-drill essential. Thanks, champ."
+          },
+          "affinityDelta": 1
+        }
+      ],
+      "talkLines": [
+        {
+          "id": "n2_talk_drill",
+          "text": {
+            "tr": "Porch Cup'ta kimse ısınmadan girmesin. Ben ısındırırım.",
+            "en": "Nobody enters Porch Cup cold. I'll warm them up."
+          }
+        },
+        {
+          "id": "n2_talk_rival",
+          "text": {
+            "tr": "Rakip zayıfsa zafer tatsız. Bana gerçek bir düello lazım.",
+            "en": "Easy rivals taste empty. I need a real duel."
+          }
+        }
+      ],
+      "drama": {
+        "id": "n2_drama_score",
+        "prompt": {
+          "tr": "Cem, gençleri sert mi çalıştırsın, yoksa moral için mi gevşetsin?",
+          "en": "Should Cem push the kids hard—or ease up for morale?"
+        },
+        "choices": [
+          {
+            "id": "n2_c_push",
+            "label": {
+              "tr": "Sert antrenman",
+              "en": "Hard drills"
+            },
+            "traitDeltas": { "Rival": 2, "Chaos": 1 },
+            "affinityDelta": 1
+          },
+          {
+            "id": "n2_c_ease",
+            "label": {
+              "tr": "Moral molası",
+              "en": "Morale break"
+            },
+            "traitDeltas": { "Rival": -1, "Soft": 2 },
+            "affinityDelta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "n3",
+      "nameKey": "neighbor.n3.name",
+      "name": { "tr": "Çocuk Leyla", "en": "Kid Leyla" },
+      "trait": "Chaos",
+      "role": "Glass cannon",
+      "synergyTag": "Chaos",
+      "prop": { "id": "prop_ucurtma", "nameKey": "prop.ucurtma", "label": { "tr": "Uçurtma", "en": "Kite" } },
+      "bustAssetHint": "bust_kid_leyla",
+      "giftLines": [
+        {
+          "id": "n3_gift_kite",
+          "itemTag": "toy",
+          "text": {
+            "tr": "Yeni uçurtma!! Rüzgârı mahalleye çağırıyorum!",
+            "en": "New kite!! I'm summoning the wind for the whole block!"
+          },
+          "affinityDelta": 2
+        },
+        {
+          "id": "n3_gift_candy",
+          "itemTag": "candy",
+          "text": {
+            "tr": "Şeker mi? Ben zaten hızlıydım… şimdi daha hızlıyım.",
+            "en": "Candy? I was already fast… now I'm faster."
+          },
+          "affinityDelta": 1
+        }
+      ],
+      "talkLines": [
+        {
+          "id": "n3_talk_rooftop",
+          "text": {
+            "tr": "Çatıdan bakınca herkes minik! Arena da öyle olmalı.",
+            "en": "From the roof everyone looks tiny! The arena should too."
+          }
+        },
+        {
+          "id": "n3_talk_chaos",
+          "text": {
+            "tr": "Plan mı? Plan, plandır… ta ki uçurtma takılana kadar.",
+            "en": "A plan? Plans are plans… until the kite snags."
+          }
+        }
+      ],
+      "drama": {
+        "id": "n3_drama_kite",
+        "prompt": {
+          "tr": "Leyla'nın uçurtması Orhan Amca'nın antenine dolaştı. Ne yapalım?",
+          "en": "Leyla's kite tangled in Mr. Orhan's antenna. What now?"
+        },
+        "choices": [
+          {
+            "id": "n3_c_dare",
+            "label": {
+              "tr": "Daha yükseğe çık",
+              "en": "Climb higher"
+            },
+            "traitDeltas": { "Chaos": 2, "Grumpy": 1 },
+            "affinityDelta": 1
+          },
+          {
+            "id": "n3_c_apologize",
+            "label": {
+              "tr": "Özür dile, yardım et",
+              "en": "Apologize and help"
+            },
+            "traitDeltas": { "Chaos": -1, "Soft": 2 },
+            "affinityDelta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "n4",
+      "nameKey": "neighbor.n4.name",
+      "name": { "tr": "Orhan Amca", "en": "Mr. Orhan" },
+      "trait": "Grumpy",
+      "role": "Tank",
+      "synergyTag": "Fence",
+      "prop": { "id": "prop_gazete", "nameKey": "prop.gazete", "label": { "tr": "Gazete", "en": "Newspaper" } },
+      "bustAssetHint": "bust_mr_orhan",
+      "giftLines": [
+        {
+          "id": "n4_gift_paper",
+          "itemTag": "newspaper",
+          "text": {
+            "tr": "Hım. Sayfalar düzgün katlanmış. Nadir şey.",
+            "en": "Hmph. Pages folded properly. Rare these days."
+          },
+          "affinityDelta": 2
+        },
+        {
+          "id": "n4_gift_tea",
+          "itemTag": "tea",
+          "text": {
+            "tr": "Çay… kabul. Konuşma kısmını kısa tut.",
+            "en": "Tea… accepted. Keep the talking short."
+          },
+          "affinityDelta": 1
+        }
+      ],
+      "talkLines": [
+        {
+          "id": "n4_talk_fence",
+          "text": {
+            "tr": "Çit sağlamsa mahalle sağlamdır. Gerisi gürültü.",
+            "en": "If the fence holds, the block holds. The rest is noise."
+          }
+        },
+        {
+          "id": "n4_talk_cup",
+          "text": {
+            "tr": "Kupada ön safta dururum. Geri çekilmem.",
+            "en": "I'll stand front line in the Cup. I don't step back."
+          }
+        }
+      ],
+      "drama": {
+        "id": "n4_drama_noise",
+        "prompt": {
+          "tr": "Gece gürültüsü Orhan Amca'yı uyandırdı. Ne önerirsin?",
+          "en": "Night noise woke Mr. Orhan. What's your call?"
+        },
+        "choices": [
+          {
+            "id": "n4_c_scold",
+            "label": {
+              "tr": "Kapıya çık, azarla",
+              "en": "Scold at the door"
+            },
+            "traitDeltas": { "Grumpy": 2, "Nightowl": -1 },
+            "affinityDelta": 1
+          },
+          {
+            "id": "n4_c_earplug",
+            "label": {
+              "tr": "Kulak tıkaçları + çay",
+              "en": "Earplugs and tea"
+            },
+            "traitDeltas": { "Grumpy": -1, "Soft": 1, "Tea": 1 },
+            "affinityDelta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "n5",
+      "nameKey": "neighbor.n5.name",
+      "name": { "tr": "DJ Peri", "en": "DJ Peri" },
+      "trait": "Nightowl",
+      "role": "AoE",
+      "synergyTag": "Neon",
+      "prop": { "id": "prop_kulaklik", "nameKey": "prop.kulaklik", "label": { "tr": "Kulaklık", "en": "Headphones" } },
+      "bustAssetHint": "bust_dj_peri",
+      "giftLines": [
+        {
+          "id": "n5_gift_cans",
+          "itemTag": "audio",
+          "text": {
+            "tr": "Bu kulaklıkla bas duvara yapışır. Neon yanıyor.",
+            "en": "With these cans the bass sticks to the wall. Neon's lit."
+          },
+          "affinityDelta": 2
+        },
+        {
+          "id": "n5_gift_energy",
+          "itemTag": "energy",
+          "text": {
+            "tr": "Gece seti için yakıt. Teşekkürler, komşu.",
+            "en": "Fuel for the night set. Thanks, neighbor."
+          },
+          "affinityDelta": 1
+        }
+      ],
+      "talkLines": [
+        {
+          "id": "n5_talk_set",
+          "text": {
+            "tr": "İlk sekiz saniye kritik. Sonra herkes dans eder—ya da kaçar.",
+            "en": "First eight seconds matter. Then everyone dances—or runs."
+          }
+        },
+        {
+          "id": "n5_talk_street",
+          "text": {
+            "tr": "Sokak lambası yetmez. Neon lazım, minik arena lazım.",
+            "en": "Street lamps aren't enough. Need neon, need a tiny stage."
+          }
+        }
+      ],
+      "drama": {
+        "id": "n5_drama_volume",
+        "prompt": {
+          "tr": "Peri'nin seti yüksek. Mahalle mi kazanır, yoksa beat mi?",
+          "en": "Peri's set is loud. Does the block win—or the beat?"
+        },
+        "choices": [
+          {
+            "id": "n5_c_blast",
+            "label": {
+              "tr": "Sesi aç, neon yak",
+              "en": "Crank it, light neon"
+            },
+            "traitDeltas": { "Nightowl": 2, "Chaos": 1 },
+            "affinityDelta": 1
+          },
+          {
+            "id": "n5_c_quiet",
+            "label": {
+              "tr": "Kulaklığa geç",
+              "en": "Switch to headphones"
+            },
+            "traitDeltas": { "Nightowl": -1, "Soft": 1, "Grumpy": -1 },
+            "affinityDelta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "n6",
+      "nameKey": "neighbor.n6.name",
+      "name": { "tr": "Fırıncı Can", "en": "Baker Can" },
+      "trait": "Soft",
+      "role": "Healer",
+      "synergyTag": "Oven",
+      "prop": { "id": "prop_tepsi", "nameKey": "prop.tepsi", "label": { "tr": "Tepsi", "en": "Tray" } },
+      "bustAssetHint": "bust_baker_can",
+      "giftLines": [
+        {
+          "id": "n6_gift_flour",
+          "itemTag": "baking",
+          "text": {
+            "tr": "Un taze… fırın mutlu. Sen de mutlu ol.",
+            "en": "Flour's fresh… the oven's happy. You should be too."
+          },
+          "affinityDelta": 2
+        },
+        {
+          "id": "n6_gift_jam",
+          "itemTag": "jam",
+          "text": {
+            "tr": "Reçel mi? Poğaçaya süreceğim, mahalle bayılacak.",
+            "en": "Jam? Going on the buns—the block will melt."
+          },
+          "affinityDelta": 1
+        }
+      ],
+      "talkLines": [
+        {
+          "id": "n6_talk_oven",
+          "text": {
+            "tr": "Sıcak tepsi, soğuk sinirleri eritir. Arenada da öyle.",
+            "en": "A warm tray melts cold nerves. Same in the arena."
+          }
+        },
+        {
+          "id": "n6_talk_care",
+          "text": {
+            "tr": "Kim düşerse onu kaldırırsın. Ben poğaçayla kaldırırsın.",
+            "en": "Whoever falls, you pick them up. I pick them up with buns."
+          }
+        }
+      ],
+      "drama": {
+        "id": "n6_drama_batch",
+        "prompt": {
+          "tr": "Can'ın poğaçası yetmez. Önce kupacılar mı, yoksa bütün sokak mı?",
+          "en": "Can's batch is short. Cup team first—or the whole street?"
+        },
+        "choices": [
+          {
+            "id": "n6_c_team",
+            "label": {
+              "tr": "Kupacıya öncelik",
+              "en": "Prioritize Cup team"
+            },
+            "traitDeltas": { "Rival": 1, "Soft": -1 },
+            "affinityDelta": 1
+          },
+          {
+            "id": "n6_c_street",
+            "label": {
+              "tr": "Herkese bölüştür",
+              "en": "Share with everyone"
+            },
+            "traitDeltas": { "Soft": 2, "Gossip": 1 },
+            "affinityDelta": 2
+          }
+        ]
+      }
+    }
+  ],
+  "synergies": [
+    {
+      "id": "syn_tea_circle",
+      "nameKey": "synergy.tea_circle.name",
+      "name": { "tr": "Çay Çemberi", "en": "Tea Circle" },
+      "tagsRequired": ["Tea"],
+      "minCount": 2,
+      "rules": {
+        "type": "periodic_heal_aura",
+        "intervalSec": 4,
+        "healPercentMaxHp": 0.04,
+        "radius": "allied_grid",
+        "description": {
+          "tr": "2+ Tea: her 4 sn müttefiklere hafif heal aura.",
+          "en": "2+ Tea: light heal aura on allies every 4s."
+        }
+      }
+    },
+    {
+      "id": "syn_rivalry",
+      "nameKey": "synergy.rivalry.name",
+      "name": { "tr": "Rekabet", "en": "Rivalry" },
+      "tagsRequired": ["Rivalry"],
+      "minCount": 2,
+      "rules": {
+        "type": "low_hp_damage_buff",
+        "hpThresholdPercent": 0.35,
+        "damageBonusPercent": 0.25,
+        "description": {
+          "tr": "2+ Rivalry: düşük HP'de (+%25) hasar.",
+          "en": "2+ Rivalry: +25% damage while under 35% HP."
+        }
+      }
+    },
+    {
+      "id": "syn_neon_night",
+      "nameKey": "synergy.neon_night.name",
+      "name": { "tr": "Neon Gece", "en": "Neon Night" },
+      "tagsRequired": ["Neon"],
+      "minCount": 2,
+      "rules": {
+        "type": "opening_dodge",
+        "windowSec": 8,
+        "dodgeChance": 0.2,
+        "description": {
+          "tr": "2+ Neon: ilk 8 sn %20 dodge şansı.",
+          "en": "2+ Neon: 20% dodge chance for the first 8s."
+        }
+      }
+    }
+  ],
+  "botCupRoster": {
+    "id": "bot_porch_mirror_a",
+    "label": { "tr": "Karşı Porch Botları", "en": "Rival Porch Bots" },
+    "pickCount": 3,
+    "units": [
+      {
+        "id": "bot_n1",
+        "mirrorOf": "n1",
+        "name": { "tr": "Bot Merve", "en": "Bot Merve" },
+        "trait": "Gossip",
+        "role": "Support buffer",
+        "synergyTag": "Tea",
+        "stats": { "hp": 90, "atk": 8, "def": 6, "spd": 10 }
+      },
+      {
+        "id": "bot_n2",
+        "mirrorOf": "n2",
+        "name": { "tr": "Bot Cem", "en": "Bot Cem" },
+        "trait": "Rival",
+        "role": "Bruiser",
+        "synergyTag": "Rivalry",
+        "stats": { "hp": 110, "atk": 14, "def": 8, "spd": 9 }
+      },
+      {
+        "id": "bot_n3",
+        "mirrorOf": "n3",
+        "name": { "tr": "Bot Leyla", "en": "Bot Leyla" },
+        "trait": "Chaos",
+        "role": "Glass cannon",
+        "synergyTag": "Chaos",
+        "stats": { "hp": 70, "atk": 18, "def": 4, "spd": 14 }
+      },
+      {
+        "id": "bot_n4",
+        "mirrorOf": "n4",
+        "name": { "tr": "Bot Orhan", "en": "Bot Orhan" },
+        "trait": "Grumpy",
+        "role": "Tank",
+        "synergyTag": "Fence",
+        "stats": { "hp": 140, "atk": 9, "def": 16, "spd": 6 }
+      },
+      {
+        "id": "bot_n5",
+        "mirrorOf": "n5",
+        "name": { "tr": "Bot Peri", "en": "Bot Peri" },
+        "trait": "Nightowl",
+        "role": "AoE",
+        "synergyTag": "Neon",
+        "stats": { "hp": 85, "atk": 12, "def": 5, "spd": 12 }
+      },
+      {
+        "id": "bot_n6",
+        "mirrorOf": "n6",
+        "name": { "tr": "Bot Can", "en": "Bot Can" },
+        "trait": "Soft",
+        "role": "Healer",
+        "synergyTag": "Oven",
+        "stats": { "hp": 95, "atk": 7, "def": 7, "spd": 8 }
+      }
+    ],
+    "defaultLineup": ["bot_n2", "bot_n4", "bot_n5"],
+    "placementHint": "2x3 enemy grid; default front: tank+bruiser, back: aoe"
+  },
+  "matchComic": {
+    "id": "comic_porch_cup_result",
+    "panelCount": 7,
+    "shareTemplateKey": "comic.share_text",
+    "panels": [
+      {
+        "beat": 1,
+        "id": "comic_kickoff",
+        "textTemplate": {
+          "tr": "Porch Cup başlar. {winner} sırası yanıyor.",
+          "en": "Porch Cup kicks off. {winner}'s porch is lit."
+        }
+      },
+      {
+        "beat": 2,
+        "id": "comic_clash",
+        "textTemplate": {
+          "tr": "İlk çarpışma! Minyatür toz, büyük gürültü.",
+          "en": "First clash! Tiny dust, huge noise."
+        }
+      },
+      {
+        "beat": 3,
+        "id": "comic_synergy",
+        "textTemplate": {
+          "tr": "{synergy} ateşlenir — mahalle bunu hisseder.",
+          "en": "{synergy} ignites — the block feels it."
+        }
+      },
+      {
+        "beat": 4,
+        "id": "comic_swing",
+        "textTemplate": {
+          "tr": "Skor sallanır. Kimse koltukta oturmuyor.",
+          "en": "The score swings. Nobody stays in their seat."
+        }
+      },
+      {
+        "beat": 5,
+        "id": "comic_mvp",
+        "textTemplate": {
+          "tr": "MVP: {mvp}. İmza prop havada!",
+          "en": "MVP: {mvp}. Signature prop in the air!"
+        }
+      },
+      {
+        "beat": 6,
+        "id": "comic_finish",
+        "textTemplate": {
+          "tr": "Son tur. Hayatta kalan HP konuşur — {winner} önde.",
+          "en": "Final tick. Surviving HP decides — {winner} leads."
+        }
+      },
+      {
+        "beat": 7,
+        "id": "comic_share",
+        "textTemplate": {
+          "tr": "{winner} Porch Cup'ı aldı! {synergy} + {mvp} efsane.",
+          "en": "{winner} took Porch Cup! {synergy} + {mvp} legend."
+        }
+      }
+    ],
+    "placeholders": ["winner", "synergy", "mvp"]
+  },
+  "uiStrings": {
+    "app.title": { "tr": "Rakip Veranda", "en": "Rival Porch" },
+    "boot.tap_to_start": { "tr": "Başlamak için dokun", "en": "Tap to start" },
+    "street.header": { "tr": "Mahalle Sokağı", "en": "Neighborhood Street" },
+    "street.hint_tap_neighbor": { "tr": "Bir komşuya dokun", "en": "Tap a neighbor" },
+    "street.porch_checkin": { "tr": "Veranda check-in", "en": "Porch check-in" },
+    "street.mood_tea": { "tr": "Çay + mood", "en": "Tea + mood" },
+    "neighbor.gift": { "tr": "Hediye ver", "en": "Give gift" },
+    "neighbor.talk": { "tr": "Konuş", "en": "Talk" },
+    "neighbor.drama": { "tr": "Mini drama", "en": "Mini drama" },
+    "neighbor.affinity": { "tr": "İlişki", "en": "Affinity" },
+    "neighbor.trait": { "tr": "Trait", "en": "Trait" },
+    "neighbor.role": { "tr": "Rol", "en": "Role" },
+    "neighbor.prop": { "tr": "Prop", "en": "Prop" },
+    "drama.choose": { "tr": "Seçimini yap", "en": "Make your choice" },
+    "cup.lobby_title": { "tr": "Porch Cup Lobisi", "en": "Porch Cup Lobby" },
+    "cup.pick_three": { "tr": "6'dan 3 komşu seç", "en": "Pick 3 of 6 neighbors" },
+    "cup.start": { "tr": "Kupa'ya gir", "en": "Enter Cup" },
+    "cup.locked_need_three": { "tr": "3 seçim gerekli", "en": "Need 3 picks" },
+    "draft.title": { "tr": "Yerleştirme", "en": "Placement" },
+    "draft.hint": { "tr": "2×3 ızgaraya yerleştir", "en": "Place on the 2×3 grid" },
+    "draft.confirm": { "tr": "Savaşa hazır", "en": "Ready to fight" },
+    "fight.title": { "tr": "Otomatik Dövüş", "en": "Auto Fight" },
+    "fight.skip": { "tr": "Atla", "en": "Skip" },
+    "fight.hp_total": { "tr": "Kalan HP", "en": "Surviving HP" },
+    "comic.title": { "tr": "Maç Çizgi Romanı", "en": "Match Comic" },
+    "comic.share": { "tr": "Paylaş", "en": "Share" },
+    "comic.copy_text": { "tr": "Metni kopyala", "en": "Copy text" },
+    "comic.export_image": { "tr": "Görsel dışa aktar", "en": "Export image" },
+    "comic.share_text": {
+      "tr": "{winner} Porch Cup şampiyonu! Synergy: {synergy} · MVP: {mvp}",
+      "en": "{winner} won Porch Cup! Synergy: {synergy} · MVP: {mvp}"
+    },
+    "shop.placeholder": { "tr": "Veranda Skinleri — yakında", "en": "Porch Skins — coming" },
+    "shop.title": { "tr": "Dükkan", "en": "Shop" },
+    "common.back": { "tr": "Geri", "en": "Back" },
+    "common.continue": { "tr": "Devam", "en": "Continue" },
+    "common.win": { "tr": "Galibiyet", "en": "Victory" },
+    "common.lose": { "tr": "Mağlubiyet", "en": "Defeat" },
+    "synergy.active": { "tr": "Aktif sinerji", "en": "Active synergy" },
+    "idle.overnight": { "tr": "Gece boyunca ilişkiler +1…+3", "en": "Overnight affinity +1…+3" }
+  },
+  "meta": {
+    "sourceGdd": "docs/rival-porch-gdd-slice.md",
+    "notes": "Day-1 drop-in content for core build. Trait deltas are relative int modifiers applied to neighbor trait weights after drama."
+  }
+}
