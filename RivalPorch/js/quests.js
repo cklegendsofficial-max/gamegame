@@ -90,19 +90,35 @@ export function normalizeQuestPack(raw) {
     worldConsequences,
     dayCalendar: raw.dayCalendar || null,
     principles: raw.principles || null,
+    journalSpine: raw.journalSpine || null,
+    storyForm2: raw.storyForm2 || null,
+    storyForm3: raw.storyForm3 || null,
   };
 }
 
 export function mergeQuestPacks(stub, overlay) {
   const a = normalizeQuestPack(stub);
   const b = overlay ? normalizeQuestPack(overlay) : null;
-  if (!b?.quests?.length) return a;
+  if (!b?.quests?.length) {
+    // Still merge form overlays / WC even if quest list empty
+    if (!overlay) return a;
+    return {
+      ...a,
+      worldConsequences: { ...(a.worldConsequences || {}), ...(b.worldConsequences || {}) },
+      storyForm2: b.storyForm2 || a.storyForm2,
+      storyForm3: b.storyForm3 || a.storyForm3,
+      journalSpine: b.journalSpine || a.journalSpine,
+    };
+  }
   // Overlay (worker pack) wins entirely when present — it's the design source of truth
   return {
     ...a,
     ...b,
     source: b.source || "merged",
     worldConsequences: { ...(a.worldConsequences || {}), ...(b.worldConsequences || {}) },
+    storyForm2: b.storyForm2 || a.storyForm2,
+    storyForm3: b.storyForm3 || a.storyForm3,
+    journalSpine: b.journalSpine || a.journalSpine,
   };
 }
 
@@ -342,12 +358,24 @@ function eventMatches(obj, event, save) {
 export function refreshWorldConsequences(save, pack) {
   const qs = ensureQuestSave(save);
   const active = new Set(qs.worldActive || []);
+  // story-form-2: keep cold Day2 WC ids across objective rebuilds
+  const coldKeep = (qs.worldActive || []).filter((id) => String(id).startsWith("wc_day2_"));
+  for (const id of coldKeep) active.add(id);
   for (const def of activeQuests(pack, save).concat(completedQuests(pack, save))) {
     const entry = qs.entries[def.id];
     if (!entry) continue;
     for (const obj of def.objectives || []) {
       if (obj.worldConsequenceId && objectiveDone(entry, obj)) active.add(obj.worldConsequenceId);
     }
+  }
+  // Re-inject from form-2 branch if Day2+ and cold flags present
+  const form2 = pack?.storyForm2;
+  const rw = form2?.day2ColdRewrites;
+  if (rw && (save.dayIndex || 1) >= (rw.activateOnDayIndexMin || 2)) {
+    const branch = (rw.branches || []).find((b) =>
+      (b.when?.flagsAll || []).every((f) => save.storyFlags?.[f])
+    );
+    if (branch?.worldConsequenceId) active.add(branch.worldConsequenceId);
   }
   qs.worldActive = [...active];
 }

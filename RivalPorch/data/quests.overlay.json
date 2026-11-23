@@ -2052,8 +2052,8 @@
       }
     }
   ],
-  "worldConsequences": [
-    {
+  "worldConsequences": {
+    "wc_welcome_teapot_steam": {
       "id": "wc_welcome_teapot_steam",
       "streetVisual": {
         "tr": "Oyuncu verandasında ince çay buharı.",
@@ -2062,28 +2062,28 @@
       "npcIdle": null,
       "cupLobby": null
     },
-    {
+    "wc_welcome_three_doors_open": {
       "id": "wc_welcome_three_doors_open",
       "streetVisual": {
         "tr": "Üç komşu kapısı aralık; selam animasyonu.",
         "en": "Three neighbor doors ajar; greeting idle."
       }
     },
-    {
+    "wc_kite_string_on_antenna": {
       "id": "wc_kite_string_on_antenna",
       "streetVisual": {
         "tr": "Antende ince uçurtma ipi asılı — Arc A tohumu.",
         "en": "Thin kite string on the antenna — Arc A seed."
       }
     },
-    {
+    "wc_cup1_gossip_board": {
       "id": "wc_cup1_gossip_board",
       "streetVisual": {
         "tr": "Bakkal camında ilk Cup skoru yazılır.",
         "en": "First Cup score chalked on the corner-shop window."
       }
     },
-    {
+    "wc_kite_snag_visible": {
       "id": "wc_kite_snag_visible",
       "streetVisual": {
         "tr": "Uçurtma antene dolanmış; Orhan gazeteyi kalkan tutar.",
@@ -2094,28 +2094,28 @@
         "n3": "kite_stuck"
       }
     },
-    {
+    "wc_leyla_map_chalk": {
       "id": "wc_leyla_map_chalk",
       "streetVisual": {
         "tr": "Çatıda tebeşir okları belirir.",
         "en": "Chalk arrows appear on the roof."
       }
     },
-    {
+    "wc_gossip_two_posters": {
       "id": "wc_gossip_two_posters",
       "streetVisual": {
         "tr": "Sokağa iki çelişkili afiş asılır.",
         "en": "Two conflicting posters go up on the street."
       }
     },
-    {
+    "wc_antenna_resolution_branch": {
       "id": "wc_antenna_resolution_branch",
       "streetVisual": {
         "tr": "Çözüm günü: anten ya bayraklı ya daha yüksek uçuş izi.",
         "en": "Resolution day: antenna either flagged or scarred by higher flight."
       }
     },
-    {
+    "wc_antenna_flag_flies": {
       "id": "wc_antenna_flag_flies",
       "streetVisual": {
         "tr": "Küçük ortak bayrak antende sallanır.",
@@ -2123,7 +2123,7 @@
       },
       "cupLobby": "orhan_flag_skin_preview"
     },
-    {
+    "wc_kite_higher_chaos": {
       "id": "wc_kite_higher_chaos",
       "streetVisual": {
         "tr": "Uçurtma daha yüksekte; çamaşır ipleri titrer.",
@@ -2131,7 +2131,7 @@
       },
       "cupLobby": "leyla_wind_mod_preview"
     },
-    {
+    "wc_bass_windows_rattle": {
       "id": "wc_bass_windows_rattle",
       "streetVisual": {
         "tr": "Gece pencereleri titreşir; mercan neon pulse.",
@@ -2142,14 +2142,14 @@
         "n4": "light_on_angry"
       }
     },
-    {
+    "wc_headphones_note_door": {
       "id": "wc_headphones_note_door",
       "streetVisual": {
         "tr": "Peri kapısında gazete mürekkepli KULAKLIK notu.",
         "en": "HEADPHONES note in newspaper ink on Peri's door."
       }
     },
-    {
+    "wc_night_bakery_glow": {
       "id": "wc_night_bakery_glow",
       "streetVisual": {
         "tr": "Fırın gece közü yanar; Soft aura sokağa sızar.",
@@ -2159,21 +2159,21 @@
         "n6": "tray_night_route"
       }
     },
-    {
+    "wc_train_ticket_peek": {
       "id": "wc_train_ticket_peek",
       "streetVisual": {
         "tr": "Kulaklık kutusundan tren bileti ucu görünür.",
         "en": "Edge of a train ticket peeks from the headphone case."
       }
     },
-    {
+    "wc_volume_resolution_branch": {
       "id": "wc_volume_resolution_branch",
       "streetVisual": {
         "tr": "Neon ya kısılır ya sertleşir — seçime göre.",
         "en": "Neon either dims or hardens — by choice."
       }
     },
-    {
+    "wc_quiet_neon_hours": {
       "id": "wc_quiet_neon_hours",
       "streetVisual": {
         "tr": "Sessiz saat tabelası + kısık neon.",
@@ -2181,7 +2181,7 @@
       },
       "cupLobby": "peri_quiet_set_preview"
     },
-    {
+    "wc_peri_suitcase_porch": {
       "id": "wc_peri_suitcase_porch",
       "streetVisual": {
         "tr": "Peri verandasında yarım açık bavul.",
@@ -2189,28 +2189,28 @@
       },
       "cupLobby": "peri_club_aoe_preview"
     },
-    {
+    "wc_bakery_queue_split": {
       "id": "wc_bakery_queue_split",
       "streetVisual": {
         "tr": "Poğaça kuyruğu ikiye ayrılır: Cup kadrosu vs sokak.",
         "en": "Pastry queue splits: Cup roster vs whole street."
       }
     },
-    {
+    "wc_teapot_ledger_silhouette": {
       "id": "wc_teapot_ledger_silhouette",
       "streetVisual": {
         "tr": "Merve'nin demliğinin yanında defter silüeti.",
         "en": "Ledger silhouette beside Merve's teapot."
       }
     },
-    {
+    "wc_can_tray_shared": {
       "id": "wc_can_tray_shared",
       "streetVisual": {
         "tr": "Ortak tepsi standı verandalar arasında.",
         "en": "Shared tray stand between porches."
       }
     },
-    {
+    "wc_tea_circle_street_heal": {
       "id": "wc_tea_circle_street_heal",
       "streetVisual": {
         "tr": "Sokak boyunca yumuşak heal buharı (flavor).",
@@ -2218,41 +2218,41 @@
       },
       "cupLobby": "tea_circle_story_synergy"
     },
-    {
+    "wc_street_rehearsal_lights": {
       "id": "wc_street_rehearsal_lights",
       "streetVisual": {
         "tr": "Cuma gecesi prova ışıkları yanar.",
         "en": "Friday rehearsal lights come on."
       }
     },
-    {
+    "wc_finale_comic_echo": {
       "id": "wc_finale_comic_echo",
       "streetVisual": {
         "tr": "Final comic panelleri bakkal vitrinine yansır.",
         "en": "Final comic panels reflect in the shop window."
       }
     },
-    {
+    "wc_ending_street_mood": {
       "id": "wc_ending_street_mood",
       "streetVisual": {
         "tr": "Dominant itibar track'ine göre sokak rengi/mood.",
         "en": "Street tint/mood by dominant reputation track."
       }
     },
-    {
+    "wc_cem_limp_idle": {
       "id": "wc_cem_limp_idle",
       "npcIdle": {
         "n2": "subtle_limp"
       }
     },
-    {
+    "wc_cem_whistle_pouch_glow": {
       "id": "wc_cem_whistle_pouch_glow",
       "streetVisual": {
         "tr": "Düdük kılıfı hafif parlar (kart ipucu).",
         "en": "Whistle pouch faintly glows (card hint)."
       }
     },
-    {
+    "wc_cem_morale_bench": {
       "id": "wc_cem_morale_bench",
       "streetVisual": {
         "tr": "Antrenman bankında 'moral molası' şişesi.",
@@ -2260,197 +2260,275 @@
       },
       "cupLobby": "cem_morale_mod_preview"
     },
-    {
+    "wc_orhan_second_cup": {
       "id": "wc_orhan_second_cup",
       "streetVisual": {
         "tr": "Orhan'ın masasında ikinci boş bardak durur.",
         "en": "Second empty cup stays on Orhan's table."
       }
     },
-    {
+    "wc_orhan_empty_chair_lit": {
       "id": "wc_orhan_empty_chair_lit",
       "streetVisual": {
         "tr": "Boş sandalye loş ışıkta.",
         "en": "Empty chair in soft light."
       }
     },
-    {
+    "wc_orhan_letters_tucked": {
       "id": "wc_orhan_letters_tucked",
       "streetVisual": {
         "tr": "Gazete arasından not köşesi görünür, sonra kaybolur.",
         "en": "Note corner peeks from the paper, then tucks away."
       }
     },
-    {
+    "wc_chalk_arrows_roof": {
       "id": "wc_chalk_arrows_roof",
       "streetVisual": {
         "tr": "Çatı antenleri arasında tebeşir okları.",
         "en": "Chalk arrows between rooftop antennas."
       }
     },
-    {
+    "wc_antenna_zone_marker": {
       "id": "wc_antenna_zone_marker",
       "streetVisual": {
         "tr": "Antende yasak veya paylaşım işareti.",
         "en": "Forbidden or shared marker on the antenna."
       }
     },
-    {
+    "wc_leyla_map_complete_pin": {
       "id": "wc_leyla_map_complete_pin",
       "streetVisual": {
         "tr": "Tamamlanmış rüzgâr haritası çatıya iğnelenir.",
         "en": "Finished wind map pinned on the roof."
       }
     },
-    {
+    "wc_pastry_trail_neon": {
       "id": "wc_pastry_trail_neon",
       "streetVisual": {
         "tr": "Poğaça tepsi izi neon yansımasıyla.",
         "en": "Pastry-tray trail with neon reflection."
       }
     },
-    {
+    "wc_oven_soft_neon_bridge": {
       "id": "wc_oven_soft_neon_bridge",
       "streetVisual": {
         "tr": "Fırın–Peri verandası arasında Soft+Neon köprü ışığı.",
         "en": "Soft+Neon bridge light between bakery and Peri porch."
       }
     },
-    {
+    "wc_merve_extra_cup": {
       "id": "wc_merve_extra_cup",
       "streetVisual": {
         "tr": "Merve demliğinde fazla bardak.",
         "en": "Extra cup on Merve's teapot tray."
       }
     },
-    {
+    "wc_merve_gossip_board_warm": {
       "id": "wc_merve_gossip_board_warm",
       "streetVisual": {
         "tr": "Dedikodu panosu sıcak ton alır.",
         "en": "Gossip board warms in tone."
       }
     },
-    {
+    "wc_tea_circle_seed_steam": {
       "id": "wc_tea_circle_seed_steam",
       "streetVisual": {
         "tr": "Üç verandada eşzamanlı çay buharı.",
         "en": "Simultaneous tea steam on three porches."
       }
     },
-    {
+    "wc_lamp_shop_highlight": {
       "id": "wc_lamp_shop_highlight",
       "streetVisual": {
         "tr": "Dükkânda lamba slotu vurgulanır.",
         "en": "Lamp slot highlighted in shop."
       }
     },
-    {
+    "wc_player_porch_lamp_on": {
       "id": "wc_player_porch_lamp_on",
       "streetVisual": {
         "tr": "Oyuncu verandası gece yanar.",
         "en": "Player porch lamp glows at night."
       }
     },
-    {
+    "wc_neighbor_compliments_lamp": {
       "id": "wc_neighbor_compliments_lamp",
       "streetVisual": {
         "tr": "Komşu selamı lambaya bakar.",
         "en": "Neighbor greeting glances at the lamp."
       }
     },
-    {
+    "wc_lobby_default": {
       "id": "wc_lobby_default",
       "cupLobby": "default"
     },
-    {
+    "wc_lobby_sparkle": {
       "id": "wc_lobby_sparkle",
       "cupLobby": "entry_flair_vfx"
     },
-    {
+    "wc_comic_shared_pin": {
       "id": "wc_comic_shared_pin",
       "streetVisual": {
         "tr": "Paylaşılan comic pin'i bakkalda.",
         "en": "Shared comic pin on the corner shop."
       }
     },
-    {
+    "wc_wrong_poster_street": {
       "id": "wc_wrong_poster_street",
       "streetVisual": {
         "tr": "Yanlış dedikodu afişi asılı.",
         "en": "Wrong-rumor poster hung."
       }
     },
-    {
+    "wc_gossip_branch": {
       "id": "wc_gossip_branch",
       "streetVisual": {
         "tr": "Afiş ya yırtılır ya çoğalır.",
         "en": "Poster either torn down or multiplied."
       }
     },
-    {
+    "wc_poster_torn_down": {
       "id": "wc_poster_torn_down",
       "streetVisual": {
         "tr": "Afiş yırtık köşede kalır.",
         "en": "Torn poster corner remains."
       }
     },
-    {
+    "wc_poster_extra_copies": {
       "id": "wc_poster_extra_copies",
       "streetVisual": {
         "tr": "Üç kopya afiş yan yana.",
         "en": "Three poster copies side by side."
       }
     },
-    {
+    "wc_street_mood_after_gossip": {
       "id": "wc_street_mood_after_gossip",
       "streetVisual": {
         "tr": "Sokak mood'u onarım/kaos tonuna kayar.",
         "en": "Street mood shifts toward repair or chaos."
       }
     },
-    {
+    "wc_rival_poster_bakkal": {
       "id": "wc_rival_poster_bakkal",
       "streetVisual": {
         "tr": "Karşı Sırt ayna afişi bakkalda.",
         "en": "Rival Ridge mirror poster at the shop."
       }
     },
-    {
+    "wc_synergy_spotlight_street": {
       "id": "wc_synergy_spotlight_street",
       "streetVisual": {
         "tr": "Sinerji spotlight izi kaldırımda.",
         "en": "Synergy spotlight trail on the curb."
       }
     },
-    {
+    "wc_rival_comic_frame": {
       "id": "wc_rival_comic_frame",
       "streetVisual": {
         "tr": "Özel comic frame vitrinde.",
         "en": "Special comic frame in the window."
       }
     },
-    {
+    "wc_draft_hours_chalk": {
       "id": "wc_draft_hours_chalk",
       "streetVisual": {
         "tr": "Kaldırımda saat aralığı tebeşirle.",
         "en": "Hour window chalked on the curb."
       }
     },
-    {
+    "wc_quiet_hours_sign": {
       "id": "wc_quiet_hours_sign",
       "streetVisual": {
         "tr": "Sessiz saat tabelası asılı.",
         "en": "Quiet-hours sign posted."
       }
     },
-    {
+    "wc_neon_dim_schedule": {
       "id": "wc_neon_dim_schedule",
       "streetVisual": {
         "tr": "Neon programa göre kısılır.",
         "en": "Neon dims on a schedule."
       }
+    },
+    "wc_day2_mediate_shared_string": {
+      "id": "wc_day2_mediate_shared_string",
+      "fromColdPath": "mediate",
+      "intensity": "visceral",
+      "activateWhen": {
+        "dayIndexMin": 2,
+        "flagsAll": [
+          "cold_open_mediate"
+        ]
+      },
+      "streetVisual": {
+        "tr": "Anten ile Leyla'nın verandası arasında GERÇEK bir ip gerili — iki ucu düğümlü, ortası sakin. Çay buharı ipin altından geçer. Orhan gazetesi yarı açık; Leyla uçurtmayı katlamış ama ipi bırakmamış.",
+        "en": "A REAL string stretches antenna↔Leyla's porch — knotted both ends, calm in the middle. Tea steam drifts under it. Orhan's paper is half-open; Leyla's kite is folded but she hasn't let the line go."
+      },
+      "npcIdle": {
+        "n3": "kite_folded_holding_line",
+        "n4": "paper_half_open_watching_string",
+        "n1": "teapot_toward_shared_string"
+      },
+      "streetBanner": {
+        "tr": "◈ Ortak ip — arabuluculuk sokakta",
+        "en": "◈ Shared string — mediation on the block"
+      },
+      "cupLobby": null,
+      "sfxHint": "teapot"
+    },
+    "wc_day2_instigate_kite_dare": {
+      "id": "wc_day2_instigate_kite_dare",
+      "fromColdPath": "instigate",
+      "intensity": "visceral",
+      "activateWhen": {
+        "dayIndexMin": 2,
+        "flagsAll": [
+          "cold_open_instigate"
+        ]
+      },
+      "streetVisual": {
+        "tr": "Uçurtma antenin ÜSTÜNDE asılı — kuyruk çamaşır iplerine sürtünüyor, ipler titriyor. Orhan gazeteyi tam kalkan; kapısında yeni bir 'YASAK BÖLGE' tebeşiri. Leyla çatıda zafer pozu; bakkal neon'u bir an titreşir.",
+        "en": "The kite hangs ABOVE the antenna — tail brushing laundry lines until they shiver. Orhan's paper is a full shield; fresh chalk on his door: FORBIDDEN ZONE. Leyla victory-poses on the roof; bakkal neon flickers once."
+      },
+      "npcIdle": {
+        "n3": "kite_victory_rooftop",
+        "n4": "grumpy_shield_hard",
+        "n5": "neon_flicker_amused"
+      },
+      "streetBanner": {
+        "tr": "◈ Yüksek uçuş — kışkırtma sokakta",
+        "en": "◈ High flight — instigation on the block"
+      },
+      "cupLobby": null,
+      "sfxHint": "knock"
+    },
+    "wc_day2_stage_cup_chalk": {
+      "id": "wc_day2_stage_cup_chalk",
+      "fromColdPath": "stage",
+      "intensity": "visceral",
+      "activateWhen": {
+        "dayIndexMin": 2,
+        "flagsAll": [
+          "cold_open_stage"
+        ]
+      },
+      "streetVisual": {
+        "tr": "Kaldırımda tebeşirle çizilmiş minyatür Cup arenası: üç daire (anten / uçurtma / düdük). Cem düdüğü boyunda, ısınma sayıyor. Uçurtma ipi 'sahne kablosu' gibi kenara bantlanmış; Orhan gazetesi reji masası gibi açık.",
+        "en": "A miniature Cup arena chalked on the cobbles: three circles (antenna / kite / whistle). Cem whistle-at-neck, counting warm-ups. Kite string taped aside like stage cable; Orhan's paper open like a stage manager's desk."
+      },
+      "npcIdle": {
+        "n2": "whistle_rehearsal_count",
+        "n3": "kite_as_prop_waiting",
+        "n4": "paper_as_clipboard"
+      },
+      "streetBanner": {
+        "tr": "◈ Tebeşir sahne — Cup dramı sokakta",
+        "en": "◈ Chalk stage — Cup drama on the block"
+      },
+      "cupLobby": "practice_frame_chalk_preview",
+      "sfxHint": "crowd"
     }
-  ],
+  },
   "meta": {
     "mainCount": 5,
     "sideCount": 10,
@@ -2586,5 +2664,576 @@
       }
     }
   ],
-  "storyForm1": "story-form-1"
+  "storyForm1": "story-form-1",
+  "storyForm2": {
+    "packId": "story-form-2",
+    "day2ColdRewrites": {
+      "id": "day2_cold_path_rewrite",
+      "activateOnDayIndexMin": 2,
+      "applyOnceFlag": "day2_cold_rewrite_applied",
+      "pick": "first matching branch by when.flagsAll",
+      "branches": [
+        {
+          "id": "d2_mediate",
+          "path": "mediate",
+          "repTrack": "rep_mediator",
+          "when": {
+            "flagsAll": [
+              "cold_open_mediate"
+            ]
+          },
+          "setFlagsOnApply": [
+            "day2_cold_rewrite_mediate",
+            "day2_cold_rewrite_applied"
+          ],
+          "worldConsequenceId": "wc_day2_mediate_shared_string",
+          "eveningBanner": {
+            "tr": "Arabulucu gecesi — anten ile uçurtma aynı ipi paylaşıyor. Sokak seni yumuşak hatırlıyor.",
+            "en": "Mediator night — antenna and kite share one string. The block remembers you soft."
+          },
+          "eveningHook": {
+            "tr": "Dünkü arabuluculuk sokakta görünür: ortak ip, iki veranda.",
+            "en": "Yesterday's mediation is visible: one shared string, two porches."
+          },
+          "streetNpcLine": {
+            "speakerId": "n4",
+            "text": {
+              "tr": "İpi birlikte çektik. Bugün gazetem… bir milimetre daha açık.",
+              "en": "We pulled the string together. Today my paper… opens one millimeter wider."
+            }
+          },
+          "journalBeatId": "jb_day2_mediate"
+        },
+        {
+          "id": "d2_instigate",
+          "path": "instigate",
+          "repTrack": "rep_instigator",
+          "when": {
+            "flagsAll": [
+              "cold_open_instigate"
+            ]
+          },
+          "setFlagsOnApply": [
+            "day2_cold_rewrite_instigate",
+            "day2_cold_rewrite_applied"
+          ],
+          "worldConsequenceId": "wc_day2_instigate_kite_dare",
+          "eveningBanner": {
+            "tr": "Kışkırtıcı gecesi — uçurtma antenden yüksekte. Orhan gazeteyi kalkan tutuyor.",
+            "en": "Instigator night — kite rides above the antenna. Orhan holds the paper like a shield."
+          },
+          "eveningHook": {
+            "tr": "Dünkü meydan okuma sokakta: yüksek ip, sert gazete.",
+            "en": "Yesterday's dare is on the street: high line, hard newspaper."
+          },
+          "streetNpcLine": {
+            "speakerId": "n3",
+            "text": {
+              "tr": "Bak — hâlâ yukarıda! Orhan kızgın ama harita kazanıyor.",
+              "en": "See — still up there! Orhan's mad but the map is winning."
+            }
+          },
+          "journalBeatId": "jb_day2_instigate"
+        },
+        {
+          "id": "d2_stage",
+          "path": "stage",
+          "repTrack": "rep_stage",
+          "when": {
+            "flagsAll": [
+              "cold_open_stage"
+            ]
+          },
+          "setFlagsOnApply": [
+            "day2_cold_rewrite_stage",
+            "day2_cold_rewrite_applied"
+          ],
+          "worldConsequenceId": "wc_day2_stage_cup_chalk",
+          "eveningBanner": {
+            "tr": "Sahne Amiri gecesi — kaldırımda Cup çerçevesi tebeşirli. Cem düdüğü prova sayıyor.",
+            "en": "Stage-manager night — a Cup frame chalked on the cobbles. Cem's whistle is counting rehearsal."
+          },
+          "eveningHook": {
+            "tr": "Dünkü 'sahneye koy' seçimin kaldırımda: tebeşir kutu, düdük hazır.",
+            "en": "Yesterday's 'stage it' choice is on the cobbles: chalk box, whistle ready."
+          },
+          "streetNpcLine": {
+            "speakerId": "n2",
+            "text": {
+              "tr": "İyi. Anten-uçurtma'yı Cup sahnesi yaptın. Bugün prova — yarın skor.",
+              "en": "Good. You made antenna-vs-kite a Cup stage. Practice today — score tomorrow."
+            }
+          },
+          "journalBeatId": "jb_day2_stage"
+        }
+      ]
+    },
+    "journalConsequenceBeats": [
+      {
+        "id": "jb_day2_mediate",
+        "when": {
+          "flagsAll": [
+            "cold_open_mediate"
+          ],
+          "dayIndexMin": 2
+        },
+        "repTrack": "rep_mediator",
+        "title": {
+          "tr": "Yankı · Arabulucu — Ortak ip",
+          "en": "Consequence · Mediator — Shared string"
+        },
+        "body": {
+          "tr": "İlk kapıda birlikte çektiniz. Day 2'de anten ile verandayı bir ip bağlıyor; Orhan gazetesi yumuşadı, Leyla ipi bırakmadı. Mahalle seni Arabulucu diye okuyor.",
+          "en": "At the first knock you pulled together. On Day 2 a string binds antenna to porch; Orhan's paper softened, Leyla kept the line. The block reads you as Mediator."
+        },
+        "worldConsequenceId": "wc_day2_mediate_shared_string",
+        "uiSection": "consequence"
+      },
+      {
+        "id": "jb_day2_instigate",
+        "when": {
+          "flagsAll": [
+            "cold_open_instigate"
+          ],
+          "dayIndexMin": 2
+        },
+        "repTrack": "rep_instigator",
+        "title": {
+          "tr": "Yankı · Kışkırtıcı — Yüksek uçuş",
+          "en": "Consequence · Instigator — High flight"
+        },
+        "body": {
+          "tr": "İlk kapıda uçurtmayı savundunuz. Day 2'de uçurtma antenin üstünde; Orhan kalkan gazete, kapıda YASAK BÖLGE. Mahalle seni Kışkırtıcı diye okuyor.",
+          "en": "At the first knock you defended the kite. On Day 2 it rides above the antenna; Orhan shields with paper, FORBIDDEN ZONE on the door. The block reads you as Instigator."
+        },
+        "worldConsequenceId": "wc_day2_instigate_kite_dare",
+        "uiSection": "consequence"
+      },
+      {
+        "id": "jb_day2_stage",
+        "when": {
+          "flagsAll": [
+            "cold_open_stage"
+          ],
+          "dayIndexMin": 2
+        },
+        "repTrack": "rep_stage",
+        "title": {
+          "tr": "Yankı · Sahne Amiri — Tebeşir Cup",
+          "en": "Consequence · Stage Manager — Chalk Cup"
+        },
+        "body": {
+          "tr": "İlk kapıda dramayı sahneye koydunuz. Day 2'de kaldırımda Cup çerçevesi; Cem prova sayıyor. Mahalle seni Sahne Amiri diye okuyor.",
+          "en": "At the first knock you staged the drama. On Day 2 a Cup frame is chalked on the cobbles; Cem counts rehearsal. The block reads you as Stage Manager."
+        },
+        "worldConsequenceId": "wc_day2_stage_cup_chalk",
+        "uiSection": "consequence"
+      }
+    ],
+    "eveningHookOverrides": [
+      {
+        "dayIndex": 2,
+        "when": {
+          "flagsAll": [
+            "cold_open_mediate"
+          ]
+        },
+        "hook": {
+          "tr": "Dünkü arabuluculuk sokakta görünür: ortak ip, iki veranda.",
+          "en": "Yesterday's mediation is visible: one shared string, two porches."
+        },
+        "banner": {
+          "tr": "Arabulucu gecesi — anten ile uçurtma aynı ipi paylaşıyor. Sokak seni yumuşak hatırlıyor.",
+          "en": "Mediator night — antenna and kite share one string. The block remembers you soft."
+        }
+      },
+      {
+        "dayIndex": 2,
+        "when": {
+          "flagsAll": [
+            "cold_open_instigate"
+          ]
+        },
+        "hook": {
+          "tr": "Dünkü meydan okuma sokakta: yüksek ip, sert gazete.",
+          "en": "Yesterday's dare is on the street: high line, hard newspaper."
+        },
+        "banner": {
+          "tr": "Kışkırtıcı gecesi — uçurtma antenden yüksekte. Orhan gazeteyi kalkan tutuyor.",
+          "en": "Instigator night — kite rides above the antenna. Orhan holds the paper like a shield."
+        }
+      },
+      {
+        "dayIndex": 2,
+        "when": {
+          "flagsAll": [
+            "cold_open_stage"
+          ]
+        },
+        "hook": {
+          "tr": "Dünkü 'sahneye koy' seçimin kaldırımda: tebeşir kutu, düdük hazır.",
+          "en": "Yesterday's 'stage it' choice is on the cobbles: chalk box, whistle ready."
+        },
+        "banner": {
+          "tr": "Sahne Amiri gecesi — kaldırımda Cup çerçevesi tebeşirli. Cem düdüğü prova sayıyor.",
+          "en": "Stage-manager night — a Cup frame chalked on the cobbles. Cem's whistle is counting rehearsal."
+        }
+      }
+    ]
+  },
+  "storyForm3": {
+    "packId": "story-form-3",
+    "streetPropOverlays": [
+      {
+        "id": "prop_day2_mediate_string",
+        "when": {
+          "dayIndexMin": 2,
+          "flagsAll": [
+            "cold_open_mediate"
+          ]
+        },
+        "screens": [
+          "street",
+          "evening"
+        ],
+        "prop": {
+          "kind": "line",
+          "anchor": "antenna_to_n3_porch",
+          "cssClass": "rp-prop-shared-string",
+          "label": {
+            "tr": "Ortak ip",
+            "en": "Shared string"
+          }
+        },
+        "npcLine": {
+          "speakerId": "n4",
+          "text": {
+            "tr": "İp duruyor. Gazetem… hâlâ bir milimetre açık.",
+            "en": "String holds. My paper… still one millimeter open."
+          }
+        },
+        "worldConsequenceId": "wc_day2_mediate_shared_string",
+        "priority": 100
+      },
+      {
+        "id": "prop_day2_instigate_high_kite",
+        "when": {
+          "dayIndexMin": 2,
+          "flagsAll": [
+            "cold_open_instigate"
+          ]
+        },
+        "screens": [
+          "street",
+          "evening"
+        ],
+        "prop": {
+          "kind": "kite",
+          "anchor": "above_antenna",
+          "cssClass": "rp-prop-kite-high",
+          "label": {
+            "tr": "Yüksek uçuş",
+            "en": "High flight"
+          }
+        },
+        "doorChalk": {
+          "neighborId": "n4",
+          "text": {
+            "tr": "YASAK BÖLGE",
+            "en": "FORBIDDEN ZONE"
+          }
+        },
+        "npcLine": {
+          "speakerId": "n3",
+          "text": {
+            "tr": "Hâlâ yukarıda! Harita kazanıyor.",
+            "en": "Still up there! The map is winning."
+          }
+        },
+        "worldConsequenceId": "wc_day2_instigate_kite_dare",
+        "priority": 100
+      },
+      {
+        "id": "prop_day2_stage_chalk_cup",
+        "when": {
+          "dayIndexMin": 2,
+          "flagsAll": [
+            "cold_open_stage"
+          ]
+        },
+        "screens": [
+          "street",
+          "evening"
+        ],
+        "prop": {
+          "kind": "chalk_arena",
+          "anchor": "street_cobbles_center",
+          "cssClass": "rp-prop-chalk-cup",
+          "label": {
+            "tr": "Tebeşir Cup",
+            "en": "Chalk Cup"
+          }
+        },
+        "npcLine": {
+          "speakerId": "n2",
+          "text": {
+            "tr": "Üç daire. Prova. Düdük hazır.",
+            "en": "Three circles. Rehearsal. Whistle ready."
+          }
+        },
+        "worldConsequenceId": "wc_day2_stage_cup_chalk",
+        "priority": 100
+      }
+    ],
+    "journalDramaCards": [
+      {
+        "id": "jdrama_day2_mediate",
+        "when": {
+          "dayIndexMin": 2,
+          "flagsAny": [
+            "cold_open_mediate",
+            "day2_cold_rewrite_mediate"
+          ]
+        },
+        "tone": "soft",
+        "eyebrow": {
+          "tr": "Yankı · Gün 2",
+          "en": "Aftermath · Day 2"
+        },
+        "title": {
+          "tr": "Arabulucu — ortak ip",
+          "en": "Mediator — shared string"
+        },
+        "body": {
+          "tr": "İlk kapıda birlikte çektiniz. Sokak bunu unutmadı: anten ile veranda aynı ipi paylaşıyor. Bu bir log satırı değil — mahallenin seni okuyuşu.",
+          "en": "At the first knock you pulled together. The street didn't forget: antenna and porch share one string. Not a log line — how the block reads you."
+        },
+        "repTrack": "rep_mediator",
+        "cta": {
+          "tr": "Sokağa bak",
+          "en": "See the street"
+        },
+        "linksWorldConsequenceId": "wc_day2_mediate_shared_string"
+      },
+      {
+        "id": "jdrama_day2_instigate",
+        "when": {
+          "dayIndexMin": 2,
+          "flagsAny": [
+            "cold_open_instigate",
+            "day2_cold_rewrite_instigate"
+          ]
+        },
+        "tone": "sharp",
+        "eyebrow": {
+          "tr": "Yankı · Gün 2",
+          "en": "Aftermath · Day 2"
+        },
+        "title": {
+          "tr": "Kışkırtıcı — yüksek uçuş",
+          "en": "Instigator — high flight"
+        },
+        "body": {
+          "tr": "Uçurtmayı savundunuz. Şimdi antenin üstünde asılı; kapıda YASAK BÖLGE. Gazete kalkan. Drama burada.",
+          "en": "You defended the kite. Now it hangs above the antenna; FORBIDDEN ZONE on the door. Paper shield. Drama lives here."
+        },
+        "repTrack": "rep_instigator",
+        "cta": {
+          "tr": "Çatı / çit",
+          "en": "Roof / fence"
+        },
+        "linksWorldConsequenceId": "wc_day2_instigate_kite_dare"
+      },
+      {
+        "id": "jdrama_day2_stage",
+        "when": {
+          "dayIndexMin": 2,
+          "flagsAny": [
+            "cold_open_stage",
+            "day2_cold_rewrite_stage"
+          ]
+        },
+        "tone": "spotlight",
+        "eyebrow": {
+          "tr": "Yankı · Gün 2",
+          "en": "Aftermath · Day 2"
+        },
+        "title": {
+          "tr": "Sahne Amiri — tebeşir Cup",
+          "en": "Stage Manager — chalk Cup"
+        },
+        "body": {
+          "tr": "Dramayı sahneye koydunuz. Kaldırımda üç daire; Cem prova sayıyor. Ününüz Sahne Amiri — ve sokak prova yapıyor.",
+          "en": "You staged the drama. Three circles on the cobbles; Cem counts rehearsal. Your rep is Stage Manager — and the street is practicing."
+        },
+        "repTrack": "rep_stage",
+        "cta": {
+          "tr": "Provaya gir",
+          "en": "Enter rehearsal"
+        },
+        "linksWorldConsequenceId": "wc_day2_stage_cup_chalk"
+      }
+    ],
+    "journalUi": {
+      "consequenceSectionTitle": {
+        "tr": "Yankı / Sonuç",
+        "en": "Aftermath / Consequence"
+      },
+      "placeAbove": "arcs",
+      "promoteForm2Beats": true,
+      "emptyState": {
+        "tr": "Henüz yankı yok — ilk kapı seçimin Day 2'de burada açılır.",
+        "en": "No aftermath yet — your first-knock choice opens here on Day 2."
+      }
+    },
+    "worldConsequencePresentation": {
+      "id": "wc_loud_over_hud",
+      "whenActiveVisceral": true,
+      "rules": [
+        {
+          "id": "elevate_street_banner",
+          "desc": "Render streetBanner / streetVisual as a full-width stage caption above quest whisper",
+          "cssHint": "rp-wc-banner--loud"
+        },
+        {
+          "id": "dim_quest_whisper",
+          "desc": "While visceral Day2 WC active on street/evening, quest HUD whisper opacity ≤ 0.55 and moves under WC banner",
+          "appliesWhen": {
+            "dayIndexMin": 2,
+            "flagsAny": [
+              "cold_open_mediate",
+              "cold_open_instigate",
+              "cold_open_stage"
+            ]
+          }
+        },
+        {
+          "id": "evening_mid_card_lead_with_wc",
+          "desc": "Evening mid-card first line = eveningBanner from form-2 branch, not agenda checklist title"
+        }
+      ],
+      "visceralIds": [
+        "wc_day2_mediate_shared_string",
+        "wc_day2_instigate_kite_dare",
+        "wc_day2_stage_cup_chalk"
+      ]
+    },
+    "comicRememberBanner": {
+      "id": "comic_remember_cold",
+      "showAfter": [
+        "practice",
+        "cup"
+      ],
+      "when": {
+        "flagsAny": [
+          "cold_open_mediate",
+          "cold_open_instigate",
+          "cold_open_stage"
+        ]
+      },
+      "title": {
+        "tr": "Sokak hatırladı",
+        "en": "The street remembered"
+      },
+      "bodyByFlag": {
+        "cold_open_mediate": {
+          "tr": "Ortak ip comic'e sızdı — Arabulucu izi.",
+          "en": "Shared string leaked into the comic — Mediator mark."
+        },
+        "cold_open_instigate": {
+          "tr": "Yüksek uçuş comic'e sızdı — Kışkırtıcı izi.",
+          "en": "High flight leaked into the comic — Instigator mark."
+        },
+        "cold_open_stage": {
+          "tr": "Tebeşir sahne comic'e sızdı — Sahne Amiri izi.",
+          "en": "Chalk stage leaked into the comic — Stage Manager mark."
+        }
+      },
+      "forceShowEvenIfShareSkipped": true,
+      "setFlags": [
+        "comic_cold_echo_seen"
+      ]
+    },
+    "comicPanelInserts": [
+      {
+        "id": "comic_cold_echo",
+        "insertAfterPanelId": "comic_kickoff",
+        "when": {
+          "flagsAny": [
+            "cold_open_mediate",
+            "cold_open_instigate",
+            "cold_open_stage"
+          ]
+        },
+        "panel": {
+          "beat": 1.5,
+          "id": "comic_cold_echo",
+          "textTemplate": {
+            "tr": "Sokak dünkü ilk kapıyı hatırladı: {coldPath}.",
+            "en": "The street remembered yesterday's first knock: {coldPath}."
+          },
+          "placeholders": {
+            "coldPath": {
+              "cold_open_mediate": {
+                "tr": "arabuluculuk / ortak ip",
+                "en": "mediation / shared string"
+              },
+              "cold_open_instigate": {
+                "tr": "uçurtma isyanı / yüksek uçuş",
+                "en": "kite rebellion / high flight"
+              },
+              "cold_open_stage": {
+                "tr": "sahne / tebeşir Cup",
+                "en": "stage / chalk Cup"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "comicEchoRulesAppend": [
+      {
+        "ifFlag": "cold_open_mediate",
+        "line": {
+          "tr": "Arenanın kenarında hâlâ o ortak ip salınıyordu.",
+          "en": "At the arena edge, that shared string still swayed."
+        }
+      },
+      {
+        "ifFlag": "cold_open_instigate",
+        "line": {
+          "tr": "Uçurtma gölgesi skor tablosunun üstünden geçti.",
+          "en": "A kite shadow cut across the scoreboard."
+        }
+      },
+      {
+        "ifFlag": "cold_open_stage",
+        "line": {
+          "tr": "Tebeşir daireleri minyatür sahneye dönüştü — düdük çaldı.",
+          "en": "Chalk circles became a miniature stage — whistle blew."
+        }
+      },
+      {
+        "ifFlag": "day2_cold_rewrite_mediate",
+        "line": {
+          "tr": "Mahalle fısıldadı: Arabulucu yine ipi tutuyor.",
+          "en": "The block whispered: Mediator still holds the line."
+        }
+      },
+      {
+        "ifFlag": "day2_cold_rewrite_instigate",
+        "line": {
+          "tr": "Mahalle fısıldadı: Kışkırtıcı uçuşu bırakmadı.",
+          "en": "The block whispered: Instigator never grounded the flight."
+        }
+      },
+      {
+        "ifFlag": "day2_cold_rewrite_stage",
+        "line": {
+          "tr": "Mahalle fısıldadı: Sahne Amiri prova izini getirdi.",
+          "en": "The block whispered: Stage Manager brought rehearsal dust."
+        }
+      }
+    ]
+  }
 }

@@ -367,7 +367,7 @@
         "fight_time_percent_gte_0.45",
         "first_ally_hp_percent_lte_0.5"
       ],
-      "pauseSec": 2.2,
+      "pauseSec": 2.6,
       "timeoutDefaultCallId": "call_cheer",
       "optionsShown": 3,
       "ui": {
@@ -384,7 +384,17 @@
         }
       },
       "cannotDismissWithoutPick": true,
-      "practiceCannotTimeoutSkipFlag": true
+      "practiceCannotTimeoutSkipFlag": true,
+      "letterboxPulseMs": 360,
+      "dimOpacity": 0.38,
+      "lampRimColor": "#FFB86B",
+      "optionCardEnterStaggerMs": 70,
+      "cannotMissPractice": true,
+      "forceReadableOrder": [
+        "safe",
+        "swingy",
+        "synergy_leaning"
+      ]
     },
     "options": [
       {
@@ -646,7 +656,7 @@
       "showBlurb": true,
       "showHpSwingHint": true,
       "showLeanPillWhenSynergyActive": true,
-      "minTapTargetPx": 48,
+      "minTapTargetPx": 52,
       "categoryChips": {
         "safe": {
           "tr": "Güvenli",
@@ -667,11 +677,22 @@
       "hpSwingHintTemplate": {
         "tr": "≈ %{min}–%{max} takım HP",
         "en": "≈ %{min}–%{max} team HP"
+      },
+      "showPropIcon": true,
+      "propIconByCallId": {
+        "call_cheer": "prop_hands_clap",
+        "call_focus_fire": "prop_point_finger",
+        "call_tea_break": "prop_demlik",
+        "call_whistle_push": "prop_whistle",
+        "call_neon_flash": "prop_neon_spark",
+        "call_chaos_kite": "prop_kite_string",
+        "call_hold_fence": "prop_newspaper",
+        "call_oven_warm": "prop_tray"
       }
     },
     "resolveFeedback": {
       "showTeamHpDeltaToast": true,
-      "toastMs": 1600,
+      "toastMs": 1800,
       "toastTemplate": {
         "tr": "Çağrı: {label} · takım HP {deltaSigned}%",
         "en": "Call: {label} · team HP {deltaSigned}%"
@@ -684,13 +705,19 @@
         "{porchCall}",
         "synergyNameOrNone",
         "mvp"
-      ]
+      ],
+      "propTossOnResolve": true
     },
     "reliability": {
       "mustOpenOncePerFight": true,
       "ifMissedTriggerRetryAt": 0.55,
       "practiceForceAtTSec": 18.0,
-      "logWarnIfNoResolve": true
+      "logWarnIfNoResolve": true,
+      "retryAtFightPercentIfMissed": 0.55,
+      "setsFlagsOnResolve": [
+        "practice_cup_porch_call_done",
+        "porch_call_resolved"
+      ]
     }
   },
   "practiceCup": {
@@ -979,8 +1006,10 @@
         "porchCallResolve": "shake_medium",
         "ko": "shake_heavy",
         "neonStart": "shake_light",
-        "botPunishKo": "shake_heavy"
-      }
+        "botPunishKo": "shake_heavy",
+        "propToss": "shake_light"
+      },
+      "maxAmpPxMobile": 4
     },
     "hitStop": {
       "koMs": 55,
@@ -1021,16 +1050,36 @@
       "scaleTo": 1.12
     },
     "mustImplement": [
-      "on-unit damage floats (ally cream/teal, enemy coral)",
-      "Rivalry gold float on unit at first proc",
-      "heal green floats on Tea ticks",
-      "HP bar white chip 120ms",
-      "synergy badge pop-scale",
-      "shake light/medium/heavy caps",
-      "Porch-call dim + lamp rim + letterbox pulse",
-      "hit-stop on KO + call resolve",
-      "post-call team HP delta toast"
-    ]
+      "units rendered on arena pads (not card-row primary)",
+      "Rivalry float+shake once per under-threshold crossing",
+      "synergy footer matches picks before Start (assert)",
+      "porch-call prop icon + resolve toss",
+      "post-call HP delta toast ≥1.6s"
+    ],
+    "arenaPadFloats": {
+      "anchor": "pad_center",
+      "stackOffsetPx": 16,
+      "zIndexAboveUnit": true
+    },
+    "float_rivalry_buff": {
+      "color": "#F0C14A",
+      "stroke": "#3A2A00",
+      "fontPxMobile": 22,
+      "risePx": 52,
+      "durationMs": 950,
+      "format": "-{amount}!",
+      "prefixLabel": {
+        "tr": "Rekabet",
+        "en": "Rivalry"
+      },
+      "mustBeOnUnitPad": true,
+      "oncePrefixPerTrigger": true
+    },
+    "propJuice": {
+      "visibleOnCallCards": true,
+      "tossOnResolve": true,
+      "useWave3PropHeroesIfPresent": true
+    }
   },
   "botAi": {
     "targeting": [
@@ -1248,6 +1297,38 @@
     "pill.fires_when": {
       "tr": "ateş: {when}",
       "en": "fires: {when}"
+    },
+    "fight.arena_ready": {
+      "tr": "Pad'ler hazır — Start",
+      "en": "Pads ready — Start"
+    },
+    "fight.footer_desync_blocked": {
+      "tr": "Sinerji senkron — bir an…",
+      "en": "Syncing synergy — one beat…"
+    },
+    "fight.rivalry_sticky": {
+      "tr": "Rekabet yanıyor",
+      "en": "Rivalry burning"
+    },
+    "placement.on_pads": {
+      "tr": "Arenaya yerleştir",
+      "en": "Place on arena"
+    },
+    "practice.show_me_then_start": {
+      "tr": "Göster → Start",
+      "en": "Show me → Start"
+    },
+    "practice.start_arena": {
+      "tr": "Start — arena",
+      "en": "Start — arena"
+    },
+    "practice.lobby_unstuck": {
+      "tr": "Takılma kalktı — Start açık.",
+      "en": "Unstuck — Start is open."
+    },
+    "practice.rivalry_ready_start": {
+      "tr": "Rekabet hazır — Start.",
+      "en": "Rivalry ready — Start."
     }
   },
   "acceptanceChecks": [
@@ -1571,5 +1652,586 @@
       "Exposed front Support takes Glass focus and shows punish toast",
       "juiceHints mustImplement list all fire in Practice Cup cold start"
     ]
+  },
+  "arenaPadFight": {
+    "layout": {
+      "mode": "arena_pads",
+      "deprecate": "button_row_combat_cards_as_primary",
+      "grid": {
+        "player": {
+          "rows": 2,
+          "cols": 3,
+          "frontRowIndex": 0
+        },
+        "enemy": {
+          "rows": 2,
+          "cols": 3,
+          "frontRowIndex": 0
+        }
+      },
+      "padIds": {
+        "player": [
+          "p_front_left",
+          "p_front_mid",
+          "p_front_right",
+          "p_back_left",
+          "p_back_mid",
+          "p_back_right"
+        ],
+        "enemy": [
+          "e_front_left",
+          "e_front_mid",
+          "e_front_right",
+          "e_back_left",
+          "e_back_mid",
+          "e_back_right"
+        ]
+      },
+      "cssHooks": {
+        "arenaRoot": ".rp-arena",
+        "pad": ".rp-arena-pad",
+        "padOccupied": ".rp-arena-pad.is-occupied",
+        "padFront": ".rp-arena-pad.is-front",
+        "padBack": ".rp-arena-pad.is-back",
+        "unitOnPad": ".rp-arena-unit",
+        "forbidCardRowPrimary": ".rp-fight-card-row[data-primary='true']"
+      },
+      "rules": [
+        "Every living unit MUST render as .rp-arena-unit inside its pad — not as a floating card row.",
+        "Placement confirm writes neighborId → padId; fight reads the same map (no re-layout shuffle).",
+        "HP bar + role chip sit on the pad unit; damage floats anchor to pad center.",
+        "If Meshy arena hero present (wave3), use as full-bleed stage under pads; pads are interaction plane."
+      ]
+    },
+    "placementToFight": {
+      "samePadMap": true,
+      "noMirrorShuffle": true,
+      "enemyPadsFromLineup": true,
+      "showEnemyRosterBeforeConfirm": true,
+      "startDisabledUntil": [
+        "roster_full",
+        "placement_confirmed",
+        "footer_synergy_synced"
+      ]
+    },
+    "visualAcceptance": {
+      "unitsOnArenaPads": true,
+      "minVisiblePads": 6,
+      "playerAndEnemyPadsDistinct": true,
+      "cardRowMayExistAsA11yFallbackOnly": true
+    }
+  },
+  "stickySynergyProcs": {
+    "oncePerTrigger": true,
+    "rivalry": {
+      "synergyId": "syn_rivalry",
+      "trigger": "ally_crosses_under_hp_threshold_while_synergy_active",
+      "hpThresholdPercent": 0.35,
+      "dedupeKey": "rivalry_proc_{fightId}_{unitId}_{crossingEventId}",
+      "onTrigger": {
+        "floatId": "float_rivalry_buff",
+        "floatMustBeOnUnitPad": true,
+        "cameraShakeId": "shake_medium",
+        "hitStopMs": 45,
+        "badgePulse": true,
+        "emberOutlineMs": 2400,
+        "coachPopOncePerFight": {
+          "durationMs": 1400,
+          "lines": {
+            "tr": "Rekabet! Düşük HP → daha sert vuruş",
+            "en": "Rivalry! Low HP → harder hits"
+          }
+        },
+        "setsFlagsFirstInPractice": [
+          "practice_cup_rivalry_pop_seen"
+        ]
+      },
+      "stickiness": {
+        "emberWhileUnderThreshold": true,
+        "goldFloatOnEachBuffedHit": true,
+        "goldFloatPrefixOnce": true,
+        "maxGoldFloatsPerSec": 3,
+        "doNotRetriggerCoachPop": true
+      }
+    },
+    "teaCircle": {
+      "synergyId": "syn_tea_circle",
+      "trigger": "heal_aura_tick",
+      "dedupeKey": "tea_tick_{fightId}_{tickIndex}",
+      "onTrigger": {
+        "floatId": "float_heal",
+        "vfxId": "vfx_tea_steam_ring",
+        "cameraShakeId": "shake_none",
+        "coachPopOncePerFight": {
+          "durationMs": 1400,
+          "lines": {
+            "tr": "Çay Çemberi — bir yudum HP",
+            "en": "Tea Circle — a sip of HP"
+          }
+        }
+      }
+    },
+    "neonNight": {
+      "synergyId": "syn_neon_night",
+      "trigger": "fight_start_if_active",
+      "windowSec": 8,
+      "dedupeKey": "neon_open_{fightId}",
+      "onTrigger": {
+        "vfxId": "vfx_neon_edge_flicker",
+        "floatId": "float_dodge",
+        "cameraShakeId": "shake_light",
+        "coachPopOncePerFight": {
+          "durationMs": 1400,
+          "lines": {
+            "tr": "Neon Gece — dodge penceresi 8 sn",
+            "en": "Neon Night — dodge window 8s"
+          }
+        }
+      },
+      "stickiness": {
+        "edgeFlickerEntireWindow": true,
+        "fadeOutLastSec": 1.2
+      }
+    },
+    "procReliability": {
+      "mustFireIfConditionMet": true,
+      "logWarnIfSkipped": true,
+      "neverLogOnly": true,
+      "requireVisibleFloatOrVfx": true
+    }
+  },
+  "synergyFooterSync": {
+    "problem": "Footer can show 0/3 while picks are lit — desync before Start",
+    "sourceOfTruth": "draftPickNeighborIds",
+    "recompute": {
+      "when": [
+        "pick_toggle",
+        "pick_clear",
+        "show_me_autopick",
+        "placement_move",
+        "locale_change",
+        "before_start_enable"
+      ],
+      "fn": "countMatchingTagsFromPools(draftPickNeighborIds, synergyTagPools)",
+      "debounceMs": 0
+    },
+    "footerModel": {
+      "items": [
+        {
+          "synergyId": "syn_rivalry",
+          "displayCount": "{matched}/{minCount}",
+          "activeWhen": "matched >= minCount",
+          "inactiveLabel": {
+            "tr": "Rekabet",
+            "en": "Rivalry"
+          }
+        },
+        {
+          "synergyId": "syn_tea_circle",
+          "displayCount": "{matched}/{minCount}",
+          "activeWhen": "matched >= minCount",
+          "inactiveLabel": {
+            "tr": "Çay Çemberi",
+            "en": "Tea Circle"
+          }
+        },
+        {
+          "synergyId": "syn_neon_night",
+          "displayCount": "{matched}/{minCount}",
+          "activeWhen": "matched >= minCount",
+          "inactiveLabel": {
+            "tr": "Neon Gece",
+            "en": "Neon Night"
+          }
+        }
+      ],
+      "opposingBotPill": {
+        "prefix": {
+          "tr": "Bot ·",
+          "en": "Bot ·"
+        },
+        "fromEnemyLineupPools": true,
+        "mustMatchEnemyPicks": true
+      }
+    },
+    "syncGuards": {
+      "beforeStartAssert": "footer.activeSynergyIds === computeActiveSynergies(draftPickNeighborIds)",
+      "onMismatch": {
+        "action": "force_recompute_and_rerender_same_tick",
+        "blockStart": false,
+        "devWarn": "synergy_footer_desync"
+      },
+      "highlightPicksThatContribute": true,
+      "dimPicksThatDoNotContributeToHoveredPill": true
+    },
+    "acceptance": {
+      "tr": "Start'tan önce footer, seçili komşuların etiket havuzuyla birebir uyumlu.",
+      "en": "Before Start, footer matches tag pools of current picks exactly."
+    }
+  },
+  "porchCallPropJuice": {
+    "stickierWindow": {
+      "pauseSec": 2.6,
+      "letterboxPulseMs": 360,
+      "dimOpacity": 0.38,
+      "lampRimColor": "#FFB86B",
+      "optionCardEnterStaggerMs": 70,
+      "cannotMissPractice": true,
+      "forceReadableOrder": [
+        "safe",
+        "swingy",
+        "synergy_leaning"
+      ]
+    },
+    "optionCards": {
+      "showCategoryChip": true,
+      "showBlurb": true,
+      "showHpSwingHint": true,
+      "showPropIcon": true,
+      "minTapTargetPx": 52,
+      "propIconByCallId": {
+        "call_cheer": "prop_hands_clap",
+        "call_focus_fire": "prop_point_finger",
+        "call_tea_break": "prop_demlik",
+        "call_whistle_push": "prop_whistle",
+        "call_neon_flash": "prop_neon_spark",
+        "call_chaos_kite": "prop_kite_string",
+        "call_hold_fence": "prop_newspaper",
+        "call_oven_warm": "prop_tray"
+      }
+    },
+    "resolveStickiness": {
+      "burstMs": 420,
+      "hitStopMs": 55,
+      "shakeId": "shake_medium",
+      "teamHpDeltaToastMs": 1800,
+      "propTossOnResolve": true,
+      "propTossMs": 480,
+      "holdChoiceHighlightMs": 900,
+      "comicMustNameCall": true
+    },
+    "midFightReliability": {
+      "mustOpenOncePerFight": true,
+      "retryAtFightPercentIfMissed": 0.55,
+      "practiceForceAtTSec": 18.0,
+      "setsFlagsOnResolve": [
+        "practice_cup_porch_call_done",
+        "porch_call_resolved"
+      ]
+    }
+  },
+  "practiceFlagReliability": {
+    "note": "Score gap: Practice can stall evening if cupDone flags lag",
+    "onFinishBanner": {
+      "setsFlagsAtomic": [
+        "practice_cup_done",
+        "syn_taught_syn_rivalry",
+        "first_evening_practice_cleared"
+      ],
+      "alsoEnsure": [
+        "practice_cup_rivalry_pop_seen",
+        "practice_cup_porch_call_done"
+      ],
+      "ifMissingProcOrCall": {
+        "action": "backfill_flags_from_scripted_moments_seen",
+        "stillRequireVisibleOnce": true
+      }
+    },
+    "endEveningUnlock": {
+      "whenFlagsAll": [
+        "practice_cup_done",
+        "syn_taught_syn_rivalry"
+      ],
+      "forceEnableWithinRenders": 1,
+      "emitEvent": "practice_cup_cleared"
+    }
+  },
+  "mechanicsFix2": {
+    "id": "mechanics-fix-2",
+    "packNumber": 2,
+    "shippedAt": "2026-11-23T11:41:00Z"
+  },
+  "practiceFlowGuarantee": {
+    "path": [
+      "practice_entry",
+      "draft",
+      "placement",
+      "arena_fight",
+      "comic"
+    ],
+    "mustNotStallAt": [
+      "cup_lobby",
+      "draft_ready_lock",
+      "placement_confirm"
+    ],
+    "acceptance": {
+      "tr": "Göster + 3 pick sonrası Start tek tap ile arena pad dövüşüne girer; Skip öğreti bir kez ateşlenene kadar kapalı.",
+      "en": "After Show me + 3 picks, Start enters fight with units on arena pads within 1 tap; skip disabled until teach fires once."
+    },
+    "coldPathContract": {
+      "maxTapsFromShowMeToFight": 2,
+      "preferred": "Show me → (auto draft+place) → Start → fight",
+      "alternate": "manual 3 picks forming Rivalry → Start → fight",
+      "timeoutAutoAdvanceMs": 0,
+      "neverRequireHover": true
+    }
+  },
+  "lobbyAutoAdvance": {
+    "practiceOnly": true,
+    "onShowMe": {
+      "applyAutoPickFallback": [
+        "n2",
+        "n4",
+        "n1"
+      ],
+      "expectedSynergyId": "syn_rivalry",
+      "setPicksImmediately": true,
+      "recomputeFooterSync": true,
+      "autoPlaceByRole": true,
+      "placementMap": [
+        {
+          "neighborId": "n4",
+          "padId": "p_front_left"
+        },
+        {
+          "neighborId": "n2",
+          "padId": "p_front_right"
+        },
+        {
+          "neighborId": "n1",
+          "padId": "p_back_mid"
+        }
+      ],
+      "enemyLineupFixed": [
+        {
+          "botId": "bot_n3",
+          "padId": "e_front_left"
+        },
+        {
+          "botId": "bot_n5",
+          "padId": "e_front_right"
+        },
+        {
+          "botId": "bot_n6",
+          "padId": "e_back_mid"
+        }
+      ],
+      "setsFlags": [
+        "practice_show_me_applied",
+        "practice_draft_ready"
+      ],
+      "unlockStart": true,
+      "coachLine": {
+        "tr": "Roster hazır — Start'a bas, Rekabeti dövüşte gör.",
+        "en": "Roster set — tap Start, see Rivalry in the fight."
+      },
+      "ctaPulse": {
+        "target": "start_button",
+        "ms": 1200
+      }
+    },
+    "onManualThreePicks": {
+      "when": "pickCount === 3",
+      "ifSynergyFormed": {
+        "synergyId": "syn_rivalry",
+        "autoPlaceIfNotPlaced": true,
+        "unlockStart": true,
+        "setsFlags": [
+          "practice_draft_ready"
+        ]
+      },
+      "ifSynergyNotFormed": {
+        "keepStartDisabled": true,
+        "showCoach": {
+          "tr": "3 pick var ama Rekabet yok — Cem+Orhan dene veya Göster.",
+          "en": "3 picks but no Rivalry — try Cem+Orhan or Show me."
+        },
+        "offerShowMe": true
+      }
+    },
+    "skipPlacementScreenIfAutoPlaced": {
+      "enabled": true,
+      "practiceDefault": true,
+      "stillAllowManualAdjust": true,
+      "adjustLabel": {
+        "tr": "Yerleri düzenle",
+        "en": "Adjust pads"
+      }
+    },
+    "antiStall": {
+      "detectStuckMs": 8000,
+      "whenStuckOnLobbyWithShowMeDone": {
+        "forceUnlockStart": true,
+        "toast": {
+          "tr": "Takılma kalktı — Start açık.",
+          "en": "Unstuck — Start is open."
+        },
+        "setsFlags": [
+          "practice_lobby_unstuck"
+        ]
+      },
+      "whenStuckOnLobbyWithThreePicksAndRivalry": {
+        "forceUnlockStart": true,
+        "forceFooterRecompute": true
+      },
+      "neverSoftLockReadyBehindDesyncedFooter": true
+    }
+  },
+  "startEnabledRules": {
+    "buttonId": "cup_start",
+    "labels": {
+      "enabled": {
+        "tr": "Start — arena",
+        "en": "Start — arena"
+      },
+      "disabledNeedPicks": {
+        "tr": "3 komşu seç veya Göster",
+        "en": "Pick 3 neighbors or Show me"
+      },
+      "disabledNeedSynergy": {
+        "tr": "Rekabeti kur (veya Göster)",
+        "en": "Form Rivalry (or Show me)"
+      },
+      "disabledSyncing": {
+        "tr": "Sinerji senkron…",
+        "en": "Syncing synergy…"
+      }
+    },
+    "enableWhenAll": [
+      "pickCount === 3",
+      "OR(show_me_applied, activeSynergies.includes('syn_rivalry'))",
+      "footerSyncedWithPicks === true",
+      "placementResolved === true"
+    ],
+    "overridesFromFix2": {
+      "note": "fix-2 blocked Start on footer desync — that caused lobby stalls when footer lagged. fix-3: recompute footer synchronously in the same tick as picks/Show me; only briefly disable (<1 frame) then force sync.",
+      "blockStartOnDesync": false,
+      "onDesync": {
+        "action": "force_recompute_and_rerender_same_tick",
+        "blockStart": false,
+        "maxSyncRetries": 2,
+        "thenEnableIfPicksValid": true,
+        "devWarn": "synergy_footer_desync_recovered"
+      }
+    },
+    "onStartTap": {
+      "enterScene": "arena_fight",
+      "requireUnitsOnPads": true,
+      "seedFromPlacementMap": true,
+      "beginScriptedMoments": true,
+      "setsFlags": [
+        "practice_fight_entered"
+      ],
+      "ifPadsEmpty": {
+        "action": "apply_default_practice_placement_then_enter",
+        "doNotAbortToLobby": true
+      }
+    },
+    "minTapTargetPx": 52,
+    "alwaysVisibleInPracticeLobby": true,
+    "disabledOpacity": 0.45,
+    "enabledPulseWhenUnlocked": true
+  },
+  "footerCoachConsistency": {
+    "problem": "Footer can claim Rivalry while coach still says form synergy — Start stays locked",
+    "rule": "coachGateState MUST equal footer.activeSynergies for taught synergy",
+    "onMismatch": {
+      "prefer": "footer_and_picks_as_source_of_truth",
+      "clearStaleRequireSynergyLock": true,
+      "unlockStartIfRivalryActive": true,
+      "coachLine": {
+        "tr": "Rekabet hazır — Start.",
+        "en": "Rivalry ready — Start."
+      }
+    },
+    "requireSynergyToReady": {
+      "practice": "satisfied_by_show_me_OR_rivalry_active",
+      "doNotKeepLockedAfterShowMe": true
+    }
+  },
+  "skipRulesFix3": {
+    "hideSkipUntilFlagsAll": [
+      "syn_taught_syn_rivalry",
+      "practice_cup_porch_call_done",
+      "practice_cup_done"
+    ],
+    "note": "Skip stays disabled until teach fires once (density gate). Do not use Skip as lobby escape.",
+    "lobbyHasNoSkipEscape": true
+  },
+  "flowStateMachine": {
+    "states": [
+      {
+        "id": "practice_entry",
+        "enter": [
+          "show_coach_or_show_me"
+        ],
+        "exits": [
+          {
+            "to": "draft",
+            "when": "user_in_cup_lobby"
+          }
+        ]
+      },
+      {
+        "id": "draft",
+        "enter": [
+          "render_picks",
+          "footer_live"
+        ],
+        "exits": [
+          {
+            "to": "placement_or_ready",
+            "when": "show_me_OR_(3_picks_AND_rivalry)"
+          }
+        ]
+      },
+      {
+        "id": "placement_or_ready",
+        "enter": [
+          "auto_place_practice_default",
+          "enable_start"
+        ],
+        "exits": [
+          {
+            "to": "arena_fight",
+            "when": "start_tapped"
+          },
+          {
+            "to": "placement_or_ready",
+            "when": "adjust_pads"
+          }
+        ]
+      },
+      {
+        "id": "arena_fight",
+        "enter": [
+          "mount_units_on_pads",
+          "run_scripted_moments",
+          "sticky_rivalry_procs"
+        ],
+        "exits": [
+          {
+            "to": "comic",
+            "when": "fight_finished"
+          }
+        ]
+      },
+      {
+        "id": "comic",
+        "enter": [
+          "seed_synergy_call_mvp",
+          "set_practice_cup_done_atomic"
+        ]
+      }
+    ],
+    "illegal": [
+      "draft -> comic",
+      "practice_entry -> arena_fight without picks",
+      "stay_in_draft after show_me > 1s without start_enabled"
+    ]
+  },
+  "mechanicsFix3": {
+    "id": "mechanics-fix-3",
+    "packNumber": 3
   }
 }

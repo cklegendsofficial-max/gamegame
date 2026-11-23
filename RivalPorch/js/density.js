@@ -101,11 +101,24 @@ export function practiceExitBlocked(density, save) {
   if (!teach) return false;
   if (!teach.softSkipBlocked) return false;
   if (save.storyFlags?.first_evening_practice_cleared && save.storyFlags?.practice_cup_done) return false;
-  // First-evening hard gate: Rivalry teach + porch call + practice done
+  // ux-session-2 / mechanics-fix-2: Day1 End evening = Practice flags ONLY
+  // (practice_cup_porch_call_done is fight soft-skip, not evening gate)
   const need = teach.ui?.endEvening?.blockedUntilFlagsAll || ["practice_cup_done", "syn_taught_syn_rivalry"];
-  const gate = [...need];
-  if (!gate.includes("practice_cup_porch_call_done")) gate.push("practice_cup_porch_call_done");
-  return gate.some((f) => !save.storyFlags?.[f]);
+  return need.some((f) => !save.storyFlags?.[f]);
+}
+
+/** Authoritative End-evening gate (ux-session-2). Day1 = practice flags; Day2+ always. */
+export function canEndEvening(save, uxPack2 = null, density = null) {
+  const day = save?.dayIndex ?? 1;
+  const gate = uxPack2?.endEveningGate;
+  if (day <= 1) {
+    const need =
+      gate?.day1RequiresFlagsAll ||
+      practiceTeach(density)?.ui?.endEvening?.blockedUntilFlagsAll ||
+      ["practice_cup_done", "syn_taught_syn_rivalry"];
+    return need.every((f) => !!save?.storyFlags?.[f]);
+  }
+  return gate?.day2PlusAlwaysAllow !== false;
 }
 
 /** Merge density practiceCupTeach moments over combat-pack moments (by id). */

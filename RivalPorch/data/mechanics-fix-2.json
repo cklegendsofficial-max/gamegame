@@ -1,0 +1,425 @@
+{
+  "schemaVersion": 1,
+  "id": "mechanics-fix-2",
+  "packNumber": 2,
+  "squad": "mechanics",
+  "shippedAt": "2026-11-23T11:41:00Z",
+  "noPrPush": true,
+  "extends": [
+    "internal/rival-porch-combat-pack.json",
+    "internal/squads/mechanics-fix-1.json"
+  ],
+  "mergeMode": "deepMergeIntoCombatPack",
+  "wirePathHint": "RivalPorch/data/combat-pack.json (+ overlay RivalPorch/data/mechanics-fix-2.json)",
+  "scoreRef": {
+    "file": "internal/rival-porch-score-latest.json",
+    "buildCommit": "e36e494",
+    "mechanicsScore": 7.0,
+    "priorityFixTitle": "Arena-pad fight with sticky synergy procs"
+  },
+  "scoreGapsAddressed": [
+    "Fight remains button-row combat, not pad-aligned arena mastery",
+    "Synergy status can desync from visible picks",
+    "Porch-call / prop juice not sticky enough to teach a system",
+    "Practice script can stall evening completion if cupDone flags lag"
+  ],
+  "targets": [
+    "arenaPadFight",
+    "stickySynergyProcs",
+    "synergyFooterSync",
+    "porchCallPropJuice",
+    "practiceFlagReliability"
+  ],
+  "arenaPadFight": {
+    "layout": {
+      "mode": "arena_pads",
+      "deprecate": "button_row_combat_cards_as_primary",
+      "grid": {
+        "player": {
+          "rows": 2,
+          "cols": 3,
+          "frontRowIndex": 0
+        },
+        "enemy": {
+          "rows": 2,
+          "cols": 3,
+          "frontRowIndex": 0
+        }
+      },
+      "padIds": {
+        "player": [
+          "p_front_left",
+          "p_front_mid",
+          "p_front_right",
+          "p_back_left",
+          "p_back_mid",
+          "p_back_right"
+        ],
+        "enemy": [
+          "e_front_left",
+          "e_front_mid",
+          "e_front_right",
+          "e_back_left",
+          "e_back_mid",
+          "e_back_right"
+        ]
+      },
+      "cssHooks": {
+        "arenaRoot": ".rp-arena",
+        "pad": ".rp-arena-pad",
+        "padOccupied": ".rp-arena-pad.is-occupied",
+        "padFront": ".rp-arena-pad.is-front",
+        "padBack": ".rp-arena-pad.is-back",
+        "unitOnPad": ".rp-arena-unit",
+        "forbidCardRowPrimary": ".rp-fight-card-row[data-primary='true']"
+      },
+      "rules": [
+        "Every living unit MUST render as .rp-arena-unit inside its pad — not as a floating card row.",
+        "Placement confirm writes neighborId → padId; fight reads the same map (no re-layout shuffle).",
+        "HP bar + role chip sit on the pad unit; damage floats anchor to pad center.",
+        "If Meshy arena hero present (wave3), use as full-bleed stage under pads; pads are interaction plane."
+      ]
+    },
+    "placementToFight": {
+      "samePadMap": true,
+      "noMirrorShuffle": true,
+      "enemyPadsFromLineup": true,
+      "showEnemyRosterBeforeConfirm": true,
+      "startDisabledUntil": [
+        "roster_full",
+        "placement_confirmed",
+        "footer_synergy_synced"
+      ]
+    },
+    "visualAcceptance": {
+      "unitsOnArenaPads": true,
+      "minVisiblePads": 6,
+      "playerAndEnemyPadsDistinct": true,
+      "cardRowMayExistAsA11yFallbackOnly": true
+    }
+  },
+  "stickySynergyProcs": {
+    "oncePerTrigger": true,
+    "rivalry": {
+      "synergyId": "syn_rivalry",
+      "trigger": "ally_crosses_under_hp_threshold_while_synergy_active",
+      "hpThresholdPercent": 0.35,
+      "dedupeKey": "rivalry_proc_{fightId}_{unitId}_{crossingEventId}",
+      "onTrigger": {
+        "floatId": "float_rivalry_buff",
+        "floatMustBeOnUnitPad": true,
+        "cameraShakeId": "shake_medium",
+        "hitStopMs": 45,
+        "badgePulse": true,
+        "emberOutlineMs": 2400,
+        "coachPopOncePerFight": {
+          "durationMs": 1400,
+          "lines": {
+            "tr": "Rekabet! Düşük HP → daha sert vuruş",
+            "en": "Rivalry! Low HP → harder hits"
+          }
+        },
+        "setsFlagsFirstInPractice": [
+          "practice_cup_rivalry_pop_seen"
+        ]
+      },
+      "stickiness": {
+        "emberWhileUnderThreshold": true,
+        "goldFloatOnEachBuffedHit": true,
+        "goldFloatPrefixOnce": true,
+        "maxGoldFloatsPerSec": 3,
+        "doNotRetriggerCoachPop": true
+      }
+    },
+    "teaCircle": {
+      "synergyId": "syn_tea_circle",
+      "trigger": "heal_aura_tick",
+      "dedupeKey": "tea_tick_{fightId}_{tickIndex}",
+      "onTrigger": {
+        "floatId": "float_heal",
+        "vfxId": "vfx_tea_steam_ring",
+        "cameraShakeId": "shake_none",
+        "coachPopOncePerFight": {
+          "durationMs": 1400,
+          "lines": {
+            "tr": "Çay Çemberi — bir yudum HP",
+            "en": "Tea Circle — a sip of HP"
+          }
+        }
+      }
+    },
+    "neonNight": {
+      "synergyId": "syn_neon_night",
+      "trigger": "fight_start_if_active",
+      "windowSec": 8,
+      "dedupeKey": "neon_open_{fightId}",
+      "onTrigger": {
+        "vfxId": "vfx_neon_edge_flicker",
+        "floatId": "float_dodge",
+        "cameraShakeId": "shake_light",
+        "coachPopOncePerFight": {
+          "durationMs": 1400,
+          "lines": {
+            "tr": "Neon Gece — dodge penceresi 8 sn",
+            "en": "Neon Night — dodge window 8s"
+          }
+        }
+      },
+      "stickiness": {
+        "edgeFlickerEntireWindow": true,
+        "fadeOutLastSec": 1.2
+      }
+    },
+    "procReliability": {
+      "mustFireIfConditionMet": true,
+      "logWarnIfSkipped": true,
+      "neverLogOnly": true,
+      "requireVisibleFloatOrVfx": true
+    }
+  },
+  "synergyFooterSync": {
+    "problem": "Footer can show 0/3 while picks are lit — desync before Start",
+    "sourceOfTruth": "draftPickNeighborIds",
+    "recompute": {
+      "when": [
+        "pick_toggle",
+        "pick_clear",
+        "show_me_autopick",
+        "placement_move",
+        "locale_change",
+        "before_start_enable"
+      ],
+      "fn": "countMatchingTagsFromPools(draftPickNeighborIds, synergyTagPools)",
+      "debounceMs": 0
+    },
+    "footerModel": {
+      "items": [
+        {
+          "synergyId": "syn_rivalry",
+          "displayCount": "{matched}/{minCount}",
+          "activeWhen": "matched >= minCount",
+          "inactiveLabel": {
+            "tr": "Rekabet",
+            "en": "Rivalry"
+          }
+        },
+        {
+          "synergyId": "syn_tea_circle",
+          "displayCount": "{matched}/{minCount}",
+          "activeWhen": "matched >= minCount",
+          "inactiveLabel": {
+            "tr": "Çay Çemberi",
+            "en": "Tea Circle"
+          }
+        },
+        {
+          "synergyId": "syn_neon_night",
+          "displayCount": "{matched}/{minCount}",
+          "activeWhen": "matched >= minCount",
+          "inactiveLabel": {
+            "tr": "Neon Gece",
+            "en": "Neon Night"
+          }
+        }
+      ],
+      "opposingBotPill": {
+        "prefix": {
+          "tr": "Bot ·",
+          "en": "Bot ·"
+        },
+        "fromEnemyLineupPools": true,
+        "mustMatchEnemyPicks": true
+      }
+    },
+    "syncGuards": {
+      "beforeStartAssert": "footer.activeSynergyIds === computeActiveSynergies(draftPickNeighborIds)",
+      "onMismatch": {
+        "action": "force_recompute_and_rerender",
+        "blockStart": true,
+        "devWarn": "synergy_footer_desync"
+      },
+      "highlightPicksThatContribute": true,
+      "dimPicksThatDoNotContributeToHoveredPill": true
+    },
+    "acceptance": {
+      "tr": "Start'tan önce footer, seçili komşuların etiket havuzuyla birebir uyumlu.",
+      "en": "Before Start, footer matches tag pools of current picks exactly."
+    }
+  },
+  "porchCallPropJuice": {
+    "stickierWindow": {
+      "pauseSec": 2.6,
+      "letterboxPulseMs": 360,
+      "dimOpacity": 0.38,
+      "lampRimColor": "#FFB86B",
+      "optionCardEnterStaggerMs": 70,
+      "cannotMissPractice": true,
+      "forceReadableOrder": [
+        "safe",
+        "swingy",
+        "synergy_leaning"
+      ]
+    },
+    "optionCards": {
+      "showCategoryChip": true,
+      "showBlurb": true,
+      "showHpSwingHint": true,
+      "showPropIcon": true,
+      "minTapTargetPx": 52,
+      "propIconByCallId": {
+        "call_cheer": "prop_hands_clap",
+        "call_focus_fire": "prop_point_finger",
+        "call_tea_break": "prop_demlik",
+        "call_whistle_push": "prop_whistle",
+        "call_neon_flash": "prop_neon_spark",
+        "call_chaos_kite": "prop_kite_string",
+        "call_hold_fence": "prop_newspaper",
+        "call_oven_warm": "prop_tray"
+      }
+    },
+    "resolveStickiness": {
+      "burstMs": 420,
+      "hitStopMs": 55,
+      "shakeId": "shake_medium",
+      "teamHpDeltaToastMs": 1800,
+      "propTossOnResolve": true,
+      "propTossMs": 480,
+      "holdChoiceHighlightMs": 900,
+      "comicMustNameCall": true
+    },
+    "midFightReliability": {
+      "mustOpenOncePerFight": true,
+      "retryAtFightPercentIfMissed": 0.55,
+      "practiceForceAtTSec": 18.0,
+      "setsFlagsOnResolve": [
+        "practice_cup_porch_call_done",
+        "porch_call_resolved"
+      ]
+    }
+  },
+  "practiceFlagReliability": {
+    "note": "Score gap: Practice can stall evening if cupDone flags lag",
+    "onFinishBanner": {
+      "setsFlagsAtomic": [
+        "practice_cup_done",
+        "syn_taught_syn_rivalry",
+        "first_evening_practice_cleared"
+      ],
+      "alsoEnsure": [
+        "practice_cup_rivalry_pop_seen",
+        "practice_cup_porch_call_done"
+      ],
+      "ifMissingProcOrCall": {
+        "action": "backfill_flags_from_scripted_moments_seen",
+        "stillRequireVisibleOnce": true
+      }
+    },
+    "endEveningUnlock": {
+      "whenFlagsAll": [
+        "practice_cup_done",
+        "syn_taught_syn_rivalry"
+      ],
+      "forceEnableWithinRenders": 1,
+      "emitEvent": "practice_cup_cleared"
+    }
+  },
+  "juiceHintsPatch": {
+    "arenaPadFloats": {
+      "anchor": "pad_center",
+      "stackOffsetPx": 16,
+      "zIndexAboveUnit": true
+    },
+    "float_rivalry_buff": {
+      "color": "#F0C14A",
+      "stroke": "#3A2A00",
+      "fontPxMobile": 22,
+      "risePx": 52,
+      "durationMs": 950,
+      "format": "-{amount}!",
+      "prefixLabel": {
+        "tr": "Rekabet",
+        "en": "Rivalry"
+      },
+      "mustBeOnUnitPad": true,
+      "oncePrefixPerTrigger": true
+    },
+    "cameraShake": {
+      "triggers": {
+        "rivalryProc": "shake_medium",
+        "porchCallResolve": "shake_medium",
+        "propToss": "shake_light",
+        "ko": "shake_heavy"
+      },
+      "maxAmpPxMobile": 4
+    },
+    "propJuice": {
+      "visibleOnCallCards": true,
+      "tossOnResolve": true,
+      "useWave3PropHeroesIfPresent": true
+    },
+    "mustImplement": [
+      "units rendered on arena pads (not card-row primary)",
+      "Rivalry float+shake once per under-threshold crossing",
+      "synergy footer matches picks before Start (assert)",
+      "porch-call prop icon + resolve toss",
+      "post-call HP delta toast ≥1.6s"
+    ]
+  },
+  "uiStringsPatch": {
+    "fight.arena_ready": {
+      "tr": "Pad'ler hazır — Start",
+      "en": "Pads ready — Start"
+    },
+    "fight.footer_desync_blocked": {
+      "tr": "Sinerji senkron — bir an…",
+      "en": "Syncing synergy — one beat…"
+    },
+    "fight.rivalry_sticky": {
+      "tr": "Rekabet yanıyor",
+      "en": "Rivalry burning"
+    },
+    "placement.on_pads": {
+      "tr": "Arenaya yerleştir",
+      "en": "Place on arena"
+    }
+  },
+  "acceptanceChecks": [
+    "Fight screen shows units on arena pads (player + enemy)",
+    "Rivalry proc: on-pad gold float + medium shake exactly once per under-35% crossing trigger",
+    "Synergy footer matches current picks before Start (no 0/3 while picks lit)",
+    "Porch-call cards show prop icon + category/blurb/HP swing; resolve toss + delta toast sticky ≥1.6s",
+    "practice_cup_done + syn_taught_syn_rivalry set atomically on finish; End evening unlocks ≤1 render"
+  ],
+  "integrator": {
+    "owner": "code owner on cursor/rival-porch-slice-31f7",
+    "steps": [
+      "Deep-merge after mechanics-fix-1 (or replace overlay with fix-2 on top).",
+      "Wire .rp-arena-pad / .rp-arena-unit; stop using card-row as primary fight layout.",
+      "Footer: recompute from draft picks on every toggle; block Start on mismatch.",
+      "Rivalry: dedupe by crossing event; float anchors to pad; shake medium once per trigger.",
+      "Porch-call: prop icons from propIconByCallId; resolve toss + longer toast.",
+      "Practice finish: atomic flag set so density End-evening gate cannot stall.",
+      "No PR from this squad — drop-in only."
+    ],
+    "priority": "wire before next harsh score — this is the mechanics PriorityFix"
+  },
+  "meta": {
+    "expectedMechanicsLift": "7.0 → toward ≥8.5 once arena pads + sticky procs + footer sync land in play",
+    "nextPackIfStillLow": "mechanics-fix-3 — Tea/Neon second practice, position skill (cover/column), closer bot HP races",
+    "compat": {
+      "cssFromVisualPacks": [
+        "visual-fix-1.css",
+        "visual-fix-2.css"
+      ],
+      "meshyArenaHero": "media/rival-porch/meshy/wave3/",
+      "neighborIds": [
+        "n1",
+        "n2",
+        "n3",
+        "n4",
+        "n5",
+        "n6"
+      ]
+    }
+  }
+}

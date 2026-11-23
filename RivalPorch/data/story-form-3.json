@@ -1,0 +1,507 @@
+{
+  "schemaVersion": 1,
+  "packId": "story-form-3",
+  "kind": "story-quest-form",
+  "formIndex": 3,
+  "localeDefault": "tr",
+  "purpose": "While Day2 cold rewrite (form-2) wires in: make consequences impossible to miss — journal as drama, louder worldConsequence vs HUD spam, cold-path comic/share echoes.",
+  "addressesScore": {
+    "scoreLatestPath": "internal/rival-porch-score-latest.json",
+    "storyScore": 6.9,
+    "playedAt": "2026-11-23T11:45:00Z",
+    "priorityFix": {
+      "title": "Day2 visual/NPC echo of cold choice",
+      "acceptance": "Day2 street or evening shows distinct line/prop tied to mediate|instigate|stage; journal lists it."
+    },
+    "gaps": [
+      "Day1 choice → Day2 world rewrite missing",
+      "Journal is a log not drama",
+      "WorldConsequence thin vs quest HUD spam",
+      "Comic beat easy to miss when fight never starts"
+    ],
+    "extendsForm": 2,
+    "note": "Form-2 already defined visceral WCs + journal beats. Form-3 adds presentation contracts so integrator can pass acceptance even if fight/comic path is flaky."
+  },
+  "sourcePacks": [
+    "internal/squads/story-form-2.json",
+    "internal/rival-porch-quests.json",
+    "internal/rival-porch-story-content.json",
+    "internal/rival-porch-session-density.json",
+    "internal/rival-porch-content.json"
+  ],
+  "integrator": {
+    "owner": "code owner on cursor/rival-porch-slice-31f7",
+    "noPrFromThisPackAuthor": true,
+    "mergeMode": "patch-overlay",
+    "wire": [
+      "MUST still ship form-2 applyDay2ColdRewrite — form-3 does not replace it",
+      "Add streetPropOverlays: render prop chip/banner on street+evening when dayIndex>=2 and cold_open_* (independent of worldActive rebuild)",
+      "Journal: render journalDramaCards above arc list; promote journalConsequenceBeats (form-2) into this drama section",
+      "When a visceral WC is active, elevate world-consequence line above quest HUD whisper; optionally dim whisper opacity",
+      "Append comicEchoRulesAppend into porchCupNarrative.comicEchoRules; insert coldEchoPanel into matchComic after panel 1 when cold flag set",
+      "Practice/Cup end: always show comicRememberBanner once even if player skips share",
+      "Append echoFollowUpsAppend + overnightTeasersAppend"
+    ],
+    "doNot": [
+      "Drop form-2 WC ids",
+      "Gate behind spend",
+      "Rename cold_open_* flags",
+      "Open PR from story squad"
+    ]
+  },
+  "principles": {
+    "storyNeverGatedBySpend": true,
+    "form2StillRequired": true,
+    "consequenceMustBeatHudSpam": true,
+    "journalMustReadAsDrama": true,
+    "comicEchoEvenOnPractice": true
+  },
+  "streetPropOverlays": [
+    {
+      "id": "prop_day2_mediate_string",
+      "when": {
+        "dayIndexMin": 2,
+        "flagsAll": [
+          "cold_open_mediate"
+        ]
+      },
+      "screens": [
+        "street",
+        "evening"
+      ],
+      "prop": {
+        "kind": "line",
+        "anchor": "antenna_to_n3_porch",
+        "cssClass": "rp-prop-shared-string",
+        "label": {
+          "tr": "Ortak ip",
+          "en": "Shared string"
+        }
+      },
+      "npcLine": {
+        "speakerId": "n4",
+        "text": {
+          "tr": "İp duruyor. Gazetem… hâlâ bir milimetre açık.",
+          "en": "String holds. My paper… still one millimeter open."
+        }
+      },
+      "worldConsequenceId": "wc_day2_mediate_shared_string",
+      "priority": 100
+    },
+    {
+      "id": "prop_day2_instigate_high_kite",
+      "when": {
+        "dayIndexMin": 2,
+        "flagsAll": [
+          "cold_open_instigate"
+        ]
+      },
+      "screens": [
+        "street",
+        "evening"
+      ],
+      "prop": {
+        "kind": "kite",
+        "anchor": "above_antenna",
+        "cssClass": "rp-prop-kite-high",
+        "label": {
+          "tr": "Yüksek uçuş",
+          "en": "High flight"
+        }
+      },
+      "doorChalk": {
+        "neighborId": "n4",
+        "text": {
+          "tr": "YASAK BÖLGE",
+          "en": "FORBIDDEN ZONE"
+        }
+      },
+      "npcLine": {
+        "speakerId": "n3",
+        "text": {
+          "tr": "Hâlâ yukarıda! Harita kazanıyor.",
+          "en": "Still up there! The map is winning."
+        }
+      },
+      "worldConsequenceId": "wc_day2_instigate_kite_dare",
+      "priority": 100
+    },
+    {
+      "id": "prop_day2_stage_chalk_cup",
+      "when": {
+        "dayIndexMin": 2,
+        "flagsAll": [
+          "cold_open_stage"
+        ]
+      },
+      "screens": [
+        "street",
+        "evening"
+      ],
+      "prop": {
+        "kind": "chalk_arena",
+        "anchor": "street_cobbles_center",
+        "cssClass": "rp-prop-chalk-cup",
+        "label": {
+          "tr": "Tebeşir Cup",
+          "en": "Chalk Cup"
+        }
+      },
+      "npcLine": {
+        "speakerId": "n2",
+        "text": {
+          "tr": "Üç daire. Prova. Düdük hazır.",
+          "en": "Three circles. Rehearsal. Whistle ready."
+        }
+      },
+      "worldConsequenceId": "wc_day2_stage_cup_chalk",
+      "priority": 100
+    }
+  ],
+  "journalDramaCards": [
+    {
+      "id": "jdrama_day2_mediate",
+      "when": {
+        "dayIndexMin": 2,
+        "flagsAny": [
+          "cold_open_mediate",
+          "day2_cold_rewrite_mediate"
+        ]
+      },
+      "tone": "soft",
+      "eyebrow": {
+        "tr": "Yankı · Gün 2",
+        "en": "Aftermath · Day 2"
+      },
+      "title": {
+        "tr": "Arabulucu — ortak ip",
+        "en": "Mediator — shared string"
+      },
+      "body": {
+        "tr": "İlk kapıda birlikte çektiniz. Sokak bunu unutmadı: anten ile veranda aynı ipi paylaşıyor. Bu bir log satırı değil — mahallenin seni okuyuşu.",
+        "en": "At the first knock you pulled together. The street didn't forget: antenna and porch share one string. Not a log line — how the block reads you."
+      },
+      "repTrack": "rep_mediator",
+      "cta": {
+        "tr": "Sokağa bak",
+        "en": "See the street"
+      },
+      "linksWorldConsequenceId": "wc_day2_mediate_shared_string"
+    },
+    {
+      "id": "jdrama_day2_instigate",
+      "when": {
+        "dayIndexMin": 2,
+        "flagsAny": [
+          "cold_open_instigate",
+          "day2_cold_rewrite_instigate"
+        ]
+      },
+      "tone": "sharp",
+      "eyebrow": {
+        "tr": "Yankı · Gün 2",
+        "en": "Aftermath · Day 2"
+      },
+      "title": {
+        "tr": "Kışkırtıcı — yüksek uçuş",
+        "en": "Instigator — high flight"
+      },
+      "body": {
+        "tr": "Uçurtmayı savundunuz. Şimdi antenin üstünde asılı; kapıda YASAK BÖLGE. Gazete kalkan. Drama burada.",
+        "en": "You defended the kite. Now it hangs above the antenna; FORBIDDEN ZONE on the door. Paper shield. Drama lives here."
+      },
+      "repTrack": "rep_instigator",
+      "cta": {
+        "tr": "Çatı / çit",
+        "en": "Roof / fence"
+      },
+      "linksWorldConsequenceId": "wc_day2_instigate_kite_dare"
+    },
+    {
+      "id": "jdrama_day2_stage",
+      "when": {
+        "dayIndexMin": 2,
+        "flagsAny": [
+          "cold_open_stage",
+          "day2_cold_rewrite_stage"
+        ]
+      },
+      "tone": "spotlight",
+      "eyebrow": {
+        "tr": "Yankı · Gün 2",
+        "en": "Aftermath · Day 2"
+      },
+      "title": {
+        "tr": "Sahne Amiri — tebeşir Cup",
+        "en": "Stage Manager — chalk Cup"
+      },
+      "body": {
+        "tr": "Dramayı sahneye koydunuz. Kaldırımda üç daire; Cem prova sayıyor. Ününüz Sahne Amiri — ve sokak prova yapıyor.",
+        "en": "You staged the drama. Three circles on the cobbles; Cem counts rehearsal. Your rep is Stage Manager — and the street is practicing."
+      },
+      "repTrack": "rep_stage",
+      "cta": {
+        "tr": "Provaya gir",
+        "en": "Enter rehearsal"
+      },
+      "linksWorldConsequenceId": "wc_day2_stage_cup_chalk"
+    }
+  ],
+  "journalUi": {
+    "consequenceSectionTitle": {
+      "tr": "Yankı / Sonuç",
+      "en": "Aftermath / Consequence"
+    },
+    "placeAbove": "arcs",
+    "promoteForm2Beats": true,
+    "emptyState": {
+      "tr": "Henüz yankı yok — ilk kapı seçimin Day 2'de burada açılır.",
+      "en": "No aftermath yet — your first-knock choice opens here on Day 2."
+    }
+  },
+  "worldConsequencePresentation": {
+    "id": "wc_loud_over_hud",
+    "whenActiveVisceral": true,
+    "rules": [
+      {
+        "id": "elevate_street_banner",
+        "desc": "Render streetBanner / streetVisual as a full-width stage caption above quest whisper",
+        "cssHint": "rp-wc-banner--loud"
+      },
+      {
+        "id": "dim_quest_whisper",
+        "desc": "While visceral Day2 WC active on street/evening, quest HUD whisper opacity ≤ 0.55 and moves under WC banner",
+        "appliesWhen": {
+          "dayIndexMin": 2,
+          "flagsAny": [
+            "cold_open_mediate",
+            "cold_open_instigate",
+            "cold_open_stage"
+          ]
+        }
+      },
+      {
+        "id": "evening_mid_card_lead_with_wc",
+        "desc": "Evening mid-card first line = eveningBanner from form-2 branch, not agenda checklist title"
+      }
+    ],
+    "visceralIds": [
+      "wc_day2_mediate_shared_string",
+      "wc_day2_instigate_kite_dare",
+      "wc_day2_stage_cup_chalk"
+    ]
+  },
+  "comicEchoRulesAppend": [
+    {
+      "ifFlag": "cold_open_mediate",
+      "line": {
+        "tr": "Arenanın kenarında hâlâ o ortak ip salınıyordu.",
+        "en": "At the arena edge, that shared string still swayed."
+      }
+    },
+    {
+      "ifFlag": "cold_open_instigate",
+      "line": {
+        "tr": "Uçurtma gölgesi skor tablosunun üstünden geçti.",
+        "en": "A kite shadow cut across the scoreboard."
+      }
+    },
+    {
+      "ifFlag": "cold_open_stage",
+      "line": {
+        "tr": "Tebeşir daireleri minyatür sahneye dönüştü — düdük çaldı.",
+        "en": "Chalk circles became a miniature stage — whistle blew."
+      }
+    },
+    {
+      "ifFlag": "day2_cold_rewrite_mediate",
+      "line": {
+        "tr": "Mahalle fısıldadı: Arabulucu yine ipi tutuyor.",
+        "en": "The block whispered: Mediator still holds the line."
+      }
+    },
+    {
+      "ifFlag": "day2_cold_rewrite_instigate",
+      "line": {
+        "tr": "Mahalle fısıldadı: Kışkırtıcı uçuşu bırakmadı.",
+        "en": "The block whispered: Instigator never grounded the flight."
+      }
+    },
+    {
+      "ifFlag": "day2_cold_rewrite_stage",
+      "line": {
+        "tr": "Mahalle fısıldadı: Sahne Amiri prova izini getirdi.",
+        "en": "The block whispered: Stage Manager brought rehearsal dust."
+      }
+    }
+  ],
+  "comicPanelInserts": [
+    {
+      "id": "comic_cold_echo",
+      "insertAfterPanelId": "comic_kickoff",
+      "when": {
+        "flagsAny": [
+          "cold_open_mediate",
+          "cold_open_instigate",
+          "cold_open_stage"
+        ]
+      },
+      "panel": {
+        "beat": 1.5,
+        "id": "comic_cold_echo",
+        "textTemplate": {
+          "tr": "Sokak dünkü ilk kapıyı hatırladı: {coldPath}.",
+          "en": "The street remembered yesterday's first knock: {coldPath}."
+        },
+        "placeholders": {
+          "coldPath": {
+            "cold_open_mediate": {
+              "tr": "arabuluculuk / ortak ip",
+              "en": "mediation / shared string"
+            },
+            "cold_open_instigate": {
+              "tr": "uçurtma isyanı / yüksek uçuş",
+              "en": "kite rebellion / high flight"
+            },
+            "cold_open_stage": {
+              "tr": "sahne / tebeşir Cup",
+              "en": "stage / chalk Cup"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "comicRememberBanner": {
+    "id": "comic_remember_cold",
+    "showAfter": [
+      "practice",
+      "cup"
+    ],
+    "when": {
+      "flagsAny": [
+        "cold_open_mediate",
+        "cold_open_instigate",
+        "cold_open_stage"
+      ]
+    },
+    "title": {
+      "tr": "Sokak hatırladı",
+      "en": "The street remembered"
+    },
+    "bodyByFlag": {
+      "cold_open_mediate": {
+        "tr": "Ortak ip comic'e sızdı — Arabulucu izi.",
+        "en": "Shared string leaked into the comic — Mediator mark."
+      },
+      "cold_open_instigate": {
+        "tr": "Yüksek uçuş comic'e sızdı — Kışkırtıcı izi.",
+        "en": "High flight leaked into the comic — Instigator mark."
+      },
+      "cold_open_stage": {
+        "tr": "Tebeşir sahne comic'e sızdı — Sahne Amiri izi.",
+        "en": "Chalk stage leaked into the comic — Stage Manager mark."
+      }
+    },
+    "forceShowEvenIfShareSkipped": true,
+    "setFlags": [
+      "comic_cold_echo_seen"
+    ]
+  },
+  "echoFollowUpsAppend": [
+    {
+      "id": "echo_form3_prop_check",
+      "kind": "day2_prop_visibility",
+      "priority": 97,
+      "when": {
+        "dayIndexMin": 2,
+        "flagsAny": [
+          "cold_open_mediate",
+          "cold_open_instigate",
+          "cold_open_stage"
+        ],
+        "flagsNone": [
+          "day2_prop_ack"
+        ],
+        "slots": [
+          "evening",
+          "street"
+        ]
+      },
+      "speakerId": "narrator",
+      "headline": {
+        "tr": "Sokak değişti — bak",
+        "en": "The street changed — look"
+      },
+      "body": {
+        "tr": "Dünkü ilk kapı artık prop: ip, yüksek uçurtma veya tebeşir Cup. HUD'dan önce sahneye bak.",
+        "en": "Yesterday's first knock is now a prop: string, high kite, or chalk Cup. Look at the stage before the HUD."
+      },
+      "cta": {
+        "tr": "Sahneyi gör",
+        "en": "See the stage"
+      },
+      "uiHint": "Pin above quest whisper; tapping opens street"
+    }
+  ],
+  "overnightTeasersAppend": [
+    {
+      "id": "ot_form3_consequence_promise",
+      "priority": 97,
+      "when": {
+        "flagsAny": [
+          "cold_open_mediate",
+          "cold_open_instigate",
+          "cold_open_stage"
+        ],
+        "flagsNone": [
+          "day2_cold_rewrite_applied"
+        ]
+      },
+      "title": {
+        "tr": "Yarın sokak dünü yazar",
+        "en": "Tomorrow the street writes yesterday"
+      },
+      "lines": [
+        {
+          "tr": "Bu gece sadece not değil — sabah prop, NPC satırı ve defterde Yankı kartı gelecek.",
+          "en": "Tonight isn't only a note — morning brings a prop, an NPC line, and an Aftermath card in the journal."
+        }
+      ],
+      "tomorrowHook": {
+        "tr": "Day 2: sahne değişimi (mediate / instigate / stage).",
+        "en": "Day 2: stage change (mediate / instigate / stage)."
+      }
+    }
+  ],
+  "acceptanceChecks": [
+    {
+      "id": "prop_or_npc_on_day2",
+      "desc": "Day2 street OR evening shows streetPropOverlays prop label OR npcLine for the cold path — even if worldActive rebuild drops WC."
+    },
+    {
+      "id": "journal_drama_card",
+      "desc": "Journal shows Aftermath/Consequence drama card for the cold path above arcs list."
+    },
+    {
+      "id": "wc_louder_than_whisper",
+      "desc": "When Day2 visceral WC/prop active, WC banner reads above quest HUD whisper."
+    },
+    {
+      "id": "comic_cold_echo",
+      "desc": "After Practice or Cup, comic includes cold echo panel OR comicRememberBanner shows path line; share skip still shows banner."
+    }
+  ],
+  "newStoryFlags": [
+    "day2_prop_ack",
+    "comic_cold_echo_seen"
+  ],
+  "meta": {
+    "squad": "story-quest",
+    "formIndex": 3,
+    "shipTrigger": "score-latest story still 6.9 after form-2; gaps journal/WC/comic",
+    "nextPackWhen": "story category < 8.5 in internal/rival-porch-score-latest.json",
+    "dependsOnForm": 2,
+    "implementationNote": "Presentation + comic layer on top of form-2 content. Integrator wires props independent of WC refresh."
+  }
+}

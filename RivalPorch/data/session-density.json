@@ -1309,6 +1309,142 @@
         "en": "Open street memory"
       },
       "uiHint": "prefer_over_generic_cup_eve"
+    },
+    {
+      "id": "echo_day2_mediate_string",
+      "kind": "day2_cold_rewrite",
+      "priority": 95,
+      "when": {
+        "dayIndexMin": 2,
+        "flagsAll": [
+          "cold_open_mediate"
+        ],
+        "flagsNone": [
+          "day2_mediate_talk_seen"
+        ],
+        "slots": [
+          "evening",
+          "street",
+          "overnight_wake"
+        ]
+      },
+      "speakerId": "n1",
+      "headline": {
+        "tr": "Ortak ip duruyor",
+        "en": "The shared string holds"
+      },
+      "body": {
+        "tr": "Arabulucu seçimin sokakta: anten↔veranda ipi. Birine dokun.",
+        "en": "Your Mediator call is on the street: antenna↔porch string. Touch someone."
+      },
+      "cta": {
+        "tr": "Sokağa çık",
+        "en": "Go to the street"
+      },
+      "worldConsequenceId": "wc_day2_mediate_shared_string",
+      "dialogueTreeId": "dlg_day2_mediate_street"
+    },
+    {
+      "id": "echo_day2_instigate_high",
+      "kind": "day2_cold_rewrite",
+      "priority": 95,
+      "when": {
+        "dayIndexMin": 2,
+        "flagsAll": [
+          "cold_open_instigate"
+        ],
+        "flagsNone": [
+          "day2_instigate_talk_seen"
+        ],
+        "slots": [
+          "evening",
+          "street",
+          "overnight_wake"
+        ]
+      },
+      "speakerId": "n3",
+      "headline": {
+        "tr": "Uçurtma hâlâ yüksekte",
+        "en": "Kite still high"
+      },
+      "body": {
+        "tr": "Kışkırtıcı seçimin sokakta: yüksek uçuş + YASAK BÖLGE. Orhan bekliyor.",
+        "en": "Your Instigator call is on the street: high flight + FORBIDDEN ZONE. Orhan is waiting."
+      },
+      "cta": {
+        "tr": "Çatıya / çite bak",
+        "en": "Check roof / fence"
+      },
+      "worldConsequenceId": "wc_day2_instigate_kite_dare",
+      "dialogueTreeId": "dlg_day2_instigate_street"
+    },
+    {
+      "id": "echo_day2_stage_chalk",
+      "kind": "day2_cold_rewrite",
+      "priority": 95,
+      "when": {
+        "dayIndexMin": 2,
+        "flagsAll": [
+          "cold_open_stage"
+        ],
+        "flagsNone": [
+          "day2_stage_talk_seen"
+        ],
+        "slots": [
+          "evening",
+          "street",
+          "overnight_wake"
+        ]
+      },
+      "speakerId": "n2",
+      "headline": {
+        "tr": "Tebeşir Cup kaldırımda",
+        "en": "Chalk Cup on the cobbles"
+      },
+      "body": {
+        "tr": "Sahne Amiri seçimin sokakta: üç daire, düdük prova. Cem sayıyor.",
+        "en": "Your Stage call is on the street: three circles, whistle rehearsal. Cem is counting."
+      },
+      "cta": {
+        "tr": "Provaya gir",
+        "en": "Enter rehearsal"
+      },
+      "worldConsequenceId": "wc_day2_stage_cup_chalk",
+      "dialogueTreeId": "dlg_day2_stage_street"
+    },
+    {
+      "id": "echo_form3_prop_check",
+      "kind": "day2_prop_visibility",
+      "priority": 97,
+      "when": {
+        "dayIndexMin": 2,
+        "flagsAny": [
+          "cold_open_mediate",
+          "cold_open_instigate",
+          "cold_open_stage"
+        ],
+        "flagsNone": [
+          "day2_prop_ack"
+        ],
+        "slots": [
+          "evening",
+          "street"
+        ]
+      },
+      "speakerId": "narrator",
+      "headline": {
+        "tr": "Sokak değişti — bak",
+        "en": "The street changed — look"
+      },
+      "body": {
+        "tr": "Dünkü ilk kapı artık prop: ip, yüksek uçurtma veya tebeşir Cup. HUD'dan önce sahneye bak.",
+        "en": "Yesterday's first knock is now a prop: string, high kite, or chalk Cup. Look at the stage before the HUD."
+      },
+      "cta": {
+        "tr": "Sahneyi gör",
+        "en": "See the stage"
+      },
+      "uiHint": "Pin above quest whisper; tapping opens street"
     }
   ],
   "practiceCupTeach": {
@@ -1875,6 +2011,116 @@
         "en": "Tomorrow: carry pastry to Peri or Orhan."
       },
       "objectiveId": "sq_night_o2"
+    },
+    {
+      "id": "ot_day2_mediate",
+      "priority": 96,
+      "when": {
+        "flagsAll": [
+          "cold_open_mediate"
+        ],
+        "flagsNone": [
+          "day2_cold_rewrite_applied"
+        ],
+        "activeQuestId": null
+      },
+      "title": {
+        "tr": "Gece Bir → İki · Ortak ip",
+        "en": "Night One → Two · Shared string"
+      },
+      "lines": [
+        {
+          "tr": "Uyurken biri ipi antene düğümledi. Sabah arabuluculuk sokakta duracak.",
+          "en": "While you slept, someone knotted the line to the antenna. Morning will put mediation on the street."
+        }
+      ],
+      "tomorrowHook": {
+        "tr": "Yarın: ortak ipi gör — mahalle Arabulucu diyor.",
+        "en": "Tomorrow: see the shared string — the block says Mediator."
+      },
+      "worldConsequenceId": "wc_day2_mediate_shared_string"
+    },
+    {
+      "id": "ot_day2_instigate",
+      "priority": 96,
+      "when": {
+        "flagsAll": [
+          "cold_open_instigate"
+        ],
+        "flagsNone": [
+          "day2_cold_rewrite_applied"
+        ]
+      },
+      "title": {
+        "tr": "Gece Bir → İki · Yüksek uçuş",
+        "en": "Night One → Two · High flight"
+      },
+      "lines": [
+        {
+          "tr": "Rüzgâr uçurtmayı yukarı itti. Orhan tebeşiri eline aldı — YASAK BÖLGE yarın kurur.",
+          "en": "Wind shoved the kite higher. Orhan took the chalk — FORBIDDEN ZONE dries tomorrow."
+        }
+      ],
+      "tomorrowHook": {
+        "tr": "Yarın: yüksek uçuş + gazete kalkan — Kışkırtıcı izi.",
+        "en": "Tomorrow: high flight + paper shield — Instigator mark."
+      },
+      "worldConsequenceId": "wc_day2_instigate_kite_dare"
+    },
+    {
+      "id": "ot_day2_stage",
+      "priority": 96,
+      "when": {
+        "flagsAll": [
+          "cold_open_stage"
+        ],
+        "flagsNone": [
+          "day2_cold_rewrite_applied"
+        ]
+      },
+      "title": {
+        "tr": "Gece Bir → İki · Tebeşir sahne",
+        "en": "Night One → Two · Chalk stage"
+      },
+      "lines": [
+        {
+          "tr": "Cem gece kaldırıma üç daire çizdi. Düdük yastığının altındaymış gibi.",
+          "en": "Cem chalked three circles on the cobbles overnight. Whistle feels like it's under the pillow."
+        }
+      ],
+      "tomorrowHook": {
+        "tr": "Yarın: Cup tebeşiri — Sahne Amiri provası.",
+        "en": "Tomorrow: Cup chalk — Stage Manager rehearsal."
+      },
+      "worldConsequenceId": "wc_day2_stage_cup_chalk"
+    },
+    {
+      "id": "ot_form3_consequence_promise",
+      "priority": 97,
+      "when": {
+        "flagsAny": [
+          "cold_open_mediate",
+          "cold_open_instigate",
+          "cold_open_stage"
+        ],
+        "flagsNone": [
+          "day2_cold_rewrite_applied"
+        ]
+      },
+      "title": {
+        "tr": "Yarın sokak dünü yazar",
+        "en": "Tomorrow the street writes yesterday"
+      },
+      "lines": [
+        {
+          "tr": "Bu gece sadece not değil — sabah prop, NPC satırı ve defterde Yankı kartı gelecek.",
+          "en": "Tonight isn't only a note — morning brings a prop, an NPC line, and an Aftermath card in the journal."
+        }
+      ],
+      "tomorrowHook": {
+        "tr": "Day 2: sahne değişimi (mediate / instigate / stage).",
+        "en": "Day 2: stage change (mediate / instigate / stage)."
+      }
     }
   ],
   "sessionPacingHints": {

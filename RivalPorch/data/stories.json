@@ -3317,6 +3317,271 @@
           "ends": true
         }
       ]
+    },
+    {
+      "id": "dlg_day2_mediate_street",
+      "kind": "day2_cold_reactive",
+      "title": {
+        "tr": "Ortak ip",
+        "en": "Shared string"
+      },
+      "start": "d2m_root",
+      "reactsToFlagsAll": [
+        "cold_open_mediate",
+        "day2_cold_rewrite_mediate"
+      ],
+      "nodes": [
+        {
+          "id": "d2m_root",
+          "speaker": "n1",
+          "text": {
+            "tr": "Gördün mü? İp hâlâ orada. Ben demedim — sokak yazdı. Arabulucu kokuyorsun.",
+            "en": "See it? The string's still there. I didn't invent that — the street wrote it. You smell like Mediator."
+          },
+          "choices": [
+            {
+              "id": "d2m_a",
+              "label": {
+                "tr": "İpi birlikte kontrol edelim",
+                "en": "Check the string together"
+              },
+              "next": "d2m_a_end",
+              "affinity": [
+                {
+                  "id": "n1",
+                  "delta": 1
+                },
+                {
+                  "id": "n4",
+                  "delta": 1
+                }
+              ],
+              "rep": {
+                "rep_mediator": 1
+              }
+            },
+            {
+              "id": "d2m_b",
+              "label": {
+                "tr": "Leyla'ya teşekkür et",
+                "en": "Thank Leyla"
+              },
+              "next": "d2m_b_end",
+              "affinity": [
+                {
+                  "id": "n3",
+                  "delta": 2
+                }
+              ],
+              "rep": {
+                "rep_mediator": 1
+              }
+            }
+          ]
+        },
+        {
+          "id": "d2m_a_end",
+          "speaker": "n4",
+          "text": {
+            "tr": "Düğüm sağlam. Bugün kavga yok. …Gazetem de öyle kalsın.",
+            "en": "Knot holds. No fight today. …Leave the paper like this."
+          },
+          "setFlags": [
+            "day2_mediate_talk_seen"
+          ],
+          "ends": true
+        },
+        {
+          "id": "d2m_b_end",
+          "speaker": "n3",
+          "text": {
+            "tr": "Teşekkür… ama ip benim de. Ortak demek iki elde.",
+            "en": "Thanks… but the line is mine too. Shared means two hands."
+          },
+          "setFlags": [
+            "day2_mediate_talk_seen"
+          ],
+          "ends": true
+        }
+      ]
+    },
+    {
+      "id": "dlg_day2_instigate_street",
+      "kind": "day2_cold_reactive",
+      "title": {
+        "tr": "Yüksek uçuş",
+        "en": "High flight"
+      },
+      "start": "d2i_root",
+      "reactsToFlagsAll": [
+        "cold_open_instigate",
+        "day2_cold_rewrite_instigate"
+      ],
+      "nodes": [
+        {
+          "id": "d2i_root",
+          "speaker": "n4",
+          "text": {
+            "tr": "YASAK BÖLGE yazdım. Sen dün 'daha yüksek' dedin. Gazetem kalkan — bu da bir cevap.",
+            "en": "I wrote FORBIDDEN ZONE. Yesterday you said 'higher.' Paper is a shield — that's an answer too."
+          },
+          "choices": [
+            {
+              "id": "d2i_a",
+              "label": {
+                "tr": "Sınırı kabul et, uçuşu tut",
+                "en": "Accept the boundary, keep the flight"
+              },
+              "next": "d2i_a_end",
+              "affinity": [
+                {
+                  "id": "n4",
+                  "delta": 2
+                },
+                {
+                  "id": "n3",
+                  "delta": 1
+                }
+              ],
+              "rep": {
+                "rep_instigator": 1,
+                "rep_mediator": 1
+              }
+            },
+            {
+              "id": "d2i_b",
+              "label": {
+                "tr": "Leyla ile çatıdan bak",
+                "en": "Look from the roof with Leyla"
+              },
+              "next": "d2i_b_end",
+              "affinity": [
+                {
+                  "id": "n3",
+                  "delta": 2
+                }
+              ],
+              "rep": {
+                "rep_instigator": 2
+              },
+              "traitDeltas": {
+                "Chaos": 1
+              }
+            }
+          ]
+        },
+        {
+          "id": "d2i_a_end",
+          "speaker": "n4",
+          "text": {
+            "tr": "Hım. Yüksek ama çizgiyi gören… idare eder.",
+            "en": "Hmph. High, but you can see the line… acceptable."
+          },
+          "setFlags": [
+            "day2_instigate_talk_seen"
+          ],
+          "ends": true
+        },
+        {
+          "id": "d2i_b_end",
+          "speaker": "n3",
+          "text": {
+            "tr": "Çatıdan anten küçük! YASAK BÖLGE — aslında meydan okuma bölgesi.",
+            "en": "From the roof the antenna looks tiny! FORBIDDEN ZONE — actually a challenge zone."
+          },
+          "setFlags": [
+            "day2_instigate_talk_seen"
+          ],
+          "ends": true
+        }
+      ]
+    },
+    {
+      "id": "dlg_day2_stage_street",
+      "kind": "day2_cold_reactive",
+      "title": {
+        "tr": "Tebeşir sahne",
+        "en": "Chalk stage"
+      },
+      "start": "d2s_root",
+      "reactsToFlagsAll": [
+        "cold_open_stage",
+        "day2_cold_rewrite_stage"
+      ],
+      "nodes": [
+        {
+          "id": "d2s_root",
+          "speaker": "n2",
+          "text": {
+            "tr": "Kaldırımdaki daireleri gördün. Dün 'sahneye koy' dedin — bugün prova. Düdük hazır.",
+            "en": "You saw the circles on the cobbles. Yesterday you said 'stage it' — today is rehearsal. Whistle ready."
+          },
+          "choices": [
+            {
+              "id": "d2s_a",
+              "label": {
+                "tr": "Isınma sayımına katıl",
+                "en": "Join the warm-up count"
+              },
+              "next": "d2s_a_end",
+              "affinity": [
+                {
+                  "id": "n2",
+                  "delta": 2
+                }
+              ],
+              "rep": {
+                "rep_stage": 2
+              }
+            },
+            {
+              "id": "d2s_b",
+              "label": {
+                "tr": "Uçurtmayı prop olarak yerleştir",
+                "en": "Place the kite as a prop"
+              },
+              "next": "d2s_b_end",
+              "affinity": [
+                {
+                  "id": "n3",
+                  "delta": 2
+                },
+                {
+                  "id": "n2",
+                  "delta": 1
+                }
+              ],
+              "rep": {
+                "rep_stage": 2
+              }
+            }
+          ]
+        },
+        {
+          "id": "d2s_a_end",
+          "speaker": "n2",
+          "text": {
+            "tr": "Bir-iki-üç. Sahne Amiri kokusu bu. Cup'ta işe yarar.",
+            "en": "One-two-three. That's Stage Manager smell. Useful in the Cup."
+          },
+          "setFlags": [
+            "day2_stage_talk_seen"
+          ],
+          "ends": true
+        },
+        {
+          "id": "d2s_b_end",
+          "speaker": "n3",
+          "text": {
+            "tr": "Prop oldum! Ama uçuş da prop… yani ikisi birden.",
+            "en": "I'm a prop! But flying is also a prop… so both."
+          },
+          "setFlags": [
+            "day2_stage_talk_seen"
+          ],
+          "ends": true
+        }
+      ]
     }
   ],
   "dailyEventPool": [
@@ -5759,6 +6024,42 @@
     "repOnLoss": {
       "rep_stage": 1,
       "rep_mediator": 1
+    },
+    "comicRememberBanner": {
+      "id": "comic_remember_cold",
+      "showAfter": [
+        "practice",
+        "cup"
+      ],
+      "when": {
+        "flagsAny": [
+          "cold_open_mediate",
+          "cold_open_instigate",
+          "cold_open_stage"
+        ]
+      },
+      "title": {
+        "tr": "Sokak hatırladı",
+        "en": "The street remembered"
+      },
+      "bodyByFlag": {
+        "cold_open_mediate": {
+          "tr": "Ortak ip comic'e sızdı — Arabulucu izi.",
+          "en": "Shared string leaked into the comic — Mediator mark."
+        },
+        "cold_open_instigate": {
+          "tr": "Yüksek uçuş comic'e sızdı — Kışkırtıcı izi.",
+          "en": "High flight leaked into the comic — Instigator mark."
+        },
+        "cold_open_stage": {
+          "tr": "Tebeşir sahne comic'e sızdı — Sahne Amiri izi.",
+          "en": "Chalk stage leaked into the comic — Stage Manager mark."
+        }
+      },
+      "forceShowEvenIfShareSkipped": true,
+      "setFlags": [
+        "comic_cold_echo_seen"
+      ]
     }
   },
   "season1": {

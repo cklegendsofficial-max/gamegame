@@ -1,0 +1,103 @@
+{
+  "packId": "ux-session-2",
+  "schemaVersion": 1,
+  "scoreReact": {
+    "file": "internal/rival-porch-score-latest.json",
+    "gameplay": 7.2,
+    "buildCommit": "e36e494",
+    "fixes": [
+      "Hard-guarantee End evening after Practice",
+      "Collapse checklist into stage actions"
+    ]
+  },
+  "endEveningGate": {
+    "day1RequiresFlagsAll": [
+      "practice_cup_done",
+      "syn_taught_syn_rivalry"
+    ],
+    "day1IgnoreLegacy": [
+      "agendaComplete",
+      "ritualDone",
+      "giftErrandDone",
+      "welcome_checkin_done",
+      "welcome_met_three",
+      "streetEventDone",
+      "practice_cup_porch_call_done"
+    ],
+    "day2PlusAlwaysAllow": true,
+    "unlockSyncAction": "EVENING_END_UNLOCK_SYNC",
+    "maxRendersToEnableAfterPractice": 1,
+    "onPracticeResolvedSetFlags": [
+      "practice_cup_done",
+      "syn_taught_syn_rivalry",
+      "first_evening_practice_cleared"
+    ],
+    "alsoEnsureFlags": [
+      "practice_cup_rivalry_pop_seen",
+      "practice_cup_porch_call_done"
+    ],
+    "blockedCopyKey": "gate.end_evening.practice",
+    "ui": {
+      "endEveningEnabledPath": "ui.endEveningEnabled",
+      "blockedReasonPath": "ui.endEveningBlockedReason",
+      "overnightReachablePath": "ui.overnightReachable"
+    }
+  },
+  "stageActions": {
+    "stayOnStreetAfter": [
+      "sa_checkin",
+      "sa_visit",
+      "sa_event",
+      "sa_kite"
+    ],
+    "forbidAutoNavEveningAfter": [
+      "sa_checkin",
+      "sa_visit",
+      "sa_event",
+      "sa_kite"
+    ],
+    "toasts": {
+      "checkin": {
+        "tr": "Buhar paylaşıldı.",
+        "en": "Steam shared."
+      },
+      "visit": {
+        "tr": "Kapı ısındı ({n}/3).",
+        "en": "Door warmed ({n}/3)."
+      },
+      "event": {
+        "tr": "Sokak bir şey fısıldadı.",
+        "en": "The street whispered something."
+      },
+      "practice": {
+        "tr": "Prova bitti — akşamı bırakabilirsin.",
+        "en": "Practice done — you can end the evening."
+      }
+    }
+  },
+  "eveningHome": {
+    "maxBeatLines": 1,
+    "killAgendaCard": true,
+    "primaryCtaFrom": "eveningPrimaryCta"
+  },
+  "strings": {
+    "gate.end_evening.practice": {
+      "tr": "Akşam bitmez — Cem Prova'da düdük çalıyor.",
+      "en": "Evening won't end — Cem's still whistling Practice."
+    },
+    "evening.cta.end": {
+      "tr": "Akşamı bırak",
+      "en": "End evening"
+    },
+    "evening.link.overnight": {
+      "tr": "Geceye geç",
+      "en": "Go overnight"
+    }
+  },
+  "acceptanceChecks": [
+    "post_practice_end_evening_enabled_first_paint",
+    "day1_overnight_without_console",
+    "stage_checkin_visit_event_without_agenda_bounce",
+    "legacy_ritual_gate_removed_from_canEndEvening"
+  ]
+}
