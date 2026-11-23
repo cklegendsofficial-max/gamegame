@@ -301,6 +301,10 @@ function renderCupLobby() {
     .join("");
 
   const ready = state.cupPicks.length === 3;
+  const pickTags = state.cupPicks.map((id) => neighborById(id).synergyTag);
+  const previewSyn = activeSynergies(pickTags)
+    .map((s) => `<span class="chip ${s.tagsRequired[0].toLowerCase()}">${loc(s.name)}</span>`)
+    .join("") || `<span class="muted">${t("synergy.active")}: —</span>`;
   screen.innerHTML = `
     <div class="topbar">
       <h2>${t("cup.lobby_title")}</h2>
@@ -309,6 +313,7 @@ function renderCupLobby() {
     <div class="arena-hero" style="background-image:url('${ART.arenaStage}')"></div>
     <p class="street-hint">${t("cup.pick_three")}</p>
     <div class="pick-grid">${cards}</div>
+    <div class="synergy-pills" style="justify-content:center">${previewSyn}</div>
     <p class="pick-status">${ready ? "3/3" : `${state.cupPicks.length}/3 — ${t("cup.locked_need_three")}`}</p>
     <div class="btn-row">
       <button class="btn btn-primary" type="button" data-action="goto-draft" ${ready ? "" : "disabled"}>${t("cup.start")}</button>
@@ -427,7 +432,7 @@ function autoPlace() {
 
 function activeSynergies(tags) {
   return state.content.synergies.filter((s) => {
-    const count = s.tagsRequired.reduce((acc, tag) => acc + tags.filter((t) => t === tag).length, 0);
+    const count = tags.filter((tag) => s.tagsRequired.includes(tag)).length;
     return count >= s.minCount;
   });
 }
@@ -506,17 +511,26 @@ function startFight() {
 
   renderFight(battle);
   showScreen("screen-fight");
+  updateFightUI(battle);
 
   const tickMs = 400;
+  const uiMs = 100;
+  let combatAcc = 0;
+  const startedAt = performance.now();
+
   state.fightTimer = setInterval(() => {
     if (battle.finished) return;
-    battle.elapsed += tickMs / 1000;
-    combatTick(battle);
+    battle.elapsed = (performance.now() - startedAt) / 1000;
+    combatAcc += uiMs;
+    while (combatAcc >= tickMs) {
+      combatAcc -= tickMs;
+      combatTick(battle);
+    }
     updateFightUI(battle);
     if (battle.elapsed >= 75 || !battle.allies.some((u) => u.alive) || !battle.enemies.some((u) => u.alive)) {
       endFight(battle);
     }
-  }, tickMs);
+  }, uiMs);
 }
 
 function combatTick(battle) {
@@ -615,9 +629,16 @@ function flashUnit(side, slot, hit) {
 
 function renderFight(battle) {
   const screen = document.getElementById("screen-fight");
-  const synPills = [...battle.allySyn, ...battle.enemySyn]
+  const allyPills = battle.allySyn
     .map((s) => `<span class="chip ${s.tagsRequired[0].toLowerCase()}">${loc(s.name)}</span>`)
-    .join("") || `<span class="muted">${t("synergy.active")}: —</span>`;
+    .join("");
+  const enemyPills = battle.enemySyn
+    .map((s) => `<span class="chip ${s.tagsRequired[0].toLowerCase()}">Bot · ${loc(s.name)}</span>`)
+    .join("");
+  const synPills =
+    allyPills || enemyPills
+      ? `${allyPills}${enemyPills}`
+      : `<span class="muted">${t("synergy.active")}: —</span>`;
 
   screen.innerHTML = `
     <div class="topbar">
@@ -662,7 +683,7 @@ function updateFightUI(battle) {
   const tm = document.getElementById("fight-timer");
   if (a) a.textContent = `${state.locale === "tr" ? "Sen" : "You"} ${allyHp}`;
   if (e) e.textContent = `Bot ${enemyHp}`;
-  if (tm) tm.textContent = `${Math.floor(battle.elapsed)}s`;
+  if (tm) tm.textContent = `${battle.elapsed.toFixed(1)}s`;
 }
 
 function endFight(battle) {

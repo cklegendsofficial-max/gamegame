@@ -447,7 +447,7 @@
       "id": "syn_tea_circle",
       "nameKey": "synergy.tea_circle.name",
       "name": { "tr": "Çay Çemberi", "en": "Tea Circle" },
-      "tagsRequired": ["Tea"],
+      "tagsRequired": ["Tea", "Oven"],
       "minCount": 2,
       "rules": {
         "type": "periodic_heal_aura",
@@ -455,8 +455,8 @@
         "healPercentMaxHp": 0.04,
         "radius": "allied_grid",
         "description": {
-          "tr": "2+ Tea: her 4 sn müttefiklere hafif heal aura.",
-          "en": "2+ Tea: light heal aura on allies every 4s."
+          "tr": "2+ Tea/Oven: her 4 sn müttefiklere hafif heal aura.",
+          "en": "2+ Tea/Oven: light heal aura on allies every 4s."
         }
       }
     },
@@ -464,15 +464,15 @@
       "id": "syn_rivalry",
       "nameKey": "synergy.rivalry.name",
       "name": { "tr": "Rekabet", "en": "Rivalry" },
-      "tagsRequired": ["Rivalry"],
+      "tagsRequired": ["Rivalry", "Chaos", "Fence"],
       "minCount": 2,
       "rules": {
         "type": "low_hp_damage_buff",
         "hpThresholdPercent": 0.35,
         "damageBonusPercent": 0.25,
         "description": {
-          "tr": "2+ Rivalry: düşük HP'de (+%25) hasar.",
-          "en": "2+ Rivalry: +25% damage while under 35% HP."
+          "tr": "2+ Rivalry/Chaos/Fence: düşük HP'de (+%25) hasar.",
+          "en": "2+ Rivalry/Chaos/Fence: +25% damage while under 35% HP."
         }
       }
     },
@@ -480,15 +480,15 @@
       "id": "syn_neon_night",
       "nameKey": "synergy.neon_night.name",
       "name": { "tr": "Neon Gece", "en": "Neon Night" },
-      "tagsRequired": ["Neon"],
+      "tagsRequired": ["Neon", "Chaos"],
       "minCount": 2,
       "rules": {
         "type": "opening_dodge",
         "windowSec": 8,
         "dodgeChance": 0.2,
         "description": {
-          "tr": "2+ Neon: ilk 8 sn %20 dodge şansı.",
-          "en": "2+ Neon: 20% dodge chance for the first 8s."
+          "tr": "2+ Neon/Chaos: ilk 8 sn %20 dodge şansı.",
+          "en": "2+ Neon/Chaos: 20% dodge chance for the first 8s."
         }
       }
     }
