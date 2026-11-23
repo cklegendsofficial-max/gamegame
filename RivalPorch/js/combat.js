@@ -394,20 +394,66 @@ export function resolveCall(battle, optionId) {
   battle.callResolved = true;
   battle.callId = optionId || 'call_prop_assist';
   battle.phase = 'close';
-  // board mutation: empower next signatures
   for (const u of living(battle.allies)) {
     u.sigCd = Math.min(u.sigCd || 0, 1.2);
   }
-  if (optionId === 'call_focus_fire' || optionId === 'call_focus_neighbor') {
-    const foes = living(battle.enemies);
-    const t = foes.slice().sort((a, b) => b.atk - a.atk)[0];
-    if (t) {
-      battle.focusTargetSlot = t.slot;
-      battle.markedSlot = t.slot;
-      battle.focusUntil = battle.elapsed + 6;
+
+  const allies = living(battle.allies);
+  const enemies = living(battle.enemies);
+  const byNid = (nid) => allies.find((u) => (u.neighborId || u.id) === nid || String(u.mirrorOf || '').includes(nid));
+  let lead = null;
+  let boardClass = 'pad-taunt';
+  let kitId = 'hold_fence';
+
+  if (battle.callId === 'call_focus_fire' || battle.callId === 'call_focus_neighbor') {
+    lead = byNid('n2') || allies[0];
+    boardClass = 'pad-marked';
+    kitId = 'whistle_mark';
+    const foe = enemies.slice().sort((a, b) => b.atk - a.atk)[0] || enemies[0];
+    if (foe) {
+      battle.focusTargetSlot = foe.slot;
+      battle.markedSlot = foe.slot;
+      battle.focusUntil = (battle.elapsed || 0) + 6;
       battle.focusDmgBonus = 0.25;
+      foe.padClass = 'pad-marked';
+    }
+  } else if (battle.callId === 'call_chaos_kite') {
+    lead = byNid('n3') || allies.find((u) => u.slot >= 3) || allies[0];
+    boardClass = 'pad-swapped';
+    kitId = 'kite_cut';
+    const front = allies.find((u) => u.slot < 3);
+    const back = allies.find((u) => u.slot >= 3 && u !== front) || allies.find((u) => u !== front);
+    if (front && back) {
+      const s = front.slot;
+      front.slot = back.slot;
+      back.slot = s;
+      front.padClass = 'pad-swapped';
+      back.padClass = 'pad-swapped';
+    }
+  } else {
+    // call_prop_assist default — front fence / pour
+    lead = allies.find((u) => u.slot < 3) || byNid('n4') || allies[0];
+    boardClass = 'pad-taunt';
+    kitId = lead?.kit?.signature?.id || 'hold_fence';
+    if (lead) {
+      battle.tauntSlot = lead.slot;
+      battle.tauntUntil = (battle.elapsed || 0) + 5;
+      battle.glanceHitsLeft = 2;
+      lead.padClass = 'pad-taunt';
     }
   }
+
+  if (lead?.kit?.signature?.effect) {
+    applyEffect(battle, lead, lead.kit.signature.effect);
+  }
+
+  battle.boardEvent = {
+    kitId,
+    propId: lead?.propId || lead?.kit?.propId || null,
+    callId: battle.callId,
+    testId: 'kit-board-change',
+    boardClass,
+  };
   return battle;
 }
 

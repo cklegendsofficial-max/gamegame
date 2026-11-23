@@ -113,7 +113,7 @@
       ],
       "lines": {
         "tr": "İki Rekabet / Kaos / Çit etiketi yan yana = Rekabet. Canın azalınca vuruş sertleşir. Cem + Orhan ile dene.",
-        "en": "Two Rivalry / Chaos / Fence tags = Rivalry. When HP dips, hits hit harder. Try Cem + Orhan."
+        "en": "Two Rivalry / Chaos / Fence tags = Rivalry. When someone’s cornered. Try Cem + Orhan."
       },
       "confirmLabel": {
         "tr": "Rekabeti kurdum",
@@ -132,8 +132,8 @@
       "durationMs": 1400,
       "blocking": false,
       "lines": {
-        "tr": "Rekabet! Düşük HP → daha sert vuruş",
-        "en": "Rivalry! Low HP → harder hits"
+        "tr": "Rekabet! köşeye sıkışınca",
+        "en": "Rivalry! When cornered, the whistle gets mean"
       },
       "vfxId": "vfx_rivalry_ember",
       "cameraShakeId": "shake_medium"
@@ -468,7 +468,7 @@
           "en": "Tea break"
         },
         "blurb": {
-          "tr": "En düşük HP müttefike anında %22 heal.",
+          "tr": "En köşeye sıkışınca.",
           "en": "Demlik + tray keep the porch standing"
         },
         "effect": {
@@ -851,8 +851,8 @@
         "vfxId": "vfx_rivalry_ember",
         "cameraShakeId": "shake_medium",
         "lines": {
-          "tr": "Rekabet! Düşük HP → daha sert vuruş",
-          "en": "Rivalry! Low HP → harder hits"
+          "tr": "Rekabet! köşeye sıkışınca",
+          "en": "Rivalry! When cornered, the whistle gets mean"
         }
       },
       {
@@ -966,8 +966,8 @@
           "practice_cup_rivalry_pop_seen"
         ],
         "lines": {
-          "tr": "Rekabet! Düşük HP → daha sert vuruş",
-          "en": "Rivalry! Low HP → harder hits"
+          "tr": "Rekabet! köşeye sıkışınca",
+          "en": "Rivalry! When cornered, the whistle gets mean"
         }
       }
     ],
@@ -1828,8 +1828,8 @@
         "coachPopOncePerFight": {
           "durationMs": 1400,
           "lines": {
-            "tr": "Rekabet! Düşük HP → daha sert vuruş",
-            "en": "Rivalry! Low HP → harder hits"
+            "tr": "Rekabet! köşeye sıkışınca",
+            "en": "Rivalry! When cornered, the whistle gets mean"
           }
         },
         "setsFlagsFirstInPractice": [
@@ -2523,6 +2523,26 @@
         "tr": "Açılış parıltısı",
         "en": "Opening flash"
       }
+    }
+  ],
+  "callBoardMutations": [
+    {
+      "callId": "call_focus_neighbor",
+      "lead": "n2",
+      "board": "whistle_mark",
+      "class": "pad-marked"
+    },
+    {
+      "callId": "call_prop_assist",
+      "lead": "front",
+      "board": "hold_fence",
+      "class": "pad-taunt"
+    },
+    {
+      "callId": "call_chaos_kite",
+      "lead": "n3",
+      "board": "kite_cut",
+      "class": "pad-swapped"
     }
   ]
 }

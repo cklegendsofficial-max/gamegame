@@ -208,8 +208,8 @@
         "en": "Next: (Leyla ↔ Orhan)"
       },
       "blurb": {
-        "tr": "Aşağı Sırt seni ölçüyor — çay, üç kapı, uçurtma tohumu.",
-        "en": "Lower Ridge is sizing you up — tea, three doors, a kite seed."
+        "tr": "Leyla ile Orhan’ın utancı kapıda. Bir taraf tut — sokak unutmaz.",
+        "en": "Leyla and Orhan’s shame is at your door. Take a side — the street won’t forget."
       }
     },
     {
@@ -226,13 +226,15 @@
       "giver": "n3",
       "week": 2,
       "dayWindow": {
-        "start": 8,
+        "start": 1,
         "end": 14
       },
       "unlockRequires": {
         "flagsAny": [
-          "quest_welcome_complete",
-          "arc_kite_antenna_seed_resolved"
+          "cold_open_mediate",
+          "cold_open_instigate",
+          "cold_open_stage",
+          "quest_welcome_o1_done"
         ]
       },
       "setsFlagsOnStart": [
@@ -245,8 +247,8 @@
           "order": 1,
           "kind": "arc_beat",
           "label": {
-            "tr": "Uçurtmayı anteninden indir",
-            "en": "Get the kite off the aerial"
+            "tr": "Çatıdaki ipi göster",
+            "en": "Show the line on the roof"
           },
           "track": {
             "type": "flag",
@@ -386,7 +388,13 @@
       "blurb": {
         "tr": "Leyla’nın ipi Orhan’ın anteninde. Çatı ikiye ayrılmadan çöz.",
         "en": "Leyla’s kite is in Orhan’s aerial. Fix it before the roof splits the block."
-      }
+      },
+      "acceptDayMin": 1,
+      "autoAcceptOnFlagsAny": [
+        "cold_open_mediate",
+        "cold_open_instigate",
+        "cold_open_stage"
+      ]
     },
     {
       "id": "mq_decibel_accord",
@@ -2237,7 +2245,7 @@
       "id": "wc_welcome_three_doors_open",
       "streetVisual": {
         "tr": "Üç komşu kapısı aralık; selam animasyonu.",
-        "en": "Three neighbor doors ajar; greeting idle."
+        "en": ""
       }
     },
     "wc_kite_string_on_antenna": {

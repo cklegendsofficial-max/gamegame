@@ -15,7 +15,7 @@ import * as Density from "./density.js";
 import * as EndEvening from "./endEvening.js";
 import * as Ux4 from "./uxSession4Nuclear.js";
 import * as UxFirst from "./uxFirstSession.js";
-import { spreadPorchNiches } from "./porchNiches.js";
+import { spreadPorchNiches, seatPorchNiches } from "./porchNiches.js";
 import { mountAffinityToast } from "./uxToasts.js";
 
 const DAY1_BUSTS = {
@@ -1133,7 +1133,7 @@ function renderQuestLog() {
             if (q.rewards?.neon_thread) rewardBits.push(`+${q.rewards.neon_thread} 🧵`);
             return `<article class="quest-card art-card">
               <h3>${loc(q.title)}</h3>
-              <p class="muted">${loc(q.blurb)}</p>
+              <p class="muted">${loc(q.summary) || loc(q.blurb)}</p>
               <ul class="quest-obj">${objs}</ul>
               <p class="quest-reward">${rewardBits.join(" · ") || "—"}</p>
               <button class="btn btn-primary" type="button" data-action="quest-accept" data-id="${q.id}">${tr ? "Kabul et" : "Accept"}</button>
@@ -1172,7 +1172,7 @@ function renderQuestLog() {
             const ready = Quests.questReadyToComplete(q, e);
             return `<article class="quest-card art-card ${ready ? "ready" : ""}">
               <h3>${loc(q.title)}</h3>
-              <p class="muted">${loc(q.blurb)}</p>
+              <p class="muted">${loc(q.summary) || loc(q.blurb)}</p>
               <ul class="quest-obj agenda-list">${objs}</ul>
               ${
                 ready
@@ -1259,6 +1259,30 @@ function dayHeadline() {
   return week?.title || { tr: `Gün ${d}`, en: `Day ${d}` };
 }
 
+
+function fireSnagDay1Beat() {
+  const f = state.save.storyFlags || (state.save.storyFlags = {});
+  if (f.snag_day1_beat_done) return;
+  f.snag_day1_beat_done = true;
+  f.snag_day1_street = true;
+  try {
+    if (state.questPack) Quests.acceptQuest(state.save, state.questPack, "mq_antenna_op");
+  } catch { /* */ }
+  saveNow();
+}
+
+function snagDay1StreetHtml() {
+  if (!storyFlag("snag_day1_street") || storyFlag("snag_day1_cleared")) return "";
+  const tr = state.locale === "tr";
+  const line = storyFlag("cold_open_instigate") || storyFlag("cold_open_stage")
+    ? (tr ? "Leyla: İpim hâlâ onun demirinde. Bugün indirmeden gece olmaz." : "Leyla: My line’s still in his iron. Night doesn’t start until it’s down.")
+    : (tr ? "Orhan: Antende paçavra. Ya çöz ya kes — yarın mahalle konuşur." : "Orhan: Rag on the aerial. Untangle or cut — tomorrow the block talks.");
+  return `<div class="rp-snag-day1" data-testid="snag-day1-beat" data-snag="1">
+    <span class="rp-snag-day1__prop" aria-hidden="true"></span>
+    <p>${line}</p>
+  </div>`;
+}
+
 function renderColdOpen() {
   const screen = document.getElementById("screen-cold");
   screen.style.backgroundImage = stageBg(ART.streetHero, ART.streetHeroFallback);
@@ -1337,6 +1361,7 @@ function resolveColdOpen(cid) {
     Quests.acceptQuest(state.save, state.questPack, "mq_welcome_porch");
   }
   emitQuestEvent({ type: "flag", flag: "arc_kite_antenna_seed_resolved" });
+  fireSnagDay1Beat();
   saveNow();
   const fb = Story.formatChoiceSummary(
     { affinity: p.aff.map(([id, delta]) => ({ id, delta })), rep: Object.entries(p.rep).map(([id, delta]) => ({ id, delta })) },
@@ -2376,8 +2401,8 @@ function renderEvening() {
       : uxStr(
           "evening.nightOne.support",
           state.locale === "tr"
-            ? "Üç kapı hâlâ nefes alıyor. Cumartesi Kupası dinliyor."
-            : "Three doors still breathe. Saturday Cup is listening."
+            ? "Çatıdaki utanç hâlâ orada. Cup dinliyor."
+            : "The roof shame is still there. Cup is listening."
         );
 
   const cta = eveningPrimaryCta();
@@ -2398,6 +2423,7 @@ function renderEvening() {
   // ux-10 sole_end only Day1; ux-11 Day2+ uses spine_one (Volume/HEADPHONES)
   const soleEnd = practiceCleared && endEnabled && dayNow <= 1;
   document.body.dataset.eveningMode = soleEnd ? "sole_end" : "spine_one";
+  document.body.dataset.first10 = UxFirst.first10Active(state.save) ? "1" : "0";
   const endLabel =
     loc(state.uxPack2?.strings?.["evening.cta.end"]) ||
     (state.locale === "tr" ? "Akşamı bırak" : "End evening");
@@ -2444,7 +2470,6 @@ function renderEvening() {
     ? `<div class="rp-overflow-sheet" data-testid="evening-overflow-sheet">
         <button class="rp-btn rp-btn--ghost" type="button" data-action="open-quests">${state.locale === "tr" ? "Görevler" : "Quests"}</button>
         <button class="rp-btn rp-btn--ghost" type="button" data-action="open-story-log">${state.locale === "tr" ? "Günlük" : "Journal"}</button>
-        <button class="rp-btn rp-btn--ghost" type="button" data-action="goto-street">${state.locale === "tr" ? "Sokak" : "Street"}</button>
         <button class="rp-btn rp-btn--ghost" type="button" data-action="open-shop">${state.locale === "tr" ? "Dükkan" : "Shop"}</button>
         ${
           trayDeferred
@@ -2458,14 +2483,8 @@ function renderEvening() {
         <button class="rp-btn rp-btn--ghost" type="button" data-action="toggle-evening-overflow" data-testid="evening-overflow">${state.locale === "tr" ? "···" : "···"}</button>
       </footer>`
     : `<footer class="rp-dock rp-dock--tertiary">
+        <button class="rp-link-street" type="button" data-action="goto-street" data-testid="goto-street">${state.locale === "tr" ? "Sokağa çık" : "Out to the street"}</button>
         <button class="rp-btn rp-btn--ghost" type="button" data-action="toggle-evening-overflow" data-testid="evening-overflow">${state.locale === "tr" ? "···" : "···"}</button>
-        ${
-          endEnabled
-            ? ""
-            : cta.action !== "goto-cup"
-              ? `<button class="rp-btn rp-btn--ghost ${st.cupRequired && !st.cupDone ? "rp-btn--ember" : ""}" type="button" data-action="goto-cup" data-testid="practice-match">${isCupNight() ? t("cup.season_night") : t("cup.practice")}</button>`
-              : ""
-        }
         ${day1EscapeChipHtml(endEnabled)}
       </footer>`;
   // ux-12/13: spine primary + End evening separate; Volume accept = compact primary (no tall card)
@@ -2479,7 +2498,7 @@ function renderEvening() {
            <button class="rp-btn rp-btn--primary rp-cta-primary" type="button" data-action="accept-volume" data-testid="evening-open-volume" hidden aria-hidden="true">${openVolLabel}</button>
            <button class="rp-evening-volume-accept__link" type="button" data-action="goto-street" data-testid="evening-volume-see-headphones">${seeHpLabel}</button>
          </div>`
-      : `<button class="rp-btn rp-btn--primary rp-cta-primary" type="button" data-action="${primaryAction}" data-testid="evening-primary" data-primary="true" data-next-action="${cta.dataNext || cta.id || "spine"}">${primaryLabel}</button>`;
+      : `<button class="rp-btn rp-btn--primary rp-cta-primary rp-cta-lamp" type="button" data-action="${primaryAction}" data-testid="evening-primary" data-primary="true" data-next-action="${cta.dataNext || cta.id || "spine"}">${primaryLabel}</button>`;
   const endSecondaryHtml =
     !soleEnd && endEnabled
       ? `<button id="btn-end-evening" class="rp-btn rp-btn--ghost rp-cta-secondary rp-end-evening" type="button" data-action="end-evening" data-testid="end-evening" data-end-evening="1" data-end-enabled="true">${endLabel}</button>`
@@ -2583,8 +2602,9 @@ function renderStreet() {
     const avail = !done;
     const dn = NICHE[n.id] || 1;
     const xy = NICHE_XY[n.id] || [50, 40];
-    const base = `<button class="rp-hotspot ${done ? "visited" : ""} ${avail ? "is-available" : ""}" data-n="${dn}" style="--x:${xy[0]}%;--y:${xy[1]}%;left:${xy[0]}%;top:${xy[1]}%" type="button" data-action="open-neighbor" data-id="${n.id}" aria-label="${loc(n.name)}">
-        <img class="rp-hotspot__bust" src="${goldBust(n.id)}" alt="" width="52" height="52" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" />
+    const base = `<button class="rp-hotspot is-porch-door ${done ? "visited" : ""} ${avail ? "is-available" : ""}" data-n="${dn}" style="--x:${xy[0]}%;--y:${xy[1]}%;left:${xy[0]}%;top:${xy[1]}%" type="button" data-action="open-neighbor" data-id="${n.id}" aria-label="${loc(n.name)}">
+        <span class="rp-hotspot__door" aria-hidden="true"></span>
+        <img class="rp-hotspot__bust" src="${goldBust(n.id)}" alt="" width="48" height="56" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" />
         <span class="rp-hotspot__name">${loc(n.name)}${done ? " ✓" : ""}</span>
       </button>`;
     return mutateHotspotHtml(n, base);
@@ -2646,8 +2666,8 @@ function renderStreet() {
     ${day10MainChipHtml()}
     ${mqStreetChipHtml()}
     <button class="rp-chip rp-back" type="button" data-action="goto-evening">${t("common.back")}</button>
-    <div class="rp-hotspots" role="list" data-testid="${coldWins || oneSignal ? "street-layer-cold-wins" : "street-hotspots"}">${spots}</div>
-    ${coldWins || oneSignal ? "" : (worldBits.length ? `<div class="world-banner street-float rp-wc-loud">${worldBits.map((l) => `<span>◈ ${l}</span>`).join("")}</div>` : "")}
+    ${snagDay1StreetHtml()}<div class="rp-hotspots" role="list" data-testid="${coldWins || oneSignal ? "street-layer-cold-wins" : "street-hotspots"}">${spots}</div>
+    ${""}
     ${day2Line}
     ${yieldNpc}
     ${week2DecibelLedgerPullHtml("street")}
@@ -2662,7 +2682,7 @@ function renderStreet() {
     </footer>`;
   requestAnimationFrame(() => {
     armMech15DecibelLived();
-    spreadPorchNiches(document);
+    seatPorchNiches(document);
   });
 }
 
@@ -3406,10 +3426,13 @@ function renderCupLobby() {
     return stake?.body || loc(s.rules?.description) || loc(s.name);
   };
   // mechanics-fix-2: footer shows matched/min for ALL synergies from draft picks
+  // mechanics-rewrite-4: binary live/quiet stakes — never N/2 meters
   const preview = footerRows
     .map((r) => {
+      const stake = porchStakeFor(r.sid || r.id);
+      const label = stake?.headline || r.name;
       const chipClass = String(r.tagPool[0] || "").toLowerCase();
-      return `<span class="chip ${chipClass} ${r.active ? "on" : "off"}" title="${r.name}">${r.name} ${r.matched}/${r.min}</span>`;
+      return `<span class="chip ${chipClass} ${r.active ? "on" : "off"}" title="${label}">${label}${r.active ? (state.locale === "tr" ? " · canlı" : " · live") : (state.locale === "tr" ? " · sessiz" : " · quiet")}</span>`;
     })
     .join("");
   const startLabels = state.combatPack?.startEnabledRules?.labels || {};
@@ -4476,6 +4499,18 @@ function showFightActions(battle) {
   }, softSec * 1000);
 }
 
+
+function paintKitBoardChange(battle) {
+  const ev = battle?.boardEvent;
+  if (!ev) return;
+  const arena = document.querySelector("#screen-fight .rp-arena, .rp-arena");
+  if (arena) {
+    arena.dataset.kitBoardChange = ev.kitId || "kit";
+    arena.setAttribute("data-testid", "kit-board-change");
+  }
+  updateFightUI(battle);
+}
+
 function applyPorchCall(callId) {
   const battle = state.battle;
   if (!battle || battle.actionUsed) return;
@@ -4490,6 +4525,7 @@ function applyPorchCall(callId) {
   const beforeMax = battle.allies.reduce((s, u) => s + u.maxHp, 0) || 1;
   const label = Combat.applyPorchCallEffect(battle, opt, loc);
   try { Combat.resolveCall(battle, callId); } catch { /* kit engine optional */ }
+  paintKitBoardChange(battle);
   battle.log.unshift(label);
   const afterHp = battle.allies.reduce((s, u) => s + Math.max(0, u.hp), 0);
   const deltaPct = Math.round(((afterHp - beforeHp) / beforeMax) * 100);
@@ -4762,7 +4798,7 @@ function combatTick(battle) {
           showSynProc(
             state.locale === "tr"
               ? "Rekabet! Düşük HP → daha sert vuruş"
-              : "Rivalry! Low HP → harder hits"
+              : "When cornered, the whistle gets mean"
           );
           if (state.practiceMode || battle.practice) {
             state.save.storyFlags = state.save.storyFlags || {};
@@ -5012,7 +5048,11 @@ function updateFightUI(battle) {
         const lane = (u.slot ?? 0) < 3 ? "is-front" : "is-back";
         const ready = side === "ally" && u.kit?.signature && (u.sigCd || 0) <= 0.05;
         const pip = ready ? `<span class="rp-sig-pip" data-testid="sig-ready-pip" title="prop ready"></span>` : "";
-        return `<div class="rp-pad rp-arena-pad is-occupied ${lane}" style="--pad-x:${x}%;--pad-y:${y}%" data-id="${u.neighborId || u.id || ""}">${pip}${unitCard(u, side, floaters)}</div>`;
+        const marked = battle.markedSlot === u.slot && side === "enemy" ? "pad-marked" : "";
+        const taunt = battle.tauntSlot === u.slot && side === "ally" ? "pad-taunt" : "";
+        const swapped = u.padClass === "pad-swapped" ? "pad-swapped" : (u.padClass || "");
+        const kitCls = [marked, taunt, swapped].filter(Boolean).join(" ");
+        return `<div class="rp-pad rp-arena-pad is-occupied ${lane} ${kitCls}" style="--pad-x:${x}%;--pad-y:${y}%" data-id="${u.neighborId || u.id || ""}" data-slot="${u.slot}">${pip}${unitCard(u, side, floaters)}</div>`;
       })
       .join("");
   };

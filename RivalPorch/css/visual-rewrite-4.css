@@ -1,0 +1,258 @@
+/* Rival Porch — visual-REWRITE-4
+   Auditor bba42cf overall 6.9 / visual 6.9.
+   PF: Seat busts in porch architecture; delete greeting-idle banner; stage ≥60% clay.
+   Keep rewrite-3 X spread. Paste AFTER visual-rewrite-3.css. Packs only — no push.
+*/
+
+.rp-screen--street {
+  --rp-door-y: 41%;
+  --rp-door-y-alt: 44%;
+  --rp-door-w: 54px;
+  --rp-door-bust-h: 58px;
+  --rp-clay-frame: #3a2a1e;
+  --rp-clay-sill: #5a4332;
+  --rp-hud-max: 40px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   A. DELETE greeting-idle / world-banner chrome (free clay ≥60%)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.rp-screen--street .rp-world-banner,
+.rp-screen--street .rp-world-consequence,
+.rp-screen--street .rp-world-changed,
+.rp-screen--street .rp-street-visual,
+.rp-screen--street .rp-world-seeds,
+.rp-screen--street .rp-consequence-list,
+.rp-screen--street .rp-seed-list,
+.rp-screen--street .rp-hud-banner:not(.rp-hud-top),
+.rp-screen--street .rp-quest-banner,
+.rp-screen--street .rp-spine-banner,
+.rp-screen--street .rp-back-bar,
+.rp-screen--street .rp-nav-back,
+.rp-screen--street [data-testid="world-banner"],
+.rp-screen--street [data-testid="street-visual"],
+.rp-screen--street [data-testid="world-consequence"],
+.rp-screen--street [data-ui="world-banner"],
+.rp-screen--street [data-street-visual],
+.rp-screen--street .rp-mid__bullets,
+.rp-screen--street .rp-hud-top ul {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  border: 0 !important;
+  opacity: 0 !important;
+}
+
+/* Thin day bead only — no second bar under it */
+.rp-screen--street .rp-hud-top {
+  max-height: var(--rp-hud-max) !important;
+  min-height: 0 !important;
+  padding: 4px 10px !important;
+  margin-bottom: 0 !important;
+}
+
+.rp-screen--street .rp-hud-top + .rp-world-banner,
+.rp-screen--street .rp-hud-top + .rp-back-bar,
+.rp-screen--street .rp-hud-top + [data-testid="world-banner"] {
+  display: none !important;
+}
+
+/* Stage owns the phone */
+.rp-screen--street .rp-stage {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center 42% !important;
+  border-radius: 0 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   B. Busts → PORCH DOOR niches (not gold-ring HUD discs)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.rp-screen--street .rp-hotspot,
+.rp-screen--street .rp-hotspot.is-porch-door {
+  position: absolute !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  width: var(--rp-door-w) !important;
+  min-width: 50px !important;
+  height: 92px !important;
+  min-height: 84px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  filter: none !important;
+  transform: none !important;
+  z-index: 3;
+  pointer-events: auto;
+}
+
+/* Clay doorframe plate behind the bust */
+.rp-screen--street .rp-hotspot::before,
+.rp-screen--street .rp-hotspot__door {
+  content: "";
+  position: absolute !important;
+  left: 50% !important;
+  bottom: 18px !important;
+  transform: translateX(-50%) !important;
+  width: 48px !important;
+  height: 64px !important;
+  border-radius: 22px 22px 4px 4px / 28px 28px 4px 4px !important; /* arch top */
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--rp-clay-frame) 88%, #000) 0%,
+      color-mix(in srgb, var(--mud-night, #1a1612) 70%, var(--rp-clay-frame)) 100%
+    ) !important;
+  border: 2px solid var(--rp-clay-sill) !important;
+  box-shadow: none !important;
+  filter: none !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+}
+
+.rp-screen--street .rp-hotspot__door {
+  /* real child wins over ::before when present */
+  content: none;
+  display: block !important;
+}
+
+/* Bust = door portrait, NOT gold HUD circle */
+.rp-screen--street .rp-hotspot__bust {
+  position: relative !important;
+  z-index: 1 !important;
+  width: 44px !important;
+  height: var(--rp-door-bust-h) !important;
+  min-height: 52px !important;
+  margin-top: 4px !important;
+  object-fit: cover !important;
+  object-position: center 22% !important;
+  /* Door aperture — arched upright, not 50% disc */
+  border-radius: 20px 20px 3px 3px / 26px 26px 3px 3px !important;
+  border: 1.5px solid var(--rp-clay-sill) !important;
+  background: var(--clay-earth, #4a3728) !important;
+  box-shadow: none !important;
+  filter: none !important;
+  outline: none !important;
+}
+
+/* Kill gold square frames / ring chrome leftovers */
+.rp-screen--street .rp-hotspot__frame,
+.rp-screen--street .rp-hotspot__card,
+.rp-screen--street .rp-hotspot .gold-frame,
+.rp-screen--street .rp-hotspot__ring {
+  display: none !important;
+}
+
+/* Name = sill plaque under door, not floating HUD tag */
+.rp-screen--street .rp-hotspot__name {
+  position: relative !important;
+  z-index: 2 !important;
+  margin-top: 2px !important;
+  padding: 1px 4px !important;
+  font-size: 8.5px !important;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  color: var(--tea-cream, #f2e6d8) !important;
+  background: color-mix(in srgb, var(--mud-night, #1a1612) 72%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--rp-clay-sill) 55%, transparent) !important;
+  border-radius: 3px !important; /* clay bead, not pill */
+  text-shadow: none !important;
+  max-width: 4.6rem;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+/* Focus = warm sill edge, not gold glow ring */
+.rp-screen--street .rp-hotspot.is-focus .rp-hotspot__bust,
+.rp-screen--street .rp-hotspot[aria-pressed="true"] .rp-hotspot__bust,
+.rp-screen--street .rp-hotspot:focus-visible .rp-hotspot__bust {
+  outline: 2px solid var(--porch-lamp, #e8a045) !important;
+  outline-offset: 1px !important;
+  border-color: var(--rp-clay-sill) !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+/* ── Door-band Y (keep rewrite-3 X) ───────────────────────────────────────── */
+
+.rp-screen--street .rp-hotspot[data-n="1"],
+.rp-screen--street .rp-hotspot[data-neighbor="n1"],
+.rp-screen--street .rp-hotspot[data-id="n1"],
+.rp-screen--street .rp-hotspots > .rp-hotspot:nth-of-type(1) {
+  left: max(8px, 3vw) !important;
+  top: var(--rp-door-y-alt) !important;
+}
+
+.rp-screen--street .rp-hotspot[data-n="2"],
+.rp-screen--street .rp-hotspot[data-neighbor="n2"],
+.rp-screen--street .rp-hotspot[data-id="n2"],
+.rp-screen--street .rp-hotspots > .rp-hotspot:nth-of-type(2) {
+  left: max(68px, 18vw) !important;
+  top: var(--rp-door-y) !important;
+}
+
+.rp-screen--street .rp-hotspot[data-n="3"],
+.rp-screen--street .rp-hotspot[data-neighbor="n3"],
+.rp-screen--street .rp-hotspot[data-id="n3"],
+.rp-screen--street .rp-hotspots > .rp-hotspot:nth-of-type(3) {
+  left: max(128px, 33vw) !important;
+  top: var(--rp-door-y-alt) !important;
+}
+
+.rp-screen--street .rp-hotspot[data-n="4"],
+.rp-screen--street .rp-hotspot[data-neighbor="n4"],
+.rp-screen--street .rp-hotspot[data-id="n4"],
+.rp-screen--street .rp-hotspots > .rp-hotspot:nth-of-type(4) {
+  left: max(188px, 48vw) !important;
+  top: var(--rp-door-y) !important;
+}
+
+.rp-screen--street .rp-hotspot[data-n="5"],
+.rp-screen--street .rp-hotspot[data-neighbor="n5"],
+.rp-screen--street .rp-hotspot[data-id="n5"],
+.rp-screen--street .rp-hotspots > .rp-hotspot:nth-of-type(5) {
+  left: max(248px, 63vw) !important;
+  top: var(--rp-door-y-alt) !important;
+}
+
+.rp-screen--street .rp-hotspot[data-n="6"],
+.rp-screen--street .rp-hotspot[data-neighbor="n6"],
+.rp-screen--street .rp-hotspot[data-id="n6"],
+.rp-screen--street .rp-hotspots > .rp-hotspot:nth-of-type(6) {
+  left: max(308px, 78vw) !important;
+  top: var(--rp-door-y) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   C. Reinforce clay cover — no mid clutter reclaiming stage
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.rp-screen--street .rp-beat-card,
+.rp-screen--street .rp-omurga-bar,
+.rp-screen--street .rp-omurga-whisper,
+.rp-screen--street .rp-quest-strip,
+.rp-screen--street .rp-main-bar,
+.rp-screen--street .rp-cult-bar,
+.rp-screen--street .rp-recommend-bar,
+.rp-screen--street .rp-stage-stack {
+  display: none !important;
+}

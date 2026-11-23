@@ -6616,3 +6616,49 @@ body:not(.rp-after-share) .rp-recommend-tonight-bar {
 .rp-porch-chain__item.is-active { font-weight: 700; color: #e8a045; }
 .rp-porch-chain__item.is-done { opacity: 0.85; }
 .rp-porch-chain__arrow { opacity: 0.5; }
+
+/* ux-rewrite-4 — lamp primary + street text link */
+.rp-cta-lamp {
+  background: #e8a045 !important;
+  color: #1a1612 !important;
+  border: 0 !important;
+  min-height: 44px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+.rp-link-street {
+  background: none;
+  border: 0;
+  color: #f2e6d8;
+  text-decoration: underline;
+  font-size: 0.9rem;
+  padding: 0.35rem 0.5rem;
+  cursor: pointer;
+}
+body[data-first10="1"] .rp-dock .rp-btn.rp-btn--ember:not(.rp-cta-lamp),
+body[data-first10="1"] .rp-dock [data-testid="practice-match"] {
+  display: none !important;
+}
+.rp-snag-day1 {
+  position: absolute; left: 10%; right: 10%; top: 58%; z-index: 5;
+  padding: 0.45rem 0.6rem; background: rgba(12,8,6,.78);
+  border: 1px solid rgba(196,165,116,.45); color: #f2e6d8; font-size: 12px;
+}
+.rp-snag-day1__prop {
+  display: block; width: 28px; height: 28px; margin-bottom: 0.25rem;
+  border: 2px solid #c4a574; border-radius: 4px 4px 2px 2px;
+  background: linear-gradient(180deg, rgba(232,160,69,.25), transparent);
+}
+/* mechanics-rewrite-4 board mutations */
+.rp-pad.pad-marked { outline: 2px solid #e8a045; outline-offset: 2px; }
+.rp-pad.pad-taunt::after {
+  content: ""; position: absolute; inset: -3px; border: 2px dashed #a67c52;
+  border-radius: 10px; pointer-events: none;
+}
+.rp-pad.pad-swapped { animation: rp-kite-swap 0.8s ease; }
+@keyframes rp-kite-swap {
+  0% { transform: translateY(0); }
+  40% { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
+}
+.rp-arena[data-kit-board-change] { box-shadow: inset 0 0 0 1px rgba(232,160,69,.35); }
