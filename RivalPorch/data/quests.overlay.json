@@ -3722,5 +3722,260 @@
         "worldConsequenceId": "wc_day2_stage_cup_chalk"
       }
     ]
+  },
+  "storyForm5": {
+    "packId": "story-form-5",
+    "schemaVersion": 1,
+    "day2StreetStageProps": {
+      "mediate": {
+        "id": "stage_prop_mediate_shared_string",
+        "when": {
+          "dayIndexMin": 2,
+          "flagsAll": [
+            "cold_open_mediate"
+          ]
+        },
+        "absentWhen": {
+          "dayIndexMax": 1,
+          "note": "Must not render on Day1 street"
+        },
+        "worldConsequenceId": "wc_day2_mediate_shared_string",
+        "testId": "story-day2-mediate-string",
+        "anchor": "street_stage",
+        "zIndex": 6,
+        "html": "\n<div class=\"rp-stage-prop rp-stage-prop--shared-string\" data-testid=\"story-day2-mediate-string\" data-prop=\"mediate-shared-string\" aria-label=\"Shared string\">\n  <svg class=\"rp-string-svg\" viewBox=\"0 0 100 40\" preserveAspectRatio=\"none\" aria-hidden=\"true\">\n    <path class=\"rp-string-path\" d=\"M 18 22 C 32 8, 48 8, 58 20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-linecap=\"round\"/>\n    <circle class=\"rp-string-knot\" cx=\"18\" cy=\"22\" r=\"1.1\"/>\n    <circle class=\"rp-string-knot\" cx=\"58\" cy=\"20\" r=\"1.1\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Shared string</span>\n</div>\n",
+        "htmlTr": "\n<div class=\"rp-stage-prop rp-stage-prop--shared-string\" data-testid=\"story-day2-mediate-string\" data-prop=\"mediate-shared-string\" aria-label=\"Ortak ip\">\n  <svg class=\"rp-string-svg\" viewBox=\"0 0 100 40\" preserveAspectRatio=\"none\" aria-hidden=\"true\">\n    <path class=\"rp-string-path\" d=\"M 18 22 C 32 8, 48 8, 58 20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-linecap=\"round\"/>\n    <circle class=\"rp-string-knot\" cx=\"18\" cy=\"22\" r=\"1.1\"/>\n    <circle class=\"rp-string-knot\" cx=\"58\" cy=\"20\" r=\"1.1\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Ortak ip</span>\n</div>\n",
+        "geometryNote": "SVG path spans ~Leyla (n3 ~46%) toward Orhan (n4 ~58%) antenna side — matches visual-form hotspot map.",
+        "distinctFromDay1Seeds": [
+          "Day1 has no .rp-stage-prop--shared-string",
+          "Day1 kite seed is journal/WC text only — no SVG string across stage",
+          "Day1 tea steam / Cup chalk are different WC ids"
+        ]
+      },
+      "instigate": {
+        "id": "stage_prop_instigate_high_kite",
+        "when": {
+          "dayIndexMin": 2,
+          "flagsAll": [
+            "cold_open_instigate"
+          ]
+        },
+        "testId": "story-day2-instigate-kite",
+        "html": "\n<div class=\"rp-stage-prop rp-stage-prop--kite-high\" data-testid=\"story-day2-instigate-kite\" data-prop=\"instigate-high-kite\">\n  <div class=\"rp-kite-glyph\" aria-hidden=\"true\">凧</div>\n  <span class=\"rp-stage-prop__tag\">High flight</span>\n  <span class=\"rp-door-chalk\" data-neighbor=\"n4\">FORBIDDEN ZONE</span>\n</div>\n"
+      },
+      "stage": {
+        "id": "stage_prop_stage_chalk_cup",
+        "when": {
+          "dayIndexMin": 2,
+          "flagsAll": [
+            "cold_open_stage"
+          ]
+        },
+        "testId": "story-day2-stage-chalk",
+        "html": "\n<div class=\"rp-stage-prop rp-stage-prop--chalk-cup\" data-testid=\"story-day2-stage-chalk\" data-prop=\"stage-chalk-cup\">\n  <svg class=\"rp-chalk-svg\" viewBox=\"0 0 60 30\" aria-hidden=\"true\">\n    <circle cx=\"12\" cy=\"15\" r=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.6\" stroke-dasharray=\"1 1\"/>\n    <circle cx=\"30\" cy=\"15\" r=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.6\" stroke-dasharray=\"1 1\"/>\n    <circle cx=\"48\" cy=\"15\" r=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.6\" stroke-dasharray=\"1 1\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Chalk Cup</span>\n</div>\n"
+      }
+    },
+    "hotspotMutations": {
+      "mediate": {
+        "when": {
+          "dayIndexMin": 2,
+          "flagsAll": [
+            "cold_open_mediate"
+          ]
+        },
+        "neighborId": "n4",
+        "addClass": [
+          "rp-hotspot--remember",
+          "rp-hotspot--mediate"
+        ],
+        "nameSuffix": {
+          "tr": " · ip",
+          "en": " · string"
+        },
+        "speechBubble": {
+          "tr": "İpi birlikte çektik. Gazetem bir milimetre açık.",
+          "en": "We pulled the string together. Paper one millimeter open."
+        },
+        "testId": "story-day2-orhan-line",
+        "idleBadge": "paper_half_open",
+        "alsoNeighborId": "n3",
+        "alsoAddClass": [
+          "rp-hotspot--mediate-leyla"
+        ],
+        "alsoSpeechBubble": {
+          "tr": "İp benim de — ortak demek iki elde.",
+          "en": "The line is mine too — shared means two hands."
+        }
+      },
+      "instigate": {
+        "when": {
+          "dayIndexMin": 2,
+          "flagsAll": [
+            "cold_open_instigate"
+          ]
+        },
+        "neighborId": "n4",
+        "addClass": [
+          "rp-hotspot--remember",
+          "rp-hotspot--instigate"
+        ],
+        "speechBubble": {
+          "tr": "YASAK BÖLGE yazdım. Gazetem kalkan.",
+          "en": "I wrote FORBIDDEN ZONE. Paper is a shield."
+        },
+        "testId": "story-day2-orhan-forbidden"
+      },
+      "stage": {
+        "when": {
+          "dayIndexMin": 2,
+          "flagsAll": [
+            "cold_open_stage"
+          ]
+        },
+        "neighborId": "n2",
+        "addClass": [
+          "rp-hotspot--remember",
+          "rp-hotspot--stage"
+        ],
+        "speechBubble": {
+          "tr": "Üç daire. Prova. Düdük hazır.",
+          "en": "Three circles. Rehearsal. Whistle ready."
+        },
+        "testId": "story-day2-cem-rehearsal"
+      }
+    },
+    "cssAppend": "\n/* story-form-5 — Day2 lived props (not chip-only) */\n.rp-stage-prop {\n  position: absolute;\n  left: 12%;\n  right: 28%;\n  top: 28%;\n  height: 22%;\n  pointer-events: none;\n  z-index: 6;\n  color: #f2e6d8;\n  filter: drop-shadow(0 1px 2px rgba(0,0,0,.75));\n}\n.rp-stage-prop--shared-string { color: #e8c9a0; }\n.rp-string-svg { width: 100%; height: 100%; display: block; }\n.rp-string-path { stroke: #f0d2a8; opacity: 0.95; }\n.rp-string-knot { fill: #c45c3e; }\n.rp-stage-prop__tag {\n  position: absolute;\n  left: 42%;\n  top: -0.4rem;\n  font: 600 11px/1.2 \"IBM Plex Sans\", system-ui, sans-serif;\n  letter-spacing: 0.04em;\n  text-transform: uppercase;\n  background: rgba(20,12,8,.72);\n  padding: 0.2rem 0.45rem;\n  border-radius: 4px;\n}\n.rp-hotspot--mediate,\n.rp-hotspot--remember {\n  outline: 2px solid rgba(232, 180, 120, 0.85);\n  outline-offset: 2px;\n}\n.rp-hotspot__bubble {\n  position: absolute;\n  left: 50%;\n  bottom: calc(100% + 6px);\n  transform: translateX(-50%);\n  min-width: 9rem;\n  max-width: 12rem;\n  padding: 0.35rem 0.5rem;\n  border-radius: 8px;\n  background: rgba(18,12,8,.88);\n  color: #f2e6d8;\n  font-size: 11px;\n  line-height: 1.25;\n  z-index: 8;\n  pointer-events: none;\n}\n.rp-stage-prop--kite-high { top: 14%; left: 50%; width: 20%; height: 18%; }\n.rp-kite-glyph { font-size: 2rem; text-align: center; }\n.rp-door-chalk {\n  position: absolute;\n  left: 56%;\n  top: 48%;\n  font: 700 10px/1 monospace;\n  color: #f4f0e4;\n  background: rgba(40,30,20,.7);\n  padding: 0.15rem 0.35rem;\n  transform: rotate(-4deg);\n}\n.rp-stage-prop--chalk-cup { top: 58%; left: 30%; width: 40%; height: 16%; color: #dce6f0; }\n",
+    "day2EnterSpotlight": {
+      "id": "day2_enter_spotlight",
+      "when": {
+        "dayIndexMin": 2,
+        "flagsAll": [
+          "cold_open_mediate"
+        ],
+        "flagsNone": [
+          "day2_mediate_spotlight_ack"
+        ]
+      },
+      "screens": [
+        "street"
+      ],
+      "modal": true,
+      "title": {
+        "tr": "Sokak değişti — ipi gör",
+        "en": "The street changed — see the string"
+      },
+      "body": {
+        "tr": "Sahnede SVG ortak ip + Orhan balonu. Bu Mediate sonucu — Day1 seed değil.",
+        "en": "On stage: SVG shared string + Orhan bubble. Mediate consequence — not a Day1 seed."
+      },
+      "ackLabel": {
+        "tr": "Gördüm",
+        "en": "Got it"
+      },
+      "setsFlagsOnAck": [
+        "day2_mediate_spotlight_ack",
+        "day2_prop_ack"
+      ],
+      "testId": "story-day2-enter-spotlight"
+    },
+    "day1VsDay2Diff": {
+      "purpose": "Auditor checklist — what must differ",
+      "day1Street": {
+        "has": [
+          "hotspots",
+          "optional WC kite seed text",
+          "quest whisper"
+        ],
+        "hasNot": [
+          "data-testid=story-day2-mediate-string",
+          "data-testid=story-day2-orhan-line",
+          ".rp-stage-prop--shared-string",
+          ".rp-hotspot__bubble on n4"
+        ]
+      },
+      "day2StreetMediate": {
+        "mustHave": [
+          "data-testid=story-day2-mediate-string (SVG string visible on diorama)",
+          "data-testid=story-day2-orhan-line (Orhan speech bubble)",
+          "n4 hotspot class rp-hotspot--mediate"
+        ]
+      }
+    },
+    "echoFollowUpsAppend": [
+      {
+        "id": "echo_form5_see_string",
+        "priority": 100,
+        "when": {
+          "dayIndexMin": 2,
+          "flagsAll": [
+            "cold_open_mediate"
+          ],
+          "flagsNone": [
+            "day2_prop_ack"
+          ],
+          "slots": [
+            "street",
+            "evening"
+          ]
+        },
+        "speakerId": "n4",
+        "headline": {
+          "tr": "İpi sahnede gör",
+          "en": "See the string on stage"
+        },
+        "body": {
+          "tr": "Chip değil — diorama üzerinde ortak ip. Balonum da orada.",
+          "en": "Not a chip — shared string on the diorama. My bubble is there too."
+        },
+        "cta": {
+          "tr": "Sokağa bak",
+          "en": "Look at the street"
+        }
+      }
+    ],
+    "newStoryFlags": [
+      "day2_mediate_spotlight_ack",
+      "day2_prop_ack"
+    ],
+    "acceptanceChecks": [
+      {
+        "id": "day2_mediate_svg_prop",
+        "desc": "Day2 street after mediate overnight: element [data-testid=story-day2-mediate-string] visible on stage (SVG path), NOT only a text chip."
+      },
+      {
+        "id": "day2_orhan_npc_bubble",
+        "desc": "Orhan hotspot shows speech bubble [data-testid=story-day2-orhan-line] with mediate line."
+      },
+      {
+        "id": "absent_on_day1",
+        "desc": "Same cold Mediate save on Day1 street: those testids MUST be absent."
+      },
+      {
+        "id": "not_copy_only",
+        "desc": "Removing all .rp-prop-chip nodes still leaves SVG string + Orhan bubble — acceptance still passes."
+      }
+    ],
+    "integratorSnippet": {
+      "language": "js",
+      "comment": "Paste into renderStreet — lived prop + Orhan bubble (mediate). Do not use chip-only.",
+      "pseudo": "\nfunction day2StreetStageHtml() {\n  const form = state.questPack?.storyForm5 || state.storyForm5;\n  const day = state.save.dayIndex || 1;\n  if (!form || day < 2) return \"\";\n  const props = form.day2StreetStageProps || {};\n  const pick = storyFlag(\"cold_open_mediate\") ? props.mediate\n    : storyFlag(\"cold_open_instigate\") ? props.instigate\n    : storyFlag(\"cold_open_stage\") ? props.stage : null;\n  if (!pick) return \"\";\n  return (state.locale === \"tr\" && pick.htmlTr) ? pick.htmlTr : pick.html;\n}\n\nfunction mutateHotspotHtml(n, baseBtnHtml) {\n  const form = state.questPack?.storyForm5 || state.storyForm5;\n  const muts = form?.hotspotMutations || {};\n  const mut = Object.values(muts).find(m =>\n    (m.when?.dayIndexMin || 2) <= (state.save.dayIndex||1) &&\n    (m.when?.flagsAll||[]).every(f => storyFlag(f)) &&\n    (m.neighborId === n.id || m.alsoNeighborId === n.id)\n  );\n  if (!mut) return baseBtnHtml;\n  const bubble = mut.neighborId === n.id ? mut.speechBubble\n    : mut.alsoNeighborId === n.id ? mut.alsoSpeechBubble : null;\n  const cls = mut.neighborId === n.id ? (mut.addClass||[]) : (mut.alsoAddClass||[]);\n  const tid = mut.neighborId === n.id ? mut.testId : \"\";\n  const bub = bubble ? `<span class=\"rp-hotspot__bubble\" ${tid?`data-testid=\"${tid}\"`:\"\"}>${loc(bubble)}</span>` : \"\";\n  return baseBtnHtml.replace('class=\"rp-hotspot', `class=\"rp-hotspot ${cls.join(\" \")}`).replace(\"</button>\", `${bub}</button>`);\n}\n\n// renderStreet: after stageLayer(\"street\") insert day2StreetStageHtml()\n// wrap each hotspot through mutateHotspotHtml\n"
+    },
+    "runtimeFlags": {
+      "mediate": "cold_open_mediate",
+      "day2": "dayIndex >= 2"
+    },
+    "meta": {
+      "squad": "story-quest",
+      "formIndex": 5,
+      "revision": "7.2-street-visceral",
+      "shipTrigger": "score story 7.2 PriorityFix: Day2 street mediate-specific prop change not copy-only",
+      "nextPackWhen": "story category < 8.5",
+      "dependsOnForms": [
+        2,
+        3,
+        4
+      ],
+      "implementationNote": "Replace chip-only overlay with stage SVG + hotspot speech bubbles. Mediate is acceptance path."
+    }
   }
 }

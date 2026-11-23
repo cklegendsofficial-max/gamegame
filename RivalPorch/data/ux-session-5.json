@@ -1,0 +1,59 @@
+{
+  "packId": "ux-session-5",
+  "schemaVersion": 1,
+  "scoreReact": {
+    "buildCommit": "b2cd05e",
+    "overall": 7.2,
+    "gameplay": 7.0,
+    "gaps": [
+      "End evening discovery depends on Settle",
+      "practice-settle soft-clear bypasses fight"
+    ]
+  },
+  "production": {
+    "practiceSettleVisible": false,
+    "softClearReasonsBlocked": [
+      "audit_settle",
+      "show_me_settle",
+      "settle",
+      "soft_clear"
+    ],
+    "flagWritersAllowed": [
+      "fight_end",
+      "auto_fight_end",
+      "comic_shown",
+      "comic_dismiss",
+      "result_banner",
+      "taught_loss"
+    ],
+    "postFightNav": "evening",
+    "primaryCtaWhenCleared": "end_evening",
+    "endEveningRequiresFightCompletion": true
+  },
+  "debugSettle": {
+    "visibleWhen": [
+      "?coldAudit=1",
+      "data-audit-cold=1",
+      "localStorage.rp_debug=1"
+    ],
+    "testid": "practice-settle",
+    "note": "Automation escape only \u2014 not in production UI"
+  },
+  "copy": {
+    "hudAfterFight": {
+      "tr": "Prova bitti \u2014 ak\u015fam\u0131 b\u0131rak",
+      "en": "Practice done \u2014 end the evening"
+    },
+    "primaryEnd": {
+      "tr": "Ak\u015fam\u0131 b\u0131rak",
+      "en": "End evening"
+    }
+  },
+  "acceptanceChecks": [
+    "naive_cold_path_no_settle_click_reaches_overnight",
+    "settle_absent_from_production_dom",
+    "soft_clear_blocked_without_debug_flag",
+    "after_comic_evening_primary_is_end_evening",
+    "endEnabled_true_after_fight_without_settle"
+  ]
+}
