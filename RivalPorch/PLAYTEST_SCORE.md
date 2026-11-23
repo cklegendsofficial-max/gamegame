@@ -13,6 +13,10 @@ Canonical scorecard (Project store):
 | Real quest log (accept / progress / complete) | FAIL |
 | Friend plays 20+ min without boredom | FAIL |
 
-**Recalibrated total: 5.2 / 10** (Round 8 honesty reset).
+**Round 8 honesty reset: 5.2 / 10.** Prior claimed 9.0 is VOID.
 
-Rebuild order: quests → art-forward Meshy layouts → combat juice/synergy tutorial → arc journal → honest replay until ≥9.0.
+**Round 8b (quest pack wired): ~6.3 / 10** — Quest Log + Welcome main drives evening; Meshy env stages on; harsh visual/combat/20-min bars still fail.
+
+Rebuild order: quests ✓ → art-forward Meshy (in progress) → combat juice/synergy tutorial → denser session → honest replay until ≥9.0.
+
+Canonical: Project store `docs/rival-porch-playtest-score.md`.
