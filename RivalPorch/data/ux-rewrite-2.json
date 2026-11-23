@@ -1,0 +1,41 @@
+{
+  "packId": "ux-rewrite-2",
+  "desireLoop": [
+    "side",
+    "cup_gossip",
+    "share"
+  ],
+  "forbidBeforeShare": [
+    "demlige-git",
+    "pot-cta",
+    "tray-reward",
+    "claim-reward",
+    "omurga-whisper",
+    "volume-accept"
+  ],
+  "eveningPrimaryAfterCold": {
+    "cold_open_mediate": {
+      "tr": "Merve'nin yanında dur — verandada hallet",
+      "en": "Stand with Merve — settle it on the porch",
+      "nav": "cup"
+    },
+    "cold_open_instigate": {
+      "tr": "İpi çek — Cup'ta görünsün",
+      "en": "Pull the string — settle on the Cup",
+      "nav": "cup"
+    },
+    "cold_open_stage": {
+      "tr": "Sahneyi al — verandada",
+      "en": "Take the stage on the porch",
+      "nav": "cup"
+    }
+  },
+  "gates": {
+    "rewardUiRequires": [
+      "first_share_done"
+    ],
+    "checkinOptionalAfter": [
+      "first_share_done"
+    ]
+  }
+}

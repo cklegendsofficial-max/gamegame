@@ -289,13 +289,13 @@ function eveningPrimaryCta() {
     return { id: "end_evening", action: "end-evening", label: loc(state.uxPack2?.strings?.["evening.cta.end"]) || (tr ? "Akşamı bırak" : "End evening") };
   }
   if (!storyFlag("practice_cup_done") && dayEarly <= 1) {
-    if (!state.save.evening?.checkin && !storyFlag("welcome_checkin_done")) {
-      return { id: "sa_checkin", action: "goto-street", label: tr ? "Demliğe git" : "Go to the pot" };
+    // ux-rewrite-2: side → Cup gossip (never Demliğe git / door checklist as primary)
+    const sideCup = UxFirst.coldSideCupPrimary(state.save.storyFlags || {}, state.locale);
+    if (sideCup) return sideCup;
+    if (!storyFlag("cold_open_mediate") && !storyFlag("cold_open_instigate") && !storyFlag("cold_open_stage")) {
+      return { id: "sa_cold", action: "goto-cold", label: tr ? "Kapıyı aç" : "Answer the door" };
     }
-    if ((state.save.evening?.visits?.length || 0) < 3 && !storyFlag("welcome_met_three")) {
-      return { id: "sa_visit", action: "goto-street", label: tr ? "Bir kapı çal" : "Knock a door" };
-    }
-    return { id: "sa_practice", action: "goto-cup", label: tr ? "Prova maçı ★" : "Practice match ★" };
+    return { id: "sa_practice", action: "goto-cup", label: tr ? "Verandada hallet ★" : "Settle it on the porch ★" };
   }
   // ux-session-9/11: Day2+ spine — Volume/HEADPHONES when unlocked (not stuck Antenna/End)
   const day = state.save.dayIndex || 1;
@@ -329,8 +329,8 @@ function eveningPrimaryCta() {
           id: "sa_ledger",
           action: "goto-street",
           label: tr ? "Defter tepsisine bak" : "See Ledger tray",
-          support: tr ? "MAIN Defter — tepsi sokakta." : "MAIN Ledger — tray on the street.",
-          whisper: tr ? "Omurga 4/5 · Defter" : "Spine 4/5 · Ledger",
+          support: tr ? "Tepsi dışarıda — defter açık" : "Tray’s out — book’s open",
+          whisper: tr ? "Defter masada" : "The book’s on the table",
           questId: "mq_ledger_tray",
           acceptIfNeeded: true,
           dataNext: "ledger",
@@ -345,9 +345,9 @@ function eveningPrimaryCta() {
           action: "accept-volume",
           label: tr ? "Desibel'i aç" : "Open Volume",
           support: tr
-            ? "KULAKLIK notu — omurga 3/5. Defter sonra."
-            : "HEADPHONES note — spine 3/5. Ledger after.",
-          whisper: tr ? "Omurga 3/5 · Desibel" : "Spine 3/5 · Volume",
+            ? "KULAKLIK notu — 01:12. Defter sonra."
+            : "HEADPHONES note — 01:12. Ledger after.",
+          whisper: tr ? "01:12 — Orhan’ın ışığı" : "01:12 — Orhan’s light",
           questId: "mq_decibel_accord",
           acceptIfNeeded: true,
           dataNext: "volume-accept",
@@ -357,8 +357,8 @@ function eveningPrimaryCta() {
         id: "sa_headphones",
         action: "goto-street",
         label: tr ? "KULAKLIK notuna git" : "Answer HEADPHONES note",
-        support: tr ? "Sokakta not — Desibel omurgası." : "Note on the street — Decibel spine.",
-        whisper: tr ? "Omurga 3/5 · KULAKLIK" : "Spine 3/5 · HEADPHONES",
+        support: tr ? "Sokakta not — geceyi konuş." : "Note on the street — talk about the night.",
+        whisper: tr ? "01:12 — kapıdaki not" : "01:12 — the door scrap",
         questId: "mq_decibel_accord",
         dataNext: "headphones",
         testId: "evening-headphones-street-job",
@@ -372,7 +372,7 @@ function eveningPrimaryCta() {
         support: tr
           ? "İp duruyor. Desibel ve Defter bu yolun ilerisi."
           : "The line holds. Volume and Ledger are further down this road.",
-        whisper: tr ? "Omurga 2/5 · Anten — sonra Desibel" : "Spine 2/5 · Antenna — then Volume",
+        whisper: tr ? "Çatıda ip var — gece sonra gelir" : "There’s a line on the roof — night comes next",
         questId: "mq_antenna_op",
       };
     }
@@ -382,7 +382,7 @@ function eveningPrimaryCta() {
         action: "goto-street",
         label: tr ? "Deftere bak" : "Open the ledger",
         support: tr ? "Çay çemberi — mahalle hesabı." : "Tea Circle — the block's account.",
-        whisper: tr ? "Omurga 4/5 · Defter ve Tepsi" : "Spine 4/5 · Ledger & Tray",
+        whisper: tr ? "Defter masada" : "The book’s on the table",
         questId: "mq_ledger_tray",
         acceptIfNeeded: true,
       };
@@ -519,11 +519,13 @@ function applyShowMePractice() {
 function autoPlaceSilent() {
   state.placement = Array(6).fill(null);
   const rank = (id) => {
-    const role = (neighborById(id)?.role || "").toLowerCase();
-    if (/tank|bruiser/.test(role)) return 0;
-    if (/support/.test(role)) return 1;
-    if (/heal/.test(role)) return 2;
-    if (/burst|aoe|assassin|glass|cannon/.test(role)) return 3;
+    const n = neighborById(id);
+    const job = (UxFirst.porchJobLabel(n, "en") || n?.porchJob?.en || "").toLowerCase();
+    const kit = (state.combatPack?.kits || []).find((k) => k.neighborId === id);
+    if (kit?.rowBias === "front" || /fence|whistle|gazete|düdük/.test(job)) return 0;
+    if (/tea|demlik|pour/.test(job)) return 1;
+    if (/tray|tepsi|warm|oven/.test(job)) return 2;
+    if (/kite|bass|cans|kulak|uçurt/.test(job)) return 3;
     return 2;
   };
   const front = [0, 1];
@@ -804,6 +806,9 @@ function firstEveningBeats() {
 function questHudWhisper() {
   const tr = state.locale === "tr";
   const flags = state.save.storyFlags || {};
+  if (UxFirst.first10Active(state.save) && UxFirst.coldSideCupPrimary(flags, state.locale)) {
+    return UxFirst.situationStrip(state.save.dayIndex || 1, flags, state.locale);
+  }
   const beats = state.uxPack?.firstEvening?.beats || [];
   const byId = Object.fromEntries(beats.map((b) => [b.id, b]));
   // ux-13/14: defer tray-reward whisper while Volume accept is live
@@ -813,11 +818,11 @@ function questHudWhisper() {
       !flags.quest_volume_accepted &&
       !flags.arc_volume_war_complete);
   if (volumeAcceptLive) {
-    return tr ? "Omurga 3/5 · Desibel — aç, sonra KULAKLIK" : "Spine 3/5 · Volume — open, then HEADPHONES";
+    return tr ? "Geceyi konuş — kapıdaki notu oku" : "Talk about the night — read the door scrap";
   }
   // Day10+ ledger handoff whisper
   if ((state.save.dayIndex || 1) >= 10 || flags.natural_ledger_street_wins) {
-    return tr ? "Omurga 4/5 · Defter tepsi — MAIN Defter" : "Spine 4/5 · Ledger tray — MAIN Ledger";
+    return tr ? "Defter masada — tepsi dışarıda" : "The book’s on the table — tray’s out";
   }
   // claimable main?
   if (state.questPack) {
@@ -892,7 +897,7 @@ function hudHtml() {
   const dayLine = fillTemplate(t("day.label"), { day: s.dayIndex, week: weekNumber() });
   const first10 = UxFirst.first10Active(s);
   const whisper = first10
-    ? (state.locale === "tr" ? "Çatıda bir ip var — iki kapıya dokun." : "There’s a line on the roof — tap two doors.")
+    ? UxFirst.situationStrip(s.dayIndex || 1, s.storyFlags || {}, state.locale)
     : questHudWhisper();
   const coins = first10
     ? ""
@@ -942,7 +947,7 @@ function synergyCoachHtml(pickedIds = []) {
       ? "Tea heal · Rivalry düşük HP hasarı · Neon açılış dodge"
       : "Tea heals · Rivalry low-HP damage · Neon opening dodge";
   return `<div class="syn-coach">
-    <h3 class="section-label">${tr ? "Sinerji okulu" : "Synergy school"}</h3>
+    <h3 class="section-label">${tr ? "Veranda dedikodusu" : "Porch gossip"}</h3>
     <p class="muted">${head}</p>
     <div class="syn-coach-grid">${defs.map(tipFor).join("")}</div>
   </div>`;
@@ -1488,16 +1493,9 @@ function oneMainChipActive() {
 }
 
 function mqStreetChipHtml() {
-  // story-20 optional: Day10 / ledger wins → spine-cult owns single MAIN 4/5
-  if (oneMainChipActive()) {
-    document.body.classList.add("rp-one-main-chip");
-    return "";
-  }
-  const chips = storyForm20()?.mqStreetChipsOverride || storyForm11()?.mqStreetChips || [];
-  const ordered = [...chips].sort((a, b) => (b.stepRank || 0) - (a.stepRank || 0));
-  const hit = ordered.find((c) => whenFlagsOk(c.when || {}));
-  if (!hit) return "";
-  return `<button class="rp-mq-street-chip" type="button" data-testid="${hit.testId || "mq-street-chip"}" data-action="open-quests">${loc(hit.chip)}</button>`;
+  // anti-slop-2: no MAIN/Omurga product chips on street — situation strip only
+  if (oneMainChipActive()) document.body.classList.add("rp-one-main-chip");
+  return "";
 }
 
 function day10MainChipHtml() {
@@ -1558,7 +1556,7 @@ function ledgerPropHtml() {
     if (html) return html;
   }
   return cleanLedgerTrayHtml() || `<div class="rp-stage-prop rp-stage-prop--ledger-tray rp-stage-prop--ledger-tray-winner" data-testid="story-street-ledger-tray" data-arc="arc_tea_ledger" data-unlock="natural" data-winner="ledger_natural" data-form="19" aria-label="Ledger & tray">
-    <span class="rp-stage-prop__tag">MAIN 4/5 · Ledger · tray</span>
+    <span class="rp-stage-prop__tag">Open Book · tray</span>
   </div>`;
 }
 
@@ -2204,7 +2202,7 @@ function overnightSpineHook() {
     };
   }
   return {
-    title: tr ? "Gece yazdı · Omurga devam" : "Night wrote · Spine continues",
+    title: tr ? "Gece yazdı · mahalle unutmadı" : "Night wrote · the street kept it",
     hook: tr
       ? "Sabah Anten Operasyonu — sonra Desibel, sonra Defter."
       : "Morning: the snag first — then the night, then the book.",
@@ -2313,7 +2311,7 @@ function renderEvening() {
 
   const nightOne = state.save.dayIndex <= 1;
   const adventureBeats = nightOne ? firstEveningBeats() : [];
-  const mainTitle = mainAgenda?.title || (state.locale === "tr" ? "Akşam omurgası" : "Evening spine");
+  const mainTitle = mainAgenda?.title || (state.locale === "tr" ? "Akşam verandası" : "Evening porch");
   const beatMax = state.uxPack?.firstEvening?.beats?.length || 4;
   const beatDone = beatMax - (adventureBeats.length || 0);
   const mainDone = nightOne
@@ -2337,6 +2335,13 @@ function renderEvening() {
 
   const cta = eveningPrimaryCta();
   if (cta.support) support = cta.support;
+  // ux-rewrite-2: never preach tea checklist once cold side is locked
+  if (UxFirst.coldSideCupPrimary(state.save.storyFlags || {}, state.locale)) {
+    const tr = state.locale === "tr";
+    support = tr
+      ? "Seçimin verandada — Cup’ta görünsün."
+      : "Your side is on the porch — settle it in Cup.";
+  }
   if (cta.acceptIfNeeded && cta.questId) {
     try { Quests.acceptQuest(state.save, state.questPack, cta.questId); } catch { /* */ }
   }
@@ -2360,7 +2365,7 @@ function renderEvening() {
   const primaryLabel = soleEnd ? endLabel : cta.label;
   const primaryTestId = "evening-primary";
   const supportLine = soleEnd
-    ? (state.locale === "tr" ? "Prova bitti. Akşamı bırak — omurga gece yazar." : "Practice done. End evening — the spine writes overnight.").slice(0, 90)
+    ? (state.locale === "tr" ? "Prova bitti. Akşamı bırak — mahalle gece yazar." : "Practice done. End evening — the street writes overnight.").slice(0, 90)
     : (support || "").slice(0, state.uxPack7?.eveningHome?.maxSupportChars || 90);
   // HOTFIX form16 + ux-13: compact Volume accept ≤35vh; defer tray reward
   applyForm16AntennaFailsafe();
@@ -2501,6 +2506,13 @@ function day1EscapeChipHtml(endEnabled) {
 
 function scrubBannedEscapeChrome() {
   UxFirst.scrubProductionEscapeHatches(document);
+  if (!UxFirst.rewardUiAllowed(state.save)) {
+    document
+      .querySelectorAll(
+        "[data-testid='tray-reward'],[data-action='claim-reward'],.rp-tray-reward,[data-testid='claim-reward'],[data-action='open-tray']"
+      )
+      .forEach((el) => el.remove());
+  }
   if (coldAuditActive()) return;
   document
     .querySelectorAll(
@@ -2513,27 +2525,17 @@ function renderStreet() {
   const screen = document.getElementById("screen-street");
   applyNaturalArcStreetUnlock();
   syncColdYieldBodyClass();
-  // visual-fix-2 wave3 L-block hotspots
-  // visual-rewrite-1: porch niches mid diorama (not bust-rail toolbar)
-  const HOT = {
-    n1: [14, 48],
-    n2: [30, 46],
-    n3: [46, 44],
-    n4: [58, 45],
-    n5: [72, 46],
-    n6: [86, 48],
-  };
-  // Always show ≥4 bust hotspots (visual-fix-3); prefer unlocked, pad with roster
+  // visual-rewrite-2: mid-stage porch niches via data-n (CSS owns %). No gold toolbar.
+  const NICHE = { n1: 1, n2: 2, n3: 3, n4: 4, n5: 5, n6: 6 };
   const roster = unlockedNeighbors().length
     ? unlockedNeighbors()
     : allNeighbors().filter((n) => ["n1", "n2", "n3", "n4", "n5", "n6"].includes(n.id));
   const spots = roster.slice(0, 6).map((n) => {
     const done = state.save.evening.visits.includes(n.id);
     const avail = !done;
-    const xy = HOT[n.id] || [50, 48];
-    const base = `<button class="rp-hotspot ${done ? "visited" : ""} ${avail ? "is-available" : ""}" style="--x:${xy[0]}%;--y:${xy[1]}%" type="button" data-action="open-neighbor" data-id="${n.id}" aria-label="${loc(n.name)}">
-        <img class="rp-hotspot__bust" src="${goldBust(n.id)}" alt="" width="56" height="56" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" />
-        <span class="rp-hotspot__glow" aria-hidden="true"></span>
+    const dn = NICHE[n.id] || 1;
+    const base = `<button class="rp-hotspot ${done ? "visited" : ""} ${avail ? "is-available" : ""}" data-n="${dn}" type="button" data-action="open-neighbor" data-id="${n.id}" aria-label="${loc(n.name)}">
+        <img class="rp-hotspot__bust" src="${goldBust(n.id)}" alt="" width="52" height="52" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" />
         <span class="rp-hotspot__name">${loc(n.name)}${done ? " ✓" : ""}</span>
       </button>`;
     return mutateHotspotHtml(n, base);
@@ -2563,7 +2565,7 @@ function renderStreet() {
   const winner = pickUnifiedStoryWinner();
   const oneSignal = !!winner;
   const coldHtml = oneSignal && winner.id === "cold_day2_prop" ? "" : (oneSignal ? "" : day2StreetStageHtml());
-  const bannerHtml = oneSignal || coldWins ? streetArcCompactChipHtml() : activeArcBeatBannerHtml();
+  const bannerHtml = ""; // visual-rewrite-2: no Beat card / Omurga bar on street
   const spotHtml = oneSignal || echoOff ? "" : day2EnterSpotlightHtml("street");
   // form17: never mount story-day2-orhan-line after yield
   const day2Line = !echoOff && coldWins && npcWhisper
@@ -2578,7 +2580,8 @@ function renderStreet() {
   })();
   if (echoOff) document.body.classList.add("rp-cold-yielded");
   screen.className = (screen.className || "").replace(/\bis-day2\b/g, "").trim();
-  if (day === 2) screen.classList.add("is-day2", "rp-screen--street");
+  if (day === 2) screen.classList.add("rp-screen--street");
+  if (day === 2) screen.classList.add("is-day2");
   if (echoOff) screen.classList.add("rp-cold-yielded");
   screen.dataset.day = String(day);
   if (winner?.id) screen.dataset.storyWinner = winner.id;
@@ -2601,7 +2604,7 @@ function renderStreet() {
     ${week2DecibelLedgerPullHtml("street")}
     ${recommendTonightBarHtml()}
     ${!echoOff && !coldWins && npcWhisper && !oneSignal ? `<div class="rp-npc-remember"><span>${npcWhisper}</span></div>` : ""}
-    ${!coldWins && !oneSignal && spine ? `<div class="rp-whisper"><span>◎ ${spine}</span></div>` : ""}
+    ${""}
     <footer class="rp-dock">
       <button class="rp-btn rp-btn--primary" type="button" data-action="checkin" ${needCheckin ? "" : "disabled"}>${needCheckin ? checkinLabel : t("street.porch_checkin")}</button>
       <button class="rp-btn" type="button" data-action="street-event" ${state.save.evening.streetEvent ? "disabled" : ""}>${t("street.event")}</button>
@@ -2654,9 +2657,9 @@ function renderNeighbor(id) {
       <div class="bust-frame frame-${state.save.equipped?.comic_frame || "frame_chalk_grid"}"><img src="${bust(id)}" alt="${loc(n.name)}" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" /></div>
       <div class="neighbor-meta">
         <h2>${loc(n.name)}</h2>
-        <p class="meta-line"><strong>${t("neighbor.trait")}:</strong> ${n.trait}</p>
-        <p class="meta-line"><strong>${t("neighbor.role")}:</strong> ${n.role}</p>
-        <p class="meta-line"><span class="chip ${(n.synergyTag || "").toLowerCase()}">${n.synergyTag}</span></p>
+        <p class="meta-line">${UxFirst.porchJobLabel(n, state.locale)}</p>
+        <p class="meta-line">${loc(n.porchWant) || ""}</p>
+        <p class="meta-line">${loc(n.porchLine) || ""}</p>
         <p class="meta-line">${t("neighbor.affinity")}: ${affinity}/100 · ${affinityLabel(id)}</p>
         <div class="affinity-bar"><div class="affinity-fill" style="width:${affinity}%"></div></div>
       </div>
@@ -3236,7 +3239,7 @@ function renderStoryLog() {
   const consequenceBits = (state.save.journalConsequenceBeats || [])
     .map((b) => `<li><strong>${loc(b.title)}</strong> — ${loc(b.body)}</li>`)
     .join("");
-  const heroTease = loc(layout?.heroTease) || (tr ? "Drama defteri — omurga + canlı beat" : "Drama journal — spine + living beat");
+  const heroTease = loc(layout?.heroTease) || (tr ? "Drama defteri — mahalle + canlı sahne" : "Drama journal — street + living scene");
   const notesLabel = loc(layout?.recentNotesLabel) || (tr ? "Eski notlar (log)" : "Older notes (log)");
   screen.innerHTML = `
     ${hudHtml()}
@@ -3300,7 +3303,7 @@ function renderCupLobby() {
       return `<button class="pick-card ${selected ? "selected" : ""} ${spotlight.has(n.id) ? "spotlight" : ""} ${dim ? "dimmed" : ""}" type="button" data-action="toggle-pick" data-id="${n.id}">
         <img src="${src}" alt="" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" />
         <div class="name">${loc(n.name)}</div>
-        <div class="muted pick-meta">${n.role} · <span class="chip ${String(tag).toLowerCase()}">${tag}</span></div>
+        <div class="muted pick-meta">${UxFirst.porchJobLabel(n, state.locale) || loc(n.porchJob) || ""} · <span class="chip ${String(tag).toLowerCase()}">${tag}</span></div>
       </button>`;
     })
     .join("");
@@ -3467,7 +3470,7 @@ function renderDraft() {
       const tag = neighborById(id)?.synergyTag || "";
       const src = goldBust(id);
       return `<button class="bench-unit ${placed ? "placed" : ""} ${state.selectedBench === id ? "selected" : ""}" type="button" data-action="select-bench" data-id="${id}" ${placed ? "disabled" : ""}>
-        <img src="${src}" alt="" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" /><span class="bench-role">${role} · ${tag}</span></button>`;
+        <img src="${src}" alt="" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" /><span class="bench-role">${UxFirst.porchJobLabel(neighborById(id), state.locale) || role || ""} · ${tag}</span></button>`;
     })
     .join("");
   const placedCount = state.placement.filter(Boolean).length;
@@ -3486,7 +3489,7 @@ function renderDraft() {
   const liveSynLine = liveSyn.length
     ? liveSyn.map((s) => loc(s.name)).join(" · ")
     : tr
-      ? "Sinerji yok — Tea/Rivalry/Neon etiketlerini eşleştir"
+      ? "Dedikodu yok — Tea/Rivalry/Neon etiketlerini eşleştir"
       : "No synergy — match Tea / Rivalry / Neon tags";
   screen.innerHTML = `
     ${hudHtml()}
@@ -3502,7 +3505,7 @@ function renderDraft() {
     <div class="bench">${bench}</div>
     <p class="muted">${state.selectedBench ? (tr ? "Şimdi bir hücreye dokun" : "Now tap a cell") : (tr ? "Önce tepside birim seç" : "Pick a unit from the tray first")}</p>
     <div class="btn-row">
-      <button class="btn btn-secondary" type="button" data-action="auto-place">${tr ? "Otomatik (rol)" : "Auto (by role)"}</button>
+      <button class="btn btn-secondary" type="button" data-action="auto-place">${tr ? "Otomatik (iş)" : "Auto (by job)"}</button>
       <button class="btn btn-primary" type="button" data-action="start-fight" ${placedCount === state.cupPicks.length ? "" : "disabled"}>${t("draft.confirm")}</button>
     </div>`;
 }
@@ -3530,11 +3533,13 @@ function placeCell(idx) {
 function autoPlace() {
   state.placement = Array(6).fill(null);
   const rank = (id) => {
-    const role = (neighborById(id)?.role || "").toLowerCase();
-    if (/tank|bruiser/.test(role)) return 0;
-    if (/support/.test(role)) return 1;
-    if (/heal/.test(role)) return 2;
-    if (/burst|aoe|assassin|glass|cannon/.test(role)) return 3;
+    const n = neighborById(id);
+    const job = (UxFirst.porchJobLabel(n, "en") || n?.porchJob?.en || "").toLowerCase();
+    const kit = (state.combatPack?.kits || []).find((k) => k.neighborId === id);
+    if (kit?.rowBias === "front" || /fence|whistle|gazete|düdük/.test(job)) return 0;
+    if (/tea|demlik|pour/.test(job)) return 1;
+    if (/tray|tepsi|warm|oven/.test(job)) return 2;
+    if (/kite|bass|cans|kulak|uçurt/.test(job)) return 3;
     return 2;
   };
   // Front slots 0–1 for tanks/bruisers; back 3–4 for burst/heal — never all-front
@@ -3584,7 +3589,8 @@ function makeFighter(neighborId, side, slot) {
     slot,
     name: loc(n.name),
     synergyTag: n.synergyTag,
-    role: n.role,
+    role: UxFirst.porchJobLabel(n, "en") || n.porchJob?.en || "",
+    kit: (state.combatPack?.kits || []).find((k) => k.neighborId === neighborId) || null,
     maxHp: base.hp,
     hp: base.hp,
     atk: base.atk,
@@ -3605,7 +3611,11 @@ function makeBotFighter(botUnit, slot, mult) {
     slot,
     name: loc(botUnit.name),
     synergyTag: botUnit.synergyTag,
-    role: botUnit.role,
+    role: botUnit.porchJob?.en || botUnit.porchJob || "",
+    kit: (() => {
+      const mid = String(botUnit.mirrorOf || "").replace(/^bot_/, "n");
+      return (state.combatPack?.kits || []).find((k) => k.neighborId === mid || k.neighborId === botUnit.mirrorOf) || null;
+    })(),
     maxHp: scale(stats.hp),
     hp: scale(stats.hp),
     atk: scale(stats.atk),
@@ -4415,6 +4425,7 @@ function applyPorchCall(callId) {
   const beforeHp = battle.allies.reduce((s, u) => s + Math.max(0, u.hp), 0);
   const beforeMax = battle.allies.reduce((s, u) => s + u.maxHp, 0) || 1;
   const label = Combat.applyPorchCallEffect(battle, opt, loc);
+  try { Combat.resolveCall(battle, callId); } catch { /* kit engine optional */ }
   battle.log.unshift(label);
   const afterHp = battle.allies.reduce((s, u) => s + Math.max(0, u.hp), 0);
   const deltaPct = Math.round(((afterHp - beforeHp) / beforeMax) * 100);
@@ -4555,10 +4566,35 @@ function hideFightActions() {
 }
 
 function combatTick(battle) {
+  // mechanics-rewrite-2: Porch Kit scheduler is source of truth for juice
+  if (battle && state.combatPack?.kits?.length) {
+    if (!battle._kitEngine) {
+      const seeded = Combat.createBattle({
+        allies: battle.allies,
+        enemies: battle.enemies,
+        practice: battle.practice || state.practiceMode,
+        pack: state.combatPack,
+      });
+      Object.assign(battle, {
+        phase: seeded.phase,
+        signatureLog: seeded.signatureLog,
+        synergyFired: battle.synergyFired || seeded.synergyFired,
+        _kitEngine: true,
+      });
+      battle.allies = seeded.allies;
+      battle.enemies = seeded.enemies;
+    }
+    Combat.step(battle, 0.25);
+    if (Combat.canOfferCall(battle) && !battle.actionOffered && !battle.actionUsed) {
+      battle.actionOffered = true;
+      /* existing porch-call UI opens via resumeFightLoop timers */
+    }
+  }
   const livingAllies = battle.allies.filter((u) => u.alive);
   const livingEnemies = battle.enemies.filter((u) => u.alive);
   if (!livingAllies.length || !livingEnemies.length) return;
 
+  // Basics remain as light stage motion; signatures already fired in Combat.step
   const order = [...livingAllies, ...livingEnemies].sort((a, b) => b.spd - a.spd);
   for (const attacker of order) {
     if (!attacker.alive) continue;
@@ -4678,11 +4714,11 @@ function combatTick(battle) {
     const chaos = selfSyn.find((s) => s.rules.type === "crit_chance");
     if (chaos && Math.random() < chaos.rules.critChance) dmg = Math.floor(dmg * (chaos.rules.critMult || 1.5));
 
-    if (attacker.role === "AoE" || /AoE|Burst/i.test(attacker.role || "")) {
+    if (/bass|cans|kulak|aoe|burst/i.test(attacker.role || attacker.porchJob?.en || "")) {
       for (const f of foes) applyDamage(f, f === target ? dmg : Math.max(1, Math.floor(dmg * 0.35)), attacker, battle, rivalryProc && f === target);
     } else applyDamage(target, dmg, attacker, battle, rivalryProc);
 
-    if (/Healer|heal/i.test(attacker.role || "") || attacker.synergyTag === "Oven") {
+    if (/tray|tepsi|warm|heal|oven/i.test(attacker.role || attacker.porchJob?.en || "") || attacker.synergyTag === "Oven") {
       const friends = attacker.side === "ally" ? battle.allies : battle.enemies;
       const hurt = friends.filter((u) => u.alive && u.hp < u.maxHp).sort((a, b) => a.hp - b.hp)[0];
       if (hurt) {
@@ -4802,7 +4838,7 @@ function renderFight(battle) {
   };
   const coachBanner = battle.allySyn.length
     ? `<div class="syn-fight-tip rp-fight-tip">${battle.allySyn.map(teachLine).join(" · ")}</div>`
-    : `<div class="syn-fight-tip soft">${tr ? "Sinerji yok — Cup'ta Tea/Rivalry/Neon eşleştir" : "No synergy — match Tea/Rivalry/Neon in Cup"}</div>`;
+    : `<div class="syn-fight-tip soft">${tr ? "Dedikodu yok — Cup'ta Tea/Rivalry/Neon eşleştir" : "No porch gossip yet — match Tea/Rivalry/Neon in Cup"}</div>`;
   const canSkip = !Density.practiceSkipBlocked(state.densityPack, state.save) && !(state.practiceMode || practiceCupRequired());
   const screen = document.getElementById("screen-fight");
   screen.innerHTML = `
@@ -5920,6 +5956,9 @@ function onAction(action, target) {
       renderEvening();
       showScreen("screen-evening");
       break;
+    case "goto-cold":
+      renderColdOpen();
+      break;
     case "goto-street":
       renderStreet();
       showScreen("screen-street");
@@ -6297,7 +6336,7 @@ async function tryPullStorePacks() {
 
 async function boot() {
   try {
-    const [content, economy, stories, ladder, depthMeta, questPack, combatPack, densityPack, uxPack, uxPack2, uxPack3, uxPack4, uxPack5, uxPack6, uxPack7, uxPack8, mechFix4, mechFix5, mechFix6, mechFix7, mechFix8, mechFix9] = await Promise.all([
+    const [content, economy, stories, ladder, depthMeta, questPack, combatPack, densityPack, uxPack, uxPack2, uxPack3, uxPack4, uxPack5, uxPack6, uxPack7, uxPack8, uxRewrite1, uxRewrite2, mechFix4, mechFix5, mechFix6, mechFix7, mechFix8, mechFix9] = await Promise.all([
       fetch("data/content.json").then((r) => r.json()),
       fetch("data/economy.json").then((r) => r.json()),
       fetch("data/stories.json").then((r) => r.json()),
@@ -6314,6 +6353,8 @@ async function boot() {
       fetch("data/ux-session-6.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
       fetch("data/ux-session-7.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
       fetch("data/ux-session-8.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      fetch("data/ux-rewrite-1.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      fetch("data/ux-rewrite-2.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
       fetch("data/mechanics-fix-4.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
       fetch("data/mechanics-fix-5.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
       fetch("data/mechanics-fix-6.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
@@ -6337,6 +6378,8 @@ async function boot() {
     state.uxPack6 = uxPack6;
     state.uxPack7 = uxPack7;
     state.uxPack8 = uxPack8;
+    state.uxRewrite1 = uxRewrite1;
+    state.uxRewrite2 = uxRewrite2;
     state.mechFix4 = mechFix4;
     state.mechFix5 = mechFix5;
     state.mechFix6 = mechFix6;

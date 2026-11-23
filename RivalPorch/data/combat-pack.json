@@ -229,13 +229,13 @@
       "phase": "placement",
       "gate": "first_placement",
       "lines": {
-        "tr": "Ön sıra darbeyi yer. Tank / Bruiser öne; Support / Healer / Glass arkaya.",
-        "en": "Front row eats hits. Tank / Bruiser front; Support / Healer / Glass back."
+        "tr": "Ön sıra darbeyi yer. fence sit / whistle öne; tea hand / warm tray / Glass arkaya.",
+        "en": "Front row eats hits. fence sit / whistle front; tea hand / warm tray / Glass back."
       },
       "warnIfSupportFront": {
         "neighborRoles": [
-          "Support buffer",
-          "Healer"
+          "tea hand",
+          "warm tray"
         ],
         "lines": {
           "tr": "Ön sıra tehlikeli — Merve / Can arkada daha mutlu.",
@@ -244,14 +244,14 @@
       },
       "autoPlaceOrder": {
         "frontRoles": [
-          "Tank",
-          "Bruiser"
+          "fence sit",
+          "whistle"
         ],
         "backRoles": [
-          "Support buffer",
-          "Healer",
-          "Glass cannon",
-          "AoE"
+          "tea hand",
+          "warm tray",
+          "kite kid",
+          "bass cans"
         ]
       }
     }
@@ -314,29 +314,29 @@
       }
     },
     "roles": {
-      "Tank": {
-        "tr": "Darbeyi emer; ön sıra.",
-        "en": "Soaks hits; front row."
+      "fence sit": {
+        "tr": "Çitte nöbet; ön sıra.",
+        "en": "Holds the fence; front row."
       },
-      "Bruiser": {
-        "tr": "Dayanıklı vurucu; genelde ön.",
-        "en": "Sturdy hitter; usually front."
+      "whistle": {
+        "tr": "Düdükle vurur; genelde ön.",
+        "en": "Whistle hits; usually front."
       },
-      "Support buffer": {
-        "tr": "Takımı besler; arkada kal.",
-        "en": "Buffs the team; stay back."
+      "tea hand": {
+        "tr": "Demlik besler; arkada kal.",
+        "en": "Keeps the pot; stay back."
       },
-      "Healer": {
-        "tr": "HP yudumlatır; arkada kal.",
-        "en": "Sips HP onto allies; stay back."
+      "warm tray": {
+        "tr": "Tepsi ısıtır; arkada kal.",
+        "en": "Warm tray; stay back."
       },
-      "Glass cannon": {
-        "tr": "Sert vurur, çabuk düşer; arka.",
-        "en": "Hard hits, soft shell; back row."
+      "kite kid": {
+        "tr": "İpi çeker, çabuk düşer; arka.",
+        "en": "Pulls the line, soft shell; back."
       },
-      "AoE": {
-        "tr": "Sıra/küme hasarı; arka.",
-        "en": "Row/cluster damage; back row."
+      "bass cans": {
+        "tr": "Bas dalgası; arka.",
+        "en": "Bass wave; back row."
       }
     },
     "porchCall": {
@@ -1182,7 +1182,7 @@
         "id": "glass_punish_exposed_support",
         "priority": 2,
         "appliesToRoles": [
-          "Glass cannon"
+          "kite kid"
         ],
         "rule": "if_enemy_support_or_healer_in_front_prioritize_them",
         "punishToast": {
@@ -1194,7 +1194,7 @@
         "id": "aoe_front_cluster",
         "priority": 2,
         "appliesToRoles": [
-          "AoE"
+          "bass cans"
         ],
         "rule": "hit_frontmost_occupied_row_cluster"
       },
@@ -1202,7 +1202,7 @@
         "id": "healer_lowest_ally",
         "priority": 1,
         "appliesToRoles": [
-          "Healer"
+          "warm tray"
         ],
         "rule": "heal_lowest_ally_hp_percent_each_skill_tick"
       },
@@ -1216,14 +1216,14 @@
     ],
     "placement": {
       "defaultFrontRoles": [
-        "Tank",
-        "Bruiser"
+        "fence sit",
+        "whistle"
       ],
       "defaultBackRoles": [
-        "AoE",
-        "Glass cannon",
-        "Support buffer",
-        "Healer"
+        "bass cans",
+        "kite kid",
+        "tea hand",
+        "warm tray"
       ],
       "punishAllFrontPlayer": {
         "enabled": true,
@@ -1325,8 +1325,8 @@
       "en": "Safe / swingy / synergy — score swings"
     },
     "fight.synergy_active": {
-      "tr": "Aktif sinerji",
-      "en": "Active synergy"
+      "tr": "Veranda dedikodusu",
+      "en": "Porch gossip"
     },
     "fight.no_synergy": {
       "tr": "Sinerji yok",
@@ -1533,14 +1533,14 @@
       "autoPlaceByRole": true,
       "roleRows": {
         "front": [
-          "Tank",
-          "Bruiser"
+          "fence sit",
+          "whistle"
         ],
         "back": [
-          "Support buffer",
-          "Healer",
-          "Glass cannon",
-          "AoE"
+          "tea hand",
+          "warm tray",
+          "kite kid",
+          "bass cans"
         ]
       },
       "supportFrontWarning": {
@@ -1640,7 +1640,7 @@
         "id": "glass_punish_exposed_support",
         "priority": 2,
         "appliesToRoles": [
-          "Glass cannon"
+          "kite kid"
         ],
         "rule": "if_enemy_support_or_healer_in_front_prioritize_them",
         "punishToast": {
@@ -1652,7 +1652,7 @@
         "id": "aoe_front_cluster",
         "priority": 2,
         "appliesToRoles": [
-          "AoE"
+          "bass cans"
         ],
         "rule": "hit_frontmost_occupied_row_cluster"
       },
@@ -1660,7 +1660,7 @@
         "id": "healer_lowest_ally",
         "priority": 1,
         "appliesToRoles": [
-          "Healer"
+          "warm tray"
         ],
         "rule": "heal_lowest_ally_hp_percent_each_skill_tick"
       },
@@ -1674,14 +1674,14 @@
     ],
     "placement": {
       "defaultFrontRoles": [
-        "Tank",
-        "Bruiser"
+        "fence sit",
+        "whistle"
       ],
       "defaultBackRoles": [
-        "AoE",
-        "Glass cannon",
-        "Support buffer",
-        "Healer"
+        "bass cans",
+        "kite kid",
+        "tea hand",
+        "warm tray"
       ],
       "punishAllFrontPlayer": {
         "enabled": true,
@@ -1725,7 +1725,7 @@
     },
     "challengeAcceptance": [
       "Non-practice Cup: player should not routinely win with >40% team HP remaining on default draft",
-      "Exposed Support/Healer front is KO'd or near-dead before 20s when Glass present",
+      "Exposed tea hand/warm tray front is KO'd or near-dead before 20s when Glass present",
       "Opposing synergy pill visible every ladder Cup"
     ]
   },
@@ -1739,7 +1739,7 @@
       "Porch-call cards show category chip + blurb + ≈HP swing (not label-only)",
       "Post-call toast shows measurable team HP delta within 4s",
       "Ladder bots use week pressureCurve; opposing synergy pill always visible",
-      "Exposed front Support takes Glass focus and shows punish toast",
+      "Exposed front tea hand takes Glass focus and shows punish toast",
       "juiceHints mustImplement list all fire in Practice Cup cold start"
     ]
   },
@@ -2348,5 +2348,134 @@
       "call_prop_assist",
       "call_chaos_kite"
     ]
+  },
+  "kits": [
+    {
+      "neighborId": "n1",
+      "propId": "prop_demlik",
+      "range": "ranged",
+      "rowBias": "back",
+      "basic": {
+        "intervalSec": 1.6,
+        "power": "low"
+      },
+      "signature": {
+        "id": "pour",
+        "cdSec": 7,
+        "vfx": "vfx_steam_pour",
+        "effect": {
+          "type": "heal_lowest",
+          "amount": 14
+        }
+      }
+    },
+    {
+      "neighborId": "n2",
+      "propId": "prop_duduck",
+      "range": "melee",
+      "rowBias": "front",
+      "basic": {
+        "intervalSec": 1.4,
+        "power": "low"
+      },
+      "signature": {
+        "id": "whistle_mark",
+        "cdSec": 7,
+        "vfx": "vfx_whistle_shock",
+        "effect": {
+          "type": "mark_foe",
+          "durationSec": 6
+        }
+      }
+    },
+    {
+      "neighborId": "n3",
+      "propId": "prop_ucurtma",
+      "range": "ranged",
+      "rowBias": "back",
+      "basic": {
+        "intervalSec": 1.3,
+        "power": "low"
+      },
+      "signature": {
+        "id": "kite_cut",
+        "cdSec": 8,
+        "openingBias": true,
+        "vfx": "vfx_kite_cut",
+        "effect": {
+          "type": "swap_burst",
+          "power": 18
+        }
+      }
+    },
+    {
+      "neighborId": "n4",
+      "propId": "prop_gazete",
+      "range": "melee",
+      "rowBias": "front",
+      "basic": {
+        "intervalSec": 1.5,
+        "power": "low"
+      },
+      "signature": {
+        "id": "hold_fence",
+        "cdSec": 8,
+        "vfx": "vfx_fence_flap",
+        "effect": {
+          "type": "taunt_glance",
+          "hits": 2,
+          "durationSec": 5
+        }
+      }
+    },
+    {
+      "neighborId": "n5",
+      "propId": "prop_kulaklik",
+      "range": "ranged",
+      "rowBias": "back",
+      "basic": {
+        "intervalSec": 1.5,
+        "power": "low"
+      },
+      "signature": {
+        "id": "bass_drop",
+        "cdSec": 9,
+        "openingBias": true,
+        "vfx": "vfx_bass_drop",
+        "effect": {
+          "type": "front_cone",
+          "power": 12
+        }
+      }
+    },
+    {
+      "neighborId": "n6",
+      "propId": "prop_tepsi",
+      "range": "ranged",
+      "rowBias": "back",
+      "basic": {
+        "intervalSec": 1.6,
+        "power": "low"
+      },
+      "signature": {
+        "id": "oven_warm",
+        "cdSec": 7,
+        "vfx": "vfx_oven_warm",
+        "effect": {
+          "type": "heal_pulse",
+          "amount": 10
+        }
+      }
+    }
+  ],
+  "placementCoach": {
+    "tr": "Gazete ile düdük öne. Demlik, tepsi, uçurtma, kulaklık arkaya.",
+    "en": "Newspaper and whistle up front. Tea, tray, kite, and cans in back."
+  },
+  "synergyChrome": {
+    "header": {
+      "tr": "Veranda dedikodusu",
+      "en": "Porch gossip"
+    }
   }
 }

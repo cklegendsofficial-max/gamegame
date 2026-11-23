@@ -1,4 +1,4 @@
-/** UX rewrite-1 — first 10 minutes desire loop + clutter gates. */
+/** UX rewrite-1+2 — first 10 desire: side → Cup gossip → share. */
 
 export function firstShareDone(save) {
   return !!(save?.storyFlags?.first_share_done);
@@ -13,6 +13,10 @@ export function week2ChromeAllowed(save) {
   return firstShareDone(save) && (save?.dayIndex || 1) >= 7;
 }
 
+export function rewardUiAllowed(save) {
+  return firstShareDone(save);
+}
+
 export function scrubProductionEscapeHatches(root = document) {
   const ban = [
     "[data-testid='skip-to-morning']",
@@ -24,7 +28,6 @@ export function scrubProductionEscapeHatches(root = document) {
     ".fight-unstuck",
     "[data-testid='force-overnight-story']",
   ];
-  // practice-settle only allowed with ?coldAudit=1
   const audit = document.documentElement.dataset.auditCold === "1";
   if (!audit) {
     ban.push("[data-testid='practice-settle']", "[data-testid='practice-settle-wrap']", "[data-testid='practice-settle-sheet']");
@@ -72,8 +75,52 @@ export function situationStrip(day, flags = {}, locale = "en") {
   if (day >= 7 || flags.quest_volume_accepted || flags.natural_volume_street) {
     return tr ? "01:12 — Orhan’ın ışığı" : "01:12 — Orhan’s light";
   }
+  if (flags.cold_open_mediate) {
+    return tr ? "Leyla’nın ipi — Merve’nin yanında durdun" : "Leyla’s kite — you stood with Merve";
+  }
+  if (flags.cold_open_instigate) {
+    return tr ? "İpi çektin — Cup’ta görünsün" : "You pulled the string — settle it on the Cup";
+  }
+  if (flags.cold_open_stage) {
+    return tr ? "Sahneyi aldın — verandada" : "You took the stage on the porch";
+  }
   if (flags.cold_open_mediate || flags.cold_open_instigate || flags.cold_open_stage || day >= 2) {
     return tr ? "Çatıda ip var" : "There’s a line on the roof";
   }
   return tr ? "Kapı çalıyor" : "Someone’s knocking";
+}
+
+/** ux-rewrite-2: cold side → Cup primary (never Demliğe git before share) */
+export function coldSideCupPrimary(flags = {}, locale = "en") {
+  const tr = locale === "tr";
+  if (flags.cold_open_mediate) {
+    return {
+      id: "sa_cup_side",
+      action: "goto-cup",
+      label: tr ? "Merve'nin yanında dur — verandada hallet" : "Stand with Merve — settle it on the porch",
+    };
+  }
+  if (flags.cold_open_instigate) {
+    return {
+      id: "sa_cup_side",
+      action: "goto-cup",
+      label: tr ? "İpi çek — Cup'ta görünsün" : "Pull the string — settle on the Cup",
+    };
+  }
+  if (flags.cold_open_stage) {
+    return {
+      id: "sa_cup_side",
+      action: "goto-cup",
+      label: tr ? "Sahneyi al — verandada" : "Take the stage on the porch",
+    };
+  }
+  return null;
+}
+
+export function porchJobLabel(n, locale = "en") {
+  if (!n) return "";
+  const job = n.porchJob;
+  if (job && typeof job === "object") return locale === "tr" ? job.tr || job.en || "" : job.en || job.tr || "";
+  if (typeof job === "string") return job;
+  return "";
 }
