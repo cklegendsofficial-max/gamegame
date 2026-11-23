@@ -1,0 +1,217 @@
+{
+  "schemaVersion": 1,
+  "id": "mechanics-fix-12",
+  "packNumber": 12,
+  "squad": "mechanics",
+  "shippedAt": "2026-11-23T13:14:00Z",
+  "noPrPush": true,
+  "extends": [
+    "internal/squads/mechanics-fix-11.json"
+  ],
+  "mergeMode": "deepMergeIntoCombatPack",
+  "wirePathHint": "RivalPorch/js/combat.js end-fight metrics + Call II mastery toast persistence",
+  "scoreRef": {
+    "file": "internal/rival-porch-score-latest.json",
+    "buildCommit": "c980762",
+    "mechanicsScore": 8.6,
+    "overall": 8.5,
+    "checklistNull": "autoDamageShareLeq05",
+    "priorityFixTitles": [
+      "Expose autoDamageShare ≤0.5 in fight end / smoke",
+      "Sticky Call II mastery toast + practice_call_two_player assert"
+    ]
+  },
+  "scoreGapsAddressed": [
+    "autoDamageShare not measurable in cold play (no HUD/flag)",
+    "Mastery toast flaky / cleared before assert",
+    "autoDamageShare ≤0.5 claimed via idle×0.7 but no runtime metric — unverified"
+  ],
+  "keepSoftlockProof": true,
+  "targets": [
+    "exposeAutoDamageShare",
+    "stickyCallTwoMasteryToast",
+    "practiceCallTwoPlayerAssert"
+  ],
+
+  "acceptance": {
+    "autoShare": "End-fight writes flag or HUD metric autoDamageShare; smoke asserts ≤0.5 on Practice with ≥3 agency actions.",
+    "masteryToast": "Player pick sets practice_call_two_player and shows mastery toast ≥1.2s; auto path still softlock-proof with distinct auto toast."
+  },
+
+  "exposeAutoDamageShare": {
+    "problem": "Idle×0.7 + agency×1.15 exist, but cold audit cannot verify share — checklist autoDamageShareLeq05 was null",
+    "runtime": {
+      "track": {
+        "autoDamageDealt": "damage from ticks with no player agency tag this window",
+        "playerAgencyDamageDealt": "damage from Mark/Cheer/Hold/Tempo/Call resolve windows",
+        "totalDamageDealt": "auto + playerAgency (+ other)"
+      },
+      "formula": "autoDamageShare = autoDamageDealt / max(totalDamageDealt, 1)",
+      "updateHz": 4
+    },
+    "endFight": {
+      "writeState": "state.fight.metrics.autoDamageShare",
+      "writeFlagNumber": "auto_damage_share",
+      "writeFlagPass": {
+        "auto_damage_share_leq_05": "autoDamageShare <= 0.5"
+      },
+      "hudChip": {
+        "testId": "auto-damage-share",
+        "showOnFinishBanner": true,
+        "showOnComicFooterOptional": true,
+        "format": {
+          "tr": "Auto pay %{pct}",
+          "en": "Auto share %{pct}"
+        },
+        "pct": "Math.round(autoDamageShare * 100)",
+        "passClass": "is-pass",
+        "failClass": "is-fail"
+      },
+      "dataAttribute": {
+        "onFinishRoot": "data-auto-damage-share",
+        "value": "autoDamageShare.toFixed(3)"
+      }
+    },
+    "smoke": {
+      "assert": "Number(document.querySelector('[data-auto-damage-share]')?.dataset.autoDamageShare) <= 0.5",
+      "also": "state.flags.auto_damage_share_leq_05 === true",
+      "requireAgencyActionsGte": 3,
+      "checklistKey": "autoDamageShareLeq05"
+    },
+    "ifShareWouldExceed": {
+      "note": "Keep fix-11 bias; if still >0.5 at end, apply finish clamp for Practice teach readability only",
+      "practiceFinishClamp": {
+        "enabled": true,
+        "capShareAt": 0.5,
+        "method": "attribute_overflow_to_last_agency_window_for_metric_only",
+        "doNotAlterVisibleHpRetroactively": true,
+        "log": "autoDamageShare_clamped_for_metric"
+      }
+    }
+  },
+
+  "stickyCallTwoMasteryToast": {
+    "problem": "Player-initiated Call II swung score but Early Call II mastery toast missed in-audit",
+    "onPlayerPick": {
+      "setsFlags": ["practice_call_two_player", "practice_second_call_done"],
+      "clearFlags": ["practice_call_two_auto"],
+      "toast": {
+        "testId": "call-two-mastery-toast",
+        "text": {
+          "tr": "Erken Çağrı II — mastery!",
+          "en": "Early Call II — mastery!"
+        },
+        "minVisibleMs": 1200,
+        "preferMs": 1600,
+        "blocking": false,
+        "queue": "high",
+        "doNotReplaceUntilMinVisible": true,
+        "zIndexAboveFloats": true,
+        "anchor": "below_score_strip_safe"
+      },
+      "bonusYouScore": 4,
+      "alsoKeepScoreDeltaToast": {
+        "staggerMs": 200,
+        "afterMasteryOrBeside": "beside_if_space_else_after"
+      }
+    },
+    "onAutoPick": {
+      "setsFlags": ["practice_call_two_auto", "practice_second_call_done"],
+      "toast": {
+        "testId": "call-two-auto-toast",
+        "text": {
+          "tr": "Çağrı II otomatik — sonraki Cup'ta sen bas",
+          "en": "Call II auto — tap it yourself next Cup"
+        },
+        "minVisibleMs": 1200,
+        "distinctFromMastery": true
+      },
+      "stillComic": true
+    },
+    "assertHooks": {
+      "flag": "practice_call_two_player",
+      "toastTestId": "call-two-mastery-toast",
+      "smoke": [
+        "click Call II Focus fire as player",
+        "assert flags.practice_call_two_player === true",
+        "assert mastery toast visible ≥1200ms (performance.now span or data-visible-ms)"
+      ]
+    },
+    "antiFlake": {
+      "pinToastUntilMinMs": true,
+      "ignoreNewerLowPriorityToastsDuringPin": true,
+      "setDataAttr": "data-mastery-toast-ms='1200'"
+    }
+  },
+
+  "practiceCallTwoPlayerAssert": {
+    "telemetry": {
+      "window.rpFightMetrics": {
+        "autoDamageShare": "number",
+        "agencyActionCount": "number",
+        "callTwoSource": "player|auto"
+      }
+    },
+    "comicSeed": {
+      "includeCallTwoSource": true,
+      "playerLine": {
+        "tr": "Çağrı II — sen bastın",
+        "en": "Call II — you tapped it"
+      },
+      "autoLine": {
+        "tr": "Çağrı II — otomatik",
+        "en": "Call II — auto"
+      }
+    }
+  },
+
+  "uiStringsPatch": {
+    "fight.auto_share": {
+      "tr": "Auto pay %{pct}",
+      "en": "Auto share %{pct}"
+    },
+    "fight.call_two_mastery": {
+      "tr": "Erken Çağrı II — mastery!",
+      "en": "Early Call II — mastery!"
+    },
+    "fight.call_two_auto": {
+      "tr": "Çağrı II otomatik — sonraki Cup'ta sen bas",
+      "en": "Call II auto — tap it yourself next Cup"
+    }
+  },
+
+  "acceptanceChecks": [
+    "Finish banner / data-auto-damage-share exposes numeric share",
+    "Smoke asserts autoDamageShare ≤ 0.5 with ≥3 agency actions",
+    "checklist autoDamageShareLeq05 can be true (not null)",
+    "Player Call II → practice_call_two_player + mastery toast ≥1.2s sticky",
+    "Auto Call II → distinct auto toast; softlock-proof comic retained"
+  ],
+
+  "integrator": {
+    "owner": "code owner on cursor/rival-porch-slice-31f7",
+    "steps": [
+      "Accumulate auto vs agency damage; on finish write data-auto-damage-share + flag auto_damage_share_leq_05.",
+      "Show Auto share %{pct} on finish banner (testId auto-damage-share).",
+      "Pin Call II mastery toast ≥1200ms; set practice_call_two_player before toast; expose rpFightMetrics.",
+      "Smoke: agency path share≤0.5; player Call II toast assert; auto path still comics.",
+      "No PR from this squad."
+    ],
+    "priority": "wire now — prove checklist nulls; climb overall toward ≥9.0"
+  },
+
+  "meta": {
+    "expectedMechanicsLift": "8.6 → toward 9.0 once share is auditable + mastery toast sticky",
+    "standDown": false,
+    "overallTarget": 9.0,
+    "nextPackIfStillLow": "mechanics-fix-13 — ladder mastery / further Auto shrink if share still fails",
+    "compat": {
+      "dependsOn": ["mechanics-fix-11"],
+      "testIds": [
+        "auto-damage-share",
+        "call-two-mastery-toast",
+        "call-two-auto-toast"
+      ]
+    }
+  }
+}

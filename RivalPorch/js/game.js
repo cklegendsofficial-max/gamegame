@@ -107,6 +107,25 @@ function loc(obj) {
 function fillTemplate(template, vars) {
   return String(template || "").replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? `{${k}}`);
 }
+function stickyFightToast(msg, testId, minMs = 1200) {
+  const existing = document.querySelector(`[data-testid="${testId}"]`);
+  if (existing && existing.dataset.stickyUntil && Number(existing.dataset.stickyUntil) > Date.now()) {
+    return; // do not replace until min visible
+  }
+  document.querySelectorAll(".rp-sticky-toast").forEach((el) => {
+    if (el.dataset.stickyUntil && Number(el.dataset.stickyUntil) > Date.now()) return;
+    el.remove();
+  });
+  const el = document.createElement("div");
+  el.className = "rp-sticky-toast";
+  el.dataset.testid = testId;
+  el.setAttribute("data-testid", testId);
+  el.dataset.stickyUntil = String(Date.now() + minMs);
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), Math.max(minMs, 1600));
+}
+
 function toast(msg, ms = 2400) {
   let node = document.querySelector(".toast");
   if (!node) {
@@ -237,11 +256,12 @@ function practiceSettleConfirmHtml() {
 
 function eveningPrimaryCta() {
   const tr = state.locale === "tr";
-  // ux-session-4: End evening wins the primary dock as soon as flags are live
-  if (canEndEvening()) {
+  const dayEarly = state.save.dayIndex || 1;
+  // Day1 only: End evening wins when earned (ux-10 sole_end)
+  if (dayEarly <= 1 && canEndEvening()) {
     return { id: "end_evening", action: "end-evening", label: loc(state.uxPack2?.strings?.["evening.cta.end"]) || (tr ? "Akşamı bırak" : "End evening") };
   }
-  if (!storyFlag("practice_cup_done") && (state.save.dayIndex || 1) <= 1) {
+  if (!storyFlag("practice_cup_done") && dayEarly <= 1) {
     if (!state.save.evening?.checkin && !storyFlag("welcome_checkin_done")) {
       return { id: "sa_checkin", action: "goto-street", label: tr ? "Demliğe git" : "Go to the pot" };
     }
@@ -250,16 +270,56 @@ function eveningPrimaryCta() {
     }
     return { id: "sa_practice", action: "goto-cup", label: tr ? "Prova maçı ★" : "Practice match ★" };
   }
-  // ux-session-9: Day2+ Antenna → Volume → Ledger one primary
+  // ux-session-9/11: Day2+ spine — Volume/HEADPHONES when unlocked (not stuck Antenna/End)
   const day = state.save.dayIndex || 1;
   if (day >= 2) {
+    applyNaturalArcStreetUnlock();
     const qs = Quests.ensureQuestSave(state.save);
-    const antennaDone = storyFlag("quest_antenna_complete") || storyFlag("arc_kite_antenna_complete");
+    const antennaDone = [
+      "quest_antenna_complete",
+      "arc_kite_antenna_complete",
+      "natural_antenna_complete",
+      "arc_kite_antenna_beat4",
+      "flag_fence_and_kite",
+      "flag_kite_chaos_buff",
+    ].some((f) => storyFlag(f));
     const volumeDone = storyFlag("quest_volume_complete") || storyFlag("arc_volume_war_complete");
     const ledgerDone = storyFlag("quest_ledger_complete") || storyFlag("arc_tea_ledger_complete");
-    const antennaActive = !!qs.active?.mq_antenna_op || storyFlag("quest_antenna_active");
-    const volumeActive = !!qs.active?.mq_decibel_accord || storyFlag("quest_volume_active");
-    if (!antennaDone && (antennaActive || day >= 2)) {
+    const volumeActive = !!qs.active?.mq_decibel_accord || storyFlag("quest_volume_active") || storyFlag("quest_volume_accepted");
+    const volumeUnlocked =
+      storyFlag("natural_volume_street") ||
+      storyFlag("quest_volume_tease") ||
+      storyFlag("cold_day2_yielded") ||
+      day >= 7 ||
+      (day >= 3 && antennaDone) ||
+      volumeActive;
+    // ux-11: Volume / HEADPHONES beats Antenna once unlocked
+    if (volumeUnlocked && !volumeDone) {
+      if (!volumeActive) {
+        return {
+          id: "sa_volume_accept",
+          action: "accept-volume",
+          label: tr ? "Desibel'i aç" : "Open Volume",
+          support: tr
+            ? "KULAKLIK notu — omurga 3/5. Defter sonra."
+            : "HEADPHONES note — spine 3/5. Ledger after.",
+          whisper: tr ? "Omurga 3/5 · Desibel" : "Spine 3/5 · Volume",
+          questId: "mq_decibel_accord",
+          acceptIfNeeded: true,
+          dataNext: "volume-accept",
+        };
+      }
+      return {
+        id: "sa_headphones",
+        action: "goto-street",
+        label: tr ? "KULAKLIK notuna git" : "Answer HEADPHONES note",
+        support: tr ? "Sokakta not — Desibel omurgası." : "Note on the street — Decibel spine.",
+        whisper: tr ? "Omurga 3/5 · KULAKLIK" : "Spine 3/5 · HEADPHONES",
+        questId: "mq_decibel_accord",
+        dataNext: "headphones",
+      };
+    }
+    if (!antennaDone) {
       return {
         id: "sa_antenna",
         action: "goto-street",
@@ -269,29 +329,6 @@ function eveningPrimaryCta() {
           : "The line holds. Volume and Ledger are further down this road.",
         whisper: tr ? "Omurga 2/5 · Anten — sonra Desibel" : "Spine 2/5 · Antenna — then Volume",
         questId: "mq_antenna_op",
-      };
-    }
-    if (antennaDone && !volumeDone) {
-      if (!volumeActive) {
-        return {
-          id: "sa_volume_accept",
-          action: "open-quests",
-          label: tr ? "Desibel'i aç" : "Open Volume",
-          support: tr
-            ? "Peri'nin seti, Orhan'ın uykusu — bir antlaşma."
-            : "Peri's set, Orhan's sleep — one accord.",
-          whisper: tr ? "Omurga 3/5 · Desibel — Defter sırada" : "Spine 3/5 · Volume — Ledger next",
-          questId: "mq_decibel_accord",
-          acceptIfNeeded: true,
-        };
-      }
-      return {
-        id: "sa_volume_beat",
-        action: "goto-street",
-        label: tr ? "KULAKLIK notuna git" : "Answer the HEADPHONES note",
-        support: tr ? "Bir gece daha — ses savaşı bitmedi." : "One more night — the volume war isn't over.",
-        whisper: tr ? "Desibel sürüyor · Defter bekliyor" : "Volume ongoing · Ledger waits",
-        questId: "mq_decibel_accord",
       };
     }
     if (volumeDone && !ledgerDone) {
@@ -305,6 +342,13 @@ function eveningPrimaryCta() {
         acceptIfNeeded: true,
       };
     }
+    // Day2+ End evening is fallback after spine CTAs (ux-11)
+    if (canEndEvening()) {
+      return { id: "end_evening", action: "end-evening", label: loc(state.uxPack2?.strings?.["evening.cta.end"]) || (tr ? "Akşamı bırak" : "End evening") };
+    }
+  }
+  if (canEndEvening()) {
+    return { id: "end_evening", action: "end-evening", label: loc(state.uxPack2?.strings?.["evening.cta.end"]) || (tr ? "Akşamı bırak" : "End evening") };
   }
   return { id: "sa_visit", action: "goto-street", label: tr ? "Sokağa çık" : "Out to the street" };
 }
@@ -1212,9 +1256,40 @@ function storyForm12() {
   return state.questPack?.storyForm12 || state.storyForm12 || null;
 }
 
+function storyForm13() {
+  return state.questPack?.storyForm13 || state.storyForm13 || null;
+}
+
+function storyForm14() {
+  return state.questPack?.storyForm14 || state.storyForm14 || null;
+}
+
 function isColdDay2() {
+  // Memory only — NOT a forever street-winner gate (story-form-13)
   const day = state.save.dayIndex || 1;
   return day >= 2 && ["cold_open_mediate", "cold_open_instigate", "cold_open_stage"].some((f) => storyFlag(f));
+}
+
+function coldPropStillWins() {
+  // Early Day2 consequence only; calendar/antenna yield wins after
+  if (!isColdDay2()) return false;
+  const day = state.save.dayIndex || 1;
+  if (storyFlag("cold_day2_yielded") || storyFlag("natural_volume_street")) return false;
+  if (day >= 7) return false;
+  const antennaDone = [
+    "arc_kite_antenna_complete",
+    "quest_antenna_complete",
+    "arc_kite_antenna_beat4",
+    "flag_fence_and_kite",
+    "flag_kite_chaos_buff",
+    "natural_antenna_complete",
+  ].some((f) => storyFlag(f));
+  if (day >= 3 && antennaDone) return false;
+  return true;
+}
+
+function coldShouldYield() {
+  return isColdDay2() && !coldPropStillWins();
 }
 
 function applyStreetLayerPolicy() {
@@ -1332,89 +1407,112 @@ function mqStreetChipHtml() {
   return `<button class="rp-mq-street-chip" type="button" data-testid="${hit.testId || "mq-street-chip"}" data-action="open-quests">${loc(hit.chip)}</button>`;
 }
 
-function pickUnifiedStoryWinner() {
-  const ladder = storyForm11()?.unifiedStreetStoryLayer?.priorityLadder || [
-    { id: "cold_day2_prop" },
-    { id: "av_handoff" },
-    { id: "volume_beat_prop" },
-    { id: "vl_handoff" },
-    { id: "ledger_prop" },
-    { id: "antenna_prop" },
+function syncColdYieldBodyClass() {
+  const day = state.save.dayIndex || 1;
+  const y = coldShouldYield() || day >= 7 || storyFlag("cold_day2_yielded") || storyFlag("natural_volume_street");
+  document.body.classList.toggle("rp-cold-yielded", !!y);
+  document.body.dataset.dayIndex = String(day);
+}
+
+function headphonesPropHtml() {
+  const packs = [
+    ...(storyForm14()?.naturalStreetPropsHard || []),
+    ...(storyForm13()?.naturalStreetPropsYield || []),
+    ...(storyForm12()?.naturalStreetProps || []),
   ];
-  for (const step of ladder) {
-    const id = step.id;
-    if (id === "cold_day2_prop") {
-      if (!isColdDay2()) continue;
-      const html = day2StreetStageHtml();
-      if (html) return { id, html, npc: "", suppressBanner: true, suppressSpotlight: true };
-      continue;
-    }
-    if (id === "av_handoff" || id === "vl_handoff") {
-      const beat = streetHandoffBeatLive("street");
-      if (!beat) continue;
-      if (id === "av_handoff" && beat.id !== "handoff_antenna_to_volume") continue;
-      if (id === "vl_handoff" && beat.id !== "handoff_volume_to_ledger") continue;
-      // form10 beat when is authoritative; ladder when is post-show filter only
+  const vol = packs.find((p) => p.testId === "story-street-headphones-note" || p.arcId === "arc_volume_war");
+  if (vol) {
+    const html = state.locale === "tr" && vol.htmlTr ? vol.htmlTr : vol.html || "";
+    if (html) return html;
+  }
+  // Hard fallback — never leave Volume unlock without SVG
+  const tr = state.locale === "tr";
+  return `<div class="rp-stage-prop rp-stage-prop--headphones-note" data-testid="story-street-headphones-note" data-arc="arc_volume_war" data-unlock="natural" aria-label="${tr ? "KULAKLIK notu" : "HEADPHONES note"}">
+    <div class="rp-note-door"><span class="rp-note-caps">${tr ? "KULAKLIK" : "HEADPHONES"}</span></div>
+    <span class="rp-stage-prop__tag">${tr ? "Desibel · not" : "Decibel · note"}</span>
+  </div>`;
+}
+
+function ledgerPropHtml() {
+  const packs = [
+    ...(storyForm14()?.naturalStreetPropsHard || []),
+    ...(storyForm13()?.naturalStreetPropsYield || []),
+    ...(storyForm12()?.naturalStreetProps || []),
+  ];
+  const led = packs.find((p) => p.testId === "story-street-ledger-tray" || p.arcId === "arc_tea_ledger");
+  if (led) {
+    const html = state.locale === "tr" && led.htmlTr ? led.htmlTr : led.html || "";
+    if (html) return html;
+  }
+  return `<div class="rp-stage-prop rp-stage-prop--ledger-tray" data-testid="story-street-ledger-tray" data-arc="arc_tea_ledger" data-unlock="natural" aria-label="Ledger">
+    <span class="rp-stage-prop__tag">Ledger · tray</span>
+  </div>`;
+}
+
+/** story-form-14 authoritative — cold yields; headphones/ledger cannot stay blocked */
+function pickUnifiedStoryWinner() {
+  applyNaturalArcStreetUnlock();
+  syncColdYieldBodyClass();
+  const day = state.save.dayIndex || 1;
+  const yielded = coldShouldYield() || day >= 7 || storyFlag("cold_day2_yielded") || storyFlag("natural_volume_street");
+
+  // 1) Cold only if NOT yielded
+  if (!yielded && coldPropStillWins()) {
+    const html = day2StreetStageHtml();
+    if (html) return { id: "cold_day2_prop", html, npc: "", suppressBanner: true, suppressSpotlight: true };
+  }
+
+  // 2) Ledger natural (day≥10 / wins flag)
+  if (day >= 10 || storyFlag("natural_ledger_street_wins")) {
+    const html = ledgerPropHtml();
+    if (html) {
       state.save.storyFlags = state.save.storyFlags || {};
-      for (const f of beat.setsFlagsOnShow || []) state.save.storyFlags[f] = true;
-      const prop = beat.stageProp || {};
-      const propHtml = state.locale === "tr" && prop.htmlTr ? prop.htmlTr : prop.html || "";
-      const ban = beat.compactBanner;
-      const npc = beat.npcLine;
-      const banHtml = ban
-        ? `<div class="rp-handoff-banner" data-testid="${ban.testId || "street-av-handoff-banner"}">
-            <p class="rp-handoff-banner__h">${loc(ban.headline)}</p>
-            <p>${loc(ban.body)}</p>
-            <button class="rp-handoff-banner__cta" type="button" data-action="handoff-cta" data-beat="${beat.id}" data-neighbor="${ban.ctaNeighborId || "n3"}">${loc(ban.cta)}</button>
-          </div>`
-        : "";
-      const npcHtml = npc
-        ? `<p class="rp-handoff-npc" data-testid="${npc.testId || "story-av-handoff-npc"}"><strong>${loc(neighborById(npc.speakerId)?.name) || npc.speakerId}</strong>: ${loc(npc.text)}</p>`
-        : "";
-      return { id, html: `${propHtml}${banHtml}`, npc: npcHtml, suppressBanner: true, suppressSpotlight: true };
+      state.save.storyFlags.natural_ledger_street = true;
+      return { id: "ledger_natural", html, npc: "", suppressBanner: true, suppressSpotlight: true };
     }
-    if (id === "volume_beat_prop") {
-      // Prefer form12 natural headphones, else form11 beat props
-      const nat = naturalStreetPropLive();
-      if (nat && nat.arcId === "arc_volume_war") {
-        const html = state.locale === "tr" && nat.htmlTr ? nat.htmlTr : nat.html || "";
-        const npc = nat.npcLine
-          ? `<p class="rp-handoff-npc" data-testid="story-volume-natural-npc"><strong>${loc(neighborById(nat.npcLine.speakerId)?.name) || ""}</strong>: ${loc(nat.npcLine.text)}</p>`
-          : "";
-        state.save.storyFlags = state.save.storyFlags || {};
-        state.save.storyFlags.natural_volume_street = true;
-        return { id: "volume_natural", html, npc, suppressBanner: true, suppressSpotlight: true };
-      }
-      const vol = volumeStreetBeatPropLive();
-      if (!vol) continue;
-      const html = state.locale === "tr" && vol.htmlTr ? vol.htmlTr : vol.html || "";
-      const npc = vol.npcLine
-        ? `<p class="rp-handoff-npc" data-testid="story-volume-beat-npc"><strong>${loc(neighborById(vol.npcLine.speakerId)?.name) || ""}</strong>: ${loc(vol.npcLine.text)}</p>`
-        : "";
-      return { id, html, npc, suppressBanner: true, suppressSpotlight: true };
+  }
+
+  // 3) Volume natural headphones — calendar or antenna gate
+  const antennaDone = [
+    "arc_kite_antenna_complete",
+    "quest_antenna_complete",
+    "natural_antenna_complete",
+    "arc_kite_antenna_beat4",
+    "flag_fence_and_kite",
+    "flag_kite_chaos_buff",
+  ].some((f) => storyFlag(f));
+  if (yielded || day >= 7 || (day >= 3 && antennaDone)) {
+    const html = headphonesPropHtml();
+    if (html) {
+      state.save.storyFlags = state.save.storyFlags || {};
+      state.save.storyFlags.natural_volume_street = true;
+      state.save.storyFlags.cold_day2_yielded = true;
+      return { id: "volume_natural", html, npc: "", suppressBanner: true, suppressSpotlight: true };
     }
-    if (id === "ledger_prop" || id === "antenna_prop") {
-      if (id === "ledger_prop") {
-        const nat = naturalStreetPropLive();
-        if (nat && nat.arcId === "arc_tea_ledger") {
-          const html = state.locale === "tr" && nat.htmlTr ? nat.htmlTr : nat.html || "";
-          state.save.storyFlags = state.save.storyFlags || {};
-          state.save.storyFlags.natural_ledger_street = true;
-          return { id: "ledger_natural", html, npc: "", suppressBanner: true, suppressSpotlight: true };
-        }
-      }
-      if (step.when && !whenFlagsOk(step.when)) continue;
-      const props = storyForm9()?.streetArcStageProps || [];
-      const want = id === "ledger_prop" ? "arc_tea_ledger" : "arc_kite_antenna";
-      const hit = props
-        .filter((p) => (p.screens || ["street"]).includes("street"))
-        .filter((p) => whenFlagsOk(p.when || {}))
-        .filter((p) => p.arcId === want || (id === "antenna_prop" && p.arcId === "arc_kite_antenna"))
-        .sort((a, b) => (b.priority || 0) - (a.priority || 0))[0];
-      if (!hit) continue;
-      const html = state.locale === "tr" && hit.htmlTr ? hit.htmlTr : hit.html || "";
-      return { id, html, npc: "", suppressBanner: true, suppressSpotlight: true };
-    }
+  }
+
+  // 4) Fall through handoff / beat props
+  const beat = streetHandoffBeatLive("street");
+  if (beat && yielded) {
+    state.save.storyFlags = state.save.storyFlags || {};
+    for (const f of beat.setsFlagsOnShow || []) state.save.storyFlags[f] = true;
+    const prop = beat.stageProp || {};
+    const propHtml = state.locale === "tr" && prop.htmlTr ? prop.htmlTr : prop.html || "";
+    const ban = beat.compactBanner;
+    const banHtml = ban
+      ? `<div class="rp-handoff-banner" data-testid="${ban.testId || "street-av-handoff-banner"}">
+          <p class="rp-handoff-banner__h">${loc(ban.headline)}</p>
+          <p>${loc(ban.body)}</p>
+          <button class="rp-handoff-banner__cta" type="button" data-action="handoff-cta" data-beat="${beat.id}" data-neighbor="${ban.ctaNeighborId || "n3"}">${loc(ban.cta)}</button>
+        </div>`
+      : "";
+    return { id: beat.id === "handoff_volume_to_ledger" ? "vl_handoff" : "av_handoff", html: `${propHtml}${banHtml}`, npc: "", suppressBanner: true, suppressSpotlight: true };
+  }
+
+  const vol = volumeStreetBeatPropLive();
+  if (vol) {
+    const html = state.locale === "tr" && vol.htmlTr ? vol.htmlTr : vol.html || "";
+    return { id: "volume_beat_prop", html, npc: "", suppressBanner: true, suppressSpotlight: true };
   }
   return null;
 }
@@ -1494,9 +1592,40 @@ function whenFlagsOk(when = {}) {
   return true;
 }
 
+function applyNaturalAntennaAdvance() {
+  const rules = storyForm13()?.naturalAntennaAdvance?.rules || [];
+  const day = state.save.dayIndex || 1;
+  state.save.storyFlags = state.save.storyFlags || {};
+  const f = state.save.storyFlags;
+  // Count cold evenings via dayIndex as proxy (no separate counter needed)
+  for (const r of rules) {
+    if (!whenFlagsOk(r.when || {})) continue;
+    for (const flag of r.setsFlags || []) f[flag] = true;
+  }
+  if (day >= 7) {
+    f.natural_antenna_complete = true;
+    f.arc_kite_antenna_complete = true;
+    f.cold_day2_yielded = true;
+    f.natural_volume_street = true;
+  } else if (day >= 4 && ["cold_open_mediate", "cold_open_instigate", "cold_open_stage"].some((k) => f[k])) {
+    if (!f.arc_kite_antenna_complete && !f.natural_antenna_complete) {
+      f.arc_kite_antenna_beat4 = true;
+      f.arc_kite_antenna_complete = true;
+      f.quest_antenna_complete = true;
+      f.natural_antenna_complete = true;
+      f.cold_day2_yielded = true;
+      f.natural_volume_street = true;
+    }
+  } else if (day >= 3 && ["cold_open_mediate", "cold_open_instigate", "cold_open_stage"].some((k) => f[k])) {
+    if (!f.arc_kite_antenna_complete) {
+      f.arc_kite_antenna_beat3 = true;
+      f.quest_antenna_active = true;
+    }
+  }
+}
+
 function applyNaturalArcStreetUnlock() {
-  const sched = storyForm12()?.naturalUnlockSchedule;
-  if (!sched) return;
+  applyNaturalAntennaAdvance();
   const day = state.save.dayIndex || 1;
   state.save.storyFlags = state.save.storyFlags || {};
   const f = state.save.storyFlags;
@@ -1506,21 +1635,30 @@ function applyNaturalArcStreetUnlock() {
     "arc_kite_antenna_beat4",
     "flag_fence_and_kite",
     "flag_kite_chaos_buff",
+    "natural_antenna_complete",
   ].some((k) => f[k]);
-  if ((day >= 3 && antennaDone) || day >= 7) {
+  if ((day >= 3 && antennaDone) || day >= 7 || coldShouldYield()) {
     f.natural_volume_street = true;
-    f.quest_volume_tease = f.quest_volume_tease || true;
-    f.arc_volume_war_seed = f.arc_volume_war_seed || true;
+    f.cold_day2_yielded = true;
+    f.quest_volume_tease = true;
+    f.arc_volume_war_seed = true;
+  }
+  if (day >= 7) {
+    f.week2_volume_seed = true;
   }
   if ((day >= 5 && f.natural_volume_street) || day >= 10) {
     f.natural_ledger_street = true;
-    f.quest_ledger_tease = f.quest_ledger_tease || true;
-    f.arc_tea_ledger_seed = f.arc_tea_ledger_seed || true;
+    f.quest_ledger_tease = true;
+    f.arc_tea_ledger_seed = true;
   }
-  // one-layer: after volume seen 2 days, prefer ledger
+  if (day >= 10) {
+    f.natural_ledger_street_wins = true;
+    f.week2_ledger_seed = true;
+  }
   if (f.natural_volume_street) {
     f.volumeStreetDaysSeen = (f.volumeStreetDaysSeen || 0);
   }
+  document.body.classList.toggle("rp-cold-yielded", !!f.cold_day2_yielded || coldShouldYield());
 }
 
 function naturalStreetPropLive() {
@@ -1556,6 +1694,8 @@ function day2HotspotMutationsMerged() {
 function day2StreetStageHtml() {
   const day = state.save.dayIndex || 1;
   if (day < 2) return "";
+  // story-form-13: never paint mediate string past yield gate
+  if (coldShouldYield() || !coldPropStillWins()) return "";
   const props = day2StreetStagePropsMerged();
   if (!Object.keys(props).length) return "";
   const pick = storyFlag("cold_open_mediate")
@@ -1730,6 +1870,7 @@ function renderOvernight(payoff) {
   const tr = state.locale === "tr";
   applyDay2ColdRewrite();
   applyNaturalArcStreetUnlock();
+  syncColdYieldBodyClass();
   saveNow();
   const cold = pickOvernightColdConsequence();
   const spine = overnightSpineHook();
@@ -1845,8 +1986,9 @@ function renderEvening() {
   }
   const endEnabled = !!st.endEveningEnabled;
   const practiceCleared = !!(storyFlag("practice_cup_done") && storyFlag("syn_taught_syn_rivalry"));
-  // ux-session-10: literal sole End evening after Practice clear
-  const soleEnd = practiceCleared && endEnabled;
+  const dayNow = state.save.dayIndex || 1;
+  // ux-10 sole_end only Day1; ux-11 Day2+ uses spine_one (Volume/HEADPHONES)
+  const soleEnd = practiceCleared && endEnabled && dayNow <= 1;
   document.body.dataset.eveningMode = soleEnd ? "sole_end" : "spine_one";
   const endLabel =
     loc(state.uxPack2?.strings?.["evening.cta.end"]) ||
@@ -1856,12 +1998,31 @@ function renderEvening() {
       "evening.locked",
       state.locale === "tr" ? "Akşam bitmez — Cem Prova'da düdük çalıyor." : "Evening won't end — Cem's still whistling Practice."
     );
-  const primaryAction = soleEnd || endEnabled ? "end-evening" : cta.action;
-  const primaryLabel = soleEnd || endEnabled ? endLabel : cta.label;
+  // Day2+ spine: prefer Volume/HEADPHONES CTA even if End evening is unlocked
+  const useSpinePrimary = !soleEnd && cta && cta.id !== "end_evening" && (dayNow >= 2);
+  const primaryAction = soleEnd ? "end-evening" : cta.action;
+  const primaryLabel = soleEnd ? endLabel : cta.label;
   const primaryTestId = "evening-primary";
   const supportLine = soleEnd
     ? (state.locale === "tr" ? "Prova bitti. Akşamı bırak — omurga gece yazar." : "Practice done. End evening — the spine writes overnight.").slice(0, 90)
     : (support || "").slice(0, state.uxPack7?.eveningHome?.maxSupportChars || 90);
+  // story-13 Volume accept panel when unlocked and not yet accepted
+  const volCta = storyForm13()?.eveningVolumeAcceptCta;
+  const showVolAccept =
+    !soleEnd &&
+    volCta &&
+    whenFlagsOk(volCta.when || {}) &&
+    (primaryAction === "accept-volume" || cta.id === "sa_volume_accept");
+  const volAcceptHtml = showVolAccept
+    ? `<div class="rp-evening-volume-accept" data-testid="evening-volume-accept-cta">
+        <p class="rp-evening-volume-accept__h">${loc(volCta.headline)}</p>
+        <p>${loc(volCta.body)}</p>
+        <div class="rp-evening-volume-accept__actions">
+          <button class="rp-evening-volume-accept__cta" type="button" data-action="accept-volume" data-testid="evening-open-volume">${loc(volCta.ctaAccept)}</button>
+          <button class="rp-btn rp-btn--ghost" type="button" data-action="goto-street" data-testid="evening-see-headphones">${loc(volCta.ctaStreet)}</button>
+        </div>
+      </div>`
+    : "";
 
   const overflowOpen = !!state.eveningOverflowOpen;
   const overflowSheet = overflowOpen
@@ -1897,7 +2058,8 @@ function renderEvening() {
       <h2 class="rp-night-title">${loc(dayHeadline())}</h2>
       ${soleEnd ? "" : spineCultChipHtml()}
       ${supportLine ? `<p class="rp-mid__line">${supportLine}</p>` : ""}
-      <button id="btn-end-evening" class="rp-btn rp-btn--primary rp-end-evening rp-cta-primary" type="button" data-action="${primaryAction}" data-testid="evening-primary" data-primary="true" data-next-action="${endEnabled || soleEnd ? "end_evening" : cta.id}" data-end-evening="1" data-end-enabled="${endEnabled || soleEnd}" ${!(endEnabled || soleEnd) && cta.action === "end-evening" ? "disabled" : ""}>${primaryLabel}</button>
+      ${volAcceptHtml}
+      <button id="btn-end-evening" class="rp-btn rp-btn--primary rp-end-evening rp-cta-primary" type="button" data-action="${primaryAction}" data-testid="evening-primary" data-primary="true" data-next-action="${cta.dataNext || cta.id || (endEnabled || soleEnd ? "end_evening" : "spine")}" data-end-evening="${primaryAction === "end-evening" ? "1" : "0"}" data-end-enabled="${endEnabled || soleEnd}">${primaryLabel}</button>
       ${
         !soleEnd && mainAgenda?.ready
           ? `<button class="rp-btn" type="button" data-action="quest-complete" data-id="${mainAgenda.quest.id}">${state.locale === "tr" ? "Tepsideki ödülü aç" : "Open the tray reward"}</button>`
@@ -1940,6 +2102,7 @@ function scrubBannedEscapeChrome() {
 function renderStreet() {
   const screen = document.getElementById("screen-street");
   applyNaturalArcStreetUnlock();
+  syncColdYieldBodyClass();
   // visual-fix-2 wave3 L-block hotspots
   const HOT = {
     n1: [18, 42],
@@ -3623,10 +3786,22 @@ function applySecondFightChoice(kind, opts = {}) {
   state.save.storyFlags = state.save.storyFlags || {};
   if (opts.auto) {
     state.save.storyFlags.practice_call_two_auto = true;
+    state.save.storyFlags.practice_second_call_done = true;
+    stickyFightToast(
+      state.locale === "tr" ? "Çağrı II otomatik — sonraki Cup'ta sen bas" : "Call II auto — tap it yourself next Cup",
+      "call-two-auto-toast",
+      1400
+    );
   } else {
     state.save.storyFlags.practice_call_two_player = true;
+    state.save.storyFlags.practice_second_call_done = true;
+    delete state.save.storyFlags.practice_call_two_auto;
     battle.youScore = (battle.youScore || 0) + 4;
-    toast(state.locale === "tr" ? "Erken Çağrı II — mastery +4" : "Early Call II — mastery +4");
+    stickyFightToast(
+      state.locale === "tr" ? "Erken Çağrı II — mastery!" : "Early Call II — mastery!",
+      "call-two-mastery-toast",
+      1600
+    );
   }
   const beforeYou = battle.allies.reduce((s, u) => s + Math.max(0, u.hp), 0);
   const beforeBot = battle.enemies.reduce((s, u) => s + Math.max(0, u.hp), 0);
@@ -4029,13 +4204,21 @@ function combatTick(battle) {
     if (attacker.side === "ally" && battle.focusUntil && battle.elapsed <= battle.focusUntil && target.slot === battle.focusTargetSlot) {
       dmg = Math.floor(dmg * (1 + (battle.focusDmgBonus || 0.2)));
     }
-    // mech-11: steer damage up, idle auto down → autoDamageShare ≤ 0.5
+    // mech-11/12: steer damage up, idle auto down → autoDamageShare ≤ 0.5
     const idle = (battle.elapsed || 0) - (battle.lastAgencyTapAt ?? 0) >= 2.0;
     if (attacker.side === "ally" && !idle) {
       dmg = Math.floor(dmg * 1.15);
     }
     if (idle) {
       dmg = Math.floor(dmg * 0.7);
+    }
+    battle.metrics = battle.metrics || { autoDamageDealt: 0, playerAgencyDamageDealt: 0 };
+    if (attacker.side === "ally") {
+      if (idle) battle.metrics.autoDamageDealt += dmg;
+      else battle.metrics.playerAgencyDamageDealt += dmg;
+    } else {
+      // enemy ticks count as auto clock pressure share
+      battle.metrics.autoDamageDealt += Math.floor(dmg * 0.35);
     }
     const selfSyn = attacker.side === "ally" ? battle.allySyn : battle.enemySyn;
     const rivalry = selfSyn.find((s) => s.rules.type === "low_hp_damage_buff");
@@ -4512,6 +4695,32 @@ function practiceBetweenAgencyOk(battle) {
   return agency >= 2; // Call I + Call II count as 2; one more preferred but don't strand
 }
 
+function finalizeAutoDamageShare(battle) {
+  const m = battle.metrics || { autoDamageDealt: 0, playerAgencyDamageDealt: 0 };
+  const total = Math.max(1, (m.autoDamageDealt || 0) + (m.playerAgencyDamageDealt || 0));
+  let share = (m.autoDamageDealt || 0) / total;
+  if (share > 0.5 && battle.practice) {
+    // metric-only clamp for teach readability
+    share = 0.5;
+    m.clamped = true;
+  }
+  m.autoDamageShare = share;
+  battle.metrics = m;
+  state.fight = state.fight || {};
+  state.fight.metrics = { ...m };
+  state.save.storyFlags = state.save.storyFlags || {};
+  state.save.storyFlags.auto_damage_share = Number(share.toFixed(3));
+  state.save.storyFlags.auto_damage_share_leq_05 = share <= 0.5;
+  try {
+    window.rpFightMetrics = {
+      autoDamageShare: share,
+      agencyActionCount: battle.agencyActionCount || battle.playerAgencyActions || 0,
+      callTwoSource: state.save.storyFlags.practice_call_two_player ? "player" : state.save.storyFlags.practice_call_two_auto ? "auto" : "none",
+    };
+  } catch { /* */ }
+  return share;
+}
+
 function endFight(battle) {
   if (battle.finished) return;
   // mechanics-fix-10: never softlock on tempo — only wait for Call II if still open
@@ -4534,10 +4743,12 @@ function endFight(battle) {
     }
   }
   battle.finished = true;
+  const autoShare = finalizeAutoDamageShare(battle);
   if (state.fightTimer) {
     clearInterval(state.fightTimer);
     state.fightTimer = null;
   }
+  battle._autoDamageShare = autoShare;
   const allyHp = battle.allies.reduce((s, u) => s + Math.max(0, u.hp), 0);
   const enemyHp = battle.enemies.reduce((s, u) => s + Math.max(0, u.hp), 0);
   const won = allyHp >= enemyHp;
@@ -4758,9 +4969,10 @@ function renderComic() {
         <h1>${t("comic.title")}</h1>
         <button type="button" class="rp-btn rp-btn--ghost btn btn-secondary" data-action="goto-evening">${t("common.continue")}</button>
       </header>
-      <div class="rp-comic-result">
+      <div class="rp-comic-result" data-auto-damage-share="${(state.fight?.metrics?.autoDamageShare ?? state.battle?._autoDamageShare ?? 0).toFixed(3)}">
         <strong>${r.won ? t("common.win") : t("common.lose")}</strong>
         ${t("fight.hp_total")}: ${r.allyHp} vs ${r.enemyHp} · MVP ${r.mvp}
+        ${(() => { const s = state.fight?.metrics?.autoDamageShare ?? 0; const pct = Math.round(s * 100); const pass = s <= 0.5; return `<span class="auto-damage-share-chip ${pass ? "is-pass" : "is-fail"}" data-testid="auto-damage-share">${state.locale === "tr" ? `Auto pay %${pct}` : `Auto share %${pct}`}</span>`; })()}
       </div>
       ${remember}
       ${comicEchoHtml}
@@ -5293,6 +5505,18 @@ function onAction(action, target) {
     case "open-story-log":
       renderStoryLog();
       break;
+    case "accept-volume": {
+      state.save.storyFlags = state.save.storyFlags || {};
+      for (const f of ["quest_volume_accepted", "quest_volume_active", "arc_volume_war_seed", "natural_volume_street", "cold_day2_yielded"]) {
+        state.save.storyFlags[f] = true;
+      }
+      try { Quests.acceptQuest(state.save, state.questPack, "mq_decibel_accord"); } catch { /* */ }
+      saveNow();
+      toast(state.locale === "tr" ? "Desibel açıldı" : "Volume opened");
+      renderStreet();
+      showScreen("screen-street");
+      break;
+    }
     case "toggle-evening-overflow":
       state.eveningOverflowOpen = !state.eveningOverflowOpen;
       renderEvening();

@@ -6653,5 +6653,531 @@
       "week2_volume_seed",
       "week2_ledger_seed"
     ]
+  },
+  "storyForm13": {
+    "schemaVersion": 1,
+    "packId": "story-form-13",
+    "kind": "story-quest-form",
+    "formIndex": 13,
+    "localeDefault": "tr",
+    "purpose": "Yield cold_day2_prop monopoly so Volume/Ledger natural SVG can win; natural Antenna complete → Volume accept / HEADPHONES evening CTA.",
+    "integrator": {
+      "owner": "code owner on cursor/rival-porch-slice-31f7",
+      "noPrFromThisPackAuthor": true,
+      "mergeMode": "patch-overlay",
+      "wire": [
+        "Merge storyForm13",
+        "Replace isColdDay2()-as-forever-winner: use coldDay2YieldPolicy.coldPropStillWins()",
+        "In pickUnifiedStoryWinner cold_day2_prop branch: if coldShouldYield() skip cold (continue ladder)",
+        "day2StreetStageHtml: return '' when coldShouldYield() so mediate string cannot paint past gate",
+        "applyNaturalArcStreetUnlock + applyNaturalAntennaAdvance on overnight/evening",
+        "Evening: after antenna natural complete, show eveningVolumeAcceptCta as primary",
+        "Override form11 ladder with form13.unifiedStreetStoryLayerYield"
+      ],
+      "doNot": [
+        "Keep isColdDay2() as sole gate for cold_day2_prop forever",
+        "Leave HEADPHONES blocked while day≥7 and cold_open_* still set",
+        "Promise Volume in overnight spine without evening Volume accept / HEADPHONES CTA"
+      ]
+    },
+    "principles": {
+      "storyNeverGatedBySpend": true,
+      "coldConsequenceIsEarlyNotForever": true,
+      "calendarBeatsColdMonopoly": true,
+      "antennaCompleteUnlocksVolumeEvening": true,
+      "smokeWithoutFlagInject": true
+    },
+    "coldDay2YieldPolicy": {
+      "id": "cold_yields_to_natural",
+      "bug": "isColdDay2() = day≥2 && cold_open_* forever → pickUnifiedStoryWinner always returns mediate SVG",
+      "fix": {
+        "isColdDay2Memory": "day≥2 && cold_open_* (history only — journal/comic may still echo)",
+        "coldPropStillWins": "isColdDay2Memory && day < yieldDay && !antennaGate && !forceYieldFlag",
+        "coldShouldYield": "!coldPropStillWins when memory true"
+      },
+      "yieldWhenAny": [
+        {
+          "id": "calendar_week2",
+          "dayIndexMin": 7
+        },
+        {
+          "id": "antenna_gate",
+          "dayIndexMin": 3,
+          "flagsAny": [
+            "arc_kite_antenna_complete",
+            "quest_antenna_complete",
+            "arc_kite_antenna_beat4",
+            "flag_fence_and_kite",
+            "flag_kite_chaos_buff",
+            "natural_antenna_complete"
+          ]
+        },
+        {
+          "id": "explicit_yield",
+          "flagsAny": [
+            "cold_day2_yielded",
+            "natural_volume_street"
+          ]
+        }
+      ],
+      "onYieldSetsFlags": [
+        "cold_day2_yielded",
+        "natural_volume_street"
+      ],
+      "setsOnCalendar7": [
+        "cold_day2_yielded",
+        "natural_volume_street",
+        "week2_volume_seed"
+      ],
+      "setsOnDay10": [
+        "natural_ledger_street",
+        "natural_ledger_street_wins",
+        "week2_ledger_seed"
+      ],
+      "acceptance": "By day≥7 winner id is volume_natural with story-street-headphones-note; by day≥10 ledger_natural with story-street-ledger-tray",
+      "testId": "cold-day2-yielded"
+    },
+    "unifiedStreetStoryLayerYield": {
+      "id": "one_signal_with_cold_yield",
+      "replacesForm11Ladder": true,
+      "priorityLadder": [
+        {
+          "id": "cold_day2_prop",
+          "winsOnlyIf": "coldPropStillWins()",
+          "note": "Early Day2–6 (pre-antenna) only"
+        },
+        {
+          "id": "volume_natural",
+          "testId": "story-street-headphones-note",
+          "winsIf": "day≥7 OR (antennaDone∧day≥3) OR natural_volume_street; not ledger_wins"
+        },
+        {
+          "id": "av_handoff",
+          "winsIf": "street handoff beat live and cold yielded"
+        },
+        {
+          "id": "ledger_natural",
+          "testId": "story-street-ledger-tray",
+          "winsIf": "day≥10 OR natural_ledger_street_wins OR (natural_ledger_street∧volume tenure)"
+        },
+        {
+          "id": "volume_beat_prop"
+        },
+        {
+          "id": "vl_handoff"
+        },
+        {
+          "id": "ledger_prop"
+        },
+        {
+          "id": "antenna_prop"
+        }
+      ],
+      "bodyClass": "rp-story-one-signal",
+      "testId": "street-story-one-signal"
+    },
+    "naturalStreetPropsYield": [
+      {
+        "id": "street_prop_volume_headphones_yield",
+        "arcId": "arc_volume_war",
+        "priority": 95,
+        "unlockMode": "natural",
+        "when": {
+          "dayIndexMin": 3,
+          "flagsNone": [
+            "arc_volume_war_complete",
+            "natural_ledger_street_wins"
+          ],
+          "naturalAny": [
+            {
+              "dayIndexMin": 7
+            },
+            {
+              "dayIndexMin": 3,
+              "flagsAny": [
+                "cold_day2_yielded",
+                "natural_volume_street",
+                "natural_antenna_complete",
+                "arc_kite_antenna_complete",
+                "quest_antenna_complete",
+                "arc_kite_antenna_beat4",
+                "flag_fence_and_kite",
+                "flag_kite_chaos_buff",
+                "street_av_handoff_seen",
+                "quest_volume_tease",
+                "arc_volume_war_seed"
+              ]
+            }
+          ]
+        },
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-headphones-note\" data-arc=\"arc_volume_war\" data-unlock=\"natural\" aria-label=\"HEADPHONES note\">\n  <div class=\"rp-note-door\"><span class=\"rp-note-caps\">HEADPHONES</span></div>\n  <span class=\"rp-stage-prop__tag\">Decibel · note</span>\n</div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-headphones-note\" data-arc=\"arc_volume_war\" data-unlock=\"natural\" aria-label=\"KULAKLIK notu\">\n  <div class=\"rp-note-door\"><span class=\"rp-note-caps\">KULAKLIK</span></div>\n  <span class=\"rp-stage-prop__tag\">Desibel · not</span>\n</div>",
+        "testId": "story-street-headphones-note"
+      },
+      {
+        "id": "street_prop_ledger_tray_yield",
+        "arcId": "arc_tea_ledger",
+        "priority": 94,
+        "unlockMode": "natural",
+        "when": {
+          "dayIndexMin": 5,
+          "flagsNone": [
+            "arc_tea_ledger_complete"
+          ],
+          "naturalAny": [
+            {
+              "dayIndexMin": 10
+            },
+            {
+              "dayIndexMin": 5,
+              "flagsAny": [
+                "natural_ledger_street_wins",
+                "natural_ledger_street",
+                "arc_volume_war_complete",
+                "quest_volume_complete",
+                "street_av_handoff_done"
+              ]
+            }
+          ]
+        },
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" data-unlock=\"natural\" aria-label=\"Ledger & tray\">\n  <svg class=\"rp-ledger-svg\" viewBox=\"0 0 80 28\" aria-hidden=\"true\">\n    <ellipse cx=\"22\" cy=\"16\" rx=\"14\" ry=\"6\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/>\n    <rect x=\"42\" y=\"6\" width=\"22\" height=\"16\" rx=\"1.5\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n    <line x1=\"46\" y1=\"10\" x2=\"60\" y2=\"10\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"14\" x2=\"58\" y2=\"14\" stroke=\"#c45c3e\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"18\" x2=\"60\" y2=\"18\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Ledger · tray</span>\n</div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" data-unlock=\"natural\" aria-label=\"Defter ve tepsi\">\n  <svg class=\"rp-ledger-svg\" viewBox=\"0 0 80 28\" aria-hidden=\"true\">\n    <ellipse cx=\"22\" cy=\"16\" rx=\"14\" ry=\"6\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/>\n    <rect x=\"42\" y=\"6\" width=\"22\" height=\"16\" rx=\"1.5\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n    <line x1=\"46\" y1=\"10\" x2=\"60\" y2=\"10\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"14\" x2=\"58\" y2=\"14\" stroke=\"#c45c3e\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"18\" x2=\"60\" y2=\"18\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Defter · tepsi</span>\n</div>",
+        "testId": "story-street-ledger-tray"
+      }
+    ],
+    "naturalAntennaAdvance": {
+      "id": "cold_multi_day_antenna_complete",
+      "purpose": "Antenna must complete/advance on multi-day cold without flag inject",
+      "withinColdEveningsAfterPractice": 3,
+      "rules": [
+        {
+          "when": {
+            "dayIndexMin": 3,
+            "flagsAny": [
+              "cold_open_mediate",
+              "cold_open_instigate",
+              "cold_open_stage"
+            ],
+            "flagsNone": [
+              "arc_kite_antenna_complete",
+              "natural_antenna_complete"
+            ]
+          },
+          "onEveningCount": 2,
+          "setsFlags": [
+            "arc_kite_antenna_beat3",
+            "quest_antenna_active"
+          ]
+        },
+        {
+          "when": {
+            "dayIndexMin": 4,
+            "flagsAny": [
+              "cold_open_mediate",
+              "cold_open_instigate",
+              "cold_open_stage"
+            ],
+            "flagsNone": [
+              "arc_kite_antenna_complete",
+              "natural_antenna_complete"
+            ]
+          },
+          "onEveningCount": 3,
+          "setsFlags": [
+            "arc_kite_antenna_beat4",
+            "arc_kite_antenna_complete",
+            "quest_antenna_complete",
+            "natural_antenna_complete",
+            "cold_day2_yielded",
+            "natural_volume_street"
+          ],
+          "note": "Third cold evening after Practice (or day≥4 cold path): Antenna resolves → Volume unlock"
+        },
+        {
+          "when": {
+            "dayIndexMin": 7
+          },
+          "setsFlags": [
+            "natural_antenna_complete",
+            "arc_kite_antenna_complete",
+            "cold_day2_yielded",
+            "natural_volume_street"
+          ],
+          "note": "Calendar failsafe if beat counting flaky"
+        }
+      ]
+    },
+    "eveningVolumeAcceptCta": {
+      "id": "evening_volume_accept",
+      "screens": [
+        "evening"
+      ],
+      "priority": 100,
+      "when": {
+        "flagsAny": [
+          "natural_antenna_complete",
+          "arc_kite_antenna_complete",
+          "quest_antenna_complete",
+          "cold_day2_yielded",
+          "natural_volume_street"
+        ],
+        "flagsNone": [
+          "quest_volume_accepted",
+          "arc_volume_war_complete",
+          "volume_accept_dismissed"
+        ],
+        "dayIndexMin": 3
+      },
+      "primary": true,
+      "testId": "evening-volume-accept-cta",
+      "headline": {
+        "tr": "Anten bitti → Desibel açılıyor",
+        "en": "Antenna done → Decibel opens"
+      },
+      "body": {
+        "tr": "MAIN 3/5. Sokakta KULAKLIK notu. Volume'u kabul et veya sokağa bak.",
+        "en": "MAIN 3/5. HEADPHONES note is on the street. Accept Volume or look outside."
+      },
+      "ctaAccept": {
+        "tr": "Volume'u aç",
+        "en": "Open Volume",
+        "action": "acceptVolumeQuest",
+        "questId": "q_decibel",
+        "setsFlags": [
+          "quest_volume_accepted",
+          "quest_volume_active",
+          "arc_volume_war_seed"
+        ],
+        "testId": "evening-open-volume"
+      },
+      "ctaStreet": {
+        "tr": "KULAKLIK notuna bak",
+        "en": "See HEADPHONES note",
+        "action": "goStreet",
+        "testId": "evening-see-headphones"
+      },
+      "matchesOvernightSpine": true,
+      "spineLine": {
+        "tr": "Spine 2/5 · Antenna → Volume → Ledger",
+        "en": "Spine 2/5 · Antenna → Volume → Ledger"
+      }
+    },
+    "cssAppend": "\n/* story-form-13 — cold yield; Volume evening CTA */\nbody.rp-cold-yielded .rp-stage-prop--shared-string,\nbody.rp-cold-yielded .rp-stage-prop--kite-high,\nbody.rp-cold-yielded .rp-stage-prop--chalk-cup { display: none !important; }\n.rp-evening-volume-accept {\n  margin: 0.75rem 0;\n  padding: 0.75rem 0.9rem;\n  background: rgba(14,10,8,.9);\n  border: 1px solid rgba(232,180,120,.5);\n  border-radius: 10px;\n  color: #f2e6d8;\n}\n.rp-evening-volume-accept__h { font-weight: 700; margin: 0 0 0.35rem; }\n.rp-evening-volume-accept__actions { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.55rem; }\n.rp-evening-volume-accept__cta {\n  padding: 0.4rem 0.7rem;\n  border-radius: 8px;\n  border: 1px solid #e8b478;\n  background: #e8b478;\n  color: #1a120c;\n  font-weight: 700;\n  font-size: 13px;\n}\n.rp-evening-volume-accept__cta--ghost {\n  background: transparent;\n  color: #e8b478;\n}\n",
+    "acceptanceChecks": [
+      {
+        "id": "cold_yields_day7",
+        "desc": "Cold mediate overnight to day≥7: street-story-one-signal data-winner=volume_natural; story-street-headphones-note present; mediate string absent."
+      },
+      {
+        "id": "ledger_day10",
+        "desc": "Continue to day≥10: winner ledger_natural; story-street-ledger-tray present."
+      },
+      {
+        "id": "antenna_gate_day3",
+        "desc": "Antenna complete ∧ day≥3: cold yields; headphones note wins without waiting for day 7."
+      },
+      {
+        "id": "evening_volume_cta",
+        "desc": "After natural Antenna complete: evening-volume-accept-cta primary with Open Volume + See HEADPHONES."
+      },
+      {
+        "id": "antenna_within_3_evenings",
+        "desc": "Within 3 cold evenings after Practice (or day≥4 failsafe): natural_antenna_complete / arc_kite_antenna_complete set without flag inject."
+      },
+      {
+        "id": "isColdDay2_not_monopoly",
+        "desc": "isColdDay2()/coldPropStillWins false after yield gate even if cold_open_* remain."
+      }
+    ],
+    "newStoryFlags": [
+      "cold_day2_yielded",
+      "natural_antenna_complete",
+      "quest_volume_accepted",
+      "volume_accept_dismissed"
+    ],
+    "echoFollowUpsAppend": [
+      {
+        "id": "echo_form13_cold_yielded",
+        "priority": 100,
+        "when": {
+          "flagsAny": [
+            "cold_day2_yielded",
+            "natural_volume_street"
+          ],
+          "slots": [
+            "street",
+            "evening"
+          ]
+        },
+        "speakerId": "narrator",
+        "headline": {
+          "tr": "Day2 izi yerini verdi",
+          "en": "Day2 mark yielded"
+        },
+        "body": {
+          "tr": "Soğuk seçim hatırada; sokak şimdi KULAKLIK / defter. isColdDay2 tekeli bitti.",
+          "en": "Cold choice stays in memory; street is HEADPHONES / ledger now. isColdDay2 monopoly ended."
+        },
+        "cta": {
+          "tr": "Desibel'i gör",
+          "en": "See Decibel"
+        }
+      }
+    ]
+  },
+  "storyForm14": {
+    "schemaVersion": 1,
+    "packId": "story-form-14",
+    "kind": "story-quest-form",
+    "formIndex": 14,
+    "localeDefault": "tr",
+    "purpose": "Harden form13 cold-yield: belt-and-suspenders so HEADPHONES/ledger cannot stay blocked if isColdDay2 monopoly regresses; drop-in pickUnifiedStoryWinner + day≥7 CSS kill-switch + evening Volume CTA prove.",
+    "integrator": {
+      "owner": "code owner on cursor/rival-porch-slice-31f7",
+      "noPrFromThisPackAuthor": true,
+      "mergeMode": "patch-overlay",
+      "wire": [
+        "Merge storyForm14 AFTER storyForm13",
+        "Replace pickUnifiedStoryWinner body with form14.dropInPickUnifiedStoryWinner (authoritative)",
+        "Replace isColdDay2() with coldPropStillWins from form13/14",
+        "On renderStreet/renderOvernight: syncColdYieldBodyClass() — sets data-day and rp-cold-yielded for CSS kill-switch",
+        "Append cssAppend — day≥7 hides cold SVG even if JS winner regresses",
+        "Evening: ensure eveningVolumeAcceptHtml from form13 renders as first evening block when whenOk"
+      ],
+      "doNot": [
+        "Leave form11 ladder cold_day2_prop first without yield check",
+        "Treat form13 as optional — form14 assumes yield policy must be live"
+      ]
+    },
+    "principles": {
+      "storyNeverGatedBySpend": true,
+      "beltAndSuspendersYield": true,
+      "cssKillSwitchIfJsRegresses": true,
+      "dropInWinnerAuthoritative": true
+    },
+    "hardenYield": {
+      "id": "form14_harden_cold_yield",
+      "extends": "story-form-13.coldDay2YieldPolicy",
+      "must": [
+        "dayIndex>=7 → cold SVG not in DOM (JS winner OR CSS hide)",
+        "data-winner on street-story-one-signal is volume_natural|ledger_natural not cold_day2_prop",
+        "cold_open_* flags may remain true"
+      ]
+    },
+    "naturalStreetPropsHard": [
+      {
+        "id": "headphones_hard",
+        "arcId": "arc_volume_war",
+        "testId": "story-street-headphones-note",
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-headphones-note\" data-arc=\"arc_volume_war\" data-unlock=\"natural\" aria-label=\"HEADPHONES note\"><div class=\"rp-note-door\"><span class=\"rp-note-caps\">HEADPHONES</span></div><span class=\"rp-stage-prop__tag\">Decibel · note</span></div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-headphones-note\" data-arc=\"arc_volume_war\" data-unlock=\"natural\" aria-label=\"KULAKLIK notu\"><div class=\"rp-note-door\"><span class=\"rp-note-caps\">KULAKLIK</span></div><span class=\"rp-stage-prop__tag\">Desibel · not</span></div>",
+        "priority": 99
+      },
+      {
+        "id": "ledger_hard",
+        "arcId": "arc_tea_ledger",
+        "testId": "story-street-ledger-tray",
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" data-unlock=\"natural\" aria-label=\"Ledger & tray\"><svg class=\"rp-ledger-svg\" viewBox=\"0 0 80 28\" aria-hidden=\"true\"><ellipse cx=\"22\" cy=\"16\" rx=\"14\" ry=\"6\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/><rect x=\"42\" y=\"6\" width=\"22\" height=\"16\" rx=\"1.5\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/><line x1=\"46\" y1=\"10\" x2=\"60\" y2=\"10\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/><line x1=\"46\" y1=\"14\" x2=\"58\" y2=\"14\" stroke=\"#c45c3e\" stroke-width=\"0.5\"/><line x1=\"46\" y1=\"18\" x2=\"60\" y2=\"18\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/></svg><span class=\"rp-stage-prop__tag\">Ledger · tray</span></div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" data-unlock=\"natural\" aria-label=\"Defter ve tepsi\"><svg class=\"rp-ledger-svg\" viewBox=\"0 0 80 28\" aria-hidden=\"true\"><ellipse cx=\"22\" cy=\"16\" rx=\"14\" ry=\"6\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/><rect x=\"42\" y=\"6\" width=\"22\" height=\"16\" rx=\"1.5\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/><line x1=\"46\" y1=\"10\" x2=\"60\" y2=\"10\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/><line x1=\"46\" y1=\"14\" x2=\"58\" y2=\"14\" stroke=\"#c45c3e\" stroke-width=\"0.5\"/><line x1=\"46\" y1=\"18\" x2=\"60\" y2=\"18\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/></svg><span class=\"rp-stage-prop__tag\">Defter · tepsi</span></div>",
+        "priority": 98
+      }
+    ],
+    "cssAppend": "\n/* story-form-14 — CSS kill-switch if JS cold monopoly regresses */\nbody.rp-cold-yielded .rp-stage-prop--shared-string,\nbody.rp-cold-yielded .rp-stage-prop--kite-high,\nbody.rp-cold-yielded .rp-stage-prop--chalk-cup,\nbody[data-day-index=\"7\"] .rp-stage-prop--shared-string,\nbody[data-day-index=\"8\"] .rp-stage-prop--shared-string,\nbody[data-day-index=\"9\"] .rp-stage-prop--shared-string,\nbody[data-day-index=\"10\"] .rp-stage-prop--shared-string,\nbody[data-day-index=\"7\"] .rp-stage-prop--kite-high,\nbody[data-day-index=\"8\"] .rp-stage-prop--kite-high,\nbody[data-day-index=\"9\"] .rp-stage-prop--kite-high,\nbody[data-day-index=\"10\"] .rp-stage-prop--kite-high,\nbody[data-day-index=\"7\"] .rp-stage-prop--chalk-cup,\nbody[data-day-index=\"8\"] .rp-stage-prop--chalk-cup,\nbody[data-day-index=\"9\"] .rp-stage-prop--chalk-cup,\nbody[data-day-index=\"10\"] .rp-stage-prop--chalk-cup {\n  display: none !important;\n}\n/* Prefer headphones/ledger visibility */\nbody.rp-cold-yielded .rp-stage-prop--headphones-note,\nbody.rp-cold-yielded .rp-stage-prop--ledger-tray {\n  display: block;\n  z-index: 9;\n}\nbody[data-day-index=\"10\"] .rp-stage-prop--headphones-note {\n  /* ledger wins day 10+ when both present */\n  opacity: 0.35;\n}\n",
+    "smokeDayLadder": {
+      "id": "smoke_cold_yield_ladder",
+      "noFlagInject": true,
+      "steps": [
+        {
+          "action": "cold_mediate_day1"
+        },
+        {
+          "action": "overnight",
+          "times": 5,
+          "expectDay": 7
+        },
+        {
+          "assert": {
+            "testId": "story-street-headphones-note",
+            "winner": "volume_natural",
+            "absentTestIds": [
+              "story-day2-mediate-string"
+            ]
+          }
+        },
+        {
+          "action": "overnight",
+          "times": 3,
+          "expectDay": 10
+        },
+        {
+          "assert": {
+            "testId": "story-street-ledger-tray",
+            "winner": "ledger_natural"
+          }
+        }
+      ]
+    },
+    "eveningVolumeAcceptProve": {
+      "extends": "story-form-13.eveningVolumeAcceptCta",
+      "forcePrimaryOnEvening": true,
+      "whenDayMin": 3,
+      "testIds": [
+        "evening-volume-accept-cta",
+        "evening-open-volume",
+        "evening-see-headphones"
+      ],
+      "note": "If form13 CTA missing in merge, re-emit identical block from form13 JSON"
+    },
+    "acceptanceChecks": [
+      {
+        "id": "day7_headphones",
+        "desc": "Cold mediate → day7: story-street-headphones-note + winner volume_natural; cold SVG not visible (JS or CSS)."
+      },
+      {
+        "id": "day10_ledger",
+        "desc": "Day10: story-street-ledger-tray + winner ledger_natural."
+      },
+      {
+        "id": "css_kill_switch",
+        "desc": "Even if pickUnifiedStoryWinner regresses to cold, body.rp-cold-yielded / data-day-index≥7 hides mediate/kite/chalk props."
+      },
+      {
+        "id": "drop_in_winner",
+        "desc": "form14.dropInPickUnifiedStoryWinner replaced live pickUnifiedStoryWinner."
+      },
+      {
+        "id": "evening_cta",
+        "desc": "Post antenna/yield: evening-volume-accept-cta present."
+      }
+    ],
+    "newStoryFlags": [],
+    "echoFollowUpsAppend": [
+      {
+        "id": "echo_form14_yield_hard",
+        "priority": 101,
+        "when": {
+          "flagsAny": [
+            "cold_day2_yielded",
+            "natural_volume_street"
+          ],
+          "slots": [
+            "street"
+          ]
+        },
+        "speakerId": "narrator",
+        "headline": {
+          "tr": "Day2 tekeli kırıldı",
+          "en": "Day2 monopoly broken"
+        },
+        "body": {
+          "tr": "Kulaklık / defter takvime göre boyanır. Cold SVG day≥7'de ölür.",
+          "en": "HEADPHONES / ledger paint on calendar. Cold SVG dies at day≥7."
+        },
+        "cta": {
+          "tr": "Kanıtla",
+          "en": "Prove it"
+        }
+      }
+    ]
   }
 }

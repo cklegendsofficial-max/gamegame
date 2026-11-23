@@ -1,0 +1,131 @@
+/* Rival Porch — visual-fix-12
+   c980762 visual 8.6 — SHARED STRING / prop tags still crowd bust rail.
+   Acceptance: bust names free of prop tags/chips; tags mid-stage or under line only.
+   Paste AFTER visual-fix-11.css.
+*/
+
+.rp-screen--street[data-day="2"],
+.rp-screen--street.is-day2,
+.rp-screen--street.rp-cold-day2,
+body.rp-cold-day2 .rp-screen--street {
+  /* Bust rail exclusion: HUD → below name plaques */
+  --rp-bust-rail-top: calc(48px + var(--rp-safe-top, 0px));
+  --rp-bust-rail-bottom: calc(var(--rp-street-bust-band-top, 96px) + 92px);
+  --rp-prop-mid-top: calc(var(--rp-bust-rail-bottom) + 8px);
+  --rp-prop-tag-bottom: calc(var(--rp-dock-h, 72px) + 52px + var(--rp-safe-bottom, 0px));
+}
+
+/* ── A. Prop SVG body stays mid-stage, never in rail ─────────────────────── */
+
+.rp-screen--street[data-day="2"] .rp-stage-prop,
+.rp-screen--street.is-day2 .rp-stage-prop,
+.rp-screen--street[data-day="2"] [data-testid="story-day2-mediate-string"],
+.rp-screen--street[data-day="2"] [data-testid="story-day2-instigate-kite"],
+.rp-screen--street[data-day="2"] [data-testid="story-day2-stage-chalk"],
+.rp-screen--street[data-day="2"] [data-testid="story-day2-forbidden-zone"],
+.rp-screen--street[data-day="2"] [data-testid="story-street-headphones-note"],
+.rp-screen--street[data-day="2"] [data-testid="story-street-ledger-tray"] {
+  position: absolute !important;
+  top: var(--rp-prop-mid-top) !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: translateX(-50%) !important;
+  max-height: min(28vh, 220px) !important;
+  max-width: min(88vw, 320px) !important;
+  z-index: 5 !important;
+  overflow: visible;
+  pointer-events: none;
+  /* Clip any child that tries to paint upward into the rail */
+  clip-path: inset(0 0 -40px 0);
+}
+
+/* SVG string arc: keep geometry in mid band (no arch through faces) */
+.rp-screen--street[data-day="2"] .rp-stage-prop svg,
+.rp-screen--street[data-day="2"] [data-testid="story-day2-mediate-string"] svg {
+  max-height: min(22vh, 160px);
+  width: 100%;
+  overflow: visible;
+}
+
+/* ── B. ALL prop tags / SHARED STRING chips → under mid prop OR line slot ─ */
+
+.rp-screen--street[data-day="2"] .rp-stage-prop__tag,
+.rp-screen--street.is-day2 .rp-stage-prop__tag,
+.rp-screen--street[data-day="2"] .rp-prop-chip,
+.rp-screen--street[data-day="2"] .rp-prop-tag,
+.rp-screen--street[data-day="2"] .rp-stage-prop-label,
+.rp-screen--street[data-day="2"] [data-prop-tag],
+.rp-screen--street[data-day="2"] [data-testid="story-day2-mediate-string"] [class*="tag"],
+.rp-screen--street[data-day="2"] [data-testid="story-day2-mediate-string"] [class*="label"],
+.rp-screen--street[data-day="2"] [data-testid="story-day2-mediate-string"] [class*="chip"],
+.rp-screen--street[data-day="2"] [data-testid="shared-string-tag"],
+.rp-screen--street[data-day="2"] [data-testid="prop-tag-shared-string"],
+.rp-screen--street[data-day="2"] .rp-shared-string-tag {
+  position: absolute !important;
+  top: auto !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: var(--rp-prop-tag-bottom) !important;
+  transform: translateX(-50%) !important;
+  z-index: 6 !important;
+  max-width: 11rem !important;
+  max-height: 28px !important;
+  padding: 4px 10px !important;
+  font-size: 10px !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 78%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--tea-cream, #F2E6D8) 22%, transparent);
+  color: var(--tea-cream, #F2E6D8) !important;
+  pointer-events: none !important;
+  margin: 0 !important;
+}
+
+/* Tags nested inside .rp-stage-prop: pin under the SVG, not above into rail */
+.rp-screen--street[data-day="2"] .rp-stage-prop > .rp-stage-prop__tag,
+.rp-screen--street[data-day="2"] .rp-stage-prop > .rp-prop-chip,
+.rp-screen--street[data-day="2"] .rp-stage-prop > [data-prop-tag] {
+  position: absolute !important;
+  top: calc(100% + 4px) !important;
+  bottom: auto !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+}
+
+/* ── C. Kill orphan tags parked inside / over the bust rail ──────────────── */
+
+/* Never render prop chips as children of hotspots / bust rail */
+.rp-screen--street[data-day="2"] .rp-hotspots .rp-prop-chip,
+.rp-screen--street[data-day="2"] .rp-hotspots .rp-stage-prop__tag,
+.rp-screen--street[data-day="2"] .rp-hotspots .rp-prop-tag,
+.rp-screen--street[data-day="2"] .rp-hotspot .rp-prop-chip,
+.rp-screen--street[data-day="2"] .rp-hotspot [data-prop-tag] {
+  display: none !important;
+}
+
+/* Floating debug / duplicate SHARED STRING pills above busts */
+.rp-screen--street[data-day="2"] .rp-hud-top .rp-prop-chip,
+.rp-screen--street[data-day="2"] .rp-hud-mid .rp-prop-chip,
+.rp-screen--street[data-day="2"] .rp-quest-strip .rp-prop-chip,
+.rp-screen--street[data-day="2"] [data-layer="bust-rail"] .rp-prop-chip {
+  display: none !important;
+}
+
+/* Soft rail mask: anything tagged as prop overlay that still sits in band */
+.rp-screen--street[data-day="2"] .rp-stage-prop-overlay {
+  top: var(--rp-prop-mid-top) !important;
+  max-height: calc(100% - var(--rp-prop-mid-top) - var(--rp-dock-h, 72px)) !important;
+  overflow: hidden;
+}
+
+/* Bust names stay readable — ensure plaque layer above leftover paint */
+.rp-screen--street[data-day="2"] .rp-hotspot__name,
+.rp-screen--street.is-day2 .rp-hotspot__name {
+  position: relative;
+  z-index: 3;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+}
