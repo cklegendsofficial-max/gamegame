@@ -1,0 +1,42 @@
+{
+  "packId": "ux-session-9",
+  "schemaVersion": 1,
+  "scoreReact": {
+    "buildCommit": "37aae6b",
+    "overall": 8.1,
+    "gameplay": 8.0,
+    "gap": "not cult 20+ min; long-arc pull thin after Day2"
+  },
+  "spineChain": [
+    "mq_welcome_porch",
+    "mq_antenna_op",
+    "mq_decibel_accord",
+    "mq_ledger_tray",
+    "mq_season_finale"
+  ],
+  "volumeQuestId": "mq_decibel_accord",
+  "ledgerQuestId": "mq_ledger_tray",
+  "overnightHooks": {
+    "priority": 95,
+    "defaultAfterDay1": "day2Bridge"
+  },
+  "day2Primary": {
+    "testid": "evening-primary",
+    "acceptIfNeeded": true,
+    "forbidChecklist": true
+  },
+  "cultChip": {
+    "testid": "spine-cult-chip",
+    "template": {
+      "tr": "Omurga {n}/5 \u00b7 Anten \u2192 Desibel \u2192 Defter",
+      "en": "Spine {n}/5 \u00b7 Antenna \u2192 Volume \u2192 Ledger"
+    }
+  },
+  "acceptanceChecks": [
+    "overnight_names_volume_or_ledger_road",
+    "day2_evening_one_primary_into_antenna_or_volume",
+    "after_antenna_primary_hooks_volume",
+    "after_volume_primary_hooks_ledger",
+    "no_three_quest_checklist_on_evening"
+  ]
+}

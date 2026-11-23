@@ -1,0 +1,206 @@
+{
+  "schemaVersion": 1,
+  "id": "mechanics-fix-10",
+  "packNumber": 10,
+  "squad": "mechanics",
+  "shippedAt": "2026-11-23T12:55:30Z",
+  "noPrPush": true,
+  "extends": [
+    "internal/squads/mechanics-fix-8.json",
+    "internal/squads/mechanics-fix-9.json"
+  ],
+  "mergeMode": "deepMergeIntoCombatPack",
+  "wirePathHint": "RivalPorch/js/combat.js Porch tempo loop — denser agency, zero softlocks",
+  "scoreRef": {
+    "file": "internal/rival-porch-score-latest.json",
+    "buildCommit": "37aae6b",
+    "mechanicsScore": 8.0,
+    "overall": 8.1,
+    "gap": "Auto Fight still carries most of the match clock",
+    "requestedBy": "coordinator — after mech-9: more tempo agency without softlocks"
+  },
+  "scoreGapsAddressed": [
+    "Auto Fight still carries most of the match clock"
+  ],
+  "respects": [
+    "mechanics-fix-9 softlock-proof Call II + comic always",
+    "never gate comic/End evening on tempo taps"
+  ],
+  "targets": [
+    "denseTempoAgency",
+    "noSoftlockGuarantees",
+    "slowAutoWhenIdle",
+    "visibleTempoMeter"
+  ],
+
+  "acceptance": {
+    "coordinator": "Auto Fight still carries most of match clock; give more tempo agency without softlocks.",
+    "playtest": "In a Practice fight, player has a tap opportunity at least every ~2.2s outside Call modals; ≥3 tempo/Mark/Cheer/Hold actions available; missing them never blocks comic. Active steer time feels ≥40% of non-modal fight clock."
+  },
+
+  "denseTempoAgency": {
+    "extendsFix8": true,
+    "tempoPulse": {
+      "intervalSec": 2.2,
+      "was": 3.5,
+      "pulseMs": 1100,
+      "testId": "tempo-pulse-pad",
+      "simultaneousHintDock": {
+        "testId": "tempo-pulse-dock",
+        "label": { "tr": "Tempo!", "en": "Tempo!" },
+        "minTapTargetPx": 48
+      },
+      "onHit": {
+        "allyPad": { "healPercentMaxHp": 0.05, "youScoreBonus": 3 },
+        "enemyPad": { "damageBonusPercent": 0.1, "youScoreBonus": 4 },
+        "float": true,
+        "scoreToastIfDeltaGte": 3
+      },
+      "onMiss": {
+        "continue": true,
+        "noPenalty": true,
+        "neverPauseForMiss": true
+      },
+      "disableWhileModalOpen": true
+    },
+    "betweenCallActions": {
+      "mark": { "cooldownSec": 3, "was": 4, "youScoreBonusOnHit": 3 },
+      "cheer": { "cooldownSec": 3.5, "was": 5, "maxUsesPerFight": 3, "wasMax": 2 },
+      "hold": { "cooldownSec": 3.5, "was": 5, "youScoreBonusOnHit": 2 }
+    },
+    "microBeat": {
+      "id": "tempo_choice_chip",
+      "everySec": 5.5,
+      "type": "non_blocking_chip_row",
+      "options": [
+        {
+          "id": "chip_push",
+          "label": { "tr": "Bastır", "en": "Push" },
+          "effect": { "allyAtkBonusPercent": 0.08, "durationSec": 2, "youScoreBonus": 3 }
+        },
+        {
+          "id": "chip_guard",
+          "label": { "tr": "Koru", "en": "Guard" },
+          "effect": { "allyDefBonusPercent": 0.1, "durationSec": 2, "youScoreBonus": 2 }
+        }
+      ],
+      "timeoutSec": 2.0,
+      "onTimeout": "dismiss_no_effect",
+      "blocking": false,
+      "cannotSoftlock": true,
+      "testId": "tempo-chip-row"
+    }
+  },
+
+  "slowAutoWhenIdle": {
+    "problem": "Auto carries most of the clock even when Mark/Cheer exist — ticks feel hands-off",
+    "rules": [
+      "If no player agency tap for 2.5s outside modals: timescale → 0.55 (readable, not frozen).",
+      "On any Mark/Cheer/Hold/Tempo/chip tap: timescale → 1.0 for 2.0s.",
+      "Never timescale 0 except Call I / Call II modals (fix-6/9).",
+      "Never require a tap to continue toward comic."
+    ],
+    "timescale": {
+      "modalPause": 0,
+      "recentTapBoost": 1.0,
+      "recentTapWindowSec": 2.0,
+      "idleSlow": 0.55,
+      "idleAfterSec": 2.5
+    }
+  },
+
+  "visibleTempoMeter": {
+    "ui": {
+      "testId": "tempo-steer-meter",
+      "label": { "tr": "Tempo senin", "en": "You're steering" },
+      "fillsOnPlayerTap": true,
+      "drainsOnIdle": true,
+      "placement": "above_score_strip_safe",
+      "doNotOverlapQuestHud": true
+    },
+    "coachOnce": {
+      "tr": "Tempo nabızları + Alkış/Hedef/Tut — Auto değil, sen yönlendiriyorsun.",
+      "en": "Tempo pulses + Cheer/Mark/Hold — you're steering, not watching Auto."
+    }
+  },
+
+  "noSoftlockGuarantees": {
+    "hardRules": [
+      "Tempo pulse miss NEVER pauses fight",
+      "tempo-chip-row timeout dismisses — never required",
+      "practice finish / comic MUST NOT require practice_tempo_pulse_hit",
+      "Override fix-8 finishGate.minPlayerActionsBeforeFinish if it softlocks — tempo is rewarded, not gated",
+      "Keep fix-9 Call II soft-timeout → comic path intact",
+      "No Unstuck / Start is open mid-fight toasts from tempo layer"
+    ],
+    "finishGateOverride": {
+      "practice": {
+        "requireFlags": [
+          "practice_cup_porch_call_done",
+          "practice_second_call_done"
+        ],
+        "tempoFlagsOptionalBonus": [
+          "practice_tempo_pulse_hit",
+          "practice_between_focus_tap",
+          "practice_between_cheer_pulse",
+          "practice_between_hold_lane"
+        ],
+        "doNotBlockOnMissingTempoFlags": true
+      }
+    }
+  },
+
+  "matchClockTarget": {
+    "nonModalFightSecTypical": 14,
+    "tapOpportunityMaxGapSec": 2.2,
+    "playerSteerFeelPercent": 0.4,
+    "note": "Auditor gap: Auto carries most of clock — denser opportunities + idle slow-down shift feel without softlocks"
+  },
+
+  "uiStringsPatch": {
+    "fight.mode_tempo": { "tr": "Porch tempo", "en": "Porch tempo" },
+    "fight.tempo_pulse": { "tr": "Tempo!", "en": "Tempo!" },
+    "fight.tempo_chip_push": { "tr": "Bastır", "en": "Push" },
+    "fight.tempo_chip_guard": { "tr": "Koru", "en": "Guard" },
+    "fight.tempo_steer": {
+      "tr": "Tempo senin",
+      "en": "You're steering"
+    },
+    "fight.tempo_idle_slow": {
+      "tr": "Dokun — tempo yavaşladı",
+      "en": "Tap — tempo slowed"
+    }
+  },
+
+  "acceptanceChecks": [
+    "Tempo pulse ≤2.2s apart outside modals",
+    "Idle >2.5s slows timescale to ~0.55; tap restores 1.0 — never freezes",
+    "Push/Guard chips optional; timeout safe",
+    "Missing all tempo taps still reaches comic via fix-9 Call II path",
+    "No Auto Fight primary label; meter shows steer feel",
+    "No softlock / Unstuck from tempo layer"
+  ],
+
+  "integrator": {
+    "owner": "code owner on cursor/rival-porch-slice-31f7",
+    "steps": [
+      "Tighten tempo pulse to 2.2s; add Tempo! dock twin; score bonus on hit.",
+      "Implement idleSlow timescale 0.55 after 2.5s without taps; boost on tap.",
+      "Add non-blocking Push/Guard chip every ~5.5s (2s timeout dismiss).",
+      "REMOVE any finish gate that requires tempo flags (override fix-8 if wired).",
+      "Preserve fix-9 Call II soft-timeout → comic.",
+      "Smoke: ignore all tempo taps → still comic; spam taps → score moves + meter fills.",
+      "No PR from this squad."
+    ],
+    "priority": "wire after fix-9 — closes 'Auto carries match clock' without new softlocks"
+  },
+
+  "meta": {
+    "expectedMechanicsLift": "8.0 → ≥8.5 by shifting clock feel to player steer without regressing Call II comic path",
+    "nextPackIfStillLow": "mechanics-fix-11 — placement skill / closer bot races / ladder mastery audit",
+    "compat": {
+      "dependsOn": ["mechanics-fix-8", "mechanics-fix-9"],
+      "testIds": ["tempo-pulse-pad", "tempo-pulse-dock", "tempo-chip-row", "tempo-steer-meter"]
+    }
+  }
+}

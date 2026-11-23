@@ -1,0 +1,159 @@
+/* Rival Porch — visual-fix-10
+   37aae6b gap: comic panels exist but framing still thin vs stage art.
+   Thicken clay strip / panel bezels so they read as comic boards, not UI cards.
+   Paste AFTER visual-fix-7.css. Keeps 3-panel structure + share export root.
+*/
+
+.rp-screen--comic {
+  --rp-comic-bead: #5c4334;
+  --rp-comic-bead-hi: #8a6a52;
+  --rp-comic-bead-lo: #2a1c14;
+  --rp-comic-paper: #1c1510;
+  --rp-comic-gutter: 10px;
+}
+
+/* Outer strip = thick clay folio, not a thin rounded card */
+.rp-comic-strip {
+  gap: var(--rp-comic-gutter) !important;
+  padding: 14px 12px !important;
+  border-radius: 18px !important;
+  background:
+    radial-gradient(120% 80% at 50% 0%, #6b4e3a 0%, transparent 55%),
+    linear-gradient(160deg, #5a4030 0%, #3a281c 40%, #1e1510 100%) !important;
+  border: 5px solid var(--rp-comic-bead-lo) !important;
+  box-shadow:
+    inset 0 2px 0 color-mix(in srgb, var(--rp-comic-bead-hi) 55%, transparent),
+    inset 0 -3px 0 color-mix(in srgb, #000 55%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--porch-lamp, #E8A045) 22%, transparent),
+    0 14px 32px color-mix(in srgb, #000 55%, transparent),
+    0 0 0 3px color-mix(in srgb, var(--mud-night, #1A1612) 80%, transparent) !important;
+}
+
+/* Each panel = heavy clay window (not 1–2px hairline card) */
+.rp-comic-panel {
+  min-height: 108px !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+  background: var(--rp-comic-paper) !important;
+  border: 4px solid var(--rp-comic-bead) !important;
+  outline: 2px solid var(--rp-comic-bead-lo);
+  outline-offset: -1px;
+  box-shadow:
+    inset 0 0 0 2px color-mix(in srgb, var(--rp-comic-bead-hi) 35%, transparent),
+    inset 0 10px 18px color-mix(in srgb, #000 35%, transparent),
+    0 3px 0 var(--rp-comic-bead-lo) !important;
+}
+
+/* Inner matte lip so art sits inset like a comic board */
+.rp-comic-panel::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  z-index: 1;
+  border-radius: 5px;
+  box-shadow:
+    inset 0 0 0 2px color-mix(in srgb, #000 45%, transparent),
+    inset 0 0 12px color-mix(in srgb, #000 40%, transparent);
+  pointer-events: none;
+}
+
+/* Art fills inside the lip */
+.rp-comic-panel__art {
+  inset: 5px !important;
+  width: calc(100% - 10px) !important;
+  height: calc(100% - 10px) !important;
+  border-radius: 4px;
+  object-fit: cover !important;
+}
+
+.rp-comic-panel--clash .rp-comic-panel__art {
+  inset: auto !important;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 0;
+}
+.rp-comic-panel--clash {
+  border-radius: 8px;
+  gap: 3px;
+  background: var(--rp-comic-bead-lo) !important;
+  padding: 5px;
+  box-sizing: border-box;
+}
+.rp-comic-panel--clash .rp-comic-panel__art {
+  border: 2px solid var(--rp-comic-bead);
+  border-radius: 4px;
+}
+
+/* Caption bar = clay plaque, not transparent hairline */
+.rp-comic-panel__caption {
+  left: 5px !important;
+  right: 5px !important;
+  bottom: 5px !important;
+  padding: 10px 10px 8px !important;
+  font-size: 12px !important;
+  font-weight: 600;
+  border-radius: 0 0 4px 4px;
+  background:
+    linear-gradient(
+      to top,
+      color-mix(in srgb, var(--mud-night, #1A1612) 92%, transparent) 0%,
+      color-mix(in srgb, var(--mud-night, #1A1612) 72%, transparent) 70%,
+      transparent 100%
+    ) !important;
+  border-top: 1px solid color-mix(in srgb, var(--porch-lamp, #E8A045) 28%, transparent);
+  z-index: 3;
+}
+
+.rp-comic-panel__badge {
+  top: 8px !important;
+  left: 8px !important;
+  z-index: 4;
+  font-size: 10px !important;
+  font-weight: 700;
+  padding: 4px 8px !important;
+  border-radius: 6px !important;
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 78%, transparent) !important;
+  border: 2px solid color-mix(in srgb, var(--tea-cream, #F2E6D8) 28%, transparent) !important;
+}
+
+/* Punch MVP bust sits in a clay ring, not a thin chip */
+.rp-comic-panel--punch .rp-comic-panel__bust {
+  width: 46% !important;
+  max-width: 132px !important;
+  border: 4px solid var(--porch-lamp, #E8A045) !important;
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--mud-night, #1A1612) 75%, transparent),
+    0 10px 22px color-mix(in srgb, #000 60%, transparent) !important;
+}
+
+.rp-comic-panel--clash .rp-comic-panel__vs {
+  font-size: 12px !important;
+  padding: 5px 10px !important;
+  border-width: 2px !important;
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 82%, transparent) !important;
+}
+
+/* Slight organic panel offset — comic strip, not UI grid */
+.rp-comic-panel--kickoff {
+  transform: rotate(-0.4deg);
+}
+.rp-comic-panel--clash {
+  transform: rotate(0.35deg);
+}
+.rp-comic-panel--punch {
+  transform: rotate(-0.25deg);
+}
+
+/* Export root keeps thicker frames */
+.rp-comic-strip[data-export-root="true"] .rp-comic-panel {
+  /* same bead rules — share PNG should look clay-bound */
+}
+
+@media (min-height: 780px) {
+  .rp-comic-panel {
+    min-height: 124px !important;
+  }
+  .rp-comic-strip {
+    padding: 16px 14px !important;
+  }
+}

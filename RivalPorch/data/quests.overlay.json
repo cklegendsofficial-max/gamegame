@@ -5653,5 +5653,1005 @@
     "newStoryFlags": [
       "hide_day2_spotlight"
     ]
+  },
+  "storyForm10": {
+    "schemaVersion": 1,
+    "packId": "story-form-10",
+    "kind": "story-quest-form",
+    "formIndex": 10,
+    "localeDefault": "tr",
+    "purpose": "Long-arc pull after Day2: Antenna→Volume handoff visible on street (prop + NPC + compact banner), not journal-only. Optional Volume→Ledger seed.",
+    "integrator": {
+      "owner": "code owner on cursor/rival-porch-slice-31f7",
+      "noPrFromThisPackAuthor": true,
+      "mergeMode": "patch-overlay",
+      "wire": [
+        "Merge storyForm10; expose via normalizeQuestPack",
+        "After Day2 cold settle (dayIndex>=3 OR cold prop already painted once), evaluate streetHandoffBeats",
+        "On Antenna complete OR beat4 done OR quest_antenna_complete: inject A→V handoff SVG + Orhan/Peri NPC line + compact handoff banner",
+        "Set storyFlags.street_av_handoff_seen when prop painted; optional quest seed q_decibel tease",
+        "Do NOT bury handoff only in journalDramaCards — street is primary",
+        "Respect form9 one-layer-wins: if cold Day2 first paint, handoff waits until dayIndex>=3 or hide_day2_spotlight already set AND cold prop acked",
+        "Append cssAppend + echoFollowUpsAppend"
+      ],
+      "doNot": [
+        "Show A→V handoff only as journal log line",
+        "Stack full Antenna banner + Volume banner + handoff prop on same paint",
+        "Gate handoff behind spend/paywall"
+      ]
+    },
+    "principles": {
+      "storyNeverGatedBySpend": true,
+      "longArcPullOnStreet": true,
+      "handoffNotJournalOnly": true,
+      "afterDay2ColdSettles": true,
+      "oneHandoffLayer": true
+    },
+    "streetHandoffBeats": [
+      {
+        "id": "handoff_antenna_to_volume",
+        "fromArcId": "arc_kite_antenna",
+        "toArcId": "arc_volume_war",
+        "fromQuestId": "q_antenna_op",
+        "toQuestId": "q_decibel",
+        "mqStep": {
+          "from": "mq_antenna_op",
+          "to": "mq_decibel_accord"
+        },
+        "priority": 92,
+        "screens": [
+          "street",
+          "evening"
+        ],
+        "when": {
+          "dayIndexMin": 3,
+          "flagsAny": [
+            "arc_kite_antenna_complete",
+            "quest_antenna_complete",
+            "arc_kite_antenna_beat4",
+            "flag_fence_and_kite",
+            "flag_kite_chaos_buff"
+          ],
+          "flagsNone": [
+            "street_av_handoff_done",
+            "arc_volume_war_complete",
+            "quest_volume_complete"
+          ],
+          "orEarlyTease": {
+            "dayIndexMin": 2,
+            "flagsAll": [
+              "arc_kite_antenna_beat3"
+            ],
+            "flagsNone": [
+              "cold_open_mediate",
+              "cold_open_instigate",
+              "cold_open_stage"
+            ],
+            "note": "If no cold Day2 conflict and Antenna late, allow Day2 evening tease"
+          }
+        },
+        "setsFlagsOnShow": [
+          "street_av_handoff_seen"
+        ],
+        "setsFlagsOnCta": [
+          "street_av_handoff_done",
+          "quest_volume_tease",
+          "arc_volume_war_seed"
+        ],
+        "stageProp": {
+          "html": "<div class=\"rp-stage-prop rp-stage-prop--av-handoff\" data-testid=\"story-street-av-handoff\" data-handoff=\"antenna_to_volume\" aria-label=\"Antenna to Volume handoff\">\n  <svg class=\"rp-av-handoff-svg\" viewBox=\"0 0 120 48\" preserveAspectRatio=\"none\" aria-hidden=\"true\">\n    <!-- fading snag scar -->\n    <line x1=\"28\" y1=\"10\" x2=\"28\" y2=\"38\" stroke=\"#6a5a48\" stroke-width=\"0.7\" opacity=\"0.55\"/>\n    <path d=\"M 18 14 Q 24 8 28 12\" fill=\"none\" stroke=\"#c45c3e\" stroke-width=\"0.6\" opacity=\"0.45\" stroke-dasharray=\"2 1.5\"/>\n    <!-- arrow / pulse toward Orhan door -->\n    <path d=\"M 40 24 L 62 24\" stroke=\"#e8b478\" stroke-width=\"1.1\" marker-end=\"url(#avh)\"/>\n    <defs><marker id=\"avh\" markerWidth=\"6\" markerHeight=\"6\" refX=\"5\" refY=\"3\" orient=\"auto\"><path d=\"M0,0 L6,3 L0,6 Z\" fill=\"#e8b478\"/></marker></defs>\n    <!-- bass rings -->\n    <circle cx=\"88\" cy=\"24\" r=\"6\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.9\" opacity=\"0.9\"/>\n    <circle cx=\"88\" cy=\"24\" r=\"11\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.55\" opacity=\"0.45\"/>\n    <circle cx=\"88\" cy=\"24\" r=\"16\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.35\" opacity=\"0.25\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Antenna → Volume</span>\n</div>",
+          "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--av-handoff\" data-testid=\"story-street-av-handoff\" data-handoff=\"antenna_to_volume\" aria-label=\"Anten → Desibel geçişi\">\n  <svg class=\"rp-av-handoff-svg\" viewBox=\"0 0 120 48\" preserveAspectRatio=\"none\" aria-hidden=\"true\">\n    <!-- fading snag scar -->\n    <line x1=\"28\" y1=\"10\" x2=\"28\" y2=\"38\" stroke=\"#6a5a48\" stroke-width=\"0.7\" opacity=\"0.55\"/>\n    <path d=\"M 18 14 Q 24 8 28 12\" fill=\"none\" stroke=\"#c45c3e\" stroke-width=\"0.6\" opacity=\"0.45\" stroke-dasharray=\"2 1.5\"/>\n    <!-- arrow / pulse toward Orhan door -->\n    <path d=\"M 40 24 L 62 24\" stroke=\"#e8b478\" stroke-width=\"1.1\" marker-end=\"url(#avh)\"/>\n    <defs><marker id=\"avh\" markerWidth=\"6\" markerHeight=\"6\" refX=\"5\" refY=\"3\" orient=\"auto\"><path d=\"M0,0 L6,3 L0,6 Z\" fill=\"#e8b478\"/></marker></defs>\n    <!-- bass rings -->\n    <circle cx=\"88\" cy=\"24\" r=\"6\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.9\" opacity=\"0.9\"/>\n    <circle cx=\"88\" cy=\"24\" r=\"11\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.55\" opacity=\"0.45\"/>\n    <circle cx=\"88\" cy=\"24\" r=\"16\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.35\" opacity=\"0.25\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Anten → Desibel</span>\n</div>",
+          "testId": "story-street-av-handoff"
+        },
+        "alsoShowVolumeNote": {
+          "reuseForm9PropId": "street_prop_volume_headphones",
+          "whenFlagsNone": [
+            "arc_volume_war_beat2"
+          ],
+          "note": "Co-paint HEADPHONES note if Volume not yet at beat2 — physical pull"
+        },
+        "npcLine": {
+          "speakerId": "n3",
+          "fallbackSpeakerId": "n5",
+          "text": {
+            "tr": "Uçurtma bitti. Gece bası başladı — Orhan'ın kapısı titriyor.",
+            "en": "Kite's done. Night bass started — Orhan's door is shaking."
+          },
+          "testId": "story-av-handoff-npc"
+        },
+        "compactBanner": {
+          "testId": "street-av-handoff-banner",
+          "headline": {
+            "tr": "Anten kapandı → Desibel açılıyor",
+            "en": "Antenna closed → Decibel opens"
+          },
+          "body": {
+            "tr": "Sokakta iz: sönük takılma izi + bas halkaları. Sonraki ark burada.",
+            "en": "Street mark: fading snag scar + bass rings. Next arc lives here."
+          },
+          "cta": {
+            "tr": "Desibel'e bak",
+            "en": "Check Decibel"
+          },
+          "ctaAction": "openNeighbor",
+          "ctaNeighborId": "n3"
+        },
+        "eveningBeat": {
+          "testId": "evening-av-handoff",
+          "headline": {
+            "tr": "Geçiş: Anten Operasyonu → Desibel Antlaşması",
+            "en": "Handoff: Antenna Op → Decibel Accord"
+          },
+          "body": {
+            "tr": "Day2 soğuk seçim sokakta kaldı. Şimdi uzun ark çekiyor: bas, not, antlaşma.",
+            "en": "Day2 cold choice stayed on the street. Now the long arc pulls: bass, note, accord."
+          }
+        },
+        "journalCard": {
+          "placement": "dramaAboveLog",
+          "id": "drama_av_handoff",
+          "testId": "journal-av-handoff",
+          "title": {
+            "tr": "Sokak geçişi — Anten → Desibel",
+            "en": "Street handoff — Antenna → Decibel"
+          },
+          "body": {
+            "tr": "Bu kart özet; asıl kanıt sokakta (story-street-av-handoff).",
+            "en": "This card is the summary; proof is on the street (story-street-av-handoff)."
+          },
+          "pointsToStreet": true
+        }
+      },
+      {
+        "id": "handoff_volume_to_ledger",
+        "fromArcId": "arc_volume_war",
+        "toArcId": "arc_tea_ledger",
+        "fromQuestId": "q_decibel",
+        "toQuestId": "q_tea_ledger",
+        "mqStep": {
+          "from": "mq_decibel_accord",
+          "to": "mq_ledger_tray"
+        },
+        "priority": 90,
+        "screens": [
+          "street",
+          "evening"
+        ],
+        "when": {
+          "dayIndexMin": 5,
+          "flagsAny": [
+            "arc_volume_war_complete",
+            "quest_volume_complete",
+            "arc_volume_war_beat5",
+            "flag_peri_stay",
+            "flag_peri_leaving_threat"
+          ],
+          "flagsNone": [
+            "street_vl_handoff_done",
+            "arc_tea_ledger_complete"
+          ]
+        },
+        "setsFlagsOnShow": [
+          "street_vl_handoff_seen"
+        ],
+        "setsFlagsOnCta": [
+          "street_vl_handoff_done",
+          "quest_ledger_tease",
+          "arc_tea_ledger_seed"
+        ],
+        "stageProp": {
+          "html": "<div class=\"rp-stage-prop rp-stage-prop--vl-handoff\" data-testid=\"story-street-vl-handoff\" data-handoff=\"volume_to_ledger\" aria-label=\"Volume to Ledger handoff\">\n  <svg class=\"rp-vl-handoff-svg\" viewBox=\"0 0 120 40\" aria-hidden=\"true\">\n    <circle cx=\"28\" cy=\"20\" r=\"5\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.8\" opacity=\"0.5\"/>\n    <path d=\"M 40 20 L 62 20\" stroke=\"#e8b478\" stroke-width=\"1\"/>\n    <ellipse cx=\"88\" cy=\"22\" rx=\"12\" ry=\"5\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/>\n    <rect x=\"78\" y=\"8\" width=\"16\" height=\"12\" rx=\"1\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.6\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Volume → Ledger</span>\n</div>",
+          "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--vl-handoff\" data-testid=\"story-street-vl-handoff\" data-handoff=\"volume_to_ledger\" aria-label=\"Desibel → Defter geçişi\">\n  <svg class=\"rp-vl-handoff-svg\" viewBox=\"0 0 120 40\" aria-hidden=\"true\">\n    <circle cx=\"28\" cy=\"20\" r=\"5\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.8\" opacity=\"0.5\"/>\n    <path d=\"M 40 20 L 62 20\" stroke=\"#e8b478\" stroke-width=\"1\"/>\n    <ellipse cx=\"88\" cy=\"22\" rx=\"12\" ry=\"5\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/>\n    <rect x=\"78\" y=\"8\" width=\"16\" height=\"12\" rx=\"1\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.6\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Desibel → Defter</span>\n</div>",
+          "testId": "story-street-vl-handoff"
+        },
+        "npcLine": {
+          "speakerId": "n1",
+          "text": {
+            "tr": "Bas sustu. Defter ve tepsi sırada — Neon da duyuyor.",
+            "en": "Bass went quiet. Ledger and tray are next — Neon hears that too."
+          },
+          "testId": "story-vl-handoff-npc"
+        },
+        "compactBanner": {
+          "testId": "street-vl-handoff-banner",
+          "headline": {
+            "tr": "Desibel kapandı → Defter açılıyor",
+            "en": "Decibel closed → Ledger opens"
+          },
+          "body": {
+            "tr": "Uzun ark devam: çay, hesap, Neon.",
+            "en": "Long arc continues: tea, accounts, Neon."
+          },
+          "cta": {
+            "tr": "Deftere bak",
+            "en": "Check Ledger"
+          },
+          "ctaAction": "openNeighbor",
+          "ctaNeighborId": "n1"
+        }
+      }
+    ],
+    "afterDay2PullContract": {
+      "id": "long_arc_after_day2",
+      "rule": "Once Day2 cold consequence has painted at least once, next story pressure is Antenna resolution → Volume open on street.",
+      "sequence": [
+        "day1 cold_open_*",
+        "day2 cold SVG + NPC (forms 5–6, 9)",
+        "antenna beats street props (form 9 snag)",
+        "antenna resolve → story-street-av-handoff + Volume note (this form)",
+        "volume beats → optional story-street-vl-handoff"
+      ],
+      "acceptance": "Player can name next arc from street screenshot without opening journal."
+    },
+    "cssAppend": "\n/* story-form-10 — Antenna→Volume street handoff */\n.rp-stage-prop--av-handoff {\n  left: 12%; right: 12%; top: 28%; height: 32%;\n  z-index: 8; color: #e8b478;\n  animation: rp-av-pulse 2.4s ease-in-out infinite;\n}\n.rp-av-handoff-svg, .rp-vl-handoff-svg { width: 100%; height: 100%; display: block; }\n@keyframes rp-av-pulse {\n  0%, 100% { opacity: 0.92; }\n  50% { opacity: 1; filter: drop-shadow(0 0 6px rgba(126,184,212,.35)); }\n}\n.rp-stage-prop--vl-handoff {\n  left: 18%; right: 18%; top: 52%; height: 22%;\n  z-index: 8; color: #e8c9a0;\n}\n.rp-handoff-banner {\n  position: absolute; left: 50%; bottom: 5.2rem;\n  transform: translateX(-50%);\n  z-index: 8;\n  max-width: min(92%, 22rem);\n  padding: 0.45rem 0.7rem;\n  background: rgba(14,10,8,.88);\n  border: 1px solid rgba(232,180,120,.45);\n  border-radius: 10px;\n  color: #f2e6d8;\n  font-size: 12px;\n  line-height: 1.35;\n}\n.rp-handoff-banner__h { font-weight: 700; margin: 0 0 0.15rem; }\n.rp-handoff-banner__cta {\n  margin-top: 0.35rem;\n  display: inline-block;\n  padding: 0.25rem 0.55rem;\n  border: 1px solid #e8b478;\n  border-radius: 6px;\n  background: transparent;\n  color: #e8b478;\n  font-size: 11px;\n}\n/* one handoff layer: hide full arc banners while handoff banner up */\nbody.rp-handoff-av .rp-arc-beat-banner,\nbody.rp-handoff-vl .rp-arc-beat-banner { display: none; }\n",
+    "echoFollowUpsAppend": [
+      {
+        "id": "echo_form10_av_street",
+        "priority": 97,
+        "when": {
+          "flagsAny": [
+            "street_av_handoff_seen",
+            "arc_kite_antenna_complete"
+          ],
+          "flagsNone": [
+            "street_av_handoff_done",
+            "arc_volume_war_complete"
+          ],
+          "slots": [
+            "street",
+            "evening"
+          ]
+        },
+        "speakerId": "narrator",
+        "headline": {
+          "tr": "Uzun ark sokakta çekiyor",
+          "en": "Long arc pulls on the street"
+        },
+        "body": {
+          "tr": "Anten izi sönüyor; bas halkaları Orhan'a gidiyor. Desibel Antlaşması burada başlar.",
+          "en": "Antenna scar fades; bass rings walk to Orhan. Decibel Accord starts here."
+        },
+        "cta": {
+          "tr": "Geçişi gör",
+          "en": "See the handoff"
+        }
+      }
+    ],
+    "acceptanceChecks": [
+      {
+        "id": "av_handoff_on_street",
+        "desc": "After Antenna resolve (day≥3): story-street-av-handoff SVG visible on street without opening journal."
+      },
+      {
+        "id": "av_handoff_npc",
+        "desc": "story-av-handoff-npc (or bubble) names Volume/bass as next pull."
+      },
+      {
+        "id": "av_handoff_banner",
+        "desc": "street-av-handoff-banner compact; no dual full Antenna+Volume banners stacked."
+      },
+      {
+        "id": "journal_points_to_street",
+        "desc": "journal-av-handoff exists but copy says proof is on street."
+      },
+      {
+        "id": "after_day2_sequence",
+        "desc": "Day2 cold paint still wins day2; handoff does not bury cold prop on first Day2 enter."
+      },
+      {
+        "id": "vl_handoff_optional",
+        "desc": "After Volume resolve: story-street-vl-handoff seeds Ledger on street."
+      }
+    ],
+    "newStoryFlags": [
+      "street_av_handoff_seen",
+      "street_av_handoff_done",
+      "quest_volume_tease",
+      "arc_volume_war_seed",
+      "street_vl_handoff_seen",
+      "street_vl_handoff_done",
+      "quest_ledger_tease",
+      "arc_tea_ledger_seed"
+    ]
+  },
+  "storyForm11": {
+    "schemaVersion": 1,
+    "packId": "story-form-11",
+    "kind": "story-quest-form",
+    "formIndex": 11,
+    "localeDefault": "tr",
+    "purpose": "Prove long-arc pull past Day2: Volume beat-by-beat street props + single unified story layer + MQ spine chips on street (screenshot-readable).",
+    "integrator": {
+      "owner": "code owner on cursor/rival-porch-slice-31f7",
+      "noPrFromThisPackAuthor": true,
+      "mergeMode": "patch-overlay",
+      "wire": [
+        "Merge storyForm11",
+        "renderStreet: compute single storyLayerWinner via unifiedStreetStoryLayer priority ladder — only ONE primary story signal + optional MQ chip",
+        "Inject volumeStreetBeatProps for active Volume beat (evolution replaces previous)",
+        "Match comic: append matchComicHandoffEchoes when street_av_handoff_seen",
+        "Append cssAppend; body.rp-story-one-signal class when unified layer active"
+      ],
+      "doNot": [
+        "Stack Antenna banner + Volume banner + handoff + cold prop + MQ chip all at once",
+        "Leave Volume beats journal-only after form10 handoff"
+      ]
+    },
+    "principles": {
+      "storyNeverGatedBySpend": true,
+      "oneStorySignalOnStreet": true,
+      "volumeBeatsHaveStreetProps": true,
+      "mqSpineReadableOnStreet": true,
+      "screenshotProveWithoutJournal": true
+    },
+    "unifiedStreetStoryLayer": {
+      "id": "one_story_signal",
+      "purpose": "Auditor screenshot: exactly one primary story visual wins",
+      "priorityLadder": [
+        {
+          "id": "cold_day2_prop",
+          "when": {
+            "dayIndex": 2,
+            "flagsAny": [
+              "cold_open_mediate",
+              "cold_open_instigate",
+              "cold_open_stage"
+            ]
+          },
+          "source": "storyForm5/6/9"
+        },
+        {
+          "id": "av_handoff",
+          "when": {
+            "flagsAny": [
+              "street_av_handoff_seen"
+            ],
+            "flagsNone": [
+              "street_av_handoff_done",
+              "quest_volume_active"
+            ]
+          },
+          "source": "storyForm10"
+        },
+        {
+          "id": "volume_beat_prop",
+          "when": {
+            "flagsAny": [
+              "quest_volume_active",
+              "arc_volume_war_beat1",
+              "arc_volume_war_seed"
+            ]
+          },
+          "source": "storyForm11.volumeStreetBeatProps"
+        },
+        {
+          "id": "vl_handoff",
+          "when": {
+            "flagsAny": [
+              "street_vl_handoff_seen"
+            ],
+            "flagsNone": [
+              "street_vl_handoff_done"
+            ]
+          },
+          "source": "storyForm10"
+        },
+        {
+          "id": "ledger_prop",
+          "when": {
+            "flagsAny": [
+              "quest_ledger_active"
+            ]
+          },
+          "source": "storyForm9"
+        },
+        {
+          "id": "antenna_prop",
+          "when": {
+            "flagsAny": [
+              "quest_antenna_active"
+            ]
+          },
+          "source": "storyForm9"
+        }
+      ],
+      "secondaryAllowed": [
+        "singleNpcBubble",
+        "mqStreetChip"
+      ],
+      "forbiddenWithPrimary": [
+        "fullArcBeatBanner",
+        "day2Spotlight",
+        "secondStageProp"
+      ],
+      "bodyClass": "rp-story-one-signal",
+      "testId": "street-story-one-signal"
+    },
+    "volumeStreetBeatProps": [
+      {
+        "id": "volume_street_beat1_bass",
+        "beatId": "arc_volume_war_beat1",
+        "when": {
+          "flagsAny": [
+            "quest_volume_active",
+            "arc_volume_war_beat1",
+            "arc_volume_war_seed",
+            "quest_volume_tease"
+          ],
+          "flagsNone": [
+            "arc_volume_war_beat2",
+            "arc_volume_war_complete"
+          ]
+        },
+        "testId": "story-street-volume-bass",
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--volume-bass\" data-testid=\"story-street-volume-bass\" aria-label=\"01:12 bass rings\">\n  <svg class=\"rp-vol-svg\" viewBox=\"0 0 100 40\" aria-hidden=\"true\">\n        <circle cx=\"70\" cy=\"20\" r=\"5\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"1\"/>\n        <circle cx=\"70\" cy=\"20\" r=\"10\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.6\" opacity=\"0.55\"/>\n        <circle cx=\"70\" cy=\"20\" r=\"15\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.35\" opacity=\"0.3\"/>\n        <text x=\"8\" y=\"24\" fill=\"#e8b478\" font-size=\"8\" font-family=\"monospace\">01:12</text>\n      </svg>\n  <span class=\"rp-stage-prop__tag\">Volume · 01:12</span>\n</div>",
+        "npcLine": {
+          "speakerId": "n3",
+          "text": {
+            "tr": "Duvar 01:12'de titredi. Bu Anten değil — Desibel.",
+            "en": "Wall shook at 01:12. Not Antenna — Decibel."
+          }
+        },
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--volume-bass\" data-testid=\"story-street-volume-bass\" aria-label=\"01:12 bas halkaları\">\n  <svg class=\"rp-vol-svg\" viewBox=\"0 0 100 40\" aria-hidden=\"true\">\n        <circle cx=\"70\" cy=\"20\" r=\"5\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"1\"/>\n        <circle cx=\"70\" cy=\"20\" r=\"10\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.6\" opacity=\"0.55\"/>\n        <circle cx=\"70\" cy=\"20\" r=\"15\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.35\" opacity=\"0.3\"/>\n        <text x=\"8\" y=\"24\" fill=\"#e8b478\" font-size=\"8\" font-family=\"monospace\">01:12</text>\n      </svg>\n  <span class=\"rp-stage-prop__tag\">Desibel · 01:12</span>\n</div>"
+      },
+      {
+        "id": "volume_street_beat2_note",
+        "beatId": "arc_volume_war_beat2",
+        "when": {
+          "flagsAny": [
+            "arc_volume_war_beat2"
+          ],
+          "flagsNone": [
+            "arc_volume_war_beat3",
+            "arc_volume_war_complete"
+          ]
+        },
+        "testId": "story-street-volume-note",
+        "reuseForm9": "street_prop_volume_headphones",
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-volume-note\" aria-label=\"HEADPHONES note\">\n  <div class=\"rp-note-door\"><span class=\"rp-note-caps\">HEADPHONES</span></div>\n  <span class=\"rp-stage-prop__tag\">Volume · note</span>\n</div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-volume-note\" aria-label=\"KULAKLIK notu\">\n  <div class=\"rp-note-door\"><span class=\"rp-note-caps\">KULAKLIK</span></div>\n  <span class=\"rp-stage-prop__tag\">Desibel · not</span>\n</div>",
+        "npcLine": {
+          "speakerId": "n5",
+          "text": {
+            "tr": "Not hâlâ kapıda. Sınır büyük harf.",
+            "en": "Note still on the door. Boundary in block caps."
+          }
+        }
+      },
+      {
+        "id": "volume_street_beat3_pastry",
+        "beatId": "arc_volume_war_beat3",
+        "when": {
+          "flagsAny": [
+            "arc_volume_war_beat3"
+          ],
+          "flagsNone": [
+            "arc_volume_war_beat4",
+            "arc_volume_war_complete"
+          ]
+        },
+        "testId": "story-street-volume-pastry",
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--volume-pastry\" data-testid=\"story-street-volume-pastry\" aria-label=\"Midnight pastry bag\">\n  <svg class=\"rp-vol-svg\" viewBox=\"0 0 80 36\" aria-hidden=\"true\">\n        <path d=\"M20 28 L28 10 L52 10 L60 28 Z\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.9\"/>\n        <ellipse cx=\"40\" cy=\"28\" rx=\"20\" ry=\"4\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.6\"/>\n      </svg>\n  <span class=\"rp-stage-prop__tag\">Volume · pastry</span>\n</div>",
+        "npcLine": {
+          "speakerId": "n2",
+          "text": {
+            "tr": "Poğaça torbası — Soft diplomasi sokakta.",
+            "en": "Pastry bag — Soft diplomacy on the street."
+          }
+        },
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--volume-pastry\" data-testid=\"story-street-volume-pastry\" aria-label=\"Gece poğaçası\">\n  <svg class=\"rp-vol-svg\" viewBox=\"0 0 80 36\" aria-hidden=\"true\">\n        <path d=\"M20 28 L28 10 L52 10 L60 28 Z\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.9\"/>\n        <ellipse cx=\"40\" cy=\"28\" rx=\"20\" ry=\"4\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.6\"/>\n      </svg>\n  <span class=\"rp-stage-prop__tag\">Desibel · poğaça</span>\n</div>"
+      },
+      {
+        "id": "volume_street_beat4_offer",
+        "beatId": "arc_volume_war_beat4",
+        "when": {
+          "flagsAny": [
+            "arc_volume_war_beat4"
+          ],
+          "flagsNone": [
+            "arc_volume_war_beat5",
+            "arc_volume_war_complete"
+          ]
+        },
+        "testId": "story-street-volume-offer",
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--volume-offer\" data-testid=\"story-street-volume-offer\" aria-label=\"Club offer slip\">\n  <svg class=\"rp-vol-svg\" viewBox=\"0 0 70 36\" aria-hidden=\"true\">\n        <rect x=\"18\" y=\"6\" width=\"34\" height=\"24\" rx=\"1.5\" fill=\"none\" stroke=\"#f2e6d8\" stroke-width=\"0.8\"/>\n        <line x1=\"24\" y1=\"12\" x2=\"46\" y2=\"12\" stroke=\"#7eb8d4\" stroke-width=\"0.5\"/>\n        <line x1=\"24\" y1=\"17\" x2=\"42\" y2=\"17\" stroke=\"#e8b478\" stroke-width=\"0.5\"/>\n        <line x1=\"24\" y1=\"22\" x2=\"44\" y2=\"22\" stroke=\"#e8b478\" stroke-width=\"0.5\"/>\n      </svg>\n  <span class=\"rp-stage-prop__tag\">Volume · offer</span>\n</div>",
+        "npcLine": {
+          "speakerId": "n5",
+          "text": {
+            "tr": "Mektup sızdı. Tren bileti cebinde gibi.",
+            "en": "The letter leaked. Train ticket feels pocketed."
+          }
+        },
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--volume-offer\" data-testid=\"story-street-volume-offer\" aria-label=\"Kulüp teklif notu\">\n  <svg class=\"rp-vol-svg\" viewBox=\"0 0 70 36\" aria-hidden=\"true\">\n        <rect x=\"18\" y=\"6\" width=\"34\" height=\"24\" rx=\"1.5\" fill=\"none\" stroke=\"#f2e6d8\" stroke-width=\"0.8\"/>\n        <line x1=\"24\" y1=\"12\" x2=\"46\" y2=\"12\" stroke=\"#7eb8d4\" stroke-width=\"0.5\"/>\n        <line x1=\"24\" y1=\"17\" x2=\"42\" y2=\"17\" stroke=\"#e8b478\" stroke-width=\"0.5\"/>\n        <line x1=\"24\" y1=\"22\" x2=\"44\" y2=\"22\" stroke=\"#e8b478\" stroke-width=\"0.5\"/>\n      </svg>\n  <span class=\"rp-stage-prop__tag\">Desibel · teklif</span>\n</div>"
+      },
+      {
+        "id": "volume_street_beat5_accord",
+        "beatId": "arc_volume_war_beat5",
+        "when": {
+          "flagsAny": [
+            "arc_volume_war_beat5",
+            "flag_peri_stay",
+            "flag_peri_leaving_threat"
+          ],
+          "flagsNone": [
+            "street_vl_handoff_seen",
+            "arc_volume_war_complete"
+          ]
+        },
+        "testId": "story-street-volume-accord",
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--volume-accord\" data-testid=\"story-street-volume-accord\" aria-label=\"Accord chalk\">\n  <div class=\"rp-accord-chalk\">QUIET HRS · NEON NIGHT</div>\n  <span class=\"rp-stage-prop__tag\">Volume · accord</span>\n</div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--volume-accord\" data-testid=\"story-street-volume-accord\" aria-label=\"Antlaşma tebeşiri\">\n  <div class=\"rp-accord-chalk\">SESSİZ SAAT · NEON NIGHT</div>\n  <span class=\"rp-stage-prop__tag\">Desibel · antlaşma</span>\n</div>",
+        "npcLine": {
+          "speakerId": "n3",
+          "text": {
+            "tr": "Tebeşir: sessiz saatler ya da veda. Seçim sokakta.",
+            "en": "Chalk: quiet hours or goodbye. Choice is on the street."
+          }
+        }
+      }
+    ],
+    "mqStreetChips": [
+      {
+        "id": "mq_street_antenna",
+        "mqId": "mq_antenna_op",
+        "step": "2/5",
+        "when": {
+          "flagsAny": [
+            "quest_antenna_active",
+            "arc_kite_antenna_beat1"
+          ],
+          "flagsNone": [
+            "arc_kite_antenna_complete",
+            "street_av_handoff_seen"
+          ]
+        },
+        "chip": {
+          "tr": "MAIN 2/5 · Anten Operasyonu",
+          "en": "MAIN 2/5 · Antenna Op"
+        },
+        "testId": "mq-street-chip-antenna"
+      },
+      {
+        "id": "mq_street_volume",
+        "mqId": "mq_decibel_accord",
+        "step": "3/5",
+        "when": {
+          "flagsAny": [
+            "quest_volume_active",
+            "street_av_handoff_seen",
+            "arc_volume_war_seed"
+          ],
+          "flagsNone": [
+            "arc_volume_war_complete",
+            "street_vl_handoff_seen"
+          ]
+        },
+        "chip": {
+          "tr": "MAIN 3/5 · Desibel Antlaşması",
+          "en": "MAIN 3/5 · Decibel Accord"
+        },
+        "testId": "mq-street-chip-volume"
+      },
+      {
+        "id": "mq_street_ledger",
+        "mqId": "mq_ledger_tray",
+        "step": "4/5",
+        "when": {
+          "flagsAny": [
+            "quest_ledger_active",
+            "street_vl_handoff_seen",
+            "arc_tea_ledger_seed"
+          ],
+          "flagsNone": [
+            "arc_tea_ledger_complete"
+          ]
+        },
+        "chip": {
+          "tr": "MAIN 4/5 · Defter & Tepsi",
+          "en": "MAIN 4/5 · Ledger & Tray"
+        },
+        "testId": "mq-street-chip-ledger"
+      }
+    ],
+    "matchComicHandoffEchoes": [
+      {
+        "id": "comic_echo_av_handoff",
+        "when": {
+          "flagsAny": [
+            "street_av_handoff_seen",
+            "street_av_handoff_done"
+          ]
+        },
+        "panel": {
+          "tr": "Anten izi soldu. Bas halkaları Orhan'a yürüdü. Desibel sokakta.",
+          "en": "Antenna scar faded. Bass rings walked to Orhan. Decibel is on the street."
+        },
+        "captionTag": {
+          "tr": "MAIN 2→3",
+          "en": "MAIN 2→3"
+        },
+        "testId": "comic-echo-av-handoff"
+      },
+      {
+        "id": "comic_echo_volume_accord",
+        "when": {
+          "flagsAny": [
+            "arc_volume_war_beat5",
+            "flag_peri_stay",
+            "flag_peri_leaving_threat"
+          ]
+        },
+        "panel": {
+          "tr": "Tebeşir: SESSİZ SAAT · NEON NIGHT. Antlaşma ya da kariyer — sokak seçti.",
+          "en": "Chalk: QUIET HRS · NEON NIGHT. Accord or career — the street chose."
+        },
+        "captionTag": {
+          "tr": "Desibel Beat 5",
+          "en": "Decibel Beat 5"
+        },
+        "testId": "comic-echo-volume-accord"
+      }
+    ],
+    "cssAppend": "\n/* story-form-11 — one story signal; Volume beat street props; MQ chip */\nbody.rp-story-one-signal .rp-arc-beat-banner { display: none; }\nbody.rp-story-one-signal .rp-day2-spotlight { display: none !important; }\n\n.rp-mq-street-chip {\n  position: absolute;\n  top: 0.55rem; left: 50%;\n  transform: translateX(-50%);\n  z-index: 6;\n  padding: 0.28rem 0.6rem;\n  border-radius: 6px;\n  background: rgba(12,8,6,.82);\n  border: 1px solid rgba(232,180,120,.4);\n  color: #f2e6d8;\n  font-size: 11px;\n  letter-spacing: 0.04em;\n  white-space: nowrap;\n  max-width: 92%;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n\n.rp-stage-prop--volume-bass { left: 48%; right: 8%; top: 30%; height: 28%; z-index: 8; }\n.rp-stage-prop--volume-pastry { left: 28%; width: 32%; top: 58%; height: 18%; z-index: 8; color: #e8c9a0; }\n.rp-stage-prop--volume-offer { left: 58%; width: 28%; top: 36%; height: 22%; z-index: 8; }\n.rp-stage-prop--volume-accord { left: 22%; right: 22%; top: 56%; height: auto; z-index: 8; }\n.rp-accord-chalk {\n  font: 700 11px/1.2 \"IBM Plex Mono\", ui-monospace, monospace;\n  letter-spacing: 0.06em;\n  padding: 0.4rem 0.55rem;\n  background: rgba(20,14,10,.9);\n  border: 1px dashed #e8b478;\n  color: #f2e6d8;\n  text-align: center;\n}\n.rp-vol-svg { width: 100%; height: 100%; display: block; }\n",
+    "echoFollowUpsAppend": [
+      {
+        "id": "echo_form11_volume_street",
+        "priority": 98,
+        "when": {
+          "flagsAny": [
+            "quest_volume_active",
+            "arc_volume_war_seed",
+            "street_av_handoff_seen"
+          ],
+          "flagsNone": [
+            "arc_volume_war_complete"
+          ],
+          "slots": [
+            "street",
+            "evening"
+          ]
+        },
+        "speakerId": "narrator",
+        "headline": {
+          "tr": "Desibel sokakta evrimleşiyor",
+          "en": "Decibel evolves on the street"
+        },
+        "body": {
+          "tr": "Bas → not → poğaça → mektup → tebeşir. Her beat sahne prop'u; defter yedek.",
+          "en": "Bass → note → pastry → letter → chalk. Each beat is a stage prop; journal is backup."
+        },
+        "cta": {
+          "tr": "Beat prop'unu gör",
+          "en": "See the beat prop"
+        }
+      }
+    ],
+    "acceptanceChecks": [
+      {
+        "id": "one_signal",
+        "desc": "Street paint: at most one primary story prop; body.rp-story-one-signal; no stacked full banners with spotlight."
+      },
+      {
+        "id": "volume_beat_props",
+        "desc": "Each Volume beat 1–5 has distinct street testId prop while that beat is active."
+      },
+      {
+        "id": "mq_chip",
+        "desc": "While Volume active post-handoff: mq-street-chip-volume shows MAIN 3/5."
+      },
+      {
+        "id": "comic_handoff",
+        "desc": "After A→V handoff, match comic includes comic-echo-av-handoff panel."
+      },
+      {
+        "id": "screenshot_no_journal",
+        "desc": "Auditor can identify active arc from street screenshot alone."
+      }
+    ],
+    "newStoryFlags": []
+  },
+  "storyForm12": {
+    "schemaVersion": 1,
+    "packId": "story-form-12",
+    "kind": "story-quest-form",
+    "formIndex": 12,
+    "localeDefault": "tr",
+    "purpose": "Volume/Ledger cold street SVG on natural unlock — story-street-headphones-note then story-street-ledger-tray without force-flag inject.",
+    "integrator": {
+      "owner": "code owner on cursor/rival-porch-slice-31f7",
+      "noPrFromThisPackAuthor": true,
+      "mergeMode": "patch-overlay",
+      "wire": [
+        "Merge storyForm12; expose via normalizeQuestPack",
+        "Replace form9 Volume/Ledger streetArcStageProps when-clauses with form12.naturalStreetProps (day-based; no flagsAny required)",
+        "Call applyNaturalArcStreetUnlock() at overnight/day advance AND at street enter — sets soft seeds from dayIndex only (never force-* inject, never smoke flag poke)",
+        "streetArcStagePropsHtml: prefer storyForm12.naturalStreetProps over form9 for arc_volume_war / arc_tea_ledger",
+        "One-layer: if both Volume+Ledger eligible, Volume wins until volumeStreetDaysSeen>=2 OR dayIndex>= ledger day; then Ledger",
+        "Smoke: advance days via normal overnight only; assert testIds; do NOT set quest_volume_active / arc_* via test harness"
+      ],
+      "doNot": [
+        "Require force-overnight-story or flag inject for headphones/ledger SVG",
+        "Gate props on quest_volume_active / arc_volume_war_beat* alone",
+        "Show Volume note and Ledger tray stacked on first eligible paint"
+      ]
+    },
+    "principles": {
+      "storyNeverGatedBySpend": true,
+      "naturalUnlockNoForceFlags": true,
+      "smokeWithoutFlagInject": true,
+      "oneLayerWins": true,
+      "volumeThenLedger": true
+    },
+    "naturalUnlockSchedule": {
+      "id": "volume_ledger_natural",
+      "note": "Calendar + Antenna advance — not force flags. Soft seeds are optional mirrors for other systems; props MUST render from dayIndex alone.",
+      "volumeHeadphones": {
+        "testId": "story-street-headphones-note",
+        "paths": [
+          {
+            "id": "after_antenna_week",
+            "dayIndexMin": 3,
+            "antennaDoneAny": [
+              "arc_kite_antenna_complete",
+              "quest_antenna_complete",
+              "arc_kite_antenna_beat4",
+              "flag_fence_and_kite",
+              "flag_kite_chaos_buff"
+            ],
+            "softSeeds": [
+              "natural_volume_street",
+              "quest_volume_tease",
+              "arc_volume_war_seed"
+            ]
+          },
+          {
+            "id": "week2_cold_seed",
+            "dayIndexMin": 7,
+            "note": "Week-2 cold: calendar alone unlocks Volume street even if Antenna flags never fired",
+            "softSeeds": [
+              "natural_volume_street",
+              "week2_volume_seed"
+            ]
+          }
+        ],
+        "suppressWhen": [
+          "arc_volume_war_complete",
+          "flag_peri_stay",
+          "flag_peri_leaving_threat"
+        ]
+      },
+      "ledgerTray": {
+        "testId": "story-street-ledger-tray",
+        "paths": [
+          {
+            "id": "after_volume_street",
+            "dayIndexMin": 5,
+            "requiresSeen": "natural_volume_street",
+            "orVolumeDoneAny": [
+              "arc_volume_war_complete",
+              "quest_volume_complete",
+              "arc_volume_war_beat5",
+              "street_av_handoff_done"
+            ],
+            "softSeeds": [
+              "natural_ledger_street",
+              "quest_ledger_tease",
+              "arc_tea_ledger_seed"
+            ]
+          },
+          {
+            "id": "week2_ledger_seed",
+            "dayIndexMin": 10,
+            "note": "Later Week-2/3 cold: ledger tray without Volume flag inject",
+            "softSeeds": [
+              "natural_ledger_street",
+              "week2_ledger_seed"
+            ]
+          }
+        ],
+        "suppressWhen": [
+          "arc_tea_ledger_complete",
+          "flag_ledger_closed_kind",
+          "flag_ledger_private"
+        ]
+      },
+      "oneLayerOrder": [
+        "volumeHeadphones",
+        "ledgerTray"
+      ]
+    },
+    "naturalStreetProps": [
+      {
+        "id": "street_prop_volume_headphones_natural",
+        "arcId": "arc_volume_war",
+        "replacesForm9Id": "street_prop_volume_headphones",
+        "screens": [
+          "street"
+        ],
+        "priority": 88,
+        "unlockMode": "natural",
+        "when": {
+          "dayIndexMin": 3,
+          "flagsNone": [
+            "arc_volume_war_complete",
+            "flag_peri_stay",
+            "flag_peri_leaving_threat",
+            "natural_ledger_street_wins"
+          ],
+          "naturalAny": [
+            {
+              "dayIndexMin": 3,
+              "flagsAny": [
+                "arc_kite_antenna_complete",
+                "quest_antenna_complete",
+                "arc_kite_antenna_beat4",
+                "flag_fence_and_kite",
+                "flag_kite_chaos_buff",
+                "natural_volume_street",
+                "street_av_handoff_seen",
+                "quest_volume_tease",
+                "arc_volume_war_seed",
+                "quest_volume_active",
+                "arc_volume_war_beat1",
+                "arc_volume_war_beat2"
+              ]
+            },
+            {
+              "dayIndexMin": 7
+            }
+          ]
+        },
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-headphones-note\" data-arc=\"arc_volume_war\" data-unlock=\"natural\" aria-label=\"HEADPHONES note\">\n  <div class=\"rp-note-door\">\n    <span class=\"rp-note-caps\">HEADPHONES</span>\n  </div>\n  <span class=\"rp-stage-prop__tag\">Decibel · note</span>\n</div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-headphones-note\" data-arc=\"arc_volume_war\" data-unlock=\"natural\" aria-label=\"KULAKLIK notu\">\n  <div class=\"rp-note-door\">\n    <span class=\"rp-note-caps\">KULAKLIK</span>\n  </div>\n  <span class=\"rp-stage-prop__tag\">Desibel · not</span>\n</div>",
+        "testId": "story-street-headphones-note",
+        "npcLine": {
+          "speakerId": "n5",
+          "text": {
+            "tr": "Kapıdaki KULAKLIK — doğal açılış, zorlama bayrak yok.",
+            "en": "HEADPHONES on the door — natural unlock, no force flags."
+          }
+        }
+      },
+      {
+        "id": "street_prop_ledger_tray_natural",
+        "arcId": "arc_tea_ledger",
+        "replacesForm9Id": "street_prop_ledger_tray",
+        "screens": [
+          "street"
+        ],
+        "priority": 86,
+        "unlockMode": "natural",
+        "when": {
+          "dayIndexMin": 5,
+          "flagsNone": [
+            "arc_tea_ledger_complete",
+            "flag_ledger_closed_kind",
+            "flag_ledger_private"
+          ],
+          "naturalAny": [
+            {
+              "dayIndexMin": 5,
+              "flagsAny": [
+                "natural_volume_street",
+                "natural_ledger_street",
+                "arc_volume_war_complete",
+                "quest_volume_complete",
+                "arc_volume_war_beat5",
+                "street_av_handoff_done",
+                "quest_ledger_active",
+                "arc_tea_ledger_beat1",
+                "arc_tea_ledger_seed",
+                "quest_ledger_tease"
+              ]
+            },
+            {
+              "dayIndexMin": 10
+            }
+          ]
+        },
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" data-unlock=\"natural\" aria-label=\"Ledger & tray\">\n  <svg class=\"rp-ledger-svg\" viewBox=\"0 0 80 28\" aria-hidden=\"true\">\n    <ellipse cx=\"22\" cy=\"16\" rx=\"14\" ry=\"6\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/>\n    <rect x=\"42\" y=\"6\" width=\"22\" height=\"16\" rx=\"1.5\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n    <line x1=\"46\" y1=\"10\" x2=\"60\" y2=\"10\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"14\" x2=\"58\" y2=\"14\" stroke=\"#c45c3e\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"18\" x2=\"60\" y2=\"18\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Ledger · tray</span>\n</div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" data-unlock=\"natural\" aria-label=\"Defter ve tepsi\">\n  <svg class=\"rp-ledger-svg\" viewBox=\"0 0 80 28\" aria-hidden=\"true\">\n    <ellipse cx=\"22\" cy=\"16\" rx=\"14\" ry=\"6\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/>\n    <rect x=\"42\" y=\"6\" width=\"22\" height=\"16\" rx=\"1.5\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n    <line x1=\"46\" y1=\"10\" x2=\"60\" y2=\"10\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"14\" x2=\"58\" y2=\"14\" stroke=\"#c45c3e\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"18\" x2=\"60\" y2=\"18\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Defter · tepsi</span>\n</div>",
+        "testId": "story-street-ledger-tray",
+        "npcLine": {
+          "speakerId": "n1",
+          "text": {
+            "tr": "Tepsi ve defter — hafta ilerledi, sokak görüyor.",
+            "en": "Tray and ledger — week advanced, the street sees it."
+          }
+        }
+      }
+    ],
+    "applyNaturalUnlockContract": {
+      "id": "applyNaturalArcStreetUnlock",
+      "callSites": [
+        "renderOvernight",
+        "applyDay2ColdRewrite",
+        "renderStreet enter",
+        "endEvening→morning"
+      ],
+      "rules": [
+        "Never call forceOvernightStoryProve or poke quest_volume_active / arc_volume_war_beat* for smoke",
+        "If day>=3 and antennaDoneAny → set natural_volume_street (soft)",
+        "If day>=7 → set natural_volume_street (week2 cold) even without antenna flags",
+        "If day>=5 and natural_volume_street (or volume done) → set natural_ledger_street",
+        "If day>=10 → set natural_ledger_street (week2/3 cold)",
+        "Props render even if soft seeds skipped — when.naturalAny dayIndexMin:7 / :10 branches are enough"
+      ]
+    },
+    "smokeProveWithoutFlagInject": {
+      "id": "smoke_natural_vl_street",
+      "forbidden": [
+        "state.save.storyFlags.quest_volume_active = true",
+        "state.save.storyFlags.arc_volume_war_beat2 = true",
+        "state.save.storyFlags.quest_ledger_active = true",
+        "forceOvernightStoryProve flag poke for volume/ledger",
+        "URL ?forceFlags="
+      ],
+      "allowed": [
+        "Normal Day1 cold choice",
+        "Normal End evening / overnight day advances",
+        "Optional: complete Antenna objectives through UI (not flag inject)"
+      ],
+      "asserts": [
+        "After dayIndex>=7 via overnight only: query story-street-headphones-note",
+        "After further overnight to dayIndex>=10: query story-street-ledger-tray (Volume yields per one-layer)",
+        "OR after Antenna UI-complete + day>=3: headphones-note present"
+      ]
+    },
+    "cssAppend": "\n/* story-form-12 — natural Volume/Ledger street props (same visuals, unlock tag) */\n.rp-stage-prop--headphones-note[data-unlock=\"natural\"],\n.rp-stage-prop--ledger-tray[data-unlock=\"natural\"] {\n  z-index: 8;\n}\n.rp-stage-prop--headphones-note {\n  left: 62%; width: 28%; top: 34%; height: auto;\n}\n.rp-note-door {\n  background: #f4f0e4;\n  color: #1a120c;\n  padding: 0.55rem 0.65rem;\n  transform: rotate(-3deg);\n  box-shadow: 0 4px 12px rgba(0,0,0,.45);\n  border: 2px solid #1a120c;\n}\n.rp-note-caps { font: 800 13px/1.1 \"IBM Plex Mono\", ui-monospace, monospace; letter-spacing: 0.08em; }\n.rp-stage-prop--ledger-tray {\n  left: 18%; width: 36%; top: 60%; height: 18%; color: #e8c9a0;\n}\n.rp-ledger-svg { width: 100%; height: 100%; display: block; }\n",
+    "echoFollowUpsAppend": [
+      {
+        "id": "echo_form12_natural_street",
+        "priority": 99,
+        "when": {
+          "flagsAny": [
+            "natural_volume_street",
+            "natural_ledger_street"
+          ],
+          "slots": [
+            "street",
+            "evening"
+          ]
+        },
+        "speakerId": "narrator",
+        "headline": {
+          "tr": "Doğal açılış — zorlama yok",
+          "en": "Natural unlock — no force"
+        },
+        "body": {
+          "tr": "KULAKLIK notu ve defter-tepsi gün ilerlemesiyle sokakta. Smoke bayrak sokmaz.",
+          "en": "HEADPHONES note and ledger-tray arrive by day advance. Smoke does not inject flags."
+        },
+        "cta": {
+          "tr": "Sokağı doğrula",
+          "en": "Prove the street"
+        }
+      }
+    ],
+    "acceptanceChecks": [
+      {
+        "id": "headphones_natural",
+        "desc": "dayIndex>=7 overnight-only OR Antenna-complete+day>=3: story-street-headphones-note present without flag inject."
+      },
+      {
+        "id": "ledger_natural",
+        "desc": "dayIndex>=10 overnight-only OR after volume natural: story-street-ledger-tray present without flag inject."
+      },
+      {
+        "id": "one_layer",
+        "desc": "Headphones and ledger-tray never co-primary on first paint; ledger wins only after volume street tenure / day>=10."
+      },
+      {
+        "id": "no_force",
+        "desc": "Smoke path uses no forceOvernightStoryProve flag poke and no quest_volume_active assignment."
+      }
+    ],
+    "newStoryFlags": [
+      "natural_volume_street",
+      "natural_ledger_street",
+      "natural_ledger_street_wins",
+      "week2_volume_seed",
+      "week2_ledger_seed"
+    ]
   }
 }

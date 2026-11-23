@@ -1,0 +1,338 @@
+{
+  "schemaVersion": 1,
+  "packId": "story-form-10",
+  "kind": "story-quest-form",
+  "formIndex": 10,
+  "localeDefault": "tr",
+  "purpose": "Long-arc pull after Day2: Antenna→Volume handoff visible on street (prop + NPC + compact banner), not journal-only. Optional Volume→Ledger seed.",
+  "addressesScore": {
+    "scoreLatestPath": "internal/rival-porch-score-latest.json",
+    "storyScore": 8.4,
+    "playedAt": "2026-11-23T12:50:00Z",
+    "gaps": [
+      "Long-arc pull still thin after Day2 beat",
+      "Antenna Op beat CTA competes with street prop readability"
+    ],
+    "userAsk": "story-form-10 — long-arc pull after Day2 beat (Antenna→Volume handoff on street, not only journal)"
+  },
+  "sourcePacks": [
+    "internal/squads/story-form-7.json",
+    "internal/squads/story-form-8.json",
+    "internal/squads/story-form-9.json"
+  ],
+  "integrator": {
+    "owner": "code owner on cursor/rival-porch-slice-31f7",
+    "noPrFromThisPackAuthor": true,
+    "mergeMode": "patch-overlay",
+    "wire": [
+      "Merge storyForm10; expose via normalizeQuestPack",
+      "After Day2 cold settle (dayIndex>=3 OR cold prop already painted once), evaluate streetHandoffBeats",
+      "On Antenna complete OR beat4 done OR quest_antenna_complete: inject A→V handoff SVG + Orhan/Peri NPC line + compact handoff banner",
+      "Set storyFlags.street_av_handoff_seen when prop painted; optional quest seed q_decibel tease",
+      "Do NOT bury handoff only in journalDramaCards — street is primary",
+      "Respect form9 one-layer-wins: if cold Day2 first paint, handoff waits until dayIndex>=3 or hide_day2_spotlight already set AND cold prop acked",
+      "Append cssAppend + echoFollowUpsAppend"
+    ],
+    "doNot": [
+      "Show A→V handoff only as journal log line",
+      "Stack full Antenna banner + Volume banner + handoff prop on same paint",
+      "Gate handoff behind spend/paywall"
+    ]
+  },
+  "principles": {
+    "storyNeverGatedBySpend": true,
+    "longArcPullOnStreet": true,
+    "handoffNotJournalOnly": true,
+    "afterDay2ColdSettles": true,
+    "oneHandoffLayer": true
+  },
+  "streetHandoffBeats": [
+    {
+      "id": "handoff_antenna_to_volume",
+      "fromArcId": "arc_kite_antenna",
+      "toArcId": "arc_volume_war",
+      "fromQuestId": "q_antenna_op",
+      "toQuestId": "q_decibel",
+      "mqStep": {
+        "from": "mq_antenna_op",
+        "to": "mq_decibel_accord"
+      },
+      "priority": 92,
+      "screens": [
+        "street",
+        "evening"
+      ],
+      "when": {
+        "dayIndexMin": 3,
+        "flagsAny": [
+          "arc_kite_antenna_complete",
+          "quest_antenna_complete",
+          "arc_kite_antenna_beat4",
+          "flag_fence_and_kite",
+          "flag_kite_chaos_buff"
+        ],
+        "flagsNone": [
+          "street_av_handoff_done",
+          "arc_volume_war_complete",
+          "quest_volume_complete"
+        ],
+        "orEarlyTease": {
+          "dayIndexMin": 2,
+          "flagsAll": [
+            "arc_kite_antenna_beat3"
+          ],
+          "flagsNone": [
+            "cold_open_mediate",
+            "cold_open_instigate",
+            "cold_open_stage"
+          ],
+          "note": "If no cold Day2 conflict and Antenna late, allow Day2 evening tease"
+        }
+      },
+      "setsFlagsOnShow": [
+        "street_av_handoff_seen"
+      ],
+      "setsFlagsOnCta": [
+        "street_av_handoff_done",
+        "quest_volume_tease",
+        "arc_volume_war_seed"
+      ],
+      "stageProp": {
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--av-handoff\" data-testid=\"story-street-av-handoff\" data-handoff=\"antenna_to_volume\" aria-label=\"Antenna to Volume handoff\">\n  <svg class=\"rp-av-handoff-svg\" viewBox=\"0 0 120 48\" preserveAspectRatio=\"none\" aria-hidden=\"true\">\n    <!-- fading snag scar -->\n    <line x1=\"28\" y1=\"10\" x2=\"28\" y2=\"38\" stroke=\"#6a5a48\" stroke-width=\"0.7\" opacity=\"0.55\"/>\n    <path d=\"M 18 14 Q 24 8 28 12\" fill=\"none\" stroke=\"#c45c3e\" stroke-width=\"0.6\" opacity=\"0.45\" stroke-dasharray=\"2 1.5\"/>\n    <!-- arrow / pulse toward Orhan door -->\n    <path d=\"M 40 24 L 62 24\" stroke=\"#e8b478\" stroke-width=\"1.1\" marker-end=\"url(#avh)\"/>\n    <defs><marker id=\"avh\" markerWidth=\"6\" markerHeight=\"6\" refX=\"5\" refY=\"3\" orient=\"auto\"><path d=\"M0,0 L6,3 L0,6 Z\" fill=\"#e8b478\"/></marker></defs>\n    <!-- bass rings -->\n    <circle cx=\"88\" cy=\"24\" r=\"6\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.9\" opacity=\"0.9\"/>\n    <circle cx=\"88\" cy=\"24\" r=\"11\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.55\" opacity=\"0.45\"/>\n    <circle cx=\"88\" cy=\"24\" r=\"16\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.35\" opacity=\"0.25\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Antenna → Volume</span>\n</div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--av-handoff\" data-testid=\"story-street-av-handoff\" data-handoff=\"antenna_to_volume\" aria-label=\"Anten → Desibel geçişi\">\n  <svg class=\"rp-av-handoff-svg\" viewBox=\"0 0 120 48\" preserveAspectRatio=\"none\" aria-hidden=\"true\">\n    <!-- fading snag scar -->\n    <line x1=\"28\" y1=\"10\" x2=\"28\" y2=\"38\" stroke=\"#6a5a48\" stroke-width=\"0.7\" opacity=\"0.55\"/>\n    <path d=\"M 18 14 Q 24 8 28 12\" fill=\"none\" stroke=\"#c45c3e\" stroke-width=\"0.6\" opacity=\"0.45\" stroke-dasharray=\"2 1.5\"/>\n    <!-- arrow / pulse toward Orhan door -->\n    <path d=\"M 40 24 L 62 24\" stroke=\"#e8b478\" stroke-width=\"1.1\" marker-end=\"url(#avh)\"/>\n    <defs><marker id=\"avh\" markerWidth=\"6\" markerHeight=\"6\" refX=\"5\" refY=\"3\" orient=\"auto\"><path d=\"M0,0 L6,3 L0,6 Z\" fill=\"#e8b478\"/></marker></defs>\n    <!-- bass rings -->\n    <circle cx=\"88\" cy=\"24\" r=\"6\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.9\" opacity=\"0.9\"/>\n    <circle cx=\"88\" cy=\"24\" r=\"11\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.55\" opacity=\"0.45\"/>\n    <circle cx=\"88\" cy=\"24\" r=\"16\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.35\" opacity=\"0.25\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Anten → Desibel</span>\n</div>",
+        "testId": "story-street-av-handoff"
+      },
+      "alsoShowVolumeNote": {
+        "reuseForm9PropId": "street_prop_volume_headphones",
+        "whenFlagsNone": [
+          "arc_volume_war_beat2"
+        ],
+        "note": "Co-paint HEADPHONES note if Volume not yet at beat2 — physical pull"
+      },
+      "npcLine": {
+        "speakerId": "n3",
+        "fallbackSpeakerId": "n5",
+        "text": {
+          "tr": "Uçurtma bitti. Gece bası başladı — Orhan'ın kapısı titriyor.",
+          "en": "Kite's done. Night bass started — Orhan's door is shaking."
+        },
+        "testId": "story-av-handoff-npc"
+      },
+      "compactBanner": {
+        "testId": "street-av-handoff-banner",
+        "headline": {
+          "tr": "Anten kapandı → Desibel açılıyor",
+          "en": "Antenna closed → Decibel opens"
+        },
+        "body": {
+          "tr": "Sokakta iz: sönük takılma izi + bas halkaları. Sonraki ark burada.",
+          "en": "Street mark: fading snag scar + bass rings. Next arc lives here."
+        },
+        "cta": {
+          "tr": "Desibel'e bak",
+          "en": "Check Decibel"
+        },
+        "ctaAction": "openNeighbor",
+        "ctaNeighborId": "n3"
+      },
+      "eveningBeat": {
+        "testId": "evening-av-handoff",
+        "headline": {
+          "tr": "Geçiş: Anten Operasyonu → Desibel Antlaşması",
+          "en": "Handoff: Antenna Op → Decibel Accord"
+        },
+        "body": {
+          "tr": "Day2 soğuk seçim sokakta kaldı. Şimdi uzun ark çekiyor: bas, not, antlaşma.",
+          "en": "Day2 cold choice stayed on the street. Now the long arc pulls: bass, note, accord."
+        }
+      },
+      "journalCard": {
+        "placement": "dramaAboveLog",
+        "id": "drama_av_handoff",
+        "testId": "journal-av-handoff",
+        "title": {
+          "tr": "Sokak geçişi — Anten → Desibel",
+          "en": "Street handoff — Antenna → Decibel"
+        },
+        "body": {
+          "tr": "Bu kart özet; asıl kanıt sokakta (story-street-av-handoff).",
+          "en": "This card is the summary; proof is on the street (story-street-av-handoff)."
+        },
+        "pointsToStreet": true
+      }
+    },
+    {
+      "id": "handoff_volume_to_ledger",
+      "fromArcId": "arc_volume_war",
+      "toArcId": "arc_tea_ledger",
+      "fromQuestId": "q_decibel",
+      "toQuestId": "q_tea_ledger",
+      "mqStep": {
+        "from": "mq_decibel_accord",
+        "to": "mq_ledger_tray"
+      },
+      "priority": 90,
+      "screens": [
+        "street",
+        "evening"
+      ],
+      "when": {
+        "dayIndexMin": 5,
+        "flagsAny": [
+          "arc_volume_war_complete",
+          "quest_volume_complete",
+          "arc_volume_war_beat5",
+          "flag_peri_stay",
+          "flag_peri_leaving_threat"
+        ],
+        "flagsNone": [
+          "street_vl_handoff_done",
+          "arc_tea_ledger_complete"
+        ]
+      },
+      "setsFlagsOnShow": [
+        "street_vl_handoff_seen"
+      ],
+      "setsFlagsOnCta": [
+        "street_vl_handoff_done",
+        "quest_ledger_tease",
+        "arc_tea_ledger_seed"
+      ],
+      "stageProp": {
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--vl-handoff\" data-testid=\"story-street-vl-handoff\" data-handoff=\"volume_to_ledger\" aria-label=\"Volume to Ledger handoff\">\n  <svg class=\"rp-vl-handoff-svg\" viewBox=\"0 0 120 40\" aria-hidden=\"true\">\n    <circle cx=\"28\" cy=\"20\" r=\"5\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.8\" opacity=\"0.5\"/>\n    <path d=\"M 40 20 L 62 20\" stroke=\"#e8b478\" stroke-width=\"1\"/>\n    <ellipse cx=\"88\" cy=\"22\" rx=\"12\" ry=\"5\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/>\n    <rect x=\"78\" y=\"8\" width=\"16\" height=\"12\" rx=\"1\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.6\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Volume → Ledger</span>\n</div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--vl-handoff\" data-testid=\"story-street-vl-handoff\" data-handoff=\"volume_to_ledger\" aria-label=\"Desibel → Defter geçişi\">\n  <svg class=\"rp-vl-handoff-svg\" viewBox=\"0 0 120 40\" aria-hidden=\"true\">\n    <circle cx=\"28\" cy=\"20\" r=\"5\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.8\" opacity=\"0.5\"/>\n    <path d=\"M 40 20 L 62 20\" stroke=\"#e8b478\" stroke-width=\"1\"/>\n    <ellipse cx=\"88\" cy=\"22\" rx=\"12\" ry=\"5\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/>\n    <rect x=\"78\" y=\"8\" width=\"16\" height=\"12\" rx=\"1\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.6\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Desibel → Defter</span>\n</div>",
+        "testId": "story-street-vl-handoff"
+      },
+      "npcLine": {
+        "speakerId": "n1",
+        "text": {
+          "tr": "Bas sustu. Defter ve tepsi sırada — Neon da duyuyor.",
+          "en": "Bass went quiet. Ledger and tray are next — Neon hears that too."
+        },
+        "testId": "story-vl-handoff-npc"
+      },
+      "compactBanner": {
+        "testId": "street-vl-handoff-banner",
+        "headline": {
+          "tr": "Desibel kapandı → Defter açılıyor",
+          "en": "Decibel closed → Ledger opens"
+        },
+        "body": {
+          "tr": "Uzun ark devam: çay, hesap, Neon.",
+          "en": "Long arc continues: tea, accounts, Neon."
+        },
+        "cta": {
+          "tr": "Deftere bak",
+          "en": "Check Ledger"
+        },
+        "ctaAction": "openNeighbor",
+        "ctaNeighborId": "n1"
+      }
+    }
+  ],
+  "afterDay2PullContract": {
+    "id": "long_arc_after_day2",
+    "rule": "Once Day2 cold consequence has painted at least once, next story pressure is Antenna resolution → Volume open on street.",
+    "sequence": [
+      "day1 cold_open_*",
+      "day2 cold SVG + NPC (forms 5–6, 9)",
+      "antenna beats street props (form 9 snag)",
+      "antenna resolve → story-street-av-handoff + Volume note (this form)",
+      "volume beats → optional story-street-vl-handoff"
+    ],
+    "acceptance": "Player can name next arc from street screenshot without opening journal."
+  },
+  "cssAppend": "\n/* story-form-10 — Antenna→Volume street handoff */\n.rp-stage-prop--av-handoff {\n  left: 12%; right: 12%; top: 28%; height: 32%;\n  z-index: 8; color: #e8b478;\n  animation: rp-av-pulse 2.4s ease-in-out infinite;\n}\n.rp-av-handoff-svg, .rp-vl-handoff-svg { width: 100%; height: 100%; display: block; }\n@keyframes rp-av-pulse {\n  0%, 100% { opacity: 0.92; }\n  50% { opacity: 1; filter: drop-shadow(0 0 6px rgba(126,184,212,.35)); }\n}\n.rp-stage-prop--vl-handoff {\n  left: 18%; right: 18%; top: 52%; height: 22%;\n  z-index: 8; color: #e8c9a0;\n}\n.rp-handoff-banner {\n  position: absolute; left: 50%; bottom: 5.2rem;\n  transform: translateX(-50%);\n  z-index: 8;\n  max-width: min(92%, 22rem);\n  padding: 0.45rem 0.7rem;\n  background: rgba(14,10,8,.88);\n  border: 1px solid rgba(232,180,120,.45);\n  border-radius: 10px;\n  color: #f2e6d8;\n  font-size: 12px;\n  line-height: 1.35;\n}\n.rp-handoff-banner__h { font-weight: 700; margin: 0 0 0.15rem; }\n.rp-handoff-banner__cta {\n  margin-top: 0.35rem;\n  display: inline-block;\n  padding: 0.25rem 0.55rem;\n  border: 1px solid #e8b478;\n  border-radius: 6px;\n  background: transparent;\n  color: #e8b478;\n  font-size: 11px;\n}\n/* one handoff layer: hide full arc banners while handoff banner up */\nbody.rp-handoff-av .rp-arc-beat-banner,\nbody.rp-handoff-vl .rp-arc-beat-banner { display: none; }\n",
+  "integratorSnippet": {
+    "language": "js",
+    "comment": "Street Antenna→Volume handoff after Day2 settle",
+    "pseudo": "\nfunction storyForm10() {\n  return state.questPack?.storyForm10 || state.storyForm10 || null;\n}\n\nfunction whenHandoffOk(h) {\n  const day = state.save.dayIndex || 1;\n  const w = h.when || {};\n  if ((w.dayIndexMin || 0) > day) {\n    // optional early tease\n    const early = w.orEarlyTease;\n    if (!early || (early.dayIndexMin || 0) > day) return false;\n    if (!flagsMatch(early)) return false;\n  } else if (!flagsMatch(w)) return false;\n  // form9: don't steal cold Day2 first paint\n  if (day === 2 && [\"cold_open_mediate\",\"cold_open_instigate\",\"cold_open_stage\"].some(storyFlag)) {\n    if (!storyFlag(\"day2_prop_ack\") && !storyFlag(\"hide_day2_spotlight\")) return false;\n  }\n  return true;\n}\n\nfunction streetHandoffHtml(screen) {\n  const beats = (storyForm10()?.streetHandoffBeats || [])\n    .filter((h) => (h.screens || []).includes(screen))\n    .filter(whenHandoffOk)\n    .sort((a,b) => (b.priority||0) - (a.priority||0));\n  const hit = beats[0];\n  if (!hit) { document.body.classList.remove(\"rp-handoff-av\",\"rp-handoff-vl\"); return \"\"; }\n  if (hit.id.includes(\"antenna_to_volume\")) document.body.classList.add(\"rp-handoff-av\");\n  if (hit.id.includes(\"volume_to_ledger\")) document.body.classList.add(\"rp-handoff-vl\");\n  for (const f of hit.setsFlagsOnShow || []) state.save.storyFlags[f] = true;\n  const prop = (state.locale===\"tr\" && hit.stageProp.htmlTr) ? hit.stageProp.htmlTr : hit.stageProp.html;\n  const ban = hit.compactBanner;\n  const bubble = hit.npcLine ? hotspotBubbleFor(hit.npcLine) : \"\";\n  return prop + bubble + handoffBannerHtml(ban);\n}\n\n// renderStreet: after cold props / before dock — streetHandoffHtml(\"street\")\n// renderEvening: eveningBeat card when whenHandoffOk\n"
+  },
+  "echoFollowUpsAppend": [
+    {
+      "id": "echo_form10_av_street",
+      "priority": 97,
+      "when": {
+        "flagsAny": [
+          "street_av_handoff_seen",
+          "arc_kite_antenna_complete"
+        ],
+        "flagsNone": [
+          "street_av_handoff_done",
+          "arc_volume_war_complete"
+        ],
+        "slots": [
+          "street",
+          "evening"
+        ]
+      },
+      "speakerId": "narrator",
+      "headline": {
+        "tr": "Uzun ark sokakta çekiyor",
+        "en": "Long arc pulls on the street"
+      },
+      "body": {
+        "tr": "Anten izi sönüyor; bas halkaları Orhan'a gidiyor. Desibel Antlaşması burada başlar.",
+        "en": "Antenna scar fades; bass rings walk to Orhan. Decibel Accord starts here."
+      },
+      "cta": {
+        "tr": "Geçişi gör",
+        "en": "See the handoff"
+      }
+    }
+  ],
+  "acceptanceChecks": [
+    {
+      "id": "av_handoff_on_street",
+      "desc": "After Antenna resolve (day≥3): story-street-av-handoff SVG visible on street without opening journal."
+    },
+    {
+      "id": "av_handoff_npc",
+      "desc": "story-av-handoff-npc (or bubble) names Volume/bass as next pull."
+    },
+    {
+      "id": "av_handoff_banner",
+      "desc": "street-av-handoff-banner compact; no dual full Antenna+Volume banners stacked."
+    },
+    {
+      "id": "journal_points_to_street",
+      "desc": "journal-av-handoff exists but copy says proof is on street."
+    },
+    {
+      "id": "after_day2_sequence",
+      "desc": "Day2 cold paint still wins day2; handoff does not bury cold prop on first Day2 enter."
+    },
+    {
+      "id": "vl_handoff_optional",
+      "desc": "After Volume resolve: story-street-vl-handoff seeds Ledger on street."
+    }
+  ],
+  "playtestScript": [
+    "Complete Antenna (or beat4) with day≥3 → street shows av-handoff SVG + NPC + compact banner",
+    "Screenshot: player can identify next arc = Volume/Decibel without journal",
+    "Confirm Day2 cold path still clean on day2 enter (form9)",
+    "Complete Volume → vl-handoff appears for Ledger seed"
+  ],
+  "newStoryFlags": [
+    "street_av_handoff_seen",
+    "street_av_handoff_done",
+    "quest_volume_tease",
+    "arc_volume_war_seed",
+    "street_vl_handoff_seen",
+    "street_vl_handoff_done",
+    "quest_ledger_tease",
+    "arc_tea_ledger_seed"
+  ],
+  "meta": {
+    "squad": "story-quest",
+    "formIndex": 10,
+    "shipTrigger": "story-9 delivered — long-arc pull Antenna→Volume on street",
+    "nextPackWhen": "story category < 8.5",
+    "dependsOnForms": [
+      7,
+      8,
+      9
+    ],
+    "implementationNote": "Street handoff beats + SVG; journal card secondary and points to street."
+  }
+}

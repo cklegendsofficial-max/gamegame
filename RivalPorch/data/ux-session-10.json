@@ -1,0 +1,61 @@
+{
+  "packId": "ux-session-10",
+  "schemaVersion": 1,
+  "scoreReact": {
+    "buildCommit": "f6801b6",
+    "overall": 8.4,
+    "gameplay": 8.3,
+    "gap": "dock still Quests/\u00b7\u00b7\u00b7/Practice + pot \u2014 not single earned primary"
+  },
+  "soleEndMode": {
+    "whenFlagsAll": [
+      "practice_cup_done",
+      "syn_taught_syn_rivalry"
+    ],
+    "bodyDataEveningMode": "sole_end",
+    "primary": {
+      "testid": "evening-primary",
+      "endEvening": true,
+      "label": {
+        "tr": "Ak\u015fam\u0131 b\u0131rak",
+        "en": "End evening"
+      },
+      "nav": "overnight"
+    },
+    "dockAllowedTestIds": [
+      "evening-overflow"
+    ],
+    "dockForbiddenTestIds": [
+      "practice-match",
+      "neighborhood-street",
+      "go-street",
+      "quests-dock",
+      "pot-cta"
+    ],
+    "midForbidden": [
+      "pot-cta",
+      "antenna-banner",
+      "agenda-list",
+      "beat-list"
+    ]
+  },
+  "overflow": {
+    "testid": "evening-overflow",
+    "items": [
+      "quests",
+      "journal",
+      "street",
+      "shop"
+    ]
+  },
+  "retain": {
+    "eveningMidVhMax": 0.35
+  },
+  "acceptanceChecks": [
+    "post_practice_exactly_one_rp_cta_primary",
+    "practice_match_not_visible_on_evening_when_cleared",
+    "pot_cta_not_visible_when_cleared",
+    "quests_only_in_overflow",
+    "midVh_le_35"
+  ]
+}

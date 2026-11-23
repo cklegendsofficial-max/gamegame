@@ -4603,3 +4603,456 @@ body.rp-cold-day2 .rp-arc-chip { display: inline-flex; }
 body.rp-cold-day2 .rp-hotspot--mediate-leyla .rp-hotspot__bubble,
 body.rp-cold-day2 .rp-hotspot--instigate-leyla .rp-hotspot__bubble,
 body.rp-cold-day2 .rp-hotspot--stage-leyla .rp-hotspot__bubble { display: none; }
+
+
+/* ===== visual-fix-10 thick clay comic ===== */
+/* Rival Porch — visual-fix-10
+   37aae6b gap: comic panels exist but framing still thin vs stage art.
+   Thicken clay strip / panel bezels so they read as comic boards, not UI cards.
+   Paste AFTER visual-fix-7.css. Keeps 3-panel structure + share export root.
+*/
+
+.rp-screen--comic {
+  --rp-comic-bead: #5c4334;
+  --rp-comic-bead-hi: #8a6a52;
+  --rp-comic-bead-lo: #2a1c14;
+  --rp-comic-paper: #1c1510;
+  --rp-comic-gutter: 10px;
+}
+
+/* Outer strip = thick clay folio, not a thin rounded card */
+.rp-comic-strip {
+  gap: var(--rp-comic-gutter) !important;
+  padding: 14px 12px !important;
+  border-radius: 18px !important;
+  background:
+    radial-gradient(120% 80% at 50% 0%, #6b4e3a 0%, transparent 55%),
+    linear-gradient(160deg, #5a4030 0%, #3a281c 40%, #1e1510 100%) !important;
+  border: 5px solid var(--rp-comic-bead-lo) !important;
+  box-shadow:
+    inset 0 2px 0 color-mix(in srgb, var(--rp-comic-bead-hi) 55%, transparent),
+    inset 0 -3px 0 color-mix(in srgb, #000 55%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--porch-lamp, #E8A045) 22%, transparent),
+    0 14px 32px color-mix(in srgb, #000 55%, transparent),
+    0 0 0 3px color-mix(in srgb, var(--mud-night, #1A1612) 80%, transparent) !important;
+}
+
+/* Each panel = heavy clay window (not 1–2px hairline card) */
+.rp-comic-panel {
+  min-height: 108px !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+  background: var(--rp-comic-paper) !important;
+  border: 4px solid var(--rp-comic-bead) !important;
+  outline: 2px solid var(--rp-comic-bead-lo);
+  outline-offset: -1px;
+  box-shadow:
+    inset 0 0 0 2px color-mix(in srgb, var(--rp-comic-bead-hi) 35%, transparent),
+    inset 0 10px 18px color-mix(in srgb, #000 35%, transparent),
+    0 3px 0 var(--rp-comic-bead-lo) !important;
+}
+
+/* Inner matte lip so art sits inset like a comic board */
+.rp-comic-panel::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  z-index: 1;
+  border-radius: 5px;
+  box-shadow:
+    inset 0 0 0 2px color-mix(in srgb, #000 45%, transparent),
+    inset 0 0 12px color-mix(in srgb, #000 40%, transparent);
+  pointer-events: none;
+}
+
+/* Art fills inside the lip */
+.rp-comic-panel__art {
+  inset: 5px !important;
+  width: calc(100% - 10px) !important;
+  height: calc(100% - 10px) !important;
+  border-radius: 4px;
+  object-fit: cover !important;
+}
+
+.rp-comic-panel--clash .rp-comic-panel__art {
+  inset: auto !important;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 0;
+}
+.rp-comic-panel--clash {
+  border-radius: 8px;
+  gap: 3px;
+  background: var(--rp-comic-bead-lo) !important;
+  padding: 5px;
+  box-sizing: border-box;
+}
+.rp-comic-panel--clash .rp-comic-panel__art {
+  border: 2px solid var(--rp-comic-bead);
+  border-radius: 4px;
+}
+
+/* Caption bar = clay plaque, not transparent hairline */
+.rp-comic-panel__caption {
+  left: 5px !important;
+  right: 5px !important;
+  bottom: 5px !important;
+  padding: 10px 10px 8px !important;
+  font-size: 12px !important;
+  font-weight: 600;
+  border-radius: 0 0 4px 4px;
+  background:
+    linear-gradient(
+      to top,
+      color-mix(in srgb, var(--mud-night, #1A1612) 92%, transparent) 0%,
+      color-mix(in srgb, var(--mud-night, #1A1612) 72%, transparent) 70%,
+      transparent 100%
+    ) !important;
+  border-top: 1px solid color-mix(in srgb, var(--porch-lamp, #E8A045) 28%, transparent);
+  z-index: 3;
+}
+
+.rp-comic-panel__badge {
+  top: 8px !important;
+  left: 8px !important;
+  z-index: 4;
+  font-size: 10px !important;
+  font-weight: 700;
+  padding: 4px 8px !important;
+  border-radius: 6px !important;
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 78%, transparent) !important;
+  border: 2px solid color-mix(in srgb, var(--tea-cream, #F2E6D8) 28%, transparent) !important;
+}
+
+/* Punch MVP bust sits in a clay ring, not a thin chip */
+.rp-comic-panel--punch .rp-comic-panel__bust {
+  width: 46% !important;
+  max-width: 132px !important;
+  border: 4px solid var(--porch-lamp, #E8A045) !important;
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--mud-night, #1A1612) 75%, transparent),
+    0 10px 22px color-mix(in srgb, #000 60%, transparent) !important;
+}
+
+.rp-comic-panel--clash .rp-comic-panel__vs {
+  font-size: 12px !important;
+  padding: 5px 10px !important;
+  border-width: 2px !important;
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 82%, transparent) !important;
+}
+
+/* Slight organic panel offset — comic strip, not UI grid */
+.rp-comic-panel--kickoff {
+  transform: rotate(-0.4deg);
+}
+.rp-comic-panel--clash {
+  transform: rotate(0.35deg);
+}
+.rp-comic-panel--punch {
+  transform: rotate(-0.25deg);
+}
+
+/* Export root keeps thicker frames */
+.rp-comic-strip[data-export-root="true"] .rp-comic-panel {
+  /* same bead rules — share PNG should look clay-bound */
+}
+
+@media (min-height: 780px) {
+  .rp-comic-panel {
+    min-height: 124px !important;
+  }
+  .rp-comic-strip {
+    padding: 16px 14px !important;
+  }
+}
+
+
+/* ===== story-form-10 A→V handoff ===== */
+
+/* story-form-10 — Antenna→Volume street handoff */
+.rp-stage-prop--av-handoff {
+  left: 12%; right: 12%; top: 28%; height: 32%;
+  z-index: 8; color: #e8b478;
+  animation: rp-av-pulse 2.4s ease-in-out infinite;
+}
+.rp-av-handoff-svg, .rp-vl-handoff-svg { width: 100%; height: 100%; display: block; }
+@keyframes rp-av-pulse {
+  0%, 100% { opacity: 0.92; }
+  50% { opacity: 1; filter: drop-shadow(0 0 6px rgba(126,184,212,.35)); }
+}
+.rp-stage-prop--vl-handoff {
+  left: 18%; right: 18%; top: 52%; height: 22%;
+  z-index: 8; color: #e8c9a0;
+}
+.rp-handoff-banner {
+  position: absolute; left: 50%; bottom: 5.2rem;
+  transform: translateX(-50%);
+  z-index: 8;
+  max-width: min(92%, 22rem);
+  padding: 0.45rem 0.7rem;
+  background: rgba(14,10,8,.88);
+  border: 1px solid rgba(232,180,120,.45);
+  border-radius: 10px;
+  color: #f2e6d8;
+  font-size: 12px;
+  line-height: 1.35;
+}
+.rp-handoff-banner__h { font-weight: 700; margin: 0 0 0.15rem; }
+.rp-handoff-banner__cta {
+  margin-top: 0.35rem;
+  display: inline-block;
+  padding: 0.25rem 0.55rem;
+  border: 1px solid #e8b478;
+  border-radius: 6px;
+  background: transparent;
+  color: #e8b478;
+  font-size: 11px;
+}
+/* one handoff layer: hide full arc banners while handoff banner up */
+body.rp-handoff-av .rp-arc-beat-banner,
+body.rp-handoff-vl .rp-arc-beat-banner { display: none; }
+
+
+/* ===== mechanics-fix-10 tempo steer ===== */
+.tempo-steer-meter {
+  position: relative;
+  height: 14px;
+  margin: 0.2rem 0 0.35rem;
+  border-radius: 7px;
+  background: rgba(20,14,10,.55);
+  border: 1px solid rgba(232,180,120,.35);
+  overflow: hidden;
+}
+.tempo-steer-meter__label {
+  position: absolute; left: 8px; top: 0; bottom: 0;
+  font-size: 10px; line-height: 14px; color: #f2e6d8; z-index: 1;
+}
+.tempo-steer-meter__fill {
+  display: block; height: 100%; width: 0;
+  background: linear-gradient(90deg, #c45c3e, #e8b478);
+  transition: width .12s linear;
+}
+.tempo-pulse-pad {
+  position: absolute; left: 50%; top: 42%; transform: translate(-50%,-50%);
+  z-index: 12; min-width: 72px; min-height: 48px;
+  border-radius: 999px; border: 2px solid #e8b478;
+  background: rgba(196,92,62,.92); color: #fff; font-weight: 700;
+  animation: tempo-pulse-pop 1.1s ease-out;
+}
+@keyframes tempo-pulse-pop {
+  0% { transform: translate(-50%,-50%) scale(.85); opacity: .7; }
+  40% { transform: translate(-50%,-50%) scale(1.08); opacity: 1; }
+  100% { transform: translate(-50%,-50%) scale(1); }
+}
+.tempo-chip-row {
+  display: flex; gap: .4rem; justify-content: center;
+  margin: .35rem 0; z-index: 11;
+}
+.tempo-idle-hint { text-align: center; font-size: 11px; }
+.rp-spine-cult-chip {
+  margin: .2rem 0 .35rem; font-size: 12px; color: #e8b478; letter-spacing: .02em;
+}
+.rp-handoff-npc {
+  position: absolute; left: 50%; bottom: 8.2rem; transform: translateX(-50%);
+  z-index: 8; max-width: min(92%, 22rem); padding: .35rem .55rem;
+  background: rgba(14,10,8,.86); border-radius: 8px; color: #f2e6d8; font-size: 12px;
+}
+.hud-you-score { margin-left: .35rem; color: #e8b478; font-weight: 600; }
+
+
+/* ===== story-form-11 one signal + volume props ===== */
+
+/* story-form-11 — one story signal; Volume beat street props; MQ chip */
+body.rp-story-one-signal .rp-arc-beat-banner { display: none; }
+body.rp-story-one-signal .rp-day2-spotlight { display: none !important; }
+
+.rp-mq-street-chip {
+  position: absolute;
+  top: 0.55rem; left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  padding: 0.28rem 0.6rem;
+  border-radius: 6px;
+  background: rgba(12,8,6,.82);
+  border: 1px solid rgba(232,180,120,.4);
+  color: #f2e6d8;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  max-width: 92%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rp-stage-prop--volume-bass { left: 48%; right: 8%; top: 30%; height: 28%; z-index: 8; }
+.rp-stage-prop--volume-pastry { left: 28%; width: 32%; top: 58%; height: 18%; z-index: 8; color: #e8c9a0; }
+.rp-stage-prop--volume-offer { left: 58%; width: 28%; top: 36%; height: 22%; z-index: 8; }
+.rp-stage-prop--volume-accord { left: 22%; right: 22%; top: 56%; height: auto; z-index: 8; }
+.rp-accord-chalk {
+  font: 700 11px/1.2 "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.06em;
+  padding: 0.4rem 0.55rem;
+  background: rgba(20,14,10,.9);
+  border: 1px dashed #e8b478;
+  color: #f2e6d8;
+  text-align: center;
+}
+.rp-vol-svg { width: 100%; height: 100%; display: block; }
+
+
+/* ===== visual-fix-11 Day2 bust clear ===== */
+/* Rival Porch — visual-fix-11
+   f6801b6 visual 8.3 — Day2 NPC bubble / Shared string overwrites bust row.
+   Acceptance: prop + single bubble readable with ZERO intersection vs bust labels.
+   Paste AFTER visual-fix-9.css.
+*/
+
+.rp-screen--street[data-day="2"],
+.rp-screen--street.is-day2 {
+  --rp-day2-bust-z: 8;
+  --rp-day2-prop-z: 5;
+  --rp-day2-line-z: 6;
+  --rp-day2-chrome-z: 4;
+}
+
+/* Bust row ALWAYS above Day2 dialogue / prop tags */
+.rp-screen--street[data-day="2"] .rp-hotspots,
+.rp-screen--street.is-day2 .rp-hotspots {
+  z-index: var(--rp-day2-bust-z) !important;
+}
+.rp-screen--street[data-day="2"] .rp-hotspot,
+.rp-screen--street.is-day2 .rp-hotspot {
+  z-index: var(--rp-day2-bust-z);
+  overflow: visible;
+}
+.rp-screen--street[data-day="2"] .rp-hotspot__bust,
+.rp-screen--street[data-day="2"] .rp-hotspot__name {
+  position: relative;
+  z-index: 2;
+}
+
+/* Kill on-bust bubbles — they collide with the rail */
+.rp-screen--street[data-day="2"] .rp-hotspot__bubble,
+.rp-screen--street.is-day2 .rp-hotspot__bubble {
+  display: none !important;
+}
+
+/* Prop SVG stays mid-stage, BELOW bust band (not painted over faces) */
+.rp-screen--street[data-day="2"] .rp-stage-prop,
+.rp-screen--street.is-day2 .rp-stage-prop,
+.rp-screen--street[data-day="2"] [data-testid^="story-day2-"][class*="prop"],
+.rp-screen--street[data-day="2"] [data-testid="story-day2-mediate-string"],
+.rp-screen--street[data-day="2"] [data-testid="story-day2-instigate-kite"],
+.rp-screen--street[data-day="2"] [data-testid="story-day2-stage-chalk"],
+.rp-screen--street[data-day="2"] [data-testid="story-day2-forbidden-zone"] {
+  z-index: var(--rp-day2-prop-z) !important;
+  top: max(32%, calc(var(--rp-street-bust-band-top, 100px) + 72px)) !important;
+  /* keep out of bust rail */
+  pointer-events: none;
+}
+.rp-screen--street[data-day="2"] .rp-stage-prop__tag {
+  font-size: 10px;
+  max-width: 7rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ONE Day2 NPC line — dedicated slot under bust row, above dock */
+.rp-screen--street[data-day="2"] .rp-day2-line,
+.rp-screen--street.is-day2 .rp-day2-line,
+.rp-screen--street[data-day="2"] [data-testid="story-day2-orhan-line"],
+.rp-screen--street[data-day="2"] [data-testid="story-day2-cem-rehearsal"],
+.rp-screen--street[data-day="2"] [data-testid="story-day2-leyla-line"] {
+  position: absolute !important;
+  left: 12px !important;
+  right: 12px !important;
+  top: auto !important;
+  bottom: calc(var(--rp-dock-h, 72px) + 10px + var(--rp-safe-bottom, 0px)) !important;
+  z-index: var(--rp-day2-line-z) !important;
+  display: block !important;
+  max-height: 40px !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 8px 12px !important;
+  font-size: 12px !important;
+  line-height: 1.25 !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 72%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--tea-cream, #F2E6D8) 18%, transparent);
+  pointer-events: none;
+  transform: none !important;
+}
+
+/* Hide duplicate mid-screen Orhan/Leyla dialogue walls */
+.rp-screen--street[data-day="2"] .rp-day2-dialogue-stack,
+.rp-screen--street[data-day="2"] .rp-npc-monologue,
+.rp-screen--street[data-day="2"] .rp-day2-line + .rp-day2-line,
+.rp-screen--street[data-day="2"] [data-day2-line]:nth-of-type(n + 2) {
+  display: none !important;
+}
+
+/* Compact Antenna chip must not cover bust faces either */
+.rp-screen--street[data-day="2"][data-arc-banner="on"] .rp-antenna-op-live-banner,
+.rp-screen--street[data-day="2"][data-arc-banner="on"] [data-testid="antenna-op-live-banner"] {
+  max-height: 32px;
+  top: calc(8px + var(--rp-safe-top, 0px));
+  z-index: var(--rp-day2-chrome-z);
+}
+
+/* If bust band overlaps chip, push hotspots slightly down on Day2 only */
+.rp-screen--street[data-day="2"] .rp-hotspots {
+  top: calc(var(--rp-street-bust-band-top, 96px) + 4px) !important;
+}
+
+
+/* ===== ux-session-10 sole_end ===== */
+body[data-evening-mode="sole_end"] .rp-dock [data-testid="practice-match"],
+body[data-evening-mode="sole_end"] .rp-dock [data-testid="neighborhood-street"],
+body[data-evening-mode="sole_end"] .rp-dock [data-testid="go-street"],
+body[data-evening-mode="sole_end"] .rp-dock [data-testid="quests-dock"],
+body[data-evening-mode="sole_end"] .rp-mid [data-testid="pot-cta"],
+body[data-evening-mode="sole_end"] .rp-mid .rp-cta-secondary,
+body[data-evening-mode="sole_end"] .rp-arc-beat-banner,
+body[data-evening-mode="sole_end"] [data-testid="antenna-banner"],
+body[data-evening-mode="sole_end"] [data-testid="antenna-op-live-banner"] {
+  display: none !important;
+}
+body[data-evening-mode="sole_end"] .rp-dock { justify-content: center; }
+.rp-overflow-sheet {
+  position: fixed; left: 50%; bottom: 4.5rem; transform: translateX(-50%);
+  z-index: 40; min-width: 12rem; padding: .5rem;
+  background: rgba(14,10,8,.94); border: 1px solid rgba(232,180,120,.4);
+  border-radius: 12px; display: flex; flex-direction: column; gap: .35rem;
+}
+.call-two-score-preview { font-size: 11px; color: #e8b478; text-align: center; margin: .25rem 0; }
+
+
+/* ===== story-form-12 natural volume/ledger ===== */
+
+/* story-form-12 — natural Volume/Ledger street props (same visuals, unlock tag) */
+.rp-stage-prop--headphones-note[data-unlock="natural"],
+.rp-stage-prop--ledger-tray[data-unlock="natural"] {
+  z-index: 8;
+}
+.rp-stage-prop--headphones-note {
+  left: 62%; width: 28%; top: 34%; height: auto;
+}
+.rp-note-door {
+  background: #f4f0e4;
+  color: #1a120c;
+  padding: 0.55rem 0.65rem;
+  transform: rotate(-3deg);
+  box-shadow: 0 4px 12px rgba(0,0,0,.45);
+  border: 2px solid #1a120c;
+}
+.rp-note-caps { font: 800 13px/1.1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.08em; }
+.rp-stage-prop--ledger-tray {
+  left: 18%; width: 36%; top: 60%; height: 18%; color: #e8c9a0;
+}
+.rp-ledger-svg { width: 100%; height: 100%; display: block; }

@@ -250,6 +250,62 @@ function eveningPrimaryCta() {
     }
     return { id: "sa_practice", action: "goto-cup", label: tr ? "Prova maçı ★" : "Practice match ★" };
   }
+  // ux-session-9: Day2+ Antenna → Volume → Ledger one primary
+  const day = state.save.dayIndex || 1;
+  if (day >= 2) {
+    const qs = Quests.ensureQuestSave(state.save);
+    const antennaDone = storyFlag("quest_antenna_complete") || storyFlag("arc_kite_antenna_complete");
+    const volumeDone = storyFlag("quest_volume_complete") || storyFlag("arc_volume_war_complete");
+    const ledgerDone = storyFlag("quest_ledger_complete") || storyFlag("arc_tea_ledger_complete");
+    const antennaActive = !!qs.active?.mq_antenna_op || storyFlag("quest_antenna_active");
+    const volumeActive = !!qs.active?.mq_decibel_accord || storyFlag("quest_volume_active");
+    if (!antennaDone && (antennaActive || day >= 2)) {
+      return {
+        id: "sa_antenna",
+        action: "goto-street",
+        label: tr ? "Antene çık" : "Up to the antenna",
+        support: tr
+          ? "İp duruyor. Desibel ve Defter bu yolun ilerisi."
+          : "The line holds. Volume and Ledger are further down this road.",
+        whisper: tr ? "Omurga 2/5 · Anten — sonra Desibel" : "Spine 2/5 · Antenna — then Volume",
+        questId: "mq_antenna_op",
+      };
+    }
+    if (antennaDone && !volumeDone) {
+      if (!volumeActive) {
+        return {
+          id: "sa_volume_accept",
+          action: "open-quests",
+          label: tr ? "Desibel'i aç" : "Open Volume",
+          support: tr
+            ? "Peri'nin seti, Orhan'ın uykusu — bir antlaşma."
+            : "Peri's set, Orhan's sleep — one accord.",
+          whisper: tr ? "Omurga 3/5 · Desibel — Defter sırada" : "Spine 3/5 · Volume — Ledger next",
+          questId: "mq_decibel_accord",
+          acceptIfNeeded: true,
+        };
+      }
+      return {
+        id: "sa_volume_beat",
+        action: "goto-street",
+        label: tr ? "KULAKLIK notuna git" : "Answer the HEADPHONES note",
+        support: tr ? "Bir gece daha — ses savaşı bitmedi." : "One more night — the volume war isn't over.",
+        whisper: tr ? "Desibel sürüyor · Defter bekliyor" : "Volume ongoing · Ledger waits",
+        questId: "mq_decibel_accord",
+      };
+    }
+    if (volumeDone && !ledgerDone) {
+      return {
+        id: "sa_ledger",
+        action: "goto-street",
+        label: tr ? "Deftere bak" : "Open the ledger",
+        support: tr ? "Çay çemberi — mahalle hesabı." : "Tea Circle — the block's account.",
+        whisper: tr ? "Omurga 4/5 · Defter ve Tepsi" : "Spine 4/5 · Ledger & Tray",
+        questId: "mq_ledger_tray",
+        acceptIfNeeded: true,
+      };
+    }
+  }
   return { id: "sa_visit", action: "goto-street", label: tr ? "Sokağa çık" : "Out to the street" };
 }
 
@@ -1144,6 +1200,18 @@ function storyForm9() {
   return state.questPack?.storyForm9 || state.storyForm9 || null;
 }
 
+function storyForm10() {
+  return state.questPack?.storyForm10 || state.storyForm10 || null;
+}
+
+function storyForm11() {
+  return state.questPack?.storyForm11 || state.storyForm11 || null;
+}
+
+function storyForm12() {
+  return state.questPack?.storyForm12 || state.storyForm12 || null;
+}
+
 function isColdDay2() {
   const day = state.save.dayIndex || 1;
   return day >= 2 && ["cold_open_mediate", "cold_open_instigate", "cold_open_stage"].some((f) => storyFlag(f));
@@ -1236,7 +1304,130 @@ function streetArcCompactChipHtml() {
   return "";
 }
 
+function streetHandoffBeatLive(screen = "street") {
+  const beats = storyForm10()?.streetHandoffBeats || [];
+  const coldShowing = isColdDay2();
+  const day = state.save.dayIndex || 1;
+  const candidates = beats
+    .filter((b) => (b.screens || ["street"]).includes(screen))
+    .filter((b) => {
+      if (whenFlagsOk(b.when || {})) return true;
+      const early = b.when?.orEarlyTease;
+      return early ? whenFlagsOk(early) : false;
+    })
+    .filter((b) => !(coldShowing && day < 3))
+    .sort((a, b) => (b.priority || 0) - (a.priority || 0));
+  return candidates[0] || null;
+}
+
+function volumeStreetBeatPropLive() {
+  const props = storyForm11()?.volumeStreetBeatProps || [];
+  return props.find((p) => whenFlagsOk(p.when || {})) || null;
+}
+
+function mqStreetChipHtml() {
+  const chips = storyForm11()?.mqStreetChips || [];
+  const hit = chips.find((c) => whenFlagsOk(c.when || {}));
+  if (!hit) return "";
+  return `<button class="rp-mq-street-chip" type="button" data-testid="${hit.testId || "mq-street-chip"}" data-action="open-quests">${loc(hit.chip)}</button>`;
+}
+
+function pickUnifiedStoryWinner() {
+  const ladder = storyForm11()?.unifiedStreetStoryLayer?.priorityLadder || [
+    { id: "cold_day2_prop" },
+    { id: "av_handoff" },
+    { id: "volume_beat_prop" },
+    { id: "vl_handoff" },
+    { id: "ledger_prop" },
+    { id: "antenna_prop" },
+  ];
+  for (const step of ladder) {
+    const id = step.id;
+    if (id === "cold_day2_prop") {
+      if (!isColdDay2()) continue;
+      const html = day2StreetStageHtml();
+      if (html) return { id, html, npc: "", suppressBanner: true, suppressSpotlight: true };
+      continue;
+    }
+    if (id === "av_handoff" || id === "vl_handoff") {
+      const beat = streetHandoffBeatLive("street");
+      if (!beat) continue;
+      if (id === "av_handoff" && beat.id !== "handoff_antenna_to_volume") continue;
+      if (id === "vl_handoff" && beat.id !== "handoff_volume_to_ledger") continue;
+      // form10 beat when is authoritative; ladder when is post-show filter only
+      state.save.storyFlags = state.save.storyFlags || {};
+      for (const f of beat.setsFlagsOnShow || []) state.save.storyFlags[f] = true;
+      const prop = beat.stageProp || {};
+      const propHtml = state.locale === "tr" && prop.htmlTr ? prop.htmlTr : prop.html || "";
+      const ban = beat.compactBanner;
+      const npc = beat.npcLine;
+      const banHtml = ban
+        ? `<div class="rp-handoff-banner" data-testid="${ban.testId || "street-av-handoff-banner"}">
+            <p class="rp-handoff-banner__h">${loc(ban.headline)}</p>
+            <p>${loc(ban.body)}</p>
+            <button class="rp-handoff-banner__cta" type="button" data-action="handoff-cta" data-beat="${beat.id}" data-neighbor="${ban.ctaNeighborId || "n3"}">${loc(ban.cta)}</button>
+          </div>`
+        : "";
+      const npcHtml = npc
+        ? `<p class="rp-handoff-npc" data-testid="${npc.testId || "story-av-handoff-npc"}"><strong>${loc(neighborById(npc.speakerId)?.name) || npc.speakerId}</strong>: ${loc(npc.text)}</p>`
+        : "";
+      return { id, html: `${propHtml}${banHtml}`, npc: npcHtml, suppressBanner: true, suppressSpotlight: true };
+    }
+    if (id === "volume_beat_prop") {
+      // Prefer form12 natural headphones, else form11 beat props
+      const nat = naturalStreetPropLive();
+      if (nat && nat.arcId === "arc_volume_war") {
+        const html = state.locale === "tr" && nat.htmlTr ? nat.htmlTr : nat.html || "";
+        const npc = nat.npcLine
+          ? `<p class="rp-handoff-npc" data-testid="story-volume-natural-npc"><strong>${loc(neighborById(nat.npcLine.speakerId)?.name) || ""}</strong>: ${loc(nat.npcLine.text)}</p>`
+          : "";
+        state.save.storyFlags = state.save.storyFlags || {};
+        state.save.storyFlags.natural_volume_street = true;
+        return { id: "volume_natural", html, npc, suppressBanner: true, suppressSpotlight: true };
+      }
+      const vol = volumeStreetBeatPropLive();
+      if (!vol) continue;
+      const html = state.locale === "tr" && vol.htmlTr ? vol.htmlTr : vol.html || "";
+      const npc = vol.npcLine
+        ? `<p class="rp-handoff-npc" data-testid="story-volume-beat-npc"><strong>${loc(neighborById(vol.npcLine.speakerId)?.name) || ""}</strong>: ${loc(vol.npcLine.text)}</p>`
+        : "";
+      return { id, html, npc, suppressBanner: true, suppressSpotlight: true };
+    }
+    if (id === "ledger_prop" || id === "antenna_prop") {
+      if (id === "ledger_prop") {
+        const nat = naturalStreetPropLive();
+        if (nat && nat.arcId === "arc_tea_ledger") {
+          const html = state.locale === "tr" && nat.htmlTr ? nat.htmlTr : nat.html || "";
+          state.save.storyFlags = state.save.storyFlags || {};
+          state.save.storyFlags.natural_ledger_street = true;
+          return { id: "ledger_natural", html, npc: "", suppressBanner: true, suppressSpotlight: true };
+        }
+      }
+      if (step.when && !whenFlagsOk(step.when)) continue;
+      const props = storyForm9()?.streetArcStageProps || [];
+      const want = id === "ledger_prop" ? "arc_tea_ledger" : "arc_kite_antenna";
+      const hit = props
+        .filter((p) => (p.screens || ["street"]).includes("street"))
+        .filter((p) => whenFlagsOk(p.when || {}))
+        .filter((p) => p.arcId === want || (id === "antenna_prop" && p.arcId === "arc_kite_antenna"))
+        .sort((a, b) => (b.priority || 0) - (a.priority || 0))[0];
+      if (!hit) continue;
+      const html = state.locale === "tr" && hit.htmlTr ? hit.htmlTr : hit.html || "";
+      return { id, html, npc: "", suppressBanner: true, suppressSpotlight: true };
+    }
+  }
+  return null;
+}
+
 function streetArcStagePropsHtml() {
+  const winner = pickUnifiedStoryWinner();
+  if (winner) {
+    document.body.classList.add("rp-story-one-signal");
+    document.body.classList.toggle("rp-handoff-av", winner.id === "av_handoff");
+    document.body.classList.toggle("rp-handoff-vl", winner.id === "vl_handoff");
+    return `<div class="street-story-one-signal" data-testid="street-story-one-signal" data-winner="${winner.id}">${winner.html || ""}${winner.npc || ""}</div>`;
+  }
+  document.body.classList.remove("rp-story-one-signal", "rp-handoff-av", "rp-handoff-vl");
   const props = storyForm9()?.streetArcStageProps || [];
   if (!props.length) return "";
   const coldShowing = isColdDay2();
@@ -1270,8 +1461,18 @@ function arcJournalBeatsHtml(cards, listTestId) {
 function antennaOpJournalHtml() {
   const f7 = storyForm7();
   const f8 = storyForm8();
+  const handoffCard = (() => {
+    const beat = (storyForm10()?.streetHandoffBeats || []).find((b) => b.id === "handoff_antenna_to_volume");
+    const card = beat?.journalCard;
+    if (!card || !(storyFlag("street_av_handoff_seen") || storyFlag("arc_kite_antenna_complete"))) return "";
+    return `<article class="antenna-beat-card" data-testid="${card.testId || "journal-av-handoff"}">
+      <h4>${loc(card.title)}</h4>
+      <p>${loc(card.body)}</p>
+    </article>`;
+  })();
   return (
     arcJournalBeatsHtml(f7?.antennaOpJournalBeatCards, "antenna-op-journal-beats") +
+    handoffCard +
     arcJournalBeatsHtml(f8?.volumeOpJournalBeatCards, "volume-op-journal-beats") +
     arcJournalBeatsHtml(f8?.ledgerOpJournalBeatCards, "ledger-op-journal-beats")
   );
@@ -1281,10 +1482,61 @@ function whenFlagsOk(when = {}) {
   const day = state.save.dayIndex || 1;
   if (when.dayIndexMin != null && day < when.dayIndexMin) return false;
   if (when.dayIndexMax != null && day > when.dayIndexMax) return false;
+  if (when.dayIndex != null && day !== when.dayIndex) return false;
   if (when.flagsAll?.length && !when.flagsAll.every((f) => storyFlag(f))) return false;
   if (when.flagsAny?.length && !when.flagsAny.some((f) => storyFlag(f))) return false;
   if (when.flagsNone?.length && when.flagsNone.some((f) => storyFlag(f))) return false;
+  // story-form-12: naturalAny = OR of day/flag branches (calendar unlock)
+  if (when.naturalAny?.length) {
+    const natOk = when.naturalAny.some((branch) => whenFlagsOk(branch));
+    if (!natOk) return false;
+  }
   return true;
+}
+
+function applyNaturalArcStreetUnlock() {
+  const sched = storyForm12()?.naturalUnlockSchedule;
+  if (!sched) return;
+  const day = state.save.dayIndex || 1;
+  state.save.storyFlags = state.save.storyFlags || {};
+  const f = state.save.storyFlags;
+  const antennaDone = [
+    "arc_kite_antenna_complete",
+    "quest_antenna_complete",
+    "arc_kite_antenna_beat4",
+    "flag_fence_and_kite",
+    "flag_kite_chaos_buff",
+  ].some((k) => f[k]);
+  if ((day >= 3 && antennaDone) || day >= 7) {
+    f.natural_volume_street = true;
+    f.quest_volume_tease = f.quest_volume_tease || true;
+    f.arc_volume_war_seed = f.arc_volume_war_seed || true;
+  }
+  if ((day >= 5 && f.natural_volume_street) || day >= 10) {
+    f.natural_ledger_street = true;
+    f.quest_ledger_tease = f.quest_ledger_tease || true;
+    f.arc_tea_ledger_seed = f.arc_tea_ledger_seed || true;
+  }
+  // one-layer: after volume seen 2 days, prefer ledger
+  if (f.natural_volume_street) {
+    f.volumeStreetDaysSeen = (f.volumeStreetDaysSeen || 0);
+  }
+}
+
+function naturalStreetPropLive() {
+  const props = storyForm12()?.naturalStreetProps || [];
+  const hits = props.filter((p) => whenFlagsOk(p.when || {})).sort((a, b) => (b.priority || 0) - (a.priority || 0));
+  if (!hits.length) return null;
+  // one-layer: volume then ledger
+  const day = state.save.dayIndex || 1;
+  const vol = hits.find((p) => p.arcId === "arc_volume_war");
+  const led = hits.find((p) => p.arcId === "arc_tea_ledger");
+  if (vol && led) {
+    const seen = state.save.storyFlags?.volumeStreetDaysSeen || 0;
+    if (seen >= 2 || day >= 5) return led;
+    return vol;
+  }
+  return hits[0];
 }
 
 /** form6 wins instigate/stage SVG; form5 mediate shared-string stays. */
@@ -1337,6 +1589,10 @@ function mutateHotspotHtml(n, baseBtnHtml) {
       new RegExp(`(rp-hotspot__name">)([^<]*)`),
       (_, a, name) => `${a}${name}${suffix}`
     );
+  }
+  // visual-fix-11: never mount on-bust bubbles on Day2 — dedicated .rp-day2-line instead
+  if (isColdDay2() || (state.save.dayIndex || 1) === 2) {
+    return html;
   }
   const bub = bubble
     ? `<span class="rp-hotspot__bubble"${tid ? ` data-testid="${tid}"` : ""}>${loc(bubble)}</span>`
@@ -1417,47 +1673,101 @@ function forceOvernightStoryProve() {
   renderOvernight({ lines: [], tease: "" });
 }
 
+function overnightSpineHook() {
+  const tr = state.locale === "tr";
+  const antennaDone = storyFlag("quest_antenna_complete") || storyFlag("arc_kite_antenna_complete");
+  const volumeDone = storyFlag("quest_volume_complete") || storyFlag("arc_volume_war_complete");
+  const antennaActive = storyFlag("quest_antenna_active") || !!Quests.ensureQuestSave(state.save).active?.mq_antenna_op;
+  const volumeActive = storyFlag("quest_volume_active") || !!Quests.ensureQuestSave(state.save).active?.mq_decibel_accord;
+  if (antennaDone && !volumeDone && !volumeActive) {
+    return {
+      title: tr ? "Gece · Bas geliyor" : "Night · Bass incoming",
+      hook: tr
+        ? "Desibel Antlaşması açıldı — Peri ↔ uyku. Defter sonra."
+        : "Decibel Accord open — Peri ↔ sleep. Ledger after.",
+    };
+  }
+  if (antennaActive && !antennaDone) {
+    return {
+      title: tr ? "Gece iki · İp duruyor" : "Night two · The line holds",
+      hook: tr ? "Anten bitmedi. Desibel seni bekliyor." : "Antenna isn't done. Volume is waiting.",
+    };
+  }
+  if (volumeActive && !volumeDone) {
+    return {
+      title: tr ? "Gece · KULAKLIK" : "Night · HEADPHONES",
+      hook: tr
+        ? "Ses savaşı sürüyor; Defter ve Tepsi sırada."
+        : "Volume war continues; Ledger & Tray next.",
+    };
+  }
+  return {
+    title: tr ? "Gece yazdı · Omurga devam" : "Night wrote · Spine continues",
+    hook: tr
+      ? "Sabah Anten Operasyonu — sonra Desibel, sonra Defter."
+      : "Morning: Antenna Op — then Volume, then Ledger.",
+  };
+}
+
+function spineCultChipHtml() {
+  const day = state.save.dayIndex || 1;
+  if (day < 2) return "";
+  const tr = state.locale === "tr";
+  let n = 1;
+  if (storyFlag("quest_antenna_complete") || storyFlag("arc_kite_antenna_complete")) n = 3;
+  else if (storyFlag("quest_antenna_active") || day >= 2) n = 2;
+  if (storyFlag("quest_volume_complete") || storyFlag("arc_volume_war_complete")) n = 4;
+  else if (storyFlag("quest_volume_active")) n = 3;
+  if (storyFlag("quest_ledger_complete")) n = 5;
+  const label = tr
+    ? `Omurga ${n}/5 · Anten → Desibel → Defter`
+    : `Spine ${n}/5 · Antenna → Volume → Ledger`;
+  return `<p class="rp-spine-cult-chip" data-testid="spine-cult-chip">${label}</p>`;
+}
+
 function renderOvernight(payoff) {
   const screen = document.getElementById("screen-overnight");
   const tr = state.locale === "tr";
   applyDay2ColdRewrite();
+  applyNaturalArcStreetUnlock();
   saveNow();
   const cold = pickOvernightColdConsequence();
+  const spine = overnightSpineHook();
   const teaser = Density.pickOvernightTeaser(state.densityPack, state.save, state.questPack);
   const form5Teasers = storyForm5()?.overnightTeasersAppend || [];
   const form4Teasers = state.questPack?.storyForm4?.overnightTeasersAppend || [];
   const form5Hit = form5Teasers.find((r) => whenFlagsOk(r.when || { flagsAll: r.when?.flagsAll }));
   const form4Hit = form4Teasers.find((r) => (r.when?.flagsAll || []).every((f) => storyFlag(f)));
-  const useTeaser = form5Hit || form4Hit || teaser;
+  // ux-9: spine hook beats generic coin teasers
+  const useTeaser = null;
   const echo = Density.pickEcho(state.densityPack, state.save, state.questPack, "overnight_wake");
   const whisper = questHudWhisper();
-  const teaserLines = (useTeaser?.lines || []).map((l) => loc(l)).filter(Boolean);
   const bitsSrc = [
-    ...teaserLines.slice(0, 2),
+    spine.hook,
     ...(payoff?.lines || []).slice(0, 1),
     echo ? loc(echo.body) : null,
   ]
     .filter(Boolean)
     .slice(0, 3);
   const bits = bitsSrc.map((l) => `<li>${l}</li>`).join("") || `<li>${tr ? "Mahalle uyudu." : "The block slept."}</li>`;
-  const tomorrow = useTeaser ? loc(useTeaser.title) : loc(dayHeadline());
-  const hook = useTeaser ? loc(useTeaser.tomorrowHook) : payoff?.tease || "";
-  const primaryLabel = tr ? `Yarım kalan: ${whisper}` : `Still open: ${whisper}`;
-  const primaryCta = whisper.includes("ödül") || whisper.toLowerCase().includes("reward") || whisper.toLowerCase().includes("tray")
-    ? "open-quests"
-    : "overnight-open-quest";
+  const tomorrow = spine.title;
+  const hook = spine.hook;
+  void form5Hit;
+  void form4Hit;
+  void teaser;
+  void useTeaser;
   screen.innerHTML = `
     ${stageLayer("street", true)}
     ${streetPropOverlayHtml("overnight")}
     <div class="rp-overnight" data-testid="overnight">
       <p class="rp-kicker">${tr ? "Gece geçti" : "Night passed"}</p>
       <h2 class="rp-night-title">${tomorrow}</h2>
-      <p class="overnight-quest-pull">◎ ${tr ? "Yarım kalan" : "Still open"}: ${whisper}</p>
+      ${spineCultChipHtml()}
+      <p class="overnight-quest-pull" data-testid="overnight-spine-hook">◎ ${hook}</p>
       ${cold ? overnightColdHtml(cold) : ""}
       <ul class="rp-ticks">${bits}</ul>
-      <p class="evening-cup-tease">${hook}</p>
-      <button class="rp-btn rp-btn--primary" type="button" data-action="${primaryCta}">${primaryLabel}</button>
-      <button class="rp-btn rp-btn--ghost" type="button" data-action="goto-evening">${tr ? "Yeni akşama gir" : "Enter the new evening"}</button>
+      <p class="evening-cup-tease">${whisper ? (tr ? "Yarım kalan: " : "Still open: ") + whisper : ""}</p>
+      <button class="rp-btn rp-btn--primary" type="button" data-action="goto-evening" data-testid="overnight-enter-evening">${tr ? "Yeni akşama gir" : "Enter the new evening"}</button>
     </div>`;
   saveNow();
   showScreen("screen-overnight");
@@ -1517,7 +1827,7 @@ function renderEvening() {
   const mainTotal = nightOne ? beatMax : mainAgenda ? mainAgenda.objectives.length : 1;
   const faceId = mainAgenda?.quest?.neighbors?.[0] || unlockedNeighbors()[0]?.id || "n1";
   const nextBeat = adventureBeats[0];
-  const support = !nightOne
+  let support = !nightOne
     ? loc(hook)
     : nextBeat
       ? loc(nextBeat.line)
@@ -1529,7 +1839,15 @@ function renderEvening() {
         );
 
   const cta = eveningPrimaryCta();
+  if (cta.support) support = cta.support;
+  if (cta.acceptIfNeeded && cta.questId) {
+    try { Quests.acceptQuest(state.save, state.questPack, cta.questId); } catch { /* */ }
+  }
   const endEnabled = !!st.endEveningEnabled;
+  const practiceCleared = !!(storyFlag("practice_cup_done") && storyFlag("syn_taught_syn_rivalry"));
+  // ux-session-10: literal sole End evening after Practice clear
+  const soleEnd = practiceCleared && endEnabled;
+  document.body.dataset.eveningMode = soleEnd ? "sole_end" : "spine_one";
   const endLabel =
     loc(state.uxPack2?.strings?.["evening.cta.end"]) ||
     (state.locale === "tr" ? "Akşamı bırak" : "End evening");
@@ -1538,41 +1856,57 @@ function renderEvening() {
       "evening.locked",
       state.locale === "tr" ? "Akşam bitmez — Cem Prova'da düdük çalıyor." : "Evening won't end — Cem's still whistling Practice."
     );
-  // ux-session-7: one next action — mid is title + ≤1 support + ONE primary (no checklist)
-  const primaryAction = endEnabled ? "end-evening" : cta.action;
-  const primaryLabel = endEnabled ? endLabel : cta.label;
-  const primaryTestId = endEnabled ? "end-evening" : "evening-primary";
-  const supportLine = (support || "").slice(0, state.uxPack7?.eveningHome?.maxSupportChars || 90);
+  const primaryAction = soleEnd || endEnabled ? "end-evening" : cta.action;
+  const primaryLabel = soleEnd || endEnabled ? endLabel : cta.label;
+  const primaryTestId = "evening-primary";
+  const supportLine = soleEnd
+    ? (state.locale === "tr" ? "Prova bitti. Akşamı bırak — omurga gece yazar." : "Practice done. End evening — the spine writes overnight.").slice(0, 90)
+    : (support || "").slice(0, state.uxPack7?.eveningHome?.maxSupportChars || 90);
 
+  const overflowOpen = !!state.eveningOverflowOpen;
+  const overflowSheet = overflowOpen
+    ? `<div class="rp-overflow-sheet" data-testid="evening-overflow-sheet">
+        <button class="rp-btn rp-btn--ghost" type="button" data-action="open-quests">${state.locale === "tr" ? "Görevler" : "Quests"}</button>
+        <button class="rp-btn rp-btn--ghost" type="button" data-action="open-story-log">${state.locale === "tr" ? "Günlük" : "Journal"}</button>
+        <button class="rp-btn rp-btn--ghost" type="button" data-action="goto-street">${state.locale === "tr" ? "Sokak" : "Street"}</button>
+        <button class="rp-btn rp-btn--ghost" type="button" data-action="open-shop">${state.locale === "tr" ? "Dükkan" : "Shop"}</button>
+      </div>`
+    : "";
+  const dockHtml = soleEnd
+    ? `<footer class="rp-dock rp-dock--tertiary">
+        <button class="rp-btn rp-btn--ghost" type="button" data-action="toggle-evening-overflow" data-testid="evening-overflow">${state.locale === "tr" ? "···" : "···"}</button>
+      </footer>`
+    : `<footer class="rp-dock rp-dock--tertiary">
+        <button class="rp-btn rp-btn--ghost" type="button" data-action="toggle-evening-overflow" data-testid="evening-overflow">${state.locale === "tr" ? "···" : "···"}</button>
+        ${
+          endEnabled
+            ? ""
+            : cta.action !== "goto-cup"
+              ? `<button class="rp-btn rp-btn--ghost ${st.cupRequired && !st.cupDone ? "rp-btn--ember" : ""}" type="button" data-action="goto-cup" data-testid="practice-match">${isCupNight() ? t("cup.season_night") : t("cup.practice")}</button>`
+              : ""
+        }
+        ${day1EscapeChipHtml(endEnabled)}
+      </footer>`;
   screen.innerHTML = `
     ${stageLayer("street")}
     ${hudHtml()}
     ${streetPropOverlayHtml("evening")}
-    ${day2StreetStageHtml()}
-    ${activeArcBeatBannerHtml()}
+    ${soleEnd ? "" : day2StreetStageHtml()}
+    ${soleEnd ? "" : activeArcBeatBannerHtml()}
     <div class="rp-mid rp-evening-card rp-evening-card--thin" data-testid="evening-mid">
       <h2 class="rp-night-title">${loc(dayHeadline())}</h2>
+      ${soleEnd ? "" : spineCultChipHtml()}
       ${supportLine ? `<p class="rp-mid__line">${supportLine}</p>` : ""}
-      <button id="btn-end-evening" class="rp-btn rp-btn--primary rp-end-evening" type="button" data-action="${primaryAction}" data-testid="${primaryTestId}" data-next-action="${endEnabled ? "end_evening" : cta.id}" data-end-evening="1" data-end-enabled="${endEnabled}" ${!endEnabled && cta.action === "end-evening" ? "disabled" : ""}>${primaryLabel}</button>
+      <button id="btn-end-evening" class="rp-btn rp-btn--primary rp-end-evening rp-cta-primary" type="button" data-action="${primaryAction}" data-testid="evening-primary" data-primary="true" data-next-action="${endEnabled || soleEnd ? "end_evening" : cta.id}" data-end-evening="1" data-end-enabled="${endEnabled || soleEnd}" ${!(endEnabled || soleEnd) && cta.action === "end-evening" ? "disabled" : ""}>${primaryLabel}</button>
       ${
-        mainAgenda?.ready
+        !soleEnd && mainAgenda?.ready
           ? `<button class="rp-btn" type="button" data-action="quest-complete" data-id="${mainAgenda.quest.id}">${state.locale === "tr" ? "Tepsideki ödülü aç" : "Open the tray reward"}</button>`
           : ""
       }
     </div>
-    <footer class="rp-dock rp-dock--tertiary">
-      <button class="rp-btn rp-btn--ghost" type="button" data-action="open-quests">${state.locale === "tr" ? "Görevler" : "Quests"}</button>
-      <button class="rp-btn rp-btn--ghost" type="button" data-action="open-story-log">${state.locale === "tr" ? "···" : "···"}</button>
-      ${
-        endEnabled
-          ? `<button class="rp-btn rp-btn--ghost" type="button" data-action="goto-street">${state.locale === "tr" ? "Sokak" : "Street"}</button>`
-          : cta.action !== "goto-cup"
-            ? `<button class="rp-btn rp-btn--ghost ${st.cupRequired && !st.cupDone ? "rp-btn--ember" : ""}" type="button" data-action="goto-cup" data-testid="practice-match">${isCupNight() ? t("cup.season_night") : t("cup.practice")}</button>`
-            : `<button class="rp-btn rp-btn--ghost" type="button" data-action="goto-street">${state.locale === "tr" ? "Sokak" : "Street"}</button>`
-      }
-      ${day1EscapeChipHtml(endEnabled)}
-    </footer>
-    ${endEnabled ? "" : `<p class="street-hint" data-testid="end-evening-hint">${lockedCopy}</p>`}
+    ${dockHtml}
+    ${overflowSheet}
+    ${endEnabled || soleEnd ? "" : `<p class="street-hint" data-testid="end-evening-hint">${lockedCopy}</p>`}
   `;
   if (endEnabled) document.documentElement.dataset.endEnabled = "true";
   else document.documentElement.dataset.endEnabled = "false";
@@ -1605,6 +1939,7 @@ function scrubBannedEscapeChrome() {
 
 function renderStreet() {
   const screen = document.getElementById("screen-street");
+  applyNaturalArcStreetUnlock();
   // visual-fix-2 wave3 L-block hotspots
   const HOT = {
     n1: [18, 42],
@@ -1644,19 +1979,34 @@ function renderStreet() {
 
   applyStreetLayerPolicy();
   const coldWins = isColdDay2();
+  const day = state.save.dayIndex || 1;
+  const winner = pickUnifiedStoryWinner();
+  const oneSignal = !!winner;
+  const coldHtml = oneSignal && winner.id === "cold_day2_prop" ? "" : (oneSignal ? "" : day2StreetStageHtml());
+  const bannerHtml = oneSignal || coldWins ? streetArcCompactChipHtml() : activeArcBeatBannerHtml();
+  const spotHtml = oneSignal ? "" : day2EnterSpotlightHtml("street");
+  // visual-fix-11: one Day2 line in dedicated slot (not on-bust bubbles)
+  const day2Line = coldWins && npcWhisper
+    ? `<p class="rp-day2-line" data-testid="story-day2-orhan-line">${npcWhisper}</p>`
+    : "";
+  screen.className = (screen.className || "").replace(/\bis-day2\b/g, "").trim();
+  if (day === 2) screen.classList.add("is-day2", "rp-screen--street");
+  screen.dataset.day = String(day);
   screen.innerHTML = `
     ${stageLayer("street")}
-    ${day2StreetStageHtml()}
+    ${coldHtml}
     ${streetArcStagePropsHtml()}
     ${hudHtml()}
     ${streetPropOverlayHtml("street")}
-    ${coldWins ? streetArcCompactChipHtml() : activeArcBeatBannerHtml()}
-    ${day2EnterSpotlightHtml("street")}
+    ${bannerHtml}
+    ${spotHtml}
+    ${mqStreetChipHtml()}
     <button class="rp-chip rp-back" type="button" data-action="goto-evening">${t("common.back")}</button>
-    <div class="rp-hotspots" role="list" data-testid="${coldWins ? "street-layer-cold-wins" : "street-hotspots"}">${spots}</div>
-    ${coldWins ? "" : (worldBits.length ? `<div class="world-banner street-float rp-wc-loud">${worldBits.map((l) => `<span>◈ ${l}</span>`).join("")}</div>` : "")}
-    ${npcWhisper ? `<div class="rp-npc-remember"><span>${npcWhisper}</span></div>` : ""}
-    ${!coldWins && spine ? `<div class="rp-whisper"><span>◎ ${spine}</span></div>` : ""}
+    <div class="rp-hotspots" role="list" data-testid="${coldWins || oneSignal ? "street-layer-cold-wins" : "street-hotspots"}">${spots}</div>
+    ${coldWins || oneSignal ? "" : (worldBits.length ? `<div class="world-banner street-float rp-wc-loud">${worldBits.map((l) => `<span>◈ ${l}</span>`).join("")}</div>` : "")}
+    ${day2Line}
+    ${!coldWins && npcWhisper && !oneSignal ? `<div class="rp-npc-remember"><span>${npcWhisper}</span></div>` : ""}
+    ${!coldWins && !oneSignal && spine ? `<div class="rp-whisper"><span>◎ ${spine}</span></div>` : ""}
     <footer class="rp-dock">
       <button class="rp-btn rp-btn--primary" type="button" data-action="checkin" ${needCheckin ? "" : "disabled"}>${needCheckin ? checkinLabel : t("street.porch_checkin")}</button>
       <button class="rp-btn" type="button" data-action="street-event" ${state.save.evening.streetEvent ? "disabled" : ""}>${t("street.event")}</button>
@@ -2822,15 +3172,161 @@ function startFight() {
   }
 }
 
+function noteTempoTap(battle) {
+  if (!battle) return;
+  battle.lastAgencyTapAt = battle.elapsed || 0;
+  battle.tempoMeter = Math.min(100, (battle.tempoMeter || 0) + 12);
+  battle.timescale = 1.05;
+  battle.agencyActionCount = (battle.agencyActionCount || 0) + 1;
+}
+
+function battleTimescale(battle) {
+  if (!battle || battle.paused) return 0;
+  const idleAfter = 2.0; // mech-11
+  const last = battle.lastAgencyTapAt ?? battle.elapsed ?? 0;
+  if ((battle.elapsed || 0) - last >= idleAfter) {
+    battle.timescale = 0.45;
+    return 0.45;
+  }
+  battle.timescale = 1.05;
+  return 1.05;
+}
+
+function syncTempoPulseUI(battle) {
+  const pad = document.getElementById("tempo-pulse-pad");
+  const dock = document.querySelector('[data-testid="tempo-pulse-dock"]');
+  const idle = document.getElementById("tempo-idle-hint");
+  const fill = document.getElementById("tempo-steer-fill");
+  const score = document.getElementById("you-score");
+  const chipRow = document.getElementById("tempo-chip-row");
+  const modalOpen = !!(
+    battle.paused &&
+    (battle.actionOffered || battle.secondCallOffered) &&
+    !document.getElementById("fight-actions")?.hidden
+  );
+  const pulseLive = !!(battle.tempoPulseUntil && battle.elapsed < battle.tempoPulseUntil && !modalOpen && !battle.finished);
+  if (pad) pad.hidden = !pulseLive;
+  if (dock) dock.hidden = !pulseLive;
+  if (idle) idle.hidden = !((battle.timescale || 1) < 0.9 && !modalOpen && !battle.finished);
+  if (fill) {
+    // drain on idle
+    if ((battle.timescale || 1) < 0.9) battle.tempoMeter = Math.max(0, (battle.tempoMeter || 0) - 0.35);
+    fill.style.width = `${Math.round(battle.tempoMeter || 0)}%`;
+  }
+  if (score) score.textContent = `You ${Math.round(battle.youScore || 0)}`;
+  const chipLive = !!(battle.tempoChipUntil && battle.elapsed < battle.tempoChipUntil && !modalOpen && !battle.finished);
+  if (chipRow) chipRow.hidden = !chipLive;
+}
+
+function tickTempoAgency(battle) {
+  if (!battle?.practice || battle.finished) return;
+  const modalOpen = !!(
+    battle.paused &&
+    (battle.actionOffered || battle.secondCallOffered)
+  );
+  if (modalOpen) {
+    battle.tempoPulseUntil = 0;
+    battle.tempoChipUntil = 0;
+    return;
+  }
+  // mechanics-fix-10: denser pulse every 2.2s (miss never blocks)
+  if (battle.actionUsed && !battle.secondCallUsed) {
+    const interval = 1.8; // mech-11 denser
+    const next = battle.nextTempoPulseAt ?? (battle.elapsed + 0.4);
+    if (battle.elapsed >= next && !(battle.tempoPulseUntil && battle.elapsed < battle.tempoPulseUntil)) {
+      battle.tempoPulseUntil = battle.elapsed + 1.1;
+      battle.nextTempoPulseAt = battle.elapsed + interval;
+      battle.tempoPulseSide = Math.random() < 0.5 ? "ally" : "enemy";
+    }
+    if (battle.tempoPulseUntil && battle.elapsed >= battle.tempoPulseUntil) {
+      battle.tempoPulseUntil = 0; // miss — continue, no penalty
+    }
+    // Push/Guard chip every ~5.5s, 2s dismiss
+    const chipNext = battle.nextTempoChipAt ?? (battle.elapsed + 3.2);
+    if (battle.elapsed >= chipNext && !(battle.tempoChipUntil && battle.elapsed < battle.tempoChipUntil)) {
+      battle.tempoChipUntil = battle.elapsed + 2.0;
+      battle.nextTempoChipAt = battle.elapsed + 5.5;
+    }
+    if (battle.tempoChipUntil && battle.elapsed >= battle.tempoChipUntil) {
+      battle.tempoChipUntil = 0; // dismiss no effect
+    }
+  }
+}
+
+function applyTempoPulseHit() {
+  const battle = state.battle;
+  if (!battle || battle.finished) return;
+  if (!(battle.tempoPulseUntil && battle.elapsed < battle.tempoPulseUntil)) return;
+  battle.tempoPulseUntil = 0;
+  noteTempoTap(battle);
+  state.save.storyFlags = state.save.storyFlags || {};
+  state.save.storyFlags.practice_tempo_pulse_hit = true;
+  battle.playerAgencyActions = (battle.playerAgencyActions || 0) + 1;
+  battle.floaters = battle.floaters || [];
+  if (battle.tempoPulseSide === "enemy") {
+    const foe = battle.enemies.find((u) => u.alive);
+    if (foe) {
+      const dmg = Math.max(3, Math.floor(foe.maxHp * 0.1));
+      foe.hp = Math.max(1, foe.hp - dmg);
+      battle.youScore = (battle.youScore || 0) + 4;
+      battle.floaters.push({ side: foe.side, slot: foe.slot, dmg, t: battle.elapsed, proc: true });
+    }
+  } else {
+    const ally = battle.allies.find((u) => u.alive);
+    if (ally) {
+      const heal = Math.max(3, Math.floor(ally.maxHp * 0.05));
+      ally.hp = Math.min(ally.maxHp, ally.hp + heal);
+      battle.youScore = (battle.youScore || 0) + 3;
+      battle.floaters.push({ side: ally.side, slot: ally.slot, heal, t: battle.elapsed, proc: true });
+    }
+  }
+  toast(state.locale === "tr" ? "Tempo!" : "Tempo!");
+  updateFightUI(battle);
+  saveNow();
+}
+
+function applyTempoChip(kind) {
+  const battle = state.battle;
+  if (!battle || battle.finished) return;
+  if (!(battle.tempoChipUntil && battle.elapsed < battle.tempoChipUntil)) return;
+  battle.tempoChipUntil = 0;
+  noteTempoTap(battle);
+  battle.playerAgencyActions = (battle.playerAgencyActions || 0) + 1;
+  if (kind === "push") {
+    battle.atkBuffUntil = (battle.elapsed || 0) + 2;
+    battle.atkBuffPct = 0.08;
+    battle.youScore = (battle.youScore || 0) + 3;
+    toast(state.locale === "tr" ? "Bastır" : "Push");
+  } else {
+    battle.defBuffUntil = (battle.elapsed || 0) + 2;
+    battle.defBuffPct = 0.1;
+    battle.youScore = (battle.youScore || 0) + 2;
+    toast(state.locale === "tr" ? "Koru" : "Guard");
+  }
+  updateFightUI(battle);
+  saveNow();
+}
+
 function resumeFightLoop(battle) {
   if (state.fightTimer) clearInterval(state.fightTimer);
   const tickMs = 700;
   const uiMs = 100;
   let combatAcc = 0;
-  const startedAt = performance.now() - battle.elapsed * 1000;
+  let lastWall = performance.now();
+  battle.lastAgencyTapAt = battle.lastAgencyTapAt ?? battle.elapsed ?? 0;
+  battle.tempoMeter = battle.tempoMeter || 0;
+  battle.youScore = battle.youScore || 0;
   state.fightTimer = setInterval(() => {
-    if (battle.finished || battle.paused) return;
-    battle.elapsed = (performance.now() - startedAt) / 1000;
+    if (battle.finished) return;
+    const now = performance.now();
+    const wallDt = (now - lastWall) / 1000;
+    lastWall = now;
+    if (battle.paused) {
+      syncTempoPulseUI(battle);
+      return;
+    }
+    const scale = battleTimescale(battle);
+    battle.elapsed = (battle.elapsed || 0) + wallDt * scale;
     // Porch-call: practice script owns timing; otherwise ~45% fight / ally ≤50% HP
     const allyLow = battle.allies.some((u) => u.alive && u.hp / u.maxHp <= 0.5);
     const timeGate = battle.practice
@@ -2843,15 +3339,17 @@ function resumeFightLoop(battle) {
       showFightActions(battle);
       return;
     }
-    combatAcc += uiMs;
+    combatAcc += uiMs * scale;
     while (combatAcc >= tickMs) {
       combatAcc -= tickMs;
       runScriptedMoments(battle);
       if (battle.paused) break;
       combatTick(battle);
     }
+    tickTempoAgency(battle);
     battle.floaters = cappedFloaters((battle.floaters || []).filter((f) => battle.elapsed - f.t < 0.85));
     updateFightUI(battle);
+    syncTempoPulseUI(battle);
     const bothAlive = battle.allies.some((u) => u.alive) && battle.enemies.some((u) => u.alive);
     const minPrac = state.mechFix5?.pauseAutoFightForCall?.minPracticeFightSec || state.combatPack?.practiceCup?.minPracticeFightSec || 12;
     const timeUp = battle.elapsed >= 75;
@@ -2917,6 +3415,16 @@ function resumeFightLoop(battle) {
         battle.cannotDismissPorch = true;
         updateFightUI(battle);
         showFightActions(battle);
+      }
+      return;
+    }
+    // After Call II, also require second call before KO finish (fix-9 path)
+    if (battle.practice && battle.actionUsed && !battle.secondCallUsed && (timeUp || !bothAlive)) {
+      if (!battle.secondCallOffered) {
+        battle.secondCallOffered = true;
+        battle.paused = true;
+        updateFightUI(battle);
+        showSecondFightChoice(battle);
       }
       return;
     }
@@ -3082,22 +3590,27 @@ function showSecondFightChoice(battle) {
     </button>`;
   };
   bar.setAttribute("data-testid", tid.modal || "porch-call-modal-2");
+  const preview = `<div class="call-two-score-preview" data-testid="call-two-score-preview">
+      <span>Focus ≈ +10 You</span> · <span>Prop ≈ +9 You</span> · <span>Swap ≈ +8 You</span>
+    </div>`;
   bar.innerHTML = `
     <p class="fight-action-prompt">${title}</p>
     <p class="muted porch-call-sub">${subtitle}</p>
+    ${preview}
     <div class="btn-row wrap porch-call-row">${(battle.porchCallTwoOptions || []).map(card).join("")}</div>`;
   bar.hidden = false;
   battle.secondCallOfferedAt = battle.elapsed || 0;
   clearTimeout(battle._callTwoTimeout);
-  // Soft-timeout 6s → auto Focus — never softlock (mech-9)
+  // Soft-timeout 7s (mech-11) → auto Focus — still softlock-proof
   battle._callTwoTimeout = setTimeout(() => {
     if (!state.battle || state.battle.secondCallUsed || state.battle.finished) return;
     toast(
-      loc(state.mechFix9?.uiStringsPatch?.["fight.porch_call_two_auto"]) ||
-        (state.locale === "tr" ? "Çağrı II — Focus (otomatik)" : "Call II — Focus (auto)")
+      state.locale === "tr"
+        ? "Çağrı II otomatik — sonraki Cup'ta sen bas"
+        : "Call II auto — tap it yourself next Cup"
     );
     applySecondFightChoice("focus", { auto: true });
-  }, (state.mechFix9?.softlockProofSecondCall?.noSoftlock?.practiceSoftTimeoutSec || 6) * 1000);
+  }, 7000);
 }
 
 function applySecondFightChoice(kind, opts = {}) {
@@ -3106,6 +3619,15 @@ function applySecondFightChoice(kind, opts = {}) {
   clearTimeout(battle._callTwoTimeout);
   battle.secondCallUsed = true;
   battle.playerAgencyActions = (battle.playerAgencyActions || 0) + 1;
+  battle.agencyActionCount = (battle.agencyActionCount || 0) + 1;
+  state.save.storyFlags = state.save.storyFlags || {};
+  if (opts.auto) {
+    state.save.storyFlags.practice_call_two_auto = true;
+  } else {
+    state.save.storyFlags.practice_call_two_player = true;
+    battle.youScore = (battle.youScore || 0) + 4;
+    toast(state.locale === "tr" ? "Erken Çağrı II — mastery +4" : "Early Call II — mastery +4");
+  }
   const beforeYou = battle.allies.reduce((s, u) => s + Math.max(0, u.hp), 0);
   const beforeBot = battle.enemies.reduce((s, u) => s + Math.max(0, u.hp), 0);
   const bias = state.mechFix9?.visibleScoreSwing?.effectBiasPractice || {};
@@ -3329,6 +3851,7 @@ function applyPorchCall(callId) {
   battle.actionUsed = true;
   battle.firstCallId = callId;
   battle.playerAgencyActions = (battle.playerAgencyActions || 0) + 1;
+  battle.agencyActionCount = (battle.agencyActionCount || 0) + 1;
   battle.cannotDismissPorch = false;
   battle.porchCallArmed = false;
   // Visible swing bias for Practice teach readability
@@ -3505,6 +4028,14 @@ function combatTick(battle) {
     if (attacker.side === "enemy" && battle.allFront && target.slot < 3) dmg = Math.floor(dmg * 1.2);
     if (attacker.side === "ally" && battle.focusUntil && battle.elapsed <= battle.focusUntil && target.slot === battle.focusTargetSlot) {
       dmg = Math.floor(dmg * (1 + (battle.focusDmgBonus || 0.2)));
+    }
+    // mech-11: steer damage up, idle auto down → autoDamageShare ≤ 0.5
+    const idle = (battle.elapsed || 0) - (battle.lastAgencyTapAt ?? 0) >= 2.0;
+    if (attacker.side === "ally" && !idle) {
+      dmg = Math.floor(dmg * 1.15);
+    }
+    if (idle) {
+      dmg = Math.floor(dmg * 0.7);
     }
     const selfSyn = attacker.side === "ally" ? battle.allySyn : battle.enemySyn;
     const rivalry = selfSyn.find((s) => s.rules.type === "low_hp_damage_buff");
@@ -3686,8 +4217,13 @@ function renderFight(battle) {
     </div>
     <p class="street-hint muted" data-testid="porch-tempo-label">${tr ? "Porch tempo — dokunarak yönlendir" : "Porch tempo — steer with taps"}</p>
     ${coachBanner}
+    <div class="tempo-steer-meter" data-testid="tempo-steer-meter" aria-label="${tr ? "Tempo senin" : "You're steering"}">
+      <span class="tempo-steer-meter__label">${tr ? "Tempo senin" : "You're steering"}</span>
+      <i id="tempo-steer-fill" class="tempo-steer-meter__fill" style="width:0%"></i>
+    </div>
     <div class="fight-hud" style="margin-bottom:0.35rem">
       <span id="ally-hp-total" class="hud-ally"></span><span id="fight-timer">0.0s</span><span id="enemy-hp-total" class="hud-enemy"></span>
+      <span id="you-score" class="hud-you-score" data-testid="you-score">You 0</span>
     </div>
     <div class="rp-arena rp-screen--fight" aria-live="polite">
       <div class="rp-float-layer" id="rp-float-layer" aria-hidden="true"></div>
@@ -3704,8 +4240,15 @@ function renderFight(battle) {
     </div>
     <div class="rp-between-dock" id="between-call-dock" data-testid="between-call-dock" hidden>
       <button class="btn btn-teal" type="button" data-action="between-cheer-pulse" data-testid="between-cheer-pulse">${tr ? "Alkış" : "Cheer"}</button>
+      <button class="btn btn-ember rp-cta-pulse" type="button" data-action="tempo-pulse-hit" data-testid="tempo-pulse-dock" hidden>${tr ? "Tempo!" : "Tempo!"}</button>
       <span class="muted">${tr ? "Hedef / Tut için pad'e dokun" : "Tap pads to Mark / Hold"}</span>
     </div>
+    <div class="tempo-chip-row" id="tempo-chip-row" data-testid="tempo-chip-row" hidden>
+      <button class="btn btn-ember" type="button" data-action="tempo-chip-push" data-testid="tempo-chip-push">${tr ? "Bastır" : "Push"}</button>
+      <button class="btn btn-secondary" type="button" data-action="tempo-chip-guard" data-testid="tempo-chip-guard">${tr ? "Koru" : "Guard"}</button>
+    </div>
+    <button class="tempo-pulse-pad" type="button" id="tempo-pulse-pad" data-action="tempo-pulse-hit" data-testid="tempo-pulse-pad" hidden aria-label="Tempo">${tr ? "Tempo!" : "Tempo!"}</button>
+    <p class="tempo-idle-hint muted" id="tempo-idle-hint" hidden data-testid="tempo-idle-hint">${tr ? "Dokun — tempo yavaşladı" : "Tap — tempo slowed"}</p>
     <div class="fight-actions" id="fight-actions" hidden></div>
     <p class="fight-log muted" id="fight-log"></p>`;
   screen._battle = battle;
@@ -3829,7 +4372,7 @@ function updateFightUI(battle) {
         : (tr ? "Çağrı!" : "Call!");
     }
   }
-  // mechanics-fix-8: between-call Mark/Cheer/Hold after first Call
+  // mechanics-fix-8/10: between-call Mark/Cheer/Hold + tempo after first Call
   const between = document.getElementById("between-call-dock");
   if (between) {
     const modalOpen = !!(battle.paused && (battle.actionOffered || battle.secondCallOffered) && !document.getElementById("fight-actions")?.hidden);
@@ -3842,6 +4385,7 @@ function updateFightUI(battle) {
     );
     between.hidden = !showBetween;
   }
+  if (typeof syncTempoPulseUI === "function") syncTempoPulseUI(battle);
   // mechanics-fix-9: Porch Call II dock
   let dock2 = document.getElementById("porch-call-two-dock");
   if (!dock2) {
@@ -3876,15 +4420,16 @@ function betweenCallWindowOpen(battle) {
 function applyBetweenCheer() {
   const battle = state.battle;
   if (!betweenCallWindowOpen(battle)) return;
-  if ((battle.cheerUses || 0) >= 2) {
+  if ((battle.cheerUses || 0) >= 3) {
     toast(state.locale === "tr" ? "Alkış bitti" : "Cheer spent");
     return;
   }
   if (battle.cheerCdUntil && battle.elapsed < battle.cheerCdUntil) return;
   battle.cheerUses = (battle.cheerUses || 0) + 1;
-  battle.cheerCdUntil = (battle.elapsed || 0) + 5;
+  battle.cheerCdUntil = (battle.elapsed || 0) + 3.5;
   battle.atkBuffUntil = (battle.elapsed || 0) + 2.5;
   battle.atkBuffPct = 0.1;
+  noteTempoTap(battle);
   const ally = battle.allies.find((u) => u.alive);
   if (ally) {
     battle.floaters = battle.floaters || [];
@@ -3908,9 +4453,11 @@ function applyBetweenFocusTap(slot) {
   battle.focusTargetSlot = foe.slot;
   battle.focusUntil = (battle.elapsed || 0) + 3;
   battle.focusDmgBonus = 0.12;
-  battle.focusCdUntil = (battle.elapsed || 0) + 4;
+  battle.focusCdUntil = (battle.elapsed || 0) + 3;
+  noteTempoTap(battle);
   const dmg = Math.max(4, Math.floor(foe.maxHp * 0.04));
   foe.hp = Math.max(1, foe.hp - dmg);
+  battle.youScore = (battle.youScore || 0) + 3;
   battle.floaters = battle.floaters || [];
   battle.floaters.push({ side: foe.side, slot: foe.slot, dmg, t: battle.elapsed, proc: true });
   state.save.storyFlags = state.save.storyFlags || {};
@@ -3932,9 +4479,11 @@ function applyBetweenHoldLane(slot) {
   battle.tauntUnitId = ally.id;
   battle.tauntUntil = (battle.elapsed || 0) + 3;
   battle.tauntRedirect = 0.25;
-  battle.holdCdUntil = (battle.elapsed || 0) + 5;
+  battle.holdCdUntil = (battle.elapsed || 0) + 3.5;
+  noteTempoTap(battle);
   const heal = Math.max(3, Math.floor(ally.maxHp * 0.03));
   ally.hp = Math.min(ally.maxHp, ally.hp + heal);
+  battle.youScore = (battle.youScore || 0) + 2;
   battle.floaters = battle.floaters || [];
   battle.floaters.push({ side: ally.side, slot: ally.slot, heal, t: battle.elapsed, proc: true });
   state.save.storyFlags = state.save.storyFlags || {};
@@ -3946,41 +4495,43 @@ function applyBetweenHoldLane(slot) {
 }
 
 function practiceBetweenAgencyOk(battle) {
+  // mechanics-fix-11: Call I + Call II + agencyActionCount>=3; softlock-proof backfill
   const flags = state.save.storyFlags || {};
-  const keys = [
-    "practice_cup_porch_call_done",
-    "practice_second_decision_done",
-    "practice_between_focus_tap",
-    "practice_between_cheer_pulse",
-    "practice_between_hold_lane",
-  ];
-  const hit = keys.filter((k) => flags[k]).length;
-  if (hit >= 2) return true;
-  if ((battle.playerAgencyActions || 0) >= 2) return true;
-  return false;
+  const call1 = !!(flags.practice_cup_porch_call_done || battle?.actionUsed);
+  const call2 = !!(flags.practice_second_call_done || flags.practice_second_decision_done || battle?.secondCallUsed);
+  if (!battle?.practice) return true;
+  if (!(call1 && call2)) return false;
+  const agency = battle.agencyActionCount || battle.playerAgencyActions || 0;
+  if (agency >= 3) return true;
+  // Softlock-proof: allow finish after Call II + short wait / backfill flag
+  if (flags.practice_agency_quota_backfill) return true;
+  if (battle.secondCallUsed && battle.secondCallOfferedAt != null && (battle.elapsed - battle.secondCallOfferedAt) > 10) {
+    flags.practice_agency_quota_backfill = true;
+    return true;
+  }
+  return agency >= 2; // Call I + Call II count as 2; one more preferred but don't strand
 }
 
 function endFight(battle) {
   if (battle.finished) return;
-  // mechanics-fix-8: practice finish needs between-call agency, not spectator KO
+  // mechanics-fix-10: never softlock on tempo — only wait for Call II if still open
   if (battle.practice && !practiceBetweenAgencyOk(battle) && !battle._agencyForced) {
-    battle._agencyForced = true;
-    battle.paused = true;
-    const bar = document.getElementById("fight-actions");
-    if (bar) {
-      const tr = state.locale === "tr";
-      bar.innerHTML = `<p class="fight-action-prompt">${tr ? "Tempo — bir dokunuş daha" : "Tempo — one more steer"}</p>
-        <div class="btn-row wrap">
-          <button class="btn btn-teal" type="button" data-action="between-cheer-pulse" data-testid="between-cheer-pulse">${tr ? "Alkış" : "Cheer"}</button>
-          <button class="btn btn-ember" type="button" data-action="between-focus-tap" data-slot="1" data-testid="between-focus-tap">${tr ? "Hedef" : "Mark"}</button>
-          <button class="btn btn-secondary" type="button" data-action="between-hold-lane" data-slot="1" data-testid="between-hold-lane">${tr ? "Tut" : "Hold"}</button>
-        </div>`;
-      bar.hidden = false;
+    if (battle.actionUsed && !battle.secondCallUsed) {
+      battle.secondCallOffered = true;
+      battle.paused = true;
+      updateFightUI(battle);
+      showSecondFightChoice(battle);
+      return;
     }
-    const between = document.getElementById("between-call-dock");
-    if (between) between.hidden = false;
-    toast(state.locale === "tr" ? "Porch tempo — dokun" : "Porch tempo — tap to steer");
-    return;
+    // Call I still open — force porch
+    if (!battle.actionUsed) {
+      battle.actionOffered = true;
+      battle.paused = true;
+      battle.cannotDismissPorch = true;
+      updateFightUI(battle);
+      showFightActions(battle);
+      return;
+    }
   }
   battle.finished = true;
   if (state.fightTimer) {
@@ -4172,11 +4723,18 @@ function renderComic() {
       : state.locale === "tr"
         ? "Çağrı vurdu. Blok izliyor."
         : "Call lands. The block is watching.");
-  const punch =
+  let punch =
     captions[2] ||
     (state.locale === "tr"
       ? `MVP ${r.mvp}. Blok yarın konuşacak.`
       : `MVP ${r.mvp}. The block will talk tomorrow.`);
+  // story-form-11: match comic A→V / Volume accord echoes
+  const comicEcho = (storyForm11()?.matchComicHandoffEchoes || []).find((e) => whenFlagsOk(e.when || {}));
+  let comicEchoHtml = "";
+  if (comicEcho) {
+    punch = loc(comicEcho.panel) || punch;
+    comicEchoHtml = `<p class="comic-echo-tag" data-testid="${comicEcho.testId || "comic-echo-av-handoff"}">${loc(comicEcho.captionTag)}</p>`;
+  }
   const shareText = fillTemplate(loc(state.content.uiStrings["comic.share_text"]), vars);
   const banner = state.questPack?.storyForm3?.comicRememberBanner || state.stories?.porchCupNarrative?.comicRememberBanner;
   let remember = "";
@@ -4205,6 +4763,7 @@ function renderComic() {
         ${t("fight.hp_total")}: ${r.allyHp} vs ${r.enemyHp} · MVP ${r.mvp}
       </div>
       ${remember}
+      ${comicEchoHtml}
       <div class="rp-comic-strip comic-panels" data-export-root="true" data-testid="comic-strip">
         <figure class="rp-comic-panel rp-comic-panel--kickoff comic-panel comic-panel--clay" data-testid="comic-panel-1">
           <span class="rp-comic-panel__badge">1</span>
@@ -4734,7 +5293,12 @@ function onAction(action, target) {
     case "open-story-log":
       renderStoryLog();
       break;
+    case "toggle-evening-overflow":
+      state.eveningOverflowOpen = !state.eveningOverflowOpen;
+      renderEvening();
+      break;
     case "open-quests":
+      state.eveningOverflowOpen = false;
       state.questTab = "active";
       renderQuestLog();
       break;
@@ -4842,28 +5406,38 @@ function onAction(action, target) {
       break;
     case "between-cheer-pulse":
       applyBetweenCheer();
-      if (state.battle && !state.battle.finished && practiceBetweenAgencyOk(state.battle) && state.battle._agencyForced) {
-        hideFightActions();
-        state.battle.paused = false;
-        endFight(state.battle);
-      }
       break;
     case "between-focus-tap":
       applyBetweenFocusTap(target.dataset.slot);
-      if (state.battle && !state.battle.finished && practiceBetweenAgencyOk(state.battle) && state.battle._agencyForced) {
-        hideFightActions();
-        state.battle.paused = false;
-        endFight(state.battle);
-      }
       break;
     case "between-hold-lane":
       applyBetweenHoldLane(target.dataset.slot);
-      if (state.battle && !state.battle.finished && practiceBetweenAgencyOk(state.battle) && state.battle._agencyForced) {
-        hideFightActions();
-        state.battle.paused = false;
-        endFight(state.battle);
-      }
       break;
+    case "tempo-pulse-hit":
+      applyTempoPulseHit();
+      break;
+    case "tempo-chip-push":
+      applyTempoChip("push");
+      break;
+    case "tempo-chip-guard":
+      applyTempoChip("guard");
+      break;
+    case "handoff-cta": {
+      const beatId = target.dataset.beat;
+      const beat = (storyForm10()?.streetHandoffBeats || []).find((b) => b.id === beatId);
+      state.save.storyFlags = state.save.storyFlags || {};
+      for (const f of beat?.setsFlagsOnCta || ["street_av_handoff_done", "quest_volume_tease"]) {
+        state.save.storyFlags[f] = true;
+      }
+      if (beat?.mqStep?.to) {
+        try { Quests.acceptQuest(state.save, state.questPack, beat.mqStep.to); } catch { /* */ }
+      }
+      saveNow();
+      const nid = target.dataset.neighbor || "n3";
+      renderNeighbor(nid);
+      showScreen("screen-neighbor");
+      break;
+    }
     case "open-porch-call": {
       const b = state.battle;
       if (!b || b.actionUsed || b.finished) break;
@@ -5071,6 +5645,8 @@ async function boot() {
     state.storyForm7 = questPack?.storyForm7 || null;
     state.storyForm8 = questPack?.storyForm8 || null;
     state.storyForm9 = questPack?.storyForm9 || null;
+    state.storyForm10 = questPack?.storyForm10 || null;
+    state.storyForm11 = questPack?.storyForm11 || null;
     if (uxPack2?.strings || uxPack3?.copy || uxPack5 || uxPack6 || uxPack7 || uxPack8) {
       state.uxPack = {
         ...(uxPack || {}),
