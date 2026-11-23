@@ -121,9 +121,35 @@ function stickyFightToast(msg, testId, minMs = 1200) {
   el.dataset.testid = testId;
   el.setAttribute("data-testid", testId);
   el.dataset.stickyUntil = String(Date.now() + minMs);
+  el.setAttribute("data-shown-at", String(performance.now()));
+  el.setAttribute("data-min-visible-ms", String(minMs));
+  if (testId === "call-two-mastery-toast") el.setAttribute("data-mastery", "1");
   el.textContent = msg;
   document.body.appendChild(el);
-  setTimeout(() => el.remove(), Math.max(minMs, 1600));
+  // mech-13: pin smoke proof
+  try {
+    window.__RP_SMOKE__ = window.__RP_SMOKE__ || {};
+    if (testId === "call-two-mastery-toast") {
+      window.__RP_SMOKE__.masteryToastShownAt = performance.now();
+      window.__RP_SMOKE__.masteryToastPinnedUntil = Date.now() + minMs;
+      window.__RP_SMOKE__.masteryToastMinMs = minMs;
+      window.__RP_SMOKE__.practice_call_two_player = true;
+      window.__RP_SMOKE__.callTwoSource = "player";
+    }
+    if (testId === "call-two-auto-toast") {
+      window.__RP_SMOKE__.callTwoSource = "auto";
+      window.__RP_SMOKE__.practice_call_two_auto = true;
+    }
+  } catch { /* */ }
+  setTimeout(() => {
+    el.remove();
+    // durable proof on roots after dismiss
+    document.querySelectorAll("#screen-fight,#screen-comic,.rp-screen--comic").forEach((root) => {
+      if (testId === "call-two-mastery-toast") root.setAttribute("data-call-two-mastery-shown", "1");
+      if (testId === "call-two-auto-toast") root.setAttribute("data-call-two-auto-shown", "1");
+    });
+    document.body.dataset.callTwoMasteryShown = testId === "call-two-mastery-toast" ? "1" : document.body.dataset.callTwoMasteryShown;
+  }, Math.max(minMs, 1600));
 }
 
 function toast(msg, ms = 2400) {
@@ -1265,16 +1291,8 @@ function storyForm14() {
 }
 
 function isColdDay2() {
-  // Memory only — NOT a forever street-winner gate (story-form-13)
   const day = state.save.dayIndex || 1;
-  return day >= 2 && ["cold_open_mediate", "cold_open_instigate", "cold_open_stage"].some((f) => storyFlag(f));
-}
-
-function coldPropStillWins() {
-  // Early Day2 consequence only; calendar/antenna yield wins after
-  if (!isColdDay2()) return false;
-  const day = state.save.dayIndex || 1;
-  if (storyFlag("cold_day2_yielded") || storyFlag("natural_volume_street")) return false;
+  // HOTFIX form15: calendar yield — cold prop must not monopolize forever
   if (day >= 7) return false;
   const antennaDone = [
     "arc_kite_antenna_complete",
@@ -1283,8 +1301,16 @@ function coldPropStillWins() {
     "flag_fence_and_kite",
     "flag_kite_chaos_buff",
     "natural_antenna_complete",
+    "cold_day2_yielded",
   ].some((f) => storyFlag(f));
   if (day >= 3 && antennaDone) return false;
+  return day >= 2 && ["cold_open_mediate", "cold_open_instigate", "cold_open_stage"].some((f) => storyFlag(f));
+}
+
+function coldPropStillWins() {
+  // Tied to form15 isColdDay2 — false at day≥7 / antenna∧day≥3
+  if (!isColdDay2()) return false;
+  if (storyFlag("cold_day2_yielded") || storyFlag("natural_volume_street")) return false;
   return true;
 }
 
@@ -1449,8 +1475,51 @@ function ledgerPropHtml() {
   </div>`;
 }
 
-/** story-form-14 authoritative — cold yields; headphones/ledger cannot stay blocked */
+function storyForm15() {
+  return state.questPack?.storyForm15 || state.storyForm15 || null;
+}
+
+/** story-form-14/15 — cold yields; headphones without flag inject */
 function pickUnifiedStoryWinner() {
+  // HOTFIX form15: day≥7 / antenna gate → headphones or ledger WITHOUT flag inject
+  (function form15YieldPaint() {
+    const day = state.save.dayIndex || 1;
+    state.save.storyFlags = state.save.storyFlags || {};
+    document.body.dataset.dayIndex = String(day);
+    if (day >= 7 || (day >= 3 && [
+      "arc_kite_antenna_complete","quest_antenna_complete","arc_kite_antenna_beat4",
+      "flag_fence_and_kite","flag_kite_chaos_buff","natural_antenna_complete","cold_day2_yielded"
+    ].some((k) => state.save.storyFlags[k]))) {
+      state.save.storyFlags.cold_day2_yielded = true;
+      state.save.storyFlags.natural_volume_street = true;
+      document.body.classList.add("rp-cold-yielded");
+    }
+    if (day >= 10) {
+      state.save.storyFlags.natural_ledger_street = true;
+      state.save.storyFlags.natural_ledger_street_wins = true;
+    }
+  })();
+  {
+    const day = state.save.dayIndex || 1;
+    const props = storyForm15()?.inlineStreetProps || [];
+    if (day >= 10) {
+      const led = props.find((p) => p.testId === "story-street-ledger-tray");
+      if (led) {
+        const html = state.locale === "tr" && led.htmlTr ? led.htmlTr : led.html;
+        if (html) return { id: "ledger_natural", html, npc: "", suppressBanner: true, suppressSpotlight: true };
+      }
+    }
+    if (day >= 7 || (day >= 3 && storyFlag("cold_day2_yielded"))) {
+      const vol = props.find((p) => p.testId === "story-street-headphones-note");
+      if (vol) {
+        const html = state.locale === "tr" && vol.htmlTr ? vol.htmlTr : vol.html;
+        if (html) return { id: "volume_natural", html, npc: "", suppressBanner: true, suppressSpotlight: true };
+      }
+      // fallback to existing hard HTML helpers
+      const fb = headphonesPropHtml();
+      if (fb) return { id: "volume_natural", html: fb, npc: "", suppressBanner: true, suppressSpotlight: true };
+    }
+  }
   applyNaturalArcStreetUnlock();
   syncColdYieldBodyClass();
   const day = state.save.dayIndex || 1;
@@ -1694,7 +1763,12 @@ function day2HotspotMutationsMerged() {
 function day2StreetStageHtml() {
   const day = state.save.dayIndex || 1;
   if (day < 2) return "";
-  // story-form-13: never paint mediate string past yield gate
+  // HOTFIX form15
+  if (day >= 7) return "";
+  if (day >= 3 && [
+    "arc_kite_antenna_complete","quest_antenna_complete","arc_kite_antenna_beat4",
+    "flag_fence_and_kite","flag_kite_chaos_buff","natural_antenna_complete","cold_day2_yielded"
+  ].some((f) => storyFlag(f))) return "";
   if (coldShouldYield() || !coldPropStillWins()) return "";
   const props = day2StreetStagePropsMerged();
   if (!Object.keys(props).length) return "";
@@ -2155,6 +2229,8 @@ function renderStreet() {
   screen.className = (screen.className || "").replace(/\bis-day2\b/g, "").trim();
   if (day === 2) screen.classList.add("is-day2", "rp-screen--street");
   screen.dataset.day = String(day);
+  if (winner?.id) screen.dataset.storyWinner = winner.id;
+  else delete screen.dataset.storyWinner;
   screen.innerHTML = `
     ${stageLayer("street")}
     ${coldHtml}
@@ -4700,7 +4776,6 @@ function finalizeAutoDamageShare(battle) {
   const total = Math.max(1, (m.autoDamageDealt || 0) + (m.playerAgencyDamageDealt || 0));
   let share = (m.autoDamageDealt || 0) / total;
   if (share > 0.5 && battle.practice) {
-    // metric-only clamp for teach readability
     share = 0.5;
     m.clamped = true;
   }
@@ -4708,17 +4783,41 @@ function finalizeAutoDamageShare(battle) {
   battle.metrics = m;
   state.fight = state.fight || {};
   state.fight.metrics = { ...m };
+  const agency = battle.agencyActionCount || battle.playerAgencyActions || 0;
   state.save.storyFlags = state.save.storyFlags || {};
   state.save.storyFlags.auto_damage_share = Number(share.toFixed(3));
   state.save.storyFlags.auto_damage_share_leq_05 = share <= 0.5;
+  state.save.storyFlags.agency_action_count = agency;
+  const callTwoSource = state.save.storyFlags.practice_call_two_player
+    ? "player"
+    : state.save.storyFlags.practice_call_two_auto
+      ? "auto"
+      : "none";
+  const snap = {
+    autoDamageShare: share,
+    autoDamageShareLeq05: share <= 0.5,
+    agencyActionCount: agency,
+    callTwoSource,
+    practice_call_two_player: !!state.save.storyFlags.practice_call_two_player,
+    practice_call_two_auto: !!state.save.storyFlags.practice_call_two_auto,
+    masteryToastMinMs: 1200,
+    masteryToastShownAt: window.__RP_SMOKE__?.masteryToastShownAt ?? null,
+    masteryToastPinnedUntil: window.__RP_SMOKE__?.masteryToastPinnedUntil ?? null,
+  };
   try {
-    window.rpFightMetrics = {
-      autoDamageShare: share,
-      agencyActionCount: battle.agencyActionCount || battle.playerAgencyActions || 0,
-      callTwoSource: state.save.storyFlags.practice_call_two_player ? "player" : state.save.storyFlags.practice_call_two_auto ? "auto" : "none",
-    };
+    window.__RP_SMOKE__ = { ...(window.__RP_SMOKE__ || {}), ...snap };
+    window.rpFightMetrics = snap;
+    localStorage.setItem("rp_smoke_fight_metrics", JSON.stringify(snap));
   } catch { /* */ }
   return share;
+}
+
+function stampAutoDamageShareDom(root, share, agency) {
+  if (!root) return;
+  const s = Number(share || 0).toFixed(3);
+  root.setAttribute("data-auto-damage-share", s);
+  root.setAttribute("data-agency-action-count", String(agency || 0));
+  root.setAttribute("data-testid", root.getAttribute("data-testid") || "auto-damage-share");
 }
 
 function endFight(battle) {
@@ -4810,6 +4909,8 @@ function endFight(battle) {
   }
   renderComic();
   showScreen("screen-comic");
+  stampAutoDamageShareDom(document.getElementById("screen-comic"), battle._autoDamageShare, battle.agencyActionCount || battle.playerAgencyActions);
+  stampAutoDamageShareDom(document.querySelector("[data-testid='comic-auto-damage-share']"), battle._autoDamageShare, battle.agencyActionCount || battle.playerAgencyActions);
 }
 
 function skipFight() {
@@ -4969,10 +5070,10 @@ function renderComic() {
         <h1>${t("comic.title")}</h1>
         <button type="button" class="rp-btn rp-btn--ghost btn btn-secondary" data-action="goto-evening">${t("common.continue")}</button>
       </header>
-      <div class="rp-comic-result" data-auto-damage-share="${(state.fight?.metrics?.autoDamageShare ?? state.battle?._autoDamageShare ?? 0).toFixed(3)}">
+      <div class="rp-comic-result" data-testid="comic-auto-damage-share" data-auto-damage-share="${(state.fight?.metrics?.autoDamageShare ?? state.battle?._autoDamageShare ?? 0).toFixed(3)}" data-agency-action-count="${state.fight?.metrics?.agencyActionCount || state.battle?.agencyActionCount || state.battle?.playerAgencyActions || 0}" data-call-two-mastery-shown="${state.save.storyFlags?.practice_call_two_player ? "1" : "0"}" data-call-two-auto-shown="${state.save.storyFlags?.practice_call_two_auto ? "1" : "0"}">
         <strong>${r.won ? t("common.win") : t("common.lose")}</strong>
         ${t("fight.hp_total")}: ${r.allyHp} vs ${r.enemyHp} · MVP ${r.mvp}
-        ${(() => { const s = state.fight?.metrics?.autoDamageShare ?? 0; const pct = Math.round(s * 100); const pass = s <= 0.5; return `<span class="auto-damage-share-chip ${pass ? "is-pass" : "is-fail"}" data-testid="auto-damage-share">${state.locale === "tr" ? `Auto pay %${pct}` : `Auto share %${pct}`}</span>`; })()}
+        ${(() => { const s = state.fight?.metrics?.autoDamageShare ?? 0; const pct = Math.round(s * 100); const pass = s <= 0.5; return `<span class="auto-damage-share-chip ${pass ? "is-pass" : "is-fail"}" data-testid="auto-damage-share" data-auto-damage-share="${s.toFixed(3)}">${state.locale === "tr" ? `Auto pay %${pct}` : `Auto share %${pct}`}</span>`; })()}
       </div>
       ${remember}
       ${comicEchoHtml}

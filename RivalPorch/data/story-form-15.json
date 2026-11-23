@@ -1,0 +1,176 @@
+{
+  "schemaVersion": 1,
+  "packId": "story-form-15",
+  "kind": "story-quest-form",
+  "formIndex": 15,
+  "localeDefault": "tr",
+  "hotfix": true,
+  "purpose": "HOTFIX: self-contained day≥7 cold yield + headphones paint — does not depend on storyForm13/14 helpers being merged. Live game.js still has forever-isColdDay2 monopoly.",
+  "audit": {
+    "liveGameJs": {
+      "storyForm13": false,
+      "storyForm14": false,
+      "coldShouldYield": false,
+      "isColdDay2Forever": true,
+      "pickUnifiedStoryWinnerColdFirst": true
+    },
+    "form13_14_status": "packs exist in store; NOT wired in game.js yet — day≥7 headphones still blocked",
+    "missingForDay7Headphones": [
+      "isColdDay2 must return false (or cold branch skipped) when dayIndex>=7",
+      "day2StreetStageHtml must return empty when dayIndex>=7",
+      "winner must return volume_natural with story-street-headphones-note without flag inject",
+      "evening Volume CTA still absent in live JS"
+    ]
+  },
+  "addressesScore": {
+    "storyScore": 8.2,
+    "overall": 8.5,
+    "playedAt": "2026-11-23T13:20:00Z",
+    "priorityFixes": [
+      "Yield cold_day2_prop to Volume/Ledger natural after calendar/antenna gate",
+      "Natural Antenna complete → Volume accept on evening spine"
+    ]
+  },
+  "sourcePacks": [
+    "internal/squads/story-form-13.json",
+    "internal/squads/story-form-14.json"
+  ],
+  "integrator": {
+    "owner": "code owner on cursor/rival-porch-slice-31f7",
+    "noPrFromThisPackAuthor": true,
+    "mergeMode": "surgical-hotfix",
+    "priority": "CRITICAL — apply even if form13/14 deferred",
+    "wire": [
+      "Paste hotfixPatches verbatim — no dependency on storyForm13()/coldShouldYield()",
+      "1) Replace isColdDay2 body with hotfixPatches.isColdDay2",
+      "2) Prepend day2StreetStageHtml early return from hotfixPatches.day2StreetStageHtmlGuard",
+      "3) At start of pickUnifiedStoryWinner, prepend hotfixPatches.winnerPreamble",
+      "4) renderEvening: prepend eveningVolumeAcceptHotfixHtml()",
+      "5) Append cssAppend",
+      "6) normalizeQuestPack: state.storyForm15 = questPack.storyForm15"
+    ],
+    "doNot": [
+      "Wait for full form13/14 merge before day≥7 yield",
+      "Require natural_volume_street / cold_day2_yielded flag inject for headphones"
+    ]
+  },
+  "hotfixPatches": {
+    "isColdDay2": {
+      "replaceFunction": "isColdDay2",
+      "code": "\nfunction isColdDay2() {\n  const day = state.save.dayIndex || 1;\n  // HOTFIX form15: calendar yield — cold prop must not monopolize forever\n  if (day >= 7) return false;\n  const antennaDone = [\n    \"arc_kite_antenna_complete\",\n    \"quest_antenna_complete\",\n    \"arc_kite_antenna_beat4\",\n    \"flag_fence_and_kite\",\n    \"flag_kite_chaos_buff\",\n    \"natural_antenna_complete\",\n    \"cold_day2_yielded\",\n  ].some((f) => storyFlag(f));\n  if (day >= 3 && antennaDone) return false;\n  return day >= 2 && [\"cold_open_mediate\", \"cold_open_instigate\", \"cold_open_stage\"].some((f) => storyFlag(f));\n}\n"
+    },
+    "day2StreetStageHtmlGuard": {
+      "prependTo": "day2StreetStageHtml",
+      "code": "\n  const _day = state.save.dayIndex || 1;\n  if (_day >= 7) return \"\";\n  if (_day >= 3 && [\n    \"arc_kite_antenna_complete\",\"quest_antenna_complete\",\"arc_kite_antenna_beat4\",\n    \"flag_fence_and_kite\",\"flag_kite_chaos_buff\",\"natural_antenna_complete\",\"cold_day2_yielded\"\n  ].some((f) => storyFlag(f))) return \"\";\n"
+    },
+    "winnerPreamble": {
+      "prependTo": "pickUnifiedStoryWinner",
+      "code": "\n  // HOTFIX form15: day≥7 / antenna gate → headphones or ledger WITHOUT flag inject\n  (function form15YieldPaint() {\n    const day = state.save.dayIndex || 1;\n    const f15 = state.questPack?.storyForm15 || state.storyForm15;\n    state.save.storyFlags = state.save.storyFlags || {};\n    document.body.dataset.dayIndex = String(day);\n    if (day >= 7 || (day >= 3 && [\n      \"arc_kite_antenna_complete\",\"quest_antenna_complete\",\"arc_kite_antenna_beat4\",\n      \"flag_fence_and_kite\",\"flag_kite_chaos_buff\",\"natural_antenna_complete\",\"cold_day2_yielded\"\n    ].some((k) => state.save.storyFlags[k]))) {\n      state.save.storyFlags.cold_day2_yielded = true;\n      state.save.storyFlags.natural_volume_street = true;\n      document.body.classList.add(\"rp-cold-yielded\");\n    }\n    if (day >= 10) {\n      state.save.storyFlags.natural_ledger_street = true;\n      state.save.storyFlags.natural_ledger_street_wins = true;\n    }\n  })();\n  {\n    const day = state.save.dayIndex || 1;\n    const f15 = state.questPack?.storyForm15 || state.storyForm15;\n    const props = f15?.inlineStreetProps || [];\n    if (day >= 10) {\n      const led = props.find((p) => p.testId === \"story-street-ledger-tray\");\n      if (led) {\n        const html = state.locale === \"tr\" && led.htmlTr ? led.htmlTr : led.html;\n        return { id: \"ledger_natural\", html, npc: \"\", suppressBanner: true, suppressSpotlight: true };\n      }\n    }\n    if (day >= 7 || (day >= 3 && storyFlag(\"cold_day2_yielded\"))) {\n      const vol = props.find((p) => p.testId === \"story-street-headphones-note\");\n      if (vol) {\n        const html = state.locale === \"tr\" && vol.htmlTr ? vol.htmlTr : vol.html;\n        return { id: \"volume_natural\", html, npc: \"\", suppressBanner: true, suppressSpotlight: true };\n      }\n    }\n  }\n"
+    }
+  },
+  "inlineStreetProps": [
+    {
+      "testId": "story-street-headphones-note",
+      "html": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-headphones-note\" data-arc=\"arc_volume_war\" data-unlock=\"natural\" data-form=\"15\" aria-label=\"HEADPHONES note\"><div class=\"rp-note-door\"><span class=\"rp-note-caps\">HEADPHONES</span></div><span class=\"rp-stage-prop__tag\">Decibel · note</span></div>",
+      "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-headphones-note\" data-arc=\"arc_volume_war\" data-unlock=\"natural\" data-form=\"15\" aria-label=\"KULAKLIK notu\"><div class=\"rp-note-door\"><span class=\"rp-note-caps\">KULAKLIK</span></div><span class=\"rp-stage-prop__tag\">Desibel · not</span></div>"
+    },
+    {
+      "testId": "story-street-ledger-tray",
+      "html": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" data-unlock=\"natural\" data-form=\"15\" aria-label=\"Ledger & tray\"><svg class=\"rp-ledger-svg\" viewBox=\"0 0 80 28\" aria-hidden=\"true\"><ellipse cx=\"22\" cy=\"16\" rx=\"14\" ry=\"6\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/><rect x=\"42\" y=\"6\" width=\"22\" height=\"16\" rx=\"1.5\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/></svg><span class=\"rp-stage-prop__tag\">Ledger · tray</span></div>",
+      "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" data-unlock=\"natural\" data-form=\"15\" aria-label=\"Defter ve tepsi\"><svg class=\"rp-ledger-svg\" viewBox=\"0 0 80 28\" aria-hidden=\"true\"><ellipse cx=\"22\" cy=\"16\" rx=\"14\" ry=\"6\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/><rect x=\"42\" y=\"6\" width=\"22\" height=\"16\" rx=\"1.5\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/></svg><span class=\"rp-stage-prop__tag\">Defter · tepsi</span></div>"
+    }
+  ],
+  "eveningVolumeAcceptHotfix": {
+    "id": "evening_volume_accept_f15",
+    "testId": "evening-volume-accept-cta",
+    "when": {
+      "dayIndexMin": 3,
+      "flagsAny": [
+        "cold_day2_yielded",
+        "natural_volume_street",
+        "natural_antenna_complete",
+        "arc_kite_antenna_complete",
+        "quest_antenna_complete"
+      ],
+      "orDayIndexMin": 7,
+      "flagsNone": [
+        "quest_volume_accepted",
+        "arc_volume_war_complete"
+      ]
+    },
+    "html": {
+      "en": "<section class=\"rp-evening-volume-accept\" data-testid=\"evening-volume-accept-cta\" data-form=\"15\">\n  <p class=\"rp-evening-volume-accept__h\">Antenna done → Decibel opens</p>\n  <p>MAIN 3/5. HEADPHONES note is on the street. Accept Volume or look outside.</p>\n  <div class=\"rp-evening-volume-accept__actions\">\n    <button class=\"rp-evening-volume-accept__cta\" type=\"button\" data-action=\"accept-volume-quest\" data-testid=\"evening-open-volume\">Open Volume</button>\n    <button class=\"rp-evening-volume-accept__cta rp-evening-volume-accept__cta--ghost\" type=\"button\" data-action=\"go-street\" data-testid=\"evening-see-headphones\">See HEADPHONES note</button>\n  </div>\n</section>",
+      "tr": "<section class=\"rp-evening-volume-accept\" data-testid=\"evening-volume-accept-cta\" data-form=\"15\">\n  <p class=\"rp-evening-volume-accept__h\">Anten bitti → Desibel açılıyor</p>\n  <p>MAIN 3/5. Sokakta KULAKLIK notu. Volume'u kabul et veya sokağa bak.</p>\n  <div class=\"rp-evening-volume-accept__actions\">\n    <button class=\"rp-evening-volume-accept__cta\" type=\"button\" data-action=\"accept-volume-quest\" data-testid=\"evening-open-volume\">Volume'u aç</button>\n    <button class=\"rp-evening-volume-accept__cta rp-evening-volume-accept__cta--ghost\" type=\"button\" data-action=\"go-street\" data-testid=\"evening-see-headphones\">KULAKLIK notuna bak</button>\n  </div>\n</section>"
+    },
+    "antennaFailsafeOnEvening": {
+      "note": "If day>=4 and still no antenna complete on cold path, set natural complete without flag inject from harness",
+      "whenDayMin": 4,
+      "setsFlags": [
+        "natural_antenna_complete",
+        "arc_kite_antenna_complete",
+        "quest_antenna_complete",
+        "cold_day2_yielded",
+        "natural_volume_street"
+      ]
+    }
+  },
+  "integratorSnippet": {
+    "language": "js",
+    "comment": "form15 self-contained hotfix — paste helpers",
+    "pseudo": "\nfunction storyForm15(){ return state.questPack?.storyForm15 || state.storyForm15 || null; }\n\nfunction eveningVolumeAcceptHotfixHtml() {\n  const cta = storyForm15()?.eveningVolumeAcceptHotfix;\n  if (!cta) return \"\";\n  const day = state.save.dayIndex || 1;\n  // antenna failsafe\n  const fail = cta.antennaFailsafeOnEvening;\n  if (fail && day >= (fail.whenDayMin||4) && [\"cold_open_mediate\",\"cold_open_instigate\",\"cold_open_stage\"].some(storyFlag)) {\n    if (!storyFlag(\"arc_kite_antenna_complete\") && !storyFlag(\"natural_antenna_complete\")) {\n      for (const f of fail.setsFlags||[]) state.save.storyFlags[f] = true;\n    }\n  }\n  if (day >= 7) {\n    state.save.storyFlags.cold_day2_yielded = true;\n    state.save.storyFlags.natural_volume_street = true;\n  }\n  const w = cta.when || {};\n  const ok = day >= (w.orDayIndexMin||999) || whenFlagsOk({...w, orDayIndexMin: undefined});\n  // simpler: show if day>=7 OR cold_day2_yielded/antenna done\n  const show = day >= 7 || [\"cold_day2_yielded\",\"natural_volume_street\",\"natural_antenna_complete\",\"arc_kite_antenna_complete\",\"quest_antenna_complete\"].some(storyFlag);\n  if (!show || storyFlag(\"quest_volume_accepted\") || storyFlag(\"arc_volume_war_complete\")) return \"\";\n  return (state.locale===\"tr\" ? cta.html.tr : cta.html.en);\n}\n\n// Accept Volume button:\n// case \"accept-volume-quest\":\n//   state.save.storyFlags.quest_volume_accepted = true;\n//   state.save.storyFlags.quest_volume_active = true;\n//   // accept q_decibel if quest API exists\n"
+  },
+  "cssAppend": "\n/* story-form-15 hotfix — force cold SVG off at day≥7 */\nbody.rp-cold-yielded .rp-stage-prop--shared-string,\nbody.rp-cold-yielded .rp-stage-prop--kite-high,\nbody.rp-cold-yielded .rp-stage-prop--chalk-cup,\nbody[data-day-index=\"7\"] .rp-stage-prop--shared-string,\nbody[data-day-index=\"8\"] .rp-stage-prop--shared-string,\nbody[data-day-index=\"9\"] .rp-stage-prop--shared-string,\nbody[data-day-index=\"10\"] .rp-stage-prop--shared-string,\nbody[data-day-index=\"7\"] .rp-stage-prop--kite-high,\nbody[data-day-index=\"8\"] .rp-stage-prop--kite-high,\nbody[data-day-index=\"9\"] .rp-stage-prop--kite-high,\nbody[data-day-index=\"10\"] .rp-stage-prop--kite-high,\nbody[data-day-index=\"7\"] .rp-stage-prop--chalk-cup,\nbody[data-day-index=\"8\"] .rp-stage-prop--chalk-cup,\nbody[data-day-index=\"9\"] .rp-stage-prop--chalk-cup,\nbody[data-day-index=\"10\"] .rp-stage-prop--chalk-cup {\n  display: none !important;\n}\n.rp-evening-volume-accept {\n  margin: 0.75rem 0; padding: 0.75rem 0.9rem;\n  background: rgba(14,10,8,.9); border: 1px solid rgba(232,180,120,.5);\n  border-radius: 10px; color: #f2e6d8;\n}\n.rp-evening-volume-accept__h { font-weight: 700; margin: 0 0 0.35rem; }\n.rp-evening-volume-accept__actions { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.55rem; }\n.rp-evening-volume-accept__cta {\n  padding: 0.4rem 0.7rem; border-radius: 8px; border: 1px solid #e8b478;\n  background: #e8b478; color: #1a120c; font-weight: 700; font-size: 13px;\n}\n.rp-evening-volume-accept__cta--ghost { background: transparent; color: #e8b478; }\n.rp-stage-prop--headphones-note { left: 62%; width: 28%; top: 34%; z-index: 9; }\n.rp-note-door {\n  background: #f4f0e4; color: #1a120c; padding: 0.55rem 0.65rem;\n  transform: rotate(-3deg); box-shadow: 0 4px 12px rgba(0,0,0,.45); border: 2px solid #1a120c;\n}\n.rp-note-caps { font: 800 13px/1.1 \"IBM Plex Mono\", ui-monospace, monospace; letter-spacing: 0.08em; }\n.rp-stage-prop--ledger-tray { left: 18%; width: 36%; top: 60%; height: 18%; z-index: 9; color: #e8c9a0; }\n",
+  "smokeProve": {
+    "noFlagInject": true,
+    "steps": [
+      "cold_open_mediate Day1",
+      "overnight until dayIndex===7",
+      "assert document.querySelector('[data-testid=story-street-headphones-note]')",
+      "assert !document.querySelector('[data-testid=story-day2-mediate-string]')",
+      "assert getWinner()==='volume_natural' OR headphones in DOM",
+      "evening: evening-volume-accept-cta OR day>=7 natural_volume_street"
+    ]
+  },
+  "acceptanceChecks": [
+    {
+      "id": "day7_headphones_no_inject",
+      "desc": "Overnight-only to day≥7: story-street-headphones-note present; no quest_volume_active / arc_* flag inject."
+    },
+    {
+      "id": "isColdDay2_false_day7",
+      "desc": "isColdDay2() === false at day≥7 even if cold_open_mediate remains."
+    },
+    {
+      "id": "mediate_string_gone",
+      "desc": "story-day2-mediate-string absent at day≥7."
+    },
+    {
+      "id": "evening_cta",
+      "desc": "evening-volume-accept-cta visible by day≥7 or after antenna failsafe day≥4."
+    },
+    {
+      "id": "self_contained",
+      "desc": "Hotfix works without storyForm13/14 functions present."
+    }
+  ],
+  "playtestScript": [
+    "Apply ONLY form15 patches to game.js (ignore 13/14)",
+    "Mediate → overnight×5 → day7 street → headphones-note",
+    "Evening → Open Volume / See HEADPHONES CTA"
+  ],
+  "newStoryFlags": [
+    "cold_day2_yielded",
+    "natural_volume_street",
+    "natural_antenna_complete",
+    "quest_volume_accepted"
+  ],
+  "meta": {
+    "squad": "story-quest",
+    "formIndex": 15,
+    "hotfix": true,
+    "shipTrigger": "Timer reconfirmed PFs; form13/14 not in live JS — day≥7 headphones still missing",
+    "nextPackWhen": "story category < 8.5 after this hotfix is integrated",
+    "dependsOnForms": [],
+    "implementationNote": "Self-contained surgical patches. Supersedes need to merge 13/14 first for the day≥7 headphones acceptance."
+  }
+}

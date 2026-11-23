@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "id": "mechanics-fix-13",
+  "packNumber": 13,
+  "squad": "mechanics",
+  "shippedAt": "2026-11-23T13:21:00Z",
+  "noPrPush": true,
+  "hotfixFor": "mechanics-fix-12",
+  "extends": ["internal/squads/mechanics-fix-12.json"],
+  "mergeMode": "deepMergeIntoCombatPack",
+  "wirePathHint": "RivalPorch/js/combat.js — persist smoke hooks past finish→comic",
+  "scoreRef": {
+    "buildCommit": "c980762",
+    "note": "Same PFs as fix-12; this pack hardens smoke assert durability only"
+  },
+  "whyHotfix": [
+    "Finish banner may unmount before Playwright reads data-auto-damage-share",
+    "Mastery toast may dismiss before ≥1.2s wall-clock assert if scene advances",
+    "Need durable artifacts on comic / window.__RP_SMOKE__ / flags for cold audit"
+  ],
+  "keepSoftlockProof": true,
+  "targets": ["smokeDurableAutoShare", "smokeDurableCallTwoMastery"],
+
+  "smokeDurableAutoShare": {
+    "onFightEnd": {
+      "writeAll": [
+        "state.fight.metrics.autoDamageShare",
+        "state.flags.auto_damage_share",
+        "state.flags.auto_damage_share_leq_05",
+        "state.flags.agency_action_count"
+      ],
+      "persistSnapshot": {
+        "windowKey": "__RP_SMOKE__",
+        "fields": {
+          "autoDamageShare": "number",
+          "autoDamageShareLeq05": "boolean",
+          "agencyActionCount": "number",
+          "callTwoSource": "player|auto",
+          "practice_call_two_player": "boolean",
+          "practice_call_two_auto": "boolean",
+          "masteryToastMinMs": 1200,
+          "masteryToastShownAt": "number|null",
+          "masteryToastPinnedUntil": "number|null"
+        },
+        "alsoLocalStorageKey": "rp_smoke_fight_metrics",
+        "surviveComicNavigation": true
+      },
+      "domHooks": {
+        "finishBanner": {
+          "data-auto-damage-share": "toFixed(3)",
+          "data-agency-action-count": "agencyActionCount",
+          "data-testid": "auto-damage-share"
+        },
+        "comicRoot": {
+          "copySameDataAttrs": true,
+          "testId": "comic-auto-damage-share",
+          "note": "Re-stamp attrs on screen-comic so smoke can assert after navigate"
+        }
+      }
+    },
+    "smokeAssertSnippet": {
+      "js": [
+        "const s = window.__RP_SMOKE__ || JSON.parse(localStorage.getItem('rp_smoke_fight_metrics')||'{}');",
+        "console.assert(s.agencyActionCount >= 3, 'agencyActionCount');",
+        "console.assert(typeof s.autoDamageShare === 'number' && s.autoDamageShare <= 0.5, 'autoDamageShare', s.autoDamageShare);",
+        "console.assert(s.autoDamageShareLeq05 === true, 'flag');",
+        "const el = document.querySelector('[data-auto-damage-share],[data-testid=\"auto-damage-share\"],[data-testid=\"comic-auto-damage-share\"]');",
+        "console.assert(el && Number(el.getAttribute('data-auto-damage-share')) <= 0.5, 'dom share');"
+      ]
+    }
+  },
+
+  "smokeDurableCallTwoMastery": {
+    "onPlayerPick": {
+      "order": [
+        "setFlag practice_call_two_player=true FIRST",
+        "set __RP_SMOKE__.practice_call_two_player=true + callTwoSource='player'",
+        "show mastery toast with data-testid=call-two-mastery-toast",
+        "set data-shown-at=performance.now() data-min-visible-ms=1200",
+        "pin until now+1200 even if scene wants to advance floats",
+        "on dismiss: leave data-call-two-mastery-shown=1 on fight/comic root"
+      ],
+      "toast": {
+        "testId": "call-two-mastery-toast",
+        "minVisibleMs": 1200,
+        "attrs": {
+          "data-shown-at": "performance.now()",
+          "data-min-visible-ms": "1200",
+          "data-mastery": "1"
+        },
+        "durableProofOnComic": {
+          "attr": "data-call-two-mastery-shown",
+          "value": "1",
+          "flag": "practice_call_two_player"
+        }
+      }
+    },
+    "onAutoPick": {
+      "setFlag": "practice_call_two_auto",
+      "smoke": { "callTwoSource": "auto" },
+      "toastTestId": "call-two-auto-toast",
+      "comicAttr": "data-call-two-auto-shown=1",
+      "stillComic": true
+    },
+    "smokeAssertSnippet": {
+      "js": [
+        "const s = window.__RP_SMOKE__ || {};",
+        "console.assert(s.practice_call_two_player === true || document.body.dataset.callTwoMasteryShown === '1' || document.querySelector('[data-call-two-mastery-shown=\"1\"]'), 'call two player');",
+        "const t = document.querySelector('[data-testid=\"call-two-mastery-toast\"]');",
+        "if (t) { const shown = Number(t.getAttribute('data-shown-at')); const min = Number(t.getAttribute('data-min-visible-ms')||1200); console.assert(performance.now() - shown >= 0 && min >= 1200, 'toast attrs'); }"
+      ]
+    }
+  },
+
+  "acceptance": {
+    "auditor": "Same as fix-12 PFs — smoke can prove them after comic lands",
+    "checks": [
+      "__RP_SMOKE__.autoDamageShare <= 0.5 readable on comic screen",
+      "data-auto-damage-share present on finish AND comic",
+      "practice_call_two_player durable; mastery toast attrs + data-call-two-mastery-shown on comic",
+      "softlock auto path still comics with call-two-auto markers"
+    ]
+  },
+
+  "integrator": {
+    "steps": [
+      "Implement window.__RP_SMOKE__ + localStorage rp_smoke_fight_metrics on fight end (copy onto comic mount).",
+      "Stamp data-auto-damage-share + data-agency-action-count on finish and comic roots.",
+      "Mastery toast: set flag before show; pin ≥1200ms; leave data-call-two-mastery-shown=1 after dismiss.",
+      "Paste smokeAssertSnippet into Playwright cold audit.",
+      "No PR from this squad."
+    ],
+    "priority": "hotfix wire with fix-12 — prevents null checklist from unmount race"
+  },
+
+  "meta": {
+    "standDown": false,
+    "overallTarget": 9.0,
+    "compat": { "dependsOn": ["mechanics-fix-12"] }
+  }
+}
