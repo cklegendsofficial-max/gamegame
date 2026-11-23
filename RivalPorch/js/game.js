@@ -311,17 +311,19 @@ function eveningPrimaryCta() {
     ].some((f) => storyFlag(f));
     const volumeDone = storyFlag("quest_volume_complete") || storyFlag("arc_volume_war_complete");
     const ledgerDone = storyFlag("quest_ledger_complete") || storyFlag("arc_tea_ledger_complete");
-    const volumeActive = !!qs.active?.mq_decibel_accord || storyFlag("quest_volume_active") || storyFlag("quest_volume_accepted");
+    // form17: HEADPHONES street job ONLY after quest_volume_accepted (not mere unlock/active)
+    const volumeAccepted = storyFlag("quest_volume_accepted");
     const volumeUnlocked =
       storyFlag("natural_volume_street") ||
       storyFlag("quest_volume_tease") ||
       storyFlag("cold_day2_yielded") ||
       day >= 7 ||
       (day >= 3 && antennaDone) ||
-      volumeActive;
-    // ux-11: Volume / HEADPHONES beats Antenna once unlocked
+      volumeAccepted ||
+      !!qs.active?.mq_decibel_accord;
+    // ux-11/form17: Open Volume first; HEADPHONES after accept
     if (volumeUnlocked && !volumeDone) {
-      if (!volumeActive) {
+      if (!volumeAccepted) {
         return {
           id: "sa_volume_accept",
           action: "accept-volume",
@@ -343,6 +345,7 @@ function eveningPrimaryCta() {
         whisper: tr ? "Omurga 3/5 · KULAKLIK" : "Spine 3/5 · HEADPHONES",
         questId: "mq_decibel_accord",
         dataNext: "headphones",
+        testId: "evening-headphones-street-job",
       };
     }
     if (!antennaDone) {
@@ -1479,6 +1482,53 @@ function storyForm15() {
   return state.questPack?.storyForm15 || state.storyForm15 || null;
 }
 
+function storyForm16() {
+  return state.questPack?.storyForm16 || state.storyForm16 || null;
+}
+
+function storyForm17() {
+  return state.questPack?.storyForm17 || state.storyForm17 || null;
+}
+
+function applyForm16AntennaFailsafe() {
+  const day = state.save.dayIndex || 1;
+  const f = state.save.storyFlags || (state.save.storyFlags = {});
+  if (day < 4) return;
+  if (!["cold_open_mediate", "cold_open_instigate", "cold_open_stage"].some(storyFlag)) return;
+  if (f.arc_kite_antenna_complete || f.natural_antenna_complete) return;
+  for (const k of [
+    "natural_antenna_complete",
+    "arc_kite_antenna_complete",
+    "quest_antenna_complete",
+    "arc_kite_antenna_beat4",
+    "cold_day2_yielded",
+    "natural_volume_street",
+  ]) {
+    f[k] = true;
+  }
+}
+
+function coldEchoSuppressed() {
+  const day = state.save.dayIndex || 1;
+  if (day >= 7) return true;
+  if (["cold_day2_yielded", "natural_volume_street", "natural_ledger_street"].some(storyFlag)) return true;
+  try {
+    const w = pickUnifiedStoryWinner();
+    return !!(w && ["volume_natural", "ledger_natural", "av_handoff", "vl_handoff", "volume_beat_prop"].includes(w.id));
+  } catch {
+    return false;
+  }
+}
+
+function syncVolumeAcceptBodyClass() {
+  const pending =
+    !storyFlag("quest_volume_accepted") &&
+    !storyFlag("arc_volume_war_complete") &&
+    (storyFlag("cold_day2_yielded") || storyFlag("natural_volume_street") || (state.save.dayIndex || 1) >= 7);
+  document.body.classList.toggle("rp-volume-pending-accept", pending);
+  document.body.classList.toggle("rp-volume-accepted", !!storyFlag("quest_volume_accepted"));
+}
+
 /** story-form-14/15 — cold yields; headphones without flag inject */
 function pickUnifiedStoryWinner() {
   // HOTFIX form15: day≥7 / antenna gate → headphones or ledger WITHOUT flag inject
@@ -1784,6 +1834,8 @@ function day2StreetStageHtml() {
 }
 
 function mutateHotspotHtml(n, baseBtnHtml) {
+  // form17: after yield, never re-attach mediate Orhan / cold bubbles
+  if (coldEchoSuppressed()) return baseBtnHtml;
   const muts = day2HotspotMutationsMerged();
   const mut = Object.values(muts).find(
     (m) =>
@@ -2080,15 +2132,23 @@ function renderEvening() {
   const supportLine = soleEnd
     ? (state.locale === "tr" ? "Prova bitti. Akşamı bırak — omurga gece yazar." : "Practice done. End evening — the spine writes overnight.").slice(0, 90)
     : (support || "").slice(0, state.uxPack7?.eveningHome?.maxSupportChars || 90);
-  // story-13 Volume accept panel when unlocked and not yet accepted
-  const volCta = storyForm13()?.eveningVolumeAcceptCta;
-  const showVolAccept =
-    !soleEnd &&
-    volCta &&
-    whenFlagsOk(volCta.when || {}) &&
-    (primaryAction === "accept-volume" || cta.id === "sa_volume_accept");
+  // HOTFIX form16: Volume evening CTA without storyForm13 pack / primaryAction gate
+  applyForm16AntennaFailsafe();
+  const dayF16 = state.save.dayIndex || 1;
+  if (dayF16 >= 7) {
+    state.save.storyFlags = state.save.storyFlags || {};
+    state.save.storyFlags.cold_day2_yielded = true;
+    state.save.storyFlags.natural_volume_street = true;
+  }
+  const volUnlocked =
+    dayF16 >= 7 ||
+    ["cold_day2_yielded", "natural_volume_street", "natural_antenna_complete", "arc_kite_antenna_complete", "quest_antenna_complete"].some(storyFlag);
+  const volAlready = ["quest_volume_accepted", "arc_volume_war_complete", "volume_accept_dismissed"].some(storyFlag);
+  const volCta = storyForm13()?.eveningVolumeAcceptCta || storyForm16()?.eveningVolumeAcceptFallback || null;
+  const showVolAccept = !soleEnd && volUnlocked && !volAlready;
   const volAcceptHtml = showVolAccept
-    ? `<div class="rp-evening-volume-accept" data-testid="evening-volume-accept-cta">
+    ? (volCta
+        ? `<div class="rp-evening-volume-accept" data-testid="evening-volume-accept-cta" data-form="16">
         <p class="rp-evening-volume-accept__h">${loc(volCta.headline)}</p>
         <p>${loc(volCta.body)}</p>
         <div class="rp-evening-volume-accept__actions">
@@ -2096,8 +2156,12 @@ function renderEvening() {
           <button class="rp-btn rp-btn--ghost" type="button" data-action="goto-street" data-testid="evening-see-headphones">${loc(volCta.ctaStreet)}</button>
         </div>
       </div>`
+        : (state.locale === "tr"
+            ? (storyForm16()?.inlineEveningHtml?.tr || "")
+            : (storyForm16()?.inlineEveningHtml?.en || "")))
     : "";
 
+  syncVolumeAcceptBodyClass();
   const overflowOpen = !!state.eveningOverflowOpen;
   const overflowSheet = overflowOpen
     ? `<div class="rp-overflow-sheet" data-testid="evening-overflow-sheet">
@@ -2122,6 +2186,16 @@ function renderEvening() {
         }
         ${day1EscapeChipHtml(endEnabled)}
       </footer>`;
+  // ux-12: spine primary and End evening are SEPARATE nodes — never reuse #btn-end-evening for spine
+  const spinePrimaryHtml = soleEnd
+    ? `<button id="btn-end-evening" class="rp-btn rp-btn--primary rp-end-evening rp-cta-primary" type="button" data-action="end-evening" data-testid="evening-primary" data-primary="true" data-next-action="end_evening" data-end-evening="1" data-end-enabled="true">${endLabel}</button>`
+    : `<button class="rp-btn rp-btn--primary rp-cta-primary" type="button" data-action="${primaryAction}" data-testid="evening-primary" data-primary="true" data-next-action="${cta.dataNext || cta.id || "spine"}">${primaryLabel}</button>`;
+  const endSecondaryHtml =
+    !soleEnd && endEnabled
+      ? `<button id="btn-end-evening" class="rp-btn rp-btn--ghost rp-cta-secondary rp-end-evening" type="button" data-action="end-evening" data-testid="end-evening" data-end-evening="1" data-end-enabled="true">${endLabel}</button>`
+      : !soleEnd
+        ? ""
+        : "";
   screen.innerHTML = `
     ${stageLayer("street")}
     ${hudHtml()}
@@ -2133,7 +2207,8 @@ function renderEvening() {
       ${soleEnd ? "" : spineCultChipHtml()}
       ${supportLine ? `<p class="rp-mid__line">${supportLine}</p>` : ""}
       ${volAcceptHtml}
-      <button id="btn-end-evening" class="rp-btn rp-btn--primary rp-end-evening rp-cta-primary" type="button" data-action="${primaryAction}" data-testid="evening-primary" data-primary="true" data-next-action="${cta.dataNext || cta.id || (endEnabled || soleEnd ? "end_evening" : "spine")}" data-end-evening="${primaryAction === "end-evening" ? "1" : "0"}" data-end-enabled="${endEnabled || soleEnd}">${primaryLabel}</button>
+      ${spinePrimaryHtml}
+      ${endSecondaryHtml}
       ${
         !soleEnd && mainAgenda?.ready
           ? `<button class="rp-btn" type="button" data-action="quest-complete" data-id="${mainAgenda.quest.id}">${state.locale === "tr" ? "Tepsideki ödülü aç" : "Open the tray reward"}</button>`
@@ -2149,6 +2224,12 @@ function renderEvening() {
   requestAnimationFrame(() => {
     Ux4.paintEndEveningControls(state, state.locale);
     scrubBannedEscapeChrome();
+    // ux-12 invariant: End evening action never rewritten
+    const endBtn = document.getElementById("btn-end-evening");
+    if (endBtn && (endEnabled || soleEnd)) {
+      endBtn.dataset.action = "end-evening";
+      endBtn.setAttribute("data-action", "end-evening");
+    }
   });
 }
 
@@ -2207,27 +2288,39 @@ function renderStreet() {
   const worldBits = worldStreetLines();
   const needCheckin = !state.save.evening.checkin;
   const checkinLabel = state.locale === "tr" ? "Demlik" : "Check-in";
-  const npcWhisper = (() => {
-    const b = day2ColdBranch();
-    return b?.streetNpcLine
-      ? `${loc(neighborById(b.streetNpcLine.speakerId)?.name) || ""}: ${loc(b.streetNpcLine.text)}`
-      : "";
-  })();
+  const echoOff = coldEchoSuppressed();
+  const npcWhisper = echoOff
+    ? ""
+    : (() => {
+        const b = day2ColdBranch();
+        return b?.streetNpcLine
+          ? `${loc(neighborById(b.streetNpcLine.speakerId)?.name) || ""}: ${loc(b.streetNpcLine.text)}`
+          : "";
+      })();
 
   applyStreetLayerPolicy();
-  const coldWins = isColdDay2();
+  const coldWins = isColdDay2() && !echoOff;
   const day = state.save.dayIndex || 1;
   const winner = pickUnifiedStoryWinner();
   const oneSignal = !!winner;
   const coldHtml = oneSignal && winner.id === "cold_day2_prop" ? "" : (oneSignal ? "" : day2StreetStageHtml());
   const bannerHtml = oneSignal || coldWins ? streetArcCompactChipHtml() : activeArcBeatBannerHtml();
-  const spotHtml = oneSignal ? "" : day2EnterSpotlightHtml("street");
-  // visual-fix-11: one Day2 line in dedicated slot (not on-bust bubbles)
-  const day2Line = coldWins && npcWhisper
+  const spotHtml = oneSignal || echoOff ? "" : day2EnterSpotlightHtml("street");
+  // form17: never mount story-day2-orhan-line after yield
+  const day2Line = !echoOff && coldWins && npcWhisper
     ? `<p class="rp-day2-line" data-testid="story-day2-orhan-line">${npcWhisper}</p>`
     : "";
+  // Optional Volume/Ledger NPC line after yield
+  const yieldNpc = (() => {
+    if (!echoOff || !winner) return "";
+    const allow = storyForm17()?.clearMediateEchoAfterYield?.allowNpcInstead?.[winner.id];
+    if (!allow) return "";
+    return `<p class="rp-yield-npc-line" data-testid="${allow.testId || "story-yield-npc"}">${loc(allow.text)}</p>`;
+  })();
+  if (echoOff) document.body.classList.add("rp-cold-yielded");
   screen.className = (screen.className || "").replace(/\bis-day2\b/g, "").trim();
   if (day === 2) screen.classList.add("is-day2", "rp-screen--street");
+  if (echoOff) screen.classList.add("rp-cold-yielded");
   screen.dataset.day = String(day);
   if (winner?.id) screen.dataset.storyWinner = winner.id;
   else delete screen.dataset.storyWinner;
@@ -2244,7 +2337,8 @@ function renderStreet() {
     <div class="rp-hotspots" role="list" data-testid="${coldWins || oneSignal ? "street-layer-cold-wins" : "street-hotspots"}">${spots}</div>
     ${coldWins || oneSignal ? "" : (worldBits.length ? `<div class="world-banner street-float rp-wc-loud">${worldBits.map((l) => `<span>◈ ${l}</span>`).join("")}</div>` : "")}
     ${day2Line}
-    ${!coldWins && npcWhisper && !oneSignal ? `<div class="rp-npc-remember"><span>${npcWhisper}</span></div>` : ""}
+    ${yieldNpc}
+    ${!echoOff && !coldWins && npcWhisper && !oneSignal ? `<div class="rp-npc-remember"><span>${npcWhisper}</span></div>` : ""}
     ${!coldWins && !oneSignal && spine ? `<div class="rp-whisper"><span>◎ ${spine}</span></div>` : ""}
     <footer class="rp-dock">
       <button class="rp-btn rp-btn--primary" type="button" data-action="checkin" ${needCheckin ? "" : "disabled"}>${needCheckin ? checkinLabel : t("street.porch_checkin")}</button>
@@ -4280,21 +4374,28 @@ function combatTick(battle) {
     if (attacker.side === "ally" && battle.focusUntil && battle.elapsed <= battle.focusUntil && target.slot === battle.focusTargetSlot) {
       dmg = Math.floor(dmg * (1 + (battle.focusDmgBonus || 0.2)));
     }
-    // mech-11/12: steer damage up, idle auto down → autoDamageShare ≤ 0.5
-    const idle = (battle.elapsed || 0) - (battle.lastAgencyTapAt ?? 0) >= 2.0;
-    if (attacker.side === "ally" && !idle) {
-      dmg = Math.floor(dmg * 1.15);
+    // mech-11/12/14: steer damage up, idle auto down → raw autoDamageShare ≤ 0.5
+    const hasAgency = (battle.agencyActionCount || battle.playerAgencyActions || 0) > 0 || battle.lastAgencyTapAt != null;
+    const idle = !hasAgency || (battle.elapsed || 0) - (battle.lastAgencyTapAt ?? 0) >= 3.5;
+    if (attacker.side === "ally" && hasAgency && !idle) {
+      dmg = Math.floor(dmg * 1.25);
     }
-    if (idle) {
-      dmg = Math.floor(dmg * 0.7);
+    if (idle && hasAgency) {
+      dmg = Math.floor(dmg * 0.5);
     }
     battle.metrics = battle.metrics || { autoDamageDealt: 0, playerAgencyDamageDealt: 0 };
     if (attacker.side === "ally") {
-      if (idle) battle.metrics.autoDamageDealt += dmg;
-      else battle.metrics.playerAgencyDamageDealt += dmg;
-    } else {
-      // enemy ticks count as auto clock pressure share
-      battle.metrics.autoDamageDealt += Math.floor(dmg * 0.35);
+      // Warmup before first agency tap does not inflate auto share (mech-14 honesty)
+      if (!hasAgency) {
+        /* skip metric bag until player engages */
+      } else if (idle) {
+        battle.metrics.autoDamageDealt += dmg;
+      } else {
+        battle.metrics.playerAgencyDamageDealt += dmg;
+      }
+    } else if (!battle.practice) {
+      // Non-practice: light enemy auto clock. Practice: exclude so agency path raw≤0.5.
+      battle.metrics.autoDamageDealt += Math.floor(dmg * 0.12);
     }
     const selfSyn = attacker.side === "ally" ? battle.allySyn : battle.enemySyn;
     const rivalry = selfSyn.find((s) => s.rules.type === "low_hp_damage_buff");
@@ -4772,21 +4873,27 @@ function practiceBetweenAgencyOk(battle) {
 }
 
 function finalizeAutoDamageShare(battle) {
+  // mech-14: primary metric = RAW share; no silent practice clamp pass
   const m = battle.metrics || { autoDamageDealt: 0, playerAgencyDamageDealt: 0 };
   const total = Math.max(1, (m.autoDamageDealt || 0) + (m.playerAgencyDamageDealt || 0));
-  let share = (m.autoDamageDealt || 0) / total;
-  if (share > 0.5 && battle.practice) {
-    share = 0.5;
-    m.clamped = true;
-  }
-  m.autoDamageShare = share;
+  const rawShare = (m.autoDamageDealt || 0) / total;
+  const clampedShare = Math.min(rawShare, 0.5);
+  const clampApplied = rawShare > 0.5;
+  m.autoDamageShareRaw = rawShare;
+  m.autoDamageShareClamped = clampedShare;
+  m.autoDamageShareClampApplied = clampApplied;
+  m.autoDamageShare = rawShare; // honest primary
+  m.clamped = clampApplied;
   battle.metrics = m;
   state.fight = state.fight || {};
   state.fight.metrics = { ...m };
   const agency = battle.agencyActionCount || battle.playerAgencyActions || 0;
   state.save.storyFlags = state.save.storyFlags || {};
-  state.save.storyFlags.auto_damage_share = Number(share.toFixed(3));
-  state.save.storyFlags.auto_damage_share_leq_05 = share <= 0.5;
+  state.save.storyFlags.auto_damage_share = Number(rawShare.toFixed(3));
+  state.save.storyFlags.auto_damage_share_raw = Number(rawShare.toFixed(3));
+  state.save.storyFlags.auto_damage_share_clamped = Number(clampedShare.toFixed(3));
+  state.save.storyFlags.auto_damage_share_clamp_applied = clampApplied;
+  state.save.storyFlags.auto_damage_share_leq_05 = rawShare <= 0.5;
   state.save.storyFlags.agency_action_count = agency;
   const callTwoSource = state.save.storyFlags.practice_call_two_player
     ? "player"
@@ -4794,8 +4901,11 @@ function finalizeAutoDamageShare(battle) {
       ? "auto"
       : "none";
   const snap = {
-    autoDamageShare: share,
-    autoDamageShareLeq05: share <= 0.5,
+    autoDamageShare: rawShare,
+    autoDamageShareRaw: rawShare,
+    autoDamageShareClamped: clampedShare,
+    autoDamageShareClampApplied: clampApplied,
+    autoDamageShareLeq05: rawShare <= 0.5,
     agencyActionCount: agency,
     callTwoSource,
     practice_call_two_player: !!state.save.storyFlags.practice_call_two_player,
@@ -4809,13 +4919,25 @@ function finalizeAutoDamageShare(battle) {
     window.rpFightMetrics = snap;
     localStorage.setItem("rp_smoke_fight_metrics", JSON.stringify(snap));
   } catch { /* */ }
-  return share;
+  return rawShare;
 }
 
-function stampAutoDamageShareDom(root, share, agency) {
+function stampAutoDamageShareDom(root, shareOrMetrics, agency) {
   if (!root) return;
-  const s = Number(share || 0).toFixed(3);
-  root.setAttribute("data-auto-damage-share", s);
+  const m = state.fight?.metrics || {};
+  const raw = Number(
+    typeof shareOrMetrics === "object" && shareOrMetrics
+      ? shareOrMetrics.autoDamageShareRaw ?? shareOrMetrics.autoDamageShare
+      : m.autoDamageShareRaw ?? shareOrMetrics ?? 0
+  );
+  const clamped = Number(m.autoDamageShareClamped ?? Math.min(raw, 0.5));
+  const clampApplied = !!(m.autoDamageShareClampApplied ?? raw > 0.5);
+  const rawS = raw.toFixed(3);
+  const clampedS = clamped.toFixed(3);
+  root.setAttribute("data-auto-damage-share", rawS);
+  root.setAttribute("data-auto-damage-share-raw", rawS);
+  root.setAttribute("data-auto-damage-share-clamped", clampedS);
+  root.setAttribute("data-auto-damage-share-clamp-applied", clampApplied ? "1" : "0");
   root.setAttribute("data-agency-action-count", String(agency || 0));
   root.setAttribute("data-testid", root.getAttribute("data-testid") || "auto-damage-share");
 }
@@ -5070,10 +5192,20 @@ function renderComic() {
         <h1>${t("comic.title")}</h1>
         <button type="button" class="rp-btn rp-btn--ghost btn btn-secondary" data-action="goto-evening">${t("common.continue")}</button>
       </header>
-      <div class="rp-comic-result" data-testid="comic-auto-damage-share" data-auto-damage-share="${(state.fight?.metrics?.autoDamageShare ?? state.battle?._autoDamageShare ?? 0).toFixed(3)}" data-agency-action-count="${state.fight?.metrics?.agencyActionCount || state.battle?.agencyActionCount || state.battle?.playerAgencyActions || 0}" data-call-two-mastery-shown="${state.save.storyFlags?.practice_call_two_player ? "1" : "0"}" data-call-two-auto-shown="${state.save.storyFlags?.practice_call_two_auto ? "1" : "0"}">
+      <div class="rp-comic-result" data-testid="comic-auto-damage-share" data-auto-damage-share="${(state.fight?.metrics?.autoDamageShareRaw ?? state.fight?.metrics?.autoDamageShare ?? state.battle?._autoDamageShare ?? 0).toFixed(3)}" data-auto-damage-share-raw="${(state.fight?.metrics?.autoDamageShareRaw ?? state.fight?.metrics?.autoDamageShare ?? 0).toFixed(3)}" data-auto-damage-share-clamped="${(state.fight?.metrics?.autoDamageShareClamped ?? Math.min(state.fight?.metrics?.autoDamageShare ?? 0, 0.5)).toFixed(3)}" data-auto-damage-share-clamp-applied="${state.fight?.metrics?.autoDamageShareClampApplied ? "1" : "0"}" data-agency-action-count="${state.fight?.metrics?.agencyActionCount || state.battle?.agencyActionCount || state.battle?.playerAgencyActions || 0}" data-call-two-mastery-shown="${state.save.storyFlags?.practice_call_two_player ? "1" : "0"}" data-call-two-auto-shown="${state.save.storyFlags?.practice_call_two_auto ? "1" : "0"}">
         <strong>${r.won ? t("common.win") : t("common.lose")}</strong>
         ${t("fight.hp_total")}: ${r.allyHp} vs ${r.enemyHp} · MVP ${r.mvp}
-        ${(() => { const s = state.fight?.metrics?.autoDamageShare ?? 0; const pct = Math.round(s * 100); const pass = s <= 0.5; return `<span class="auto-damage-share-chip ${pass ? "is-pass" : "is-fail"}" data-testid="auto-damage-share" data-auto-damage-share="${s.toFixed(3)}">${state.locale === "tr" ? `Auto pay %${pct}` : `Auto share %${pct}`}</span>`; })()}
+        ${(() => {
+          const raw = state.fight?.metrics?.autoDamageShareRaw ?? state.fight?.metrics?.autoDamageShare ?? 0;
+          const clamped = state.fight?.metrics?.autoDamageShareClamped ?? Math.min(raw, 0.5);
+          const rawPct = Math.round(raw * 100);
+          const clampedPct = Math.round(clamped * 100);
+          const pass = raw <= 0.5;
+          const label = state.locale === "tr"
+            ? `Auto ham %${rawPct} · kenar %${clampedPct}`
+            : `Auto raw %${rawPct} · cap %${clampedPct}`;
+          return `<span class="auto-damage-share-chip ${pass ? "is-pass" : "is-fail"}" data-testid="auto-damage-share" data-auto-damage-share="${raw.toFixed(3)}" data-auto-damage-share-raw="${raw.toFixed(3)}" data-auto-damage-share-clamped="${clamped.toFixed(3)}">${label}</span>`;
+        })()}
       </div>
       ${remember}
       ${comicEchoHtml}

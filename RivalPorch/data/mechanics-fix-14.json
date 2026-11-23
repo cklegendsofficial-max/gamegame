@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "id": "mechanics-fix-14",
+  "packNumber": 14,
+  "squad": "mechanics",
+  "shippedAt": "2026-11-23T13:34:00Z",
+  "noPrPush": true,
+  "extends": [
+    "internal/squads/mechanics-fix-12.json",
+    "internal/squads/mechanics-fix-13.json"
+  ],
+  "mergeMode": "deepMergeIntoCombatPack",
+  "wirePathHint": "RivalPorch/js/combat.js finalizeAutoDamageShare — expose raw before clamp",
+  "scoreRef": {
+    "file": "internal/rival-porch-score-latest.json",
+    "buildCommit": "e1fedc9",
+    "mechanicsScore": 8.9,
+    "overall": 8.7,
+    "priorityFixTitle": "Show raw autoDamageShare before 0.5 clamp"
+  },
+  "scoreGapsAddressed": [
+    "Raw pre-clamp autoDamageShare not shown",
+    "finalize clamps share to 0.5 so over-cap reality can be hidden"
+  ],
+  "keepSoftlockProof": true,
+  "targets": ["rawAutoDamageShareTransparency"],
+
+  "acceptance": {
+    "auditor": "Comic/metrics expose rawShare + clampedShare; smoke asserts rawShare≤0.5 on agency path (or fail if clamp required)."
+  },
+
+  "rawAutoDamageShareTransparency": {
+    "problem": "finalizeAutoDamageShare clamps practice share to 0.5 — smoke can pass while true idle share >50%",
+    "compute": {
+      "rawShare": "autoDamageDealt / max(totalDamageDealt, 1)",
+      "clampedShare": "Math.min(rawShare, 0.5)",
+      "clampApplied": "rawShare > 0.5",
+      "order": "ALWAYS compute and persist rawShare BEFORE any clamp"
+    },
+    "disableHiddenClampPass": {
+      "practiceFinishClamp": {
+        "fromFix12": true,
+        "change": "Do not silently pass smoke on clampedShare alone",
+        "smokeMustUse": "rawShare",
+        "clampMayStillExistForDisplayTeach": false,
+        "prefer": "no_metric_clamp — fix gameplay so rawShare≤0.5; if clamp kept, mark fail"
+      }
+    },
+    "persist": {
+      "state.fight.metrics": {
+        "autoDamageShareRaw": "rawShare",
+        "autoDamageShareClamped": "clampedShare",
+        "autoDamageShare": "rawShare",
+        "note": "Primary autoDamageShare field = RAW (honest). Clamped is secondary only."
+      },
+      "flags": {
+        "auto_damage_share_raw": "rawShare",
+        "auto_damage_share_clamped": "clampedShare",
+        "auto_damage_share_clamp_applied": "clampApplied",
+        "auto_damage_share_leq_05": "rawShare <= 0.5"
+      },
+      "__RP_SMOKE__": {
+        "autoDamageShare": "rawShare",
+        "autoDamageShareRaw": "rawShare",
+        "autoDamageShareClamped": "clampedShare",
+        "autoDamageShareClampApplied": "clampApplied",
+        "autoDamageShareLeq05": "rawShare <= 0.5"
+      },
+      "localStorage.rp_smoke_fight_metrics": "same fields"
+    },
+    "dom": {
+      "finishAndComic": {
+        "data-auto-damage-share": "rawShare.toFixed(3)",
+        "data-auto-damage-share-raw": "rawShare.toFixed(3)",
+        "data-auto-damage-share-clamped": "clampedShare.toFixed(3)",
+        "data-auto-damage-share-clamp-applied": "clampApplied ? '1' : '0'",
+        "testIds": {
+          "raw": "auto-damage-share-raw",
+          "clamped": "auto-damage-share-clamped",
+          "chip": "auto-damage-share"
+        }
+      },
+      "hudChip": {
+        "format": {
+          "tr": "Auto ham %{raw}% · kenar %{clamped}%",
+          "en": "Auto raw %{raw}% · cap %{clamped}%"
+        },
+        "showBothAlways": true,
+        "failClassIfRawGt05": "is-fail",
+        "passClassIfRawLeq05": "is-pass"
+      }
+    },
+    "smoke": {
+      "assertRaw": "Number((__RP_SMOKE__||{}).autoDamageShareRaw ?? document.querySelector('[data-auto-damage-share-raw]')?.getAttribute('data-auto-damage-share-raw')) <= 0.5",
+      "failIfClampRequiredToPass": "if (autoDamageShareClampApplied && autoDamageShareRaw > 0.5) smoke FAIL even if clamped ≤0.5",
+      "agencyPath": "Practice with ≥3 agency actions; expect rawShare≤0.5 without clamp",
+      "checklistKeys": {
+        "autoDamageShareLeq05": "rawShare <= 0.5",
+        "autoDamageShareRawExposed": true
+      }
+    },
+    "gameplayIfRawTooHigh": {
+      "note": "Transparency first; then tighten idle auto further so raw passes",
+      "idleAutoDamageMult": 0.6,
+      "was": 0.7,
+      "playerAgencyDamageBonusPercent": 0.18,
+      "was": 0.15,
+      "doNotClampMetricToPass": true
+    }
+  },
+
+  "uiStringsPatch": {
+    "fight.auto_share_raw": {
+      "tr": "Auto ham %{raw}%",
+      "en": "Auto raw %{raw}%"
+    },
+    "fight.auto_share_both": {
+      "tr": "Auto ham %{raw}% · kenar %{clamped}%",
+      "en": "Auto raw %{raw}% · cap %{clamped}%"
+    },
+    "fight.auto_share_clamp_warn": {
+      "tr": "Kenar uygulandı — ham >%50",
+      "en": "Cap applied — raw >50%"
+    }
+  },
+
+  "acceptanceChecks": [
+    "Comic/metrics expose rawShare AND clampedShare",
+    "Primary autoDamageShare / data-auto-damage-share = RAW",
+    "Smoke asserts rawShare≤0.5; FAIL if only clamped passes",
+    "auto_damage_share_leq_05 uses raw, not clamped",
+    "Softlock-proof Call II path unchanged"
+  ],
+
+  "integrator": {
+    "owner": "code owner on cursor/rival-porch-slice-31f7",
+    "steps": [
+      "In finalizeAutoDamageShare: persist rawShare first; stop using clamped value as primary autoDamageShare.",
+      "Stamp data-auto-damage-share-raw + data-auto-damage-share-clamped on finish+comic; chip shows both.",
+      "auto_damage_share_leq_05 := rawShare<=0.5; smoke must read raw.",
+      "Remove practice metric-only clamp pass (fix-12 practiceFinishClamp).",
+      "Optionally tighten idle×0.6 / agency×1.18 so raw naturally ≤0.5.",
+      "No PR from this squad."
+    ],
+    "priority": "wire now — honesty PF on e1fedc9; climb overall toward ≥9.0"
+  },
+
+  "meta": {
+    "expectedMechanicsLift": "8.9 → toward 9.0 with honest raw share",
+    "standDown": false,
+    "overallTarget": 9.0,
+    "nextPackIfStillLow": "mechanics-fix-15 — further Auto shrink / ladder mastery",
+    "compat": {
+      "dependsOn": ["mechanics-fix-12", "mechanics-fix-13"],
+      "testIds": ["auto-damage-share-raw", "auto-damage-share-clamped", "auto-damage-share"]
+    }
+  }
+}

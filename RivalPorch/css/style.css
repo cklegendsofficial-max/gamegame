@@ -5481,3 +5481,231 @@ body.rp-cold-day2 .rp-hud-top [class*="shared-string"] {
   position: relative;
   z-index: 2;
 }
+
+
+/* ===== story-form-16 — evening Volume CTA readable ===== */
+.rp-evening-volume-accept {
+  margin: 0.75rem 0;
+  padding: 0.75rem 0.9rem;
+  background: rgba(14,10,8,.9);
+  border: 1px solid rgba(232,180,120,.5);
+  border-radius: 10px;
+  color: #f2e6d8;
+}
+.rp-evening-volume-accept__h { font-weight: 700; margin: 0 0 0.35rem; }
+.rp-evening-volume-accept__actions { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.55rem; }
+.rp-evening-volume-accept__cta {
+  padding: 0.4rem 0.7rem; border-radius: 8px; border: 1px solid #e8b478;
+  background: #e8b478; color: #1a120c; font-weight: 700; font-size: 13px;
+}
+
+/* ===== visual-fix-14 ===== */
+/* Rival Porch — visual-fix-14
+   e1fedc9 visual 8.7 — Day7+ float / mediate echo text over bust rail.
+   Acceptance: Day7 bust names free of any float/dialogue overlay; one line under rail.
+   Paste AFTER visual-fix-13.css.
+*/
+
+/* ── Scope: yielded street (Volume/Ledger) + day≥7 ───────────────────────── */
+
+.rp-screen--street[data-day]:not([data-day="1"]):not([data-day="2"]):not([data-day="3"]):not([data-day="4"]):not([data-day="5"]):not([data-day="6"]),
+.rp-screen--street[data-day="7"],
+.rp-screen--street[data-day="8"],
+.rp-screen--street[data-day="9"],
+.rp-screen--street[data-day="10"],
+.rp-screen--street[data-story-winner="volume_natural"],
+.rp-screen--street[data-story-winner="ledger_natural"],
+.rp-screen--street.rp-cold-yielded,
+body.rp-cold-yielded .rp-screen--street,
+.rp-screen--street:has([data-testid="story-street-headphones-note"]),
+.rp-screen--street:has([data-testid="story-street-ledger-tray"]) {
+  --rp-bust-rail-bottom: calc(var(--rp-street-bust-band-top, 96px) + 96px);
+  --rp-yield-line-bottom: calc(var(--rp-dock-h, 72px) + 10px + var(--rp-safe-bottom, 0px));
+}
+
+/* ── A. KILL mediate / Orhan string floats on yielded days ───────────────── */
+
+.rp-screen--street[data-story-winner="volume_natural"] [data-testid="story-day2-orhan-line"],
+.rp-screen--street[data-story-winner="ledger_natural"] [data-testid="story-day2-orhan-line"],
+.rp-screen--street[data-story-winner="volume_natural"] [data-testid="story-day2-cem-rehearsal"],
+.rp-screen--street[data-story-winner="ledger_natural"] [data-testid="story-day2-cem-rehearsal"],
+.rp-screen--street[data-story-winner="volume_natural"] [data-testid="story-day2-leyla-line"],
+.rp-screen--street[data-story-winner="ledger_natural"] [data-testid="story-day2-leyla-line"],
+.rp-screen--street[data-story-winner="volume_natural"] .rp-day2-line,
+.rp-screen--street[data-story-winner="ledger_natural"] .rp-day2-line,
+body.rp-cold-yielded .rp-screen--street [data-testid="story-day2-orhan-line"],
+body.rp-cold-yielded .rp-screen--street [data-testid="story-day2-cem-rehearsal"],
+body.rp-cold-yielded .rp-screen--street [data-testid="story-day2-leyla-line"],
+body.rp-cold-yielded .rp-screen--street .rp-day2-line,
+.rp-screen--street[data-day="7"] [data-testid="story-day2-orhan-line"],
+.rp-screen--street[data-day="8"] [data-testid="story-day2-orhan-line"],
+.rp-screen--street[data-day="9"] [data-testid="story-day2-orhan-line"],
+.rp-screen--street[data-day="10"] [data-testid="story-day2-orhan-line"],
+.rp-screen--street[data-day="7"] .rp-day2-line,
+.rp-screen--street[data-day="10"] .rp-day2-line {
+  display: none !important;
+}
+
+/* Mediate prop + SHARED STRING leftovers must stay gone when yielded */
+.rp-screen--street[data-story-winner="volume_natural"] [data-testid="story-day2-mediate-string"],
+.rp-screen--street[data-story-winner="ledger_natural"] [data-testid="story-day2-mediate-string"],
+.rp-screen--street[data-story-winner="volume_natural"] [data-testid="story-day2-instigate-kite"],
+.rp-screen--street[data-story-winner="ledger_natural"] [data-testid="story-day2-instigate-kite"],
+.rp-screen--street[data-story-winner="volume_natural"] [data-testid="story-day2-stage-chalk"],
+.rp-screen--street[data-story-winner="ledger_natural"] [data-testid="story-day2-stage-chalk"],
+body.rp-cold-yielded .rp-screen--street [data-testid^="story-day2-"]:not([data-testid*="headphones"]):not([data-testid*="ledger"]),
+.rp-screen--street[data-day="7"] [data-testid="story-day2-mediate-string"],
+.rp-screen--street[data-day="10"] [data-testid="story-day2-mediate-string"] {
+  display: none !important;
+}
+
+/* ── B. Kill float text that parks in / over the bust rail ───────────────── */
+
+.rp-screen--street[data-day="7"] .rp-float,
+.rp-screen--street[data-day="8"] .rp-float,
+.rp-screen--street[data-day="9"] .rp-float,
+.rp-screen--street[data-day="10"] .rp-float,
+.rp-screen--street[data-story-winner="volume_natural"] .rp-float,
+.rp-screen--street[data-story-winner="ledger_natural"] .rp-float,
+body.rp-cold-yielded .rp-screen--street .rp-float,
+.rp-screen--street:has([data-testid="story-street-headphones-note"]) .rp-float,
+.rp-screen--street:has([data-testid="story-street-ledger-tray"]) .rp-float,
+.rp-screen--street[data-day="7"] .rp-hotspot__bubble,
+.rp-screen--street[data-day="10"] .rp-hotspot__bubble,
+.rp-screen--street[data-story-winner="volume_natural"] .rp-hotspot__bubble,
+.rp-screen--street[data-story-winner="ledger_natural"] .rp-hotspot__bubble,
+body.rp-cold-yielded .rp-screen--street .rp-hotspot__bubble,
+.rp-screen--street[data-day="7"] .rp-npc-monologue,
+.rp-screen--street[data-day="10"] .rp-npc-monologue,
+.rp-screen--street[data-story-winner="volume_natural"] .rp-npc-monologue,
+.rp-screen--street[data-story-winner="ledger_natural"] .rp-npc-monologue,
+.rp-screen--street[data-day="7"] .rp-day2-dialogue-stack,
+.rp-screen--street[data-story-winner="volume_natural"] .rp-day2-dialogue-stack,
+.rp-screen--street[data-day="7"] .rp-mediate-echo,
+.rp-screen--street[data-day="7"] [data-mediate-echo],
+.rp-screen--street[data-story-winner="volume_natural"] [data-mediate-echo],
+.rp-screen--street[data-story-winner="ledger_natural"] [data-mediate-echo],
+body.rp-cold-yielded .rp-screen--street [data-mediate-echo],
+.rp-screen--street[data-day="7"] .rp-street-float-text,
+.rp-screen--street[data-day="7"] .rp-whisper-float,
+.rp-screen--street[data-story-winner="volume_natural"] .rp-whisper-float,
+.rp-screen--street[data-story-winner="ledger_natural"] .rp-whisper-float {
+  display: none !important;
+}
+
+/* Residual string-copy floats (class-agnostic hooks used by integrator) */
+.rp-screen--street[data-story-winner="volume_natural"] [data-float-kind="mediate"],
+.rp-screen--street[data-story-winner="ledger_natural"] [data-float-kind="mediate"],
+.rp-screen--street[data-story-winner="volume_natural"] [data-float-kind="string"],
+.rp-screen--street[data-story-winner="ledger_natural"] [data-float-kind="string"],
+body.rp-cold-yielded .rp-screen--street [data-float-kind="mediate"],
+body.rp-cold-yielded .rp-screen--street [data-float-kind="string"] {
+  display: none !important;
+}
+
+/* ── C. ONE yield line slot — under bust rail, above dock ────────────────── */
+
+.rp-screen--street[data-story-winner="volume_natural"] .rp-yield-line,
+.rp-screen--street[data-story-winner="ledger_natural"] .rp-yield-line,
+.rp-screen--street[data-day="7"] .rp-yield-line,
+.rp-screen--street[data-day="10"] .rp-yield-line,
+body.rp-cold-yielded .rp-screen--street .rp-yield-line,
+.rp-screen--street[data-story-winner="volume_natural"] [data-testid="story-volume-line"],
+.rp-screen--street[data-story-winner="ledger_natural"] [data-testid="story-ledger-line"],
+.rp-screen--street:has([data-testid="story-street-headphones-note"]) [data-testid="story-volume-line"],
+.rp-screen--street:has([data-testid="story-street-ledger-tray"]) [data-testid="story-ledger-line"] {
+  position: absolute !important;
+  left: 12px !important;
+  right: 12px !important;
+  top: auto !important;
+  bottom: var(--rp-yield-line-bottom, calc(72px + 10px)) !important;
+  z-index: 6 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  max-height: 40px !important;
+  padding: 8px 12px !important;
+  font-size: 12px !important;
+  line-height: 1.25 !important;
+  overflow: hidden !important;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 72%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--tea-cream, #F2E6D8) 18%, transparent);
+  pointer-events: none;
+  transform: none !important;
+}
+
+/* Hide duplicate yield lines */
+.rp-screen--street .rp-yield-line + .rp-yield-line,
+.rp-screen--street [data-testid="story-volume-line"] ~ [data-testid="story-volume-line"],
+.rp-screen--street [data-testid="story-ledger-line"] ~ [data-testid="story-ledger-line"] {
+  display: none !important;
+}
+
+/* ── D. Bust rail always above leftover paint ────────────────────────────── */
+
+.rp-screen--street[data-day="7"] .rp-hotspots,
+.rp-screen--street[data-day="8"] .rp-hotspots,
+.rp-screen--street[data-day="9"] .rp-hotspots,
+.rp-screen--street[data-day="10"] .rp-hotspots,
+.rp-screen--street[data-story-winner="volume_natural"] .rp-hotspots,
+.rp-screen--street[data-story-winner="ledger_natural"] .rp-hotspots,
+body.rp-cold-yielded .rp-screen--street .rp-hotspots {
+  z-index: 8 !important;
+  isolation: isolate;
+}
+
+.rp-screen--street[data-day="7"] .rp-hotspot__name,
+.rp-screen--street[data-day="10"] .rp-hotspot__name,
+.rp-screen--street[data-story-winner="volume_natural"] .rp-hotspot__name,
+.rp-screen--street[data-story-winner="ledger_natural"] .rp-hotspot__name {
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+}
+
+/* Soft: any absolute text layer forced below rail floor if still visible */
+.rp-screen--street[data-story-winner="volume_natural"] .rp-street-caption,
+.rp-screen--street[data-story-winner="ledger_natural"] .rp-street-caption,
+.rp-screen--street[data-day="7"] .rp-street-caption {
+  top: auto !important;
+  bottom: var(--rp-yield-line-bottom) !important;
+  left: 12px !important;
+  right: 12px !important;
+  transform: none !important;
+  max-height: 40px !important;
+  overflow: hidden !important;
+}
+
+/* story-form-17 — clear mediate echo after yield; Volume accept first */
+body.rp-cold-yielded .rp-day2-line,
+body.rp-cold-yielded .rp-npc-remember,
+body.rp-cold-yielded [data-testid="story-day2-orhan-line"],
+body.rp-cold-yielded [data-testid="story-day2-orhan-forbidden"],
+body.rp-cold-yielded [data-testid="story-day2-cem-rehearsal"],
+body.rp-cold-yielded .rp-stage-prop--shared-string,
+body.rp-cold-yielded .rp-stage-prop--kite-high,
+body.rp-cold-yielded .rp-stage-prop--chalk-cup,
+body.rp-cold-yielded .rp-hotspot__bubble[data-testid="story-day2-orhan-line"],
+body.rp-cold-yielded .rp-hotspot__bubble[data-testid="story-day2-orhan-forbidden"],
+body.rp-cold-yielded .rp-hotspot__bubble[data-testid="story-day2-cem-rehearsal"] {
+  display: none !important;
+}
+/* Volume accept panel stacks above other evening CTAs */
+.rp-evening-volume-accept {
+  order: -1;
+  position: relative;
+  z-index: 5;
+}
+body.rp-volume-pending-accept [data-testid="evening-headphones-street-job"],
+body.rp-volume-pending-accept [data-next="headphones"] {
+  /* street job not primary until accept — demote if wrongly painted */
+  opacity: 0.55;
+  pointer-events: none;
+}
+body.rp-volume-accepted [data-next="headphones"],
+body.rp-volume-accepted [data-testid="evening-headphones-street-job"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+

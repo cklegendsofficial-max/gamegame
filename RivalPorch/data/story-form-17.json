@@ -1,0 +1,268 @@
+{
+  "schemaVersion": 1,
+  "packId": "story-form-17",
+  "kind": "story-quest-form",
+  "formIndex": 17,
+  "localeDefault": "tr",
+  "purpose": "After cold yield: clear mediate Orhan/string echo; Volume accept panel before HEADPHONES street job.",
+  "addressesScore": {
+    "scoreLatestPath": "internal/rival-porch-score-latest.json",
+    "overall": 8.7,
+    "storyScore": 8.7,
+    "playedAt": "2026-11-23T13:35:00Z",
+    "gaps": [
+      "Mediate NPC echo on Volume/Ledger days",
+      "Volume accept panel vs HEADPHONES CTA inconsistency"
+    ],
+    "priorityFixes": [
+      {
+        "title": "Clear cold mediate NPC echo after yield",
+        "acceptance": "When winner is volume_natural or ledger_natural, mediate Orhan string lines/tags hidden; Volume/Ledger NPC line only."
+      },
+      {
+        "title": "Volume accept panel before HEADPHONES street job",
+        "acceptance": "First Volume unlock evening shows evening-volume-accept-cta (Open Volume + See HEADPHONES); after accept, street job becomes primary."
+      }
+    ],
+    "note": "form-16 already queued for evening CTA bypass — form17 sequences accept-before-street-job and clears mediate echo."
+  },
+  "sourcePacks": [
+    "internal/squads/story-form-5.json",
+    "internal/squads/story-form-15.json",
+    "internal/squads/story-form-16.json"
+  ],
+  "integrator": {
+    "owner": "code owner on cursor/rival-porch-slice-31f7",
+    "noPrFromThisPackAuthor": true,
+    "mergeMode": "patch-overlay",
+    "wire": [
+      "Merge storyForm17",
+      "mutateHotspotHtml: if coldEchoSuppressed() return baseBtnHtml without day2 mediate/instigate/stage bubbles/suffixes",
+      "renderStreet: if coldEchoSuppressed() force npcWhisper/day2Line/rp-npc-remember empty; never mount story-day2-orhan-line",
+      "day2StreetStageHtml already empty after yield — keep; CSS hide shared-string as belt",
+      "Evening primary: while !quest_volume_accepted && volumeUnlocked → sa_volume_accept / evening-volume-accept-cta ONLY (not sa_headphones)",
+      "After quest_volume_accepted → sa_headphones street job becomes primary",
+      "Works with form16 evening CTA bypass; form17 adds sequencing rule",
+      "Append cssAppend"
+    ],
+    "doNot": [
+      "Re-show mediate Orhan bubble once isColdDay2 becomes false",
+      "Make Answer HEADPHONES note the evening primary before Open Volume accept"
+    ]
+  },
+  "principles": {
+    "storyNeverGatedBySpend": true,
+    "yieldClearsColdEcho": true,
+    "volumeAcceptBeforeHeadphonesJob": true,
+    "oneNpcLineAfterYield": true
+  },
+  "clearMediateEchoAfterYield": {
+    "id": "suppress_cold_echo_after_yield",
+    "bug": "mutateHotspotHtml skips bubbles only when isColdDay2()||day===2; after yield isColdDay2=false so mediate Orhan bubble RETURNS via form5 hotspotMutations (flagsAll cold_open_mediate, dayIndexMin 2).",
+    "coldEchoSuppressedWhen": {
+      "any": [
+        "cold_day2_yielded",
+        "natural_volume_street",
+        "natural_ledger_street",
+        {
+          "winnerIn": [
+            "volume_natural",
+            "ledger_natural",
+            "av_handoff",
+            "vl_handoff",
+            "volume_beat_prop"
+          ]
+        },
+        {
+          "dayIndexMin": 7
+        }
+      ]
+    },
+    "suppressTestIds": [
+      "story-day2-orhan-line",
+      "story-day2-orhan-forbidden",
+      "story-day2-cem-rehearsal",
+      "story-day2-mediate-string",
+      "story-day2-instigate-kite",
+      "story-day2-stage-chalk"
+    ],
+    "suppressClasses": [
+      "rp-day2-line",
+      "rp-npc-remember",
+      "rp-stage-prop--shared-string",
+      "rp-stage-prop--kite-high",
+      "rp-stage-prop--chalk-cup",
+      "rp-hotspot--mediate-orhan",
+      "rp-hotspot--instigate-orhan",
+      "rp-hotspot--stage-cem"
+    ],
+    "allowNpcInstead": {
+      "volume_natural": {
+        "speakerId": "n5",
+        "text": {
+          "tr": "KULAKLIK notu — Day2 ipi bitti.",
+          "en": "HEADPHONES note — Day2 string is done."
+        },
+        "testId": "story-volume-natural-npc"
+      },
+      "ledger_natural": {
+        "speakerId": "n1",
+        "text": {
+          "tr": "Defter ve tepsi — soğuk seçim hatırada kalsın.",
+          "en": "Ledger and tray — leave the cold choice in memory."
+        },
+        "testId": "story-ledger-natural-npc"
+      }
+    },
+    "hotspotMutationOverride": {
+      "mediate": {
+        "when": {
+          "dayIndexMin": 2,
+          "dayIndexMax": 6,
+          "flagsAll": [
+            "cold_open_mediate"
+          ],
+          "flagsNone": [
+            "cold_day2_yielded",
+            "natural_volume_street"
+          ]
+        }
+      },
+      "instigate": {
+        "when": {
+          "dayIndexMin": 2,
+          "dayIndexMax": 6,
+          "flagsAll": [
+            "cold_open_instigate"
+          ],
+          "flagsNone": [
+            "cold_day2_yielded",
+            "natural_volume_street"
+          ]
+        }
+      },
+      "stage": {
+        "when": {
+          "dayIndexMin": 2,
+          "dayIndexMax": 6,
+          "flagsAll": [
+            "cold_open_stage"
+          ],
+          "flagsNone": [
+            "cold_day2_yielded",
+            "natural_volume_street"
+          ]
+        }
+      }
+    }
+  },
+  "volumeAcceptBeforeHeadphonesJob": {
+    "id": "accept_before_street_headphones",
+    "sequence": [
+      "volumeUnlocked (day≥7 / yield / antenna)",
+      "evening-volume-accept-cta primary (Open Volume + See HEADPHONES secondary)",
+      "player accept-volume → quest_volume_accepted + quest_volume_active",
+      "THEN sa_headphones street job primary (Answer HEADPHONES note)"
+    ],
+    "eveningPrimaryBeforeAccept": {
+      "id": "sa_volume_accept",
+      "action": "accept-volume",
+      "testIdPanel": "evening-volume-accept-cta",
+      "testIdOpen": "evening-open-volume",
+      "testIdSee": "evening-see-headphones",
+      "forbidPrimaryIds": [
+        "sa_headphones"
+      ]
+    },
+    "streetJobAfterAccept": {
+      "id": "sa_headphones",
+      "action": "goto-street",
+      "whenFlagsAll": [
+        "quest_volume_accepted"
+      ],
+      "label": {
+        "tr": "KULAKLIK notuna git",
+        "en": "Answer HEADPHONES note"
+      },
+      "testId": "evening-headphones-street-job",
+      "becomesPrimary": true
+    },
+    "seeHeadphonesBeforeAccept": {
+      "note": "evening-see-headphones may peek street but must NOT replace Open Volume as primary CTA",
+      "isSecondaryOnly": true
+    },
+    "dependsOnForm16": "form-16 queues evening CTA bypass; form17 forbids sa_headphones until accept"
+  },
+  "cssAppend": "\n/* story-form-17 — clear mediate echo after yield; Volume accept first */\nbody.rp-cold-yielded .rp-day2-line,\nbody.rp-cold-yielded .rp-npc-remember,\nbody.rp-cold-yielded [data-testid=\"story-day2-orhan-line\"],\nbody.rp-cold-yielded [data-testid=\"story-day2-orhan-forbidden\"],\nbody.rp-cold-yielded [data-testid=\"story-day2-cem-rehearsal\"],\nbody.rp-cold-yielded .rp-stage-prop--shared-string,\nbody.rp-cold-yielded .rp-stage-prop--kite-high,\nbody.rp-cold-yielded .rp-stage-prop--chalk-cup,\nbody.rp-cold-yielded .rp-hotspot__bubble[data-testid=\"story-day2-orhan-line\"],\nbody.rp-cold-yielded .rp-hotspot__bubble[data-testid=\"story-day2-orhan-forbidden\"],\nbody.rp-cold-yielded .rp-hotspot__bubble[data-testid=\"story-day2-cem-rehearsal\"] {\n  display: none !important;\n}\n/* Volume accept panel stacks above other evening CTAs */\n.rp-evening-volume-accept {\n  order: -1;\n  position: relative;\n  z-index: 5;\n}\nbody.rp-volume-pending-accept [data-testid=\"evening-headphones-street-job\"],\nbody.rp-volume-pending-accept [data-next=\"headphones\"] {\n  /* street job not primary until accept — demote if wrongly painted */\n  opacity: 0.55;\n  pointer-events: none;\n}\nbody.rp-volume-accepted [data-next=\"headphones\"],\nbody.rp-volume-accepted [data-testid=\"evening-headphones-street-job\"] {\n  opacity: 1;\n  pointer-events: auto;\n}\n",
+  "integratorSnippet": {
+    "language": "js",
+    "comment": "Clear cold echo after yield; Volume accept before HEADPHONES job",
+    "pseudo": "\nfunction storyForm17() {\n  return state.questPack?.storyForm17 || state.storyForm17 || null;\n}\n\nfunction coldEchoSuppressed() {\n  const day = state.save.dayIndex || 1;\n  if (day >= 7) return true;\n  if ([\"cold_day2_yielded\",\"natural_volume_street\",\"natural_ledger_street\"].some(storyFlag)) return true;\n  const w = typeof pickUnifiedStoryWinner === \"function\" ? pickUnifiedStoryWinner() : null;\n  return !!(w && [\"volume_natural\",\"ledger_natural\",\"av_handoff\",\"vl_handoff\",\"volume_beat_prop\"].includes(w.id));\n}\n\n// mutateHotspotHtml — prepend:\n//   if (coldEchoSuppressed()) return baseBtnHtml;\n\n// renderStreet — after npcWhisper:\n//   const whisper = coldEchoSuppressed() ? \"\" : npcWhisper;\n//   const day2Line = (!coldEchoSuppressed() && coldWins && whisper) ? ... : \"\";\n//   if winner volume/ledger, optional Volume/Ledger NPC only (allowNpcInstead)\n\nfunction syncVolumeAcceptBodyClass() {\n  const pending = !storyFlag(\"quest_volume_accepted\") && !storyFlag(\"arc_volume_war_complete\") && (\n    storyFlag(\"cold_day2_yielded\") || storyFlag(\"natural_volume_street\") || (state.save.dayIndex||1) >= 7\n  );\n  document.body.classList.toggle(\"rp-volume-pending-accept\", pending);\n  document.body.classList.toggle(\"rp-volume-accepted\", !!storyFlag(\"quest_volume_accepted\"));\n}\n\n// pickEveningPrimary / spine CTA:\n//   if (volumeUnlocked && !quest_volume_accepted) return sa_volume_accept ONLY — never sa_headphones\n//   if (quest_volume_accepted && !volumeDone) return sa_headphones street job\n"
+  },
+  "echoFollowUpsAppend": [
+    {
+      "id": "echo_form17_yield_clear",
+      "priority": 102,
+      "when": {
+        "flagsAny": [
+          "cold_day2_yielded",
+          "natural_volume_street"
+        ],
+        "flagsNone": [
+          "quest_volume_accepted"
+        ],
+        "slots": [
+          "evening"
+        ]
+      },
+      "speakerId": "narrator",
+      "headline": {
+        "tr": "Önce Volume'u aç",
+        "en": "Open Volume first"
+      },
+      "body": {
+        "tr": "Orhan ipi sustu. KULAKLIK sokağı — ama önce Desibel kabul paneli.",
+        "en": "Orhan's string went quiet. HEADPHONES is on the street — but accept Decibel first."
+      },
+      "cta": {
+        "tr": "Volume'u aç",
+        "en": "Open Volume"
+      }
+    }
+  ],
+  "acceptanceChecks": [
+    {
+      "id": "no_mediate_echo_after_yield",
+      "desc": "day≥7 volume_natural: no story-day2-orhan-line, no shared-string, no mediate Orhan bubble; optional story-volume-natural-npc only."
+    },
+    {
+      "id": "no_instigate_stage_echo",
+      "desc": "Same suppress for orhan-forbidden / cem-rehearsal after yield."
+    },
+    {
+      "id": "accept_before_headphones_job",
+      "desc": "First Volume unlock evening: evening-volume-accept-cta primary; sa_headphones / Answer HEADPHONES not primary until quest_volume_accepted."
+    },
+    {
+      "id": "headphones_job_after_accept",
+      "desc": "After accept-volume: sa_headphones becomes evening/street primary job."
+    }
+  ],
+  "playtestScript": [
+    "Mediate → overnight to day7 → street: headphones-note present; Orhan mediate line ABSENT",
+    "Evening before accept: evening-volume-accept-cta; no primary Answer HEADPHONES",
+    "Accept Volume → evening/street primary becomes Answer HEADPHONES note"
+  ],
+  "newStoryFlags": [],
+  "meta": {
+    "squad": "story-quest",
+    "formIndex": 17,
+    "shipTrigger": "score 8.7 story 8.7 — clear mediate echo; Volume accept before HEADPHONES job",
+    "nextPackWhen": "story priorityFixes still open OR story < 8.5",
+    "dependsOnForms": [
+      15,
+      16
+    ],
+    "implementationNote": "Hotspot mutation window dayIndexMax 6 + coldEchoSuppressed; evening sequencing accept→headphones job."
+  }
+}

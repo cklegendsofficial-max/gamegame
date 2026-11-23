@@ -1,0 +1,28 @@
+{
+  "packId": "ux-session-12",
+  "schemaVersion": 1,
+  "scoreReact": {
+    "buildCommit": "e1fedc9",
+    "overall": 8.7,
+    "gameplay": 8.4,
+    "gap": "Day2+ End evening buried when spine owns primary"
+  },
+  "day2Plus": {
+    "spinePrimaryTestId": "evening-primary",
+    "endEveningTestId": "end-evening",
+    "endEveningDataActionLocked": "end-evening",
+    "endEveningRole": "secondary",
+    "endEveningVisibleWhen": "canEndEvening()",
+    "forbidReuseEndEveningButtonForSpine": true,
+    "forbidOverflowOnlyEndEvening": true
+  },
+  "day1": {
+    "soleEndUnchanged": true
+  },
+  "acceptanceChecks": [
+    "day2plus_btn_end_evening_data_action_is_end_evening",
+    "spine_primary_and_end_evening_both_visible_when_can_end",
+    "smoke_day1_to_day7_zero_action_patch",
+    "no_skip_to_morning"
+  ]
+}
