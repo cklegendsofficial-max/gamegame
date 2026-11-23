@@ -1,0 +1,2193 @@
+{
+  "schemaVersion": 1,
+  "sliceId": "rival-porch-stories-depth",
+  "note": "Local expanded trees until store internal/rival-porch-story-content.json lands",
+  "streetEvents": [
+    {
+      "id": "evt_cat_lantern",
+      "minDay": 1,
+      "prompt": {
+        "tr": "Sokak kedisi feneri devirdi. Ne yaparsın?",
+        "en": "Street cat knocked a lantern. What now?"
+      },
+      "choices": [
+        {
+          "id": "a",
+          "label": {
+            "tr": "Kediyi kovala, feneri düzelt",
+            "en": "Chase cat, fix lantern"
+          },
+          "effects": {
+            "teaLeaves": 1,
+            "mood": 1
+          }
+        },
+        {
+          "id": "b",
+          "label": {
+            "tr": "Feneri bırak, çay koy",
+            "en": "Leave lantern, make tea"
+          },
+          "effects": {
+            "teaLeaves": 2,
+            "affinityAll": 1
+          }
+        },
+        {
+          "id": "c",
+          "label": {
+            "tr": "Neon tabelayı yak, ışık olsun",
+            "en": "Light the neon sign"
+          },
+          "effects": {
+            "neonTokens": 1,
+            "mood": 2
+          }
+        },
+        {
+          "id": "d",
+          "label": {
+            "tr": "Orhan Amca'ya şikayet et",
+            "en": "Complain to Mr. Orhan"
+          },
+          "effects": {
+            "affinity": {
+              "n4": 1
+            },
+            "traits": {
+              "Grumpy": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "evt_power_flicker",
+      "minDay": 2,
+      "prompt": {
+        "tr": "Mahallede elektrik kırpışıyor. Kim önce?",
+        "en": "Block power flickers. Who first?"
+      },
+      "choices": [
+        {
+          "id": "a",
+          "label": {
+            "tr": "DJ Peri'nin setini kurtar",
+            "en": "Save DJ Peri's set"
+          },
+          "effects": {
+            "affinity": {
+              "n5": 2
+            },
+            "neonTokens": 1
+          }
+        },
+        {
+          "id": "b",
+          "label": {
+            "tr": "Fırını açık tut",
+            "en": "Keep the oven warm"
+          },
+          "effects": {
+            "affinity": {
+              "n6": 2
+            },
+            "ovenCoins": 1
+          }
+        },
+        {
+          "id": "c",
+          "label": {
+            "tr": "Herkese mum dağıt",
+            "en": "Hand out candles"
+          },
+          "effects": {
+            "affinityAll": 1,
+            "teaLeaves": 1
+          }
+        },
+        {
+          "id": "d",
+          "label": {
+            "tr": "Bekle, belki geçer",
+            "en": "Wait it out"
+          },
+          "effects": {
+            "mood": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "evt_rumor_wave",
+      "minDay": 3,
+      "prompt": {
+        "tr": "Yeni bir dedikodu dalgası… nereye koşarsın?",
+        "en": "A rumor wave hits—where do you run?"
+      },
+      "choices": [
+        {
+          "id": "a",
+          "label": {
+            "tr": "Merve Teyze'ye doğrula",
+            "en": "Verify with Aunt Merve"
+          },
+          "effects": {
+            "affinity": {
+              "n1": 2
+            },
+            "teaLeaves": 1
+          }
+        },
+        {
+          "id": "b",
+          "label": {
+            "tr": "Sessiz kal, dinle",
+            "en": "Stay quiet, listen"
+          },
+          "effects": {
+            "teaLeaves": 2
+          }
+        },
+        {
+          "id": "c",
+          "label": {
+            "tr": "Cem'e spor dedikodusuna çevir",
+            "en": "Spin it into sports talk for Cem"
+          },
+          "effects": {
+            "affinity": {
+              "n2": 1
+            }
+          }
+        },
+        {
+          "id": "d",
+          "label": {
+            "tr": "Leyla'ya abarttır",
+            "en": "Let Leyla exaggerate"
+          },
+          "effects": {
+            "affinity": {
+              "n3": 1
+            },
+            "traits": {
+              "Chaos": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "evt_bakkal_queue",
+      "minDay": 1,
+      "prompt": {
+        "tr": "Bakkal kuyruğu uzadı. Nasıl davranırsın?",
+        "en": "Bakkal queue is long. How do you play it?"
+      },
+      "choices": [
+        {
+          "id": "a",
+          "label": {
+            "tr": "Sıra bekle, sohbet et",
+            "en": "Wait in line, chat"
+          },
+          "effects": {
+            "affinityAll": 1,
+            "teaLeaves": 1
+          }
+        },
+        {
+          "id": "b",
+          "label": {
+            "tr": "Can için un kap",
+            "en": "Grab flour for Can"
+          },
+          "effects": {
+            "affinity": {
+              "n6": 2
+            },
+            "ovenCoins": 1
+          }
+        },
+        {
+          "id": "c",
+          "label": {
+            "tr": "Peri için enerji içeceği",
+            "en": "Energy drink for Peri"
+          },
+          "effects": {
+            "affinity": {
+              "n5": 1
+            },
+            "neonTokens": 1
+          }
+        },
+        {
+          "id": "d",
+          "label": {
+            "tr": "Kuyruğu atla (risk)",
+            "en": "Skip the line (risky)"
+          },
+          "effects": {
+            "affinity": {
+              "n4": -1
+            },
+            "teaLeaves": 3
+          }
+        }
+      ]
+    }
+  ],
+  "neighborArcs": [
+    {
+      "id": "n1_deep_arc",
+      "neighborId": "n1",
+      "title": {
+        "tr": "Demlik Konseyi",
+        "en": "Teapot Council"
+      },
+      "startNode": "n1_b1",
+      "minDay": 1,
+      "nodes": {
+        "n1_b1": {
+          "text": {
+            "tr": "Merve Teyze demliği kaldırır: “Bu akşam üç kapı birden konuşacak. Sen kimin tarafındasın?”",
+            "en": "Aunt Merve lifts the pot: “Three doors will talk tonight. Whose side are you on?”"
+          },
+          "choices": [
+            {
+              "id": "c1",
+              "label": {
+                "tr": "Seninle kalırım",
+                "en": "I stay with you"
+              },
+              "next": "n1_b2",
+              "effects": {
+                "traits": {
+                  "Gossip": 1
+                },
+                "affinityDelta": 2,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "c2",
+              "label": {
+                "tr": "Tarafsız arabulucu",
+                "en": "Neutral mediator"
+              },
+              "next": "n1_b2",
+              "effects": {
+                "traits": {
+                  "Soft": 1
+                },
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "c3",
+              "label": {
+                "tr": "Hepsini dinleyelim",
+                "en": "Listen to everyone"
+              },
+              "next": "n1_b2",
+              "effects": {
+                "affinityDelta": 1,
+                "teaLeaves": 2
+              }
+            },
+            {
+              "id": "c4",
+              "label": {
+                "tr": "Konuyu çaya bağla",
+                "en": "Steer it back to tea"
+              },
+              "next": "n1_b2",
+              "effects": {
+                "teaLeaves": 2,
+                "affinityDelta": 2
+              }
+            }
+          ]
+        },
+        "n1_b2": {
+          "text": {
+            "tr": "Kapı tıklar. Dedikodu mu, barış mı? Seçimin yankılanır.",
+            "en": "A knock. Gossip or peace? Your choice echoes."
+          },
+          "choices": [
+            {
+              "id": "c1",
+              "label": {
+                "tr": "Fısıltıyı büyüt",
+                "en": "Amplify the whisper"
+              },
+              "next": "n1_b3",
+              "effects": {
+                "traits": {
+                  "Gossip": 2
+                },
+                "neonTokens": 0,
+                "affinityDelta": 1
+              }
+            },
+            {
+              "id": "c2",
+              "label": {
+                "tr": "İki komşuyu buluştur",
+                "en": "Bring two neighbors together"
+              },
+              "next": "n1_b3",
+              "effects": {
+                "affinityAll": 1,
+                "affinityDelta": 2,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "c3",
+              "label": {
+                "tr": "Konuyu Cup'a çevir",
+                "en": "Pivot to Cup talk"
+              },
+              "next": "n1_b3",
+              "effects": {
+                "storyFlags": {
+                  "cup_hype": 1
+                },
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            }
+          ]
+        },
+        "n1_b3": {
+          "text": {
+            "tr": "Demlik boşalır. “Yarın da gel. İlişki böyle demlenir.”",
+            "en": "The pot empties. “Come tomorrow. Relationships brew like this.”"
+          },
+          "choices": [
+            {
+              "id": "c1",
+              "label": {
+                "tr": "Söz ver, streak'e yaz",
+                "en": "Promise—log the streak"
+              },
+              "next": null,
+              "effects": {
+                "checkinBonus": 1,
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "c2",
+              "label": {
+                "tr": "Bir hediye notu bırak",
+                "en": "Leave a gift note"
+              },
+              "next": null,
+              "effects": {
+                "inventoryGift": "gift_tea",
+                "affinityDelta": 2
+              }
+            },
+            {
+              "id": "c3",
+              "label": {
+                "tr": "Sessizce çık",
+                "en": "Slip out quietly"
+              },
+              "next": null,
+              "effects": {
+                "teaLeaves": 1
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "n2_deep_arc",
+      "neighborId": "n2",
+      "title": {
+        "tr": "Düdük Ritüeli",
+        "en": "Whistle Ritual"
+      },
+      "startNode": "n2_b1",
+      "minDay": 1,
+      "nodes": {
+        "n2_b1": {
+          "text": {
+            "tr": "Cem düdüğü çevirir: “Isınma yoksa zafer tatsız. Bu akşam sert mi, moral mi?”",
+            "en": "Cem spins the whistle: “No warm-up, hollow win. Hard night or morale night?”"
+          },
+          "choices": [
+            {
+              "id": "c1",
+              "label": {
+                "tr": "Sert drill",
+                "en": "Hard drills"
+              },
+              "next": "n2_b2",
+              "effects": {
+                "traits": {
+                  "Rival": 2
+                },
+                "affinityDelta": 1
+              }
+            },
+            {
+              "id": "c2",
+              "label": {
+                "tr": "Moral molası",
+                "en": "Morale break"
+              },
+              "next": "n2_b2",
+              "effects": {
+                "traits": {
+                  "Soft": 1
+                },
+                "affinityDelta": 2,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "c3",
+              "label": {
+                "tr": "Rakip analizi yap",
+                "en": "Scout the rival"
+              },
+              "next": "n2_b2",
+              "effects": {
+                "storyFlags": {
+                  "scouted_bot": 1
+                },
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "c4",
+              "label": {
+                "tr": "Çocuklarla koş",
+                "en": "Run with the kids"
+              },
+              "next": "n2_b2",
+              "effects": {
+                "affinity": {
+                  "n3": 1
+                },
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            }
+          ]
+        },
+        "n2_b2": {
+          "text": {
+            "tr": "Tur biter. Cem: “Cup'ta kim ön safta?”",
+            "en": "Lap ends. Cem: “Who stands front in the Cup?”"
+          },
+          "choices": [
+            {
+              "id": "c1",
+              "label": {
+                "tr": "Sen, bruiser",
+                "en": "You, bruiser"
+              },
+              "next": "n2_b3",
+              "effects": {
+                "storyFlags": {
+                  "prefer_front_n2": 1
+                },
+                "affinityDelta": 2
+              }
+            },
+            {
+              "id": "c2",
+              "label": {
+                "tr": "Orhan tank",
+                "en": "Orhan tank"
+              },
+              "next": "n2_b3",
+              "effects": {
+                "affinity": {
+                  "n4": 1
+                },
+                "affinityDelta": 1
+              }
+            },
+            {
+              "id": "c3",
+              "label": {
+                "tr": "Karışık hat",
+                "en": "Mixed line"
+              },
+              "next": "n2_b3",
+              "effects": {
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            }
+          ]
+        },
+        "n2_b3": {
+          "text": {
+            "tr": "Düdük boynuna asılır. “Yarın da ısın. Streak kırılırsa zayıf düşersin.”",
+            "en": "Whistle around his neck. “Warm up tomorrow. Break the streak, go soft.”"
+          },
+          "choices": [
+            {
+              "id": "c1",
+              "label": {
+                "tr": "Streak yemini",
+                "en": "Streak oath"
+              },
+              "next": null,
+              "effects": {
+                "checkinBonus": 1,
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "c2",
+              "label": {
+                "tr": "Protein hediyesi sözü",
+                "en": "Promise a protein gift"
+              },
+              "next": null,
+              "effects": {
+                "inventoryGift": "gift_sport",
+                "affinityDelta": 1
+              }
+            },
+            {
+              "id": "c3",
+              "label": {
+                "tr": "Rakibe mesaj gönder",
+                "en": "Send a message to the rival"
+              },
+              "next": null,
+              "effects": {
+                "neonTokens": 1
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "n3_deep_arc",
+      "neighborId": "n3",
+      "title": {
+        "tr": "Uçurtma Düğümü",
+        "en": "Kite Knot"
+      },
+      "startNode": "n3_b1",
+      "minDay": 1,
+      "nodes": {
+        "n3_b1": {
+          "text": {
+            "tr": "Leyla çatıya işaret eder: “İp dolandı. Kurtarır mısın, yoksa daha yükseğe mi?”",
+            "en": "Leyla points at the roof: “String tangled. Rescue—or climb higher?”"
+          },
+          "choices": [
+            {
+              "id": "c1",
+              "label": {
+                "tr": "Kurtar, özür dile",
+                "en": "Rescue and apologize"
+              },
+              "next": "n3_b2",
+              "effects": {
+                "affinity": {
+                  "n4": 1
+                },
+                "affinityDelta": 2,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "c2",
+              "label": {
+                "tr": "Daha yükseğe!",
+                "en": "Higher!"
+              },
+              "next": "n3_b2",
+              "effects": {
+                "traits": {
+                  "Chaos": 2
+                },
+                "affinityDelta": 1
+              }
+            },
+            {
+              "id": "c3",
+              "label": {
+                "tr": "Peri'den rüzgâr iste",
+                "en": "Ask Peri for wind"
+              },
+              "next": "n3_b2",
+              "effects": {
+                "affinity": {
+                  "n5": 1
+                },
+                "affinityDelta": 1
+              }
+            },
+            {
+              "id": "c4",
+              "label": {
+                "tr": "Yeni ip al (çay yaprağı)",
+                "en": "Buy new string (tea leaves)"
+              },
+              "next": "n3_b2",
+              "effects": {
+                "inventoryGift": "gift_toy",
+                "affinityDelta": 2,
+                "teaLeaves": -3
+              }
+            }
+          ]
+        },
+        "n3_b2": {
+          "text": {
+            "tr": "Uçurtma tekrar uçar. Leyla: “Arenada da böyle kaotik olmalı!”",
+            "en": "The kite flies again. Leyla: “Arena should feel this chaotic!”"
+          },
+          "choices": [
+            {
+              "id": "c1",
+              "label": {
+                "tr": "Kaos sinerjisini öv",
+                "en": "Hype Chaos synergy"
+              },
+              "next": "n3_b3",
+              "effects": {
+                "storyFlags": {
+                  "chaos_hype": 1
+                },
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "c2",
+              "label": {
+                "tr": "Plan yapmayı öğret",
+                "en": "Teach a tiny plan"
+              },
+              "next": "n3_b3",
+              "effects": {
+                "traits": {
+                  "Chaos": -1,
+                  "Soft": 1
+                },
+                "affinityDelta": 2,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "c3",
+              "label": {
+                "tr": "Çatıdan mahalleyi izle",
+                "en": "Watch the block from the roof"
+              },
+              "next": "n3_b3",
+              "effects": {
+                "mood": 2,
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            }
+          ]
+        },
+        "n3_b3": {
+          "text": {
+            "tr": "Gün biterken Leyla fısıldar: “Yarın başka bir düğüm bulurum.”",
+            "en": "At dusk Leyla whispers: “Tomorrow I’ll find another knot.”"
+          },
+          "choices": [
+            {
+              "id": "c1",
+              "label": {
+                "tr": "Hazırım",
+                "en": "I'm ready"
+              },
+              "next": null,
+              "effects": {
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "c2",
+              "label": {
+                "tr": "Bugünlük yeter",
+                "en": "Enough for today"
+              },
+              "next": null,
+              "effects": {
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "c3",
+              "label": {
+                "tr": "Şeker ver, kaç",
+                "en": "Candy and run"
+              },
+              "next": null,
+              "effects": {
+                "traits": {
+                  "Chaos": 1
+                },
+                "affinityDelta": 1,
+                "teaLeaves": -1
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "n4_deep_arc",
+      "neighborId": "n4",
+      "title": {
+        "tr": "Gazete Duvarı",
+        "en": "Newspaper Wall"
+      },
+      "startNode": "n4_b1",
+      "minDay": 1,
+      "nodes": {
+        "n4_b1": {
+          "text": {
+            "tr": "Orhan Amca gazeteyi indirir: “Gürültü, uçurtma, neon… Mahalle mi, sirk mi?”",
+            "en": "Mr. Orhan lowers the paper: “Noise, kites, neon… Block or circus?”"
+          },
+          "choices": [
+            {
+              "id": "c1",
+              "label": {
+                "tr": "Mahalle, kurallı",
+                "en": "A block with rules"
+              },
+              "next": "n4_b2",
+              "effects": {
+                "traits": {
+                  "Grumpy": 1
+                },
+                "affinityDelta": 2,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "c2",
+              "label": {
+                "tr": "Biraz sirk, biraz kalp",
+                "en": "Circus with a heart"
+              },
+              "next": "n4_b2",
+              "effects": {
+                "traits": {
+                  "Soft": 1
+                },
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "c3",
+              "label": {
+                "tr": "Senin çitin kutsal",
+                "en": "Your fence is sacred"
+              },
+              "next": "n4_b2",
+              "effects": {
+                "storyFlags": {
+                  "fence_respect": 1
+                },
+                "affinityDelta": 2
+              }
+            },
+            {
+              "id": "c4",
+              "label": {
+                "tr": "Kulak tıkacı + çay",
+                "en": "Earplugs and tea"
+              },
+              "next": "n4_b2",
+              "effects": {
+                "affinityDelta": 2,
+                "teaLeaves": 1
+              }
+            }
+          ]
+        },
+        "n4_b2": {
+          "text": {
+            "tr": "Başlık: PORCH CUP. Orhan: “Ön safta dururum. Ama gece yarısı set istemem.”",
+            "en": "Headline: PORCH CUP. Orhan: “I’ll stand front. No midnight sets.”"
+          },
+          "choices": [
+            {
+              "id": "c1",
+              "label": {
+                "tr": "Peri'ye sessiz saat koy",
+                "en": "Quiet hours for Peri"
+              },
+              "next": "n4_b3",
+              "effects": {
+                "affinity": {
+                  "n5": 1,
+                  "n4": 1
+                },
+                "affinityDelta": 1
+              }
+            },
+            {
+              "id": "c2",
+              "label": {
+                "tr": "Tank rolünü onayla",
+                "en": "Confirm tank role"
+              },
+              "next": "n4_b3",
+              "effects": {
+                "storyFlags": {
+                  "prefer_front_n4": 1
+                },
+                "affinityDelta": 2
+              }
+            },
+            {
+              "id": "c3",
+              "label": {
+                "tr": "Gazete hediyesi sözü",
+                "en": "Promise a newspaper gift"
+              },
+              "next": "n4_b3",
+              "effects": {
+                "inventoryGift": "gift_paper",
+                "affinityDelta": 1
+              }
+            }
+          ]
+        },
+        "n4_b3": {
+          "text": {
+            "tr": "Kapı aralanır. “Yarın da gel. Ama kısa konuş.”",
+            "en": "Door cracks: “Come tomorrow. Keep it short.”"
+          },
+          "choices": [
+            {
+              "id": "c1",
+              "label": {
+                "tr": "Kısa ve sadık",
+                "en": "Short and loyal"
+              },
+              "next": null,
+              "effects": {
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "c2",
+              "label": {
+                "tr": "Çay bırak, çık",
+                "en": "Leave tea, leave"
+              },
+              "next": null,
+              "effects": {
+                "affinityDelta": 2,
+                "teaLeaves": -2
+              }
+            },
+            {
+              "id": "c3",
+              "label": {
+                "tr": "Gülümse, cevap yok",
+                "en": "Smile, no reply"
+              },
+              "next": null,
+              "effects": {
+                "teaLeaves": 1
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "n5_deep_arc",
+      "neighborId": "n5",
+      "title": {
+        "tr": "Neon İlk Sekiz",
+        "en": "Neon First Eight"
+      },
+      "startNode": "n5_b1",
+      "minDay": 1,
+      "nodes": {
+        "n5_b1": {
+          "text": {
+            "tr": "Peri kulaklığı takar: “İlk sekiz saniye kritik. Bu akşam blast mı, kulaklık mı?”",
+            "en": "Peri slides cans on: “First eight seconds matter. Blast or headphones tonight?”"
+          },
+          "choices": [
+            {
+              "id": "c1",
+              "label": {
+                "tr": "Blast + neon",
+                "en": "Blast + neon"
+              },
+              "next": "n5_b2",
+              "effects": {
+                "traits": {
+                  "Nightowl": 2
+                },
+                "neonTokens": 1,
+                "affinityDelta": 1
+              }
+            },
+            {
+              "id": "c2",
+              "label": {
+                "tr": "Kulaklığa geç",
+                "en": "Headphones only"
+              },
+              "next": "n5_b2",
+              "effects": {
+                "affinity": {
+                  "n4": 1
+                },
+                "affinityDelta": 2,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "c3",
+              "label": {
+                "tr": "Cup intro jingle yaz",
+                "en": "Write a Cup intro jingle"
+              },
+              "next": "n5_b2",
+              "effects": {
+                "storyFlags": {
+                  "jingle": 1
+                },
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "c4",
+              "label": {
+                "tr": "Bası fırına taşı",
+                "en": "Carry bass to the bakery"
+              },
+              "next": "n5_b2",
+              "effects": {
+                "affinity": {
+                  "n6": 1
+                },
+                "affinityDelta": 1
+              }
+            }
+          ]
+        },
+        "n5_b2": {
+          "text": {
+            "tr": "Beat düşer. Peri: “Dodge şansı… senin sinerjin neon mu?”",
+            "en": "Beat drops. Peri: “Dodge window… is your synergy neon?”"
+          },
+          "choices": [
+            {
+              "id": "c1",
+              "label": {
+                "tr": "Neon Night hedefle",
+                "en": "Aim Neon Night"
+              },
+              "next": "n5_b3",
+              "effects": {
+                "storyFlags": {
+                  "neon_focus": 1
+                },
+                "affinityDelta": 1
+              }
+            },
+            {
+              "id": "c2",
+              "label": {
+                "tr": "Kaos ile karıştır",
+                "en": "Mix with Chaos"
+              },
+              "next": "n5_b3",
+              "effects": {
+                "affinity": {
+                  "n3": 1
+                },
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "c3",
+              "label": {
+                "tr": "Sadece dans et",
+                "en": "Just dance"
+              },
+              "next": "n5_b3",
+              "effects": {
+                "mood": 2,
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            }
+          ]
+        },
+        "n5_b3": {
+          "text": {
+            "tr": "Set biter. “Yarın jeton getir—neon çerçeve için.”",
+            "en": "Set ends. “Bring tokens tomorrow—for a neon frame.”"
+          },
+          "choices": [
+            {
+              "id": "c1",
+              "label": {
+                "tr": "Jeton avına çık",
+                "en": "Go token hunting"
+              },
+              "next": null,
+              "effects": {
+                "neonTokens": 1,
+                "affinityDelta": 1
+              }
+            },
+            {
+              "id": "c2",
+              "label": {
+                "tr": "Kulaklık pedi hediye et",
+                "en": "Gift earpad kit"
+              },
+              "next": null,
+              "effects": {
+                "inventoryGift": "gift_audio",
+                "affinityDelta": 2
+              }
+            },
+            {
+              "id": "c3",
+              "label": {
+                "tr": "Sessiz gece sözü",
+                "en": "Promise a quiet night"
+              },
+              "next": null,
+              "effects": {
+                "affinity": {
+                  "n4": 1
+                },
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "n6_deep_arc",
+      "neighborId": "n6",
+      "title": {
+        "tr": "Poğaça Payı",
+        "en": "Bun Share"
+      },
+      "startNode": "n6_b1",
+      "minDay": 1,
+      "nodes": {
+        "n6_b1": {
+          "text": {
+            "tr": "Can tepsiyi uzatır: “Batch kısa. Kupacılar mı, bütün sokak mı?”",
+            "en": "Can offers the tray: “Batch is short. Cup team—or whole street?”"
+          },
+          "choices": [
+            {
+              "id": "c1",
+              "label": {
+                "tr": "Kupacıya öncelik",
+                "en": "Cup team first"
+              },
+              "next": "n6_b2",
+              "effects": {
+                "traits": {
+                  "Rival": 1
+                },
+                "storyFlags": {
+                  "feed_cup": 1
+                },
+                "affinityDelta": 1
+              }
+            },
+            {
+              "id": "c2",
+              "label": {
+                "tr": "Herkese bölüştür",
+                "en": "Share with all"
+              },
+              "next": "n6_b2",
+              "effects": {
+                "traits": {
+                  "Soft": 2
+                },
+                "affinityAll": 1,
+                "affinityDelta": 2,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "c3",
+              "label": {
+                "tr": "Orhan'a ilk dilim",
+                "en": "First slice to Orhan"
+              },
+              "next": "n6_b2",
+              "effects": {
+                "affinity": {
+                  "n4": 2
+                },
+                "affinityDelta": 1
+              }
+            },
+            {
+              "id": "c4",
+              "label": {
+                "tr": "Un için bakkala koş",
+                "en": "Run to bakkal for flour"
+              },
+              "next": "n6_b2",
+              "effects": {
+                "ovenCoins": 1,
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            }
+          ]
+        },
+        "n6_b2": {
+          "text": {
+            "tr": "Fırın sıcak. Can: “Arenada da kaldırırsın—poğaçayla.”",
+            "en": "Oven glows. Can: “In the arena you lift people—with buns.”"
+          },
+          "choices": [
+            {
+              "id": "c1",
+              "label": {
+                "tr": "Healer rolünü sahiplen",
+                "en": "Own the healer role"
+              },
+              "next": "n6_b3",
+              "effects": {
+                "storyFlags": {
+                  "healer_focus": 1
+                },
+                "affinityDelta": 2
+              }
+            },
+            {
+              "id": "c2",
+              "label": {
+                "tr": "Tea Circle'ı konuş",
+                "en": "Talk Tea Circle"
+              },
+              "next": "n6_b3",
+              "effects": {
+                "affinity": {
+                  "n1": 1
+                },
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "c3",
+              "label": {
+                "tr": "Fırın parası say",
+                "en": "Count oven coins"
+              },
+              "next": "n6_b3",
+              "effects": {
+                "ovenCoins": 2
+              }
+            }
+          ]
+        },
+        "n6_b3": {
+          "text": {
+            "tr": "Tepsi boş. “Yarın sabah da gel—ekmek sıcak olur.”",
+            "en": "Tray empty. “Come morning—bread will be warm.”"
+          },
+          "choices": [
+            {
+              "id": "c1",
+              "label": {
+                "tr": "Sabah check-in sözü",
+                "en": "Promise morning check-in"
+              },
+              "next": null,
+              "effects": {
+                "checkinBonus": 1,
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "c2",
+              "label": {
+                "tr": "Reçel bırak",
+                "en": "Leave jam"
+              },
+              "next": null,
+              "effects": {
+                "inventoryGift": "gift_pastry",
+                "affinityDelta": 2
+              }
+            },
+            {
+              "id": "c3",
+              "label": {
+                "tr": "Teşekkür, çık",
+                "en": "Thanks, leave"
+              },
+              "next": null,
+              "effects": {
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "n1_week2_echo",
+      "neighborId": "n1",
+      "title": {
+        "tr": "Yankı Akşamı",
+        "en": "Echo Evening"
+      },
+      "startNode": "echo_start",
+      "minDay": 4,
+      "requiresFlags": {},
+      "nodes": {
+        "echo_start": {
+          "text": {
+            "tr": "Geçen seçimlerin hâlâ konuşuluyor. Nasıl devam?",
+            "en": "Your past choices are still gossip. How continue?"
+          },
+          "choices": [
+            {
+              "id": "a",
+              "label": {
+                "tr": "Doubling down",
+                "en": "Double down"
+              },
+              "next": "echo_mid",
+              "effects": {
+                "traits": {
+                  "Gossip": 1
+                },
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "b",
+              "label": {
+                "tr": "Özür / yumuşat",
+                "en": "Apologize / soften"
+              },
+              "next": "echo_mid",
+              "effects": {
+                "traits": {
+                  "Soft": 1
+                },
+                "affinityDelta": 2,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "c",
+              "label": {
+                "tr": "Cup hikayesine bağla",
+                "en": "Tie it to Cup lore"
+              },
+              "next": "echo_mid",
+              "effects": {
+                "storyFlags": {
+                  "lore_cup": 1
+                },
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            }
+          ]
+        },
+        "echo_mid": {
+          "text": {
+            "tr": "Mahalle nefes alır. Bir kapı daha açılır.",
+            "en": "The block exhales. One more door opens."
+          },
+          "choices": [
+            {
+              "id": "a",
+              "label": {
+                "tr": "İlişkiyi pekiştir",
+                "en": "Reinforce the bond"
+              },
+              "next": "echo_end",
+              "effects": {
+                "affinityDelta": 2,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "b",
+              "label": {
+                "tr": "Kaynak topla",
+                "en": "Gather resources"
+              },
+              "next": "echo_end",
+              "effects": {
+                "ovenCoins": 1,
+                "teaLeaves": 2
+              }
+            },
+            {
+              "id": "c",
+              "label": {
+                "tr": "Sıradaki komşuya git",
+                "en": "Move to next neighbor"
+              },
+              "next": null,
+              "effects": {
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            }
+          ]
+        },
+        "echo_end": {
+          "text": {
+            "tr": "Akşam derinleşir. Hâlâ işin var.",
+            "en": "Evening deepens. You still have work."
+          },
+          "choices": [
+            {
+              "id": "a",
+              "label": {
+                "tr": "Devam",
+                "en": "Continue"
+              },
+              "next": null,
+              "effects": {
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "b",
+              "label": {
+                "tr": "Küçük hediye",
+                "en": "Small gift"
+              },
+              "next": null,
+              "effects": {
+                "affinityDelta": 2,
+                "teaLeaves": -1
+              }
+            },
+            {
+              "id": "c",
+              "label": {
+                "tr": "Not al, çık",
+                "en": "Note it, leave"
+              },
+              "next": null,
+              "effects": {
+                "teaLeaves": 1
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "n2_week2_echo",
+      "neighborId": "n2",
+      "title": {
+        "tr": "Yankı Akşamı",
+        "en": "Echo Evening"
+      },
+      "startNode": "echo_start",
+      "minDay": 4,
+      "requiresFlags": {},
+      "nodes": {
+        "echo_start": {
+          "text": {
+            "tr": "Geçen seçimlerin hâlâ konuşuluyor. Nasıl devam?",
+            "en": "Your past choices are still gossip. How continue?"
+          },
+          "choices": [
+            {
+              "id": "a",
+              "label": {
+                "tr": "Doubling down",
+                "en": "Double down"
+              },
+              "next": "echo_mid",
+              "effects": {
+                "traits": {
+                  "Gossip": 1
+                },
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "b",
+              "label": {
+                "tr": "Özür / yumuşat",
+                "en": "Apologize / soften"
+              },
+              "next": "echo_mid",
+              "effects": {
+                "traits": {
+                  "Soft": 1
+                },
+                "affinityDelta": 2,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "c",
+              "label": {
+                "tr": "Cup hikayesine bağla",
+                "en": "Tie it to Cup lore"
+              },
+              "next": "echo_mid",
+              "effects": {
+                "storyFlags": {
+                  "lore_cup": 1
+                },
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            }
+          ]
+        },
+        "echo_mid": {
+          "text": {
+            "tr": "Mahalle nefes alır. Bir kapı daha açılır.",
+            "en": "The block exhales. One more door opens."
+          },
+          "choices": [
+            {
+              "id": "a",
+              "label": {
+                "tr": "İlişkiyi pekiştir",
+                "en": "Reinforce the bond"
+              },
+              "next": "echo_end",
+              "effects": {
+                "affinityDelta": 2,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "b",
+              "label": {
+                "tr": "Kaynak topla",
+                "en": "Gather resources"
+              },
+              "next": "echo_end",
+              "effects": {
+                "ovenCoins": 1,
+                "teaLeaves": 2
+              }
+            },
+            {
+              "id": "c",
+              "label": {
+                "tr": "Sıradaki komşuya git",
+                "en": "Move to next neighbor"
+              },
+              "next": null,
+              "effects": {
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            }
+          ]
+        },
+        "echo_end": {
+          "text": {
+            "tr": "Akşam derinleşir. Hâlâ işin var.",
+            "en": "Evening deepens. You still have work."
+          },
+          "choices": [
+            {
+              "id": "a",
+              "label": {
+                "tr": "Devam",
+                "en": "Continue"
+              },
+              "next": null,
+              "effects": {
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "b",
+              "label": {
+                "tr": "Küçük hediye",
+                "en": "Small gift"
+              },
+              "next": null,
+              "effects": {
+                "affinityDelta": 2,
+                "teaLeaves": -1
+              }
+            },
+            {
+              "id": "c",
+              "label": {
+                "tr": "Not al, çık",
+                "en": "Note it, leave"
+              },
+              "next": null,
+              "effects": {
+                "teaLeaves": 1
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "n3_week2_echo",
+      "neighborId": "n3",
+      "title": {
+        "tr": "Yankı Akşamı",
+        "en": "Echo Evening"
+      },
+      "startNode": "echo_start",
+      "minDay": 4,
+      "requiresFlags": {},
+      "nodes": {
+        "echo_start": {
+          "text": {
+            "tr": "Geçen seçimlerin hâlâ konuşuluyor. Nasıl devam?",
+            "en": "Your past choices are still gossip. How continue?"
+          },
+          "choices": [
+            {
+              "id": "a",
+              "label": {
+                "tr": "Doubling down",
+                "en": "Double down"
+              },
+              "next": "echo_mid",
+              "effects": {
+                "traits": {
+                  "Gossip": 1
+                },
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "b",
+              "label": {
+                "tr": "Özür / yumuşat",
+                "en": "Apologize / soften"
+              },
+              "next": "echo_mid",
+              "effects": {
+                "traits": {
+                  "Soft": 1
+                },
+                "affinityDelta": 2,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "c",
+              "label": {
+                "tr": "Cup hikayesine bağla",
+                "en": "Tie it to Cup lore"
+              },
+              "next": "echo_mid",
+              "effects": {
+                "storyFlags": {
+                  "lore_cup": 1
+                },
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            }
+          ]
+        },
+        "echo_mid": {
+          "text": {
+            "tr": "Mahalle nefes alır. Bir kapı daha açılır.",
+            "en": "The block exhales. One more door opens."
+          },
+          "choices": [
+            {
+              "id": "a",
+              "label": {
+                "tr": "İlişkiyi pekiştir",
+                "en": "Reinforce the bond"
+              },
+              "next": "echo_end",
+              "effects": {
+                "affinityDelta": 2,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "b",
+              "label": {
+                "tr": "Kaynak topla",
+                "en": "Gather resources"
+              },
+              "next": "echo_end",
+              "effects": {
+                "ovenCoins": 1,
+                "teaLeaves": 2
+              }
+            },
+            {
+              "id": "c",
+              "label": {
+                "tr": "Sıradaki komşuya git",
+                "en": "Move to next neighbor"
+              },
+              "next": null,
+              "effects": {
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            }
+          ]
+        },
+        "echo_end": {
+          "text": {
+            "tr": "Akşam derinleşir. Hâlâ işin var.",
+            "en": "Evening deepens. You still have work."
+          },
+          "choices": [
+            {
+              "id": "a",
+              "label": {
+                "tr": "Devam",
+                "en": "Continue"
+              },
+              "next": null,
+              "effects": {
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "b",
+              "label": {
+                "tr": "Küçük hediye",
+                "en": "Small gift"
+              },
+              "next": null,
+              "effects": {
+                "affinityDelta": 2,
+                "teaLeaves": -1
+              }
+            },
+            {
+              "id": "c",
+              "label": {
+                "tr": "Not al, çık",
+                "en": "Note it, leave"
+              },
+              "next": null,
+              "effects": {
+                "teaLeaves": 1
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "n4_week2_echo",
+      "neighborId": "n4",
+      "title": {
+        "tr": "Yankı Akşamı",
+        "en": "Echo Evening"
+      },
+      "startNode": "echo_start",
+      "minDay": 4,
+      "requiresFlags": {},
+      "nodes": {
+        "echo_start": {
+          "text": {
+            "tr": "Geçen seçimlerin hâlâ konuşuluyor. Nasıl devam?",
+            "en": "Your past choices are still gossip. How continue?"
+          },
+          "choices": [
+            {
+              "id": "a",
+              "label": {
+                "tr": "Doubling down",
+                "en": "Double down"
+              },
+              "next": "echo_mid",
+              "effects": {
+                "traits": {
+                  "Gossip": 1
+                },
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "b",
+              "label": {
+                "tr": "Özür / yumuşat",
+                "en": "Apologize / soften"
+              },
+              "next": "echo_mid",
+              "effects": {
+                "traits": {
+                  "Soft": 1
+                },
+                "affinityDelta": 2,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "c",
+              "label": {
+                "tr": "Cup hikayesine bağla",
+                "en": "Tie it to Cup lore"
+              },
+              "next": "echo_mid",
+              "effects": {
+                "storyFlags": {
+                  "lore_cup": 1
+                },
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            }
+          ]
+        },
+        "echo_mid": {
+          "text": {
+            "tr": "Mahalle nefes alır. Bir kapı daha açılır.",
+            "en": "The block exhales. One more door opens."
+          },
+          "choices": [
+            {
+              "id": "a",
+              "label": {
+                "tr": "İlişkiyi pekiştir",
+                "en": "Reinforce the bond"
+              },
+              "next": "echo_end",
+              "effects": {
+                "affinityDelta": 2,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "b",
+              "label": {
+                "tr": "Kaynak topla",
+                "en": "Gather resources"
+              },
+              "next": "echo_end",
+              "effects": {
+                "ovenCoins": 1,
+                "teaLeaves": 2
+              }
+            },
+            {
+              "id": "c",
+              "label": {
+                "tr": "Sıradaki komşuya git",
+                "en": "Move to next neighbor"
+              },
+              "next": null,
+              "effects": {
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            }
+          ]
+        },
+        "echo_end": {
+          "text": {
+            "tr": "Akşam derinleşir. Hâlâ işin var.",
+            "en": "Evening deepens. You still have work."
+          },
+          "choices": [
+            {
+              "id": "a",
+              "label": {
+                "tr": "Devam",
+                "en": "Continue"
+              },
+              "next": null,
+              "effects": {
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "b",
+              "label": {
+                "tr": "Küçük hediye",
+                "en": "Small gift"
+              },
+              "next": null,
+              "effects": {
+                "affinityDelta": 2,
+                "teaLeaves": -1
+              }
+            },
+            {
+              "id": "c",
+              "label": {
+                "tr": "Not al, çık",
+                "en": "Note it, leave"
+              },
+              "next": null,
+              "effects": {
+                "teaLeaves": 1
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "n5_week2_echo",
+      "neighborId": "n5",
+      "title": {
+        "tr": "Yankı Akşamı",
+        "en": "Echo Evening"
+      },
+      "startNode": "echo_start",
+      "minDay": 4,
+      "requiresFlags": {},
+      "nodes": {
+        "echo_start": {
+          "text": {
+            "tr": "Geçen seçimlerin hâlâ konuşuluyor. Nasıl devam?",
+            "en": "Your past choices are still gossip. How continue?"
+          },
+          "choices": [
+            {
+              "id": "a",
+              "label": {
+                "tr": "Doubling down",
+                "en": "Double down"
+              },
+              "next": "echo_mid",
+              "effects": {
+                "traits": {
+                  "Gossip": 1
+                },
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "b",
+              "label": {
+                "tr": "Özür / yumuşat",
+                "en": "Apologize / soften"
+              },
+              "next": "echo_mid",
+              "effects": {
+                "traits": {
+                  "Soft": 1
+                },
+                "affinityDelta": 2,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "c",
+              "label": {
+                "tr": "Cup hikayesine bağla",
+                "en": "Tie it to Cup lore"
+              },
+              "next": "echo_mid",
+              "effects": {
+                "storyFlags": {
+                  "lore_cup": 1
+                },
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            }
+          ]
+        },
+        "echo_mid": {
+          "text": {
+            "tr": "Mahalle nefes alır. Bir kapı daha açılır.",
+            "en": "The block exhales. One more door opens."
+          },
+          "choices": [
+            {
+              "id": "a",
+              "label": {
+                "tr": "İlişkiyi pekiştir",
+                "en": "Reinforce the bond"
+              },
+              "next": "echo_end",
+              "effects": {
+                "affinityDelta": 2,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "b",
+              "label": {
+                "tr": "Kaynak topla",
+                "en": "Gather resources"
+              },
+              "next": "echo_end",
+              "effects": {
+                "ovenCoins": 1,
+                "teaLeaves": 2
+              }
+            },
+            {
+              "id": "c",
+              "label": {
+                "tr": "Sıradaki komşuya git",
+                "en": "Move to next neighbor"
+              },
+              "next": null,
+              "effects": {
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            }
+          ]
+        },
+        "echo_end": {
+          "text": {
+            "tr": "Akşam derinleşir. Hâlâ işin var.",
+            "en": "Evening deepens. You still have work."
+          },
+          "choices": [
+            {
+              "id": "a",
+              "label": {
+                "tr": "Devam",
+                "en": "Continue"
+              },
+              "next": null,
+              "effects": {
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "b",
+              "label": {
+                "tr": "Küçük hediye",
+                "en": "Small gift"
+              },
+              "next": null,
+              "effects": {
+                "affinityDelta": 2,
+                "teaLeaves": -1
+              }
+            },
+            {
+              "id": "c",
+              "label": {
+                "tr": "Not al, çık",
+                "en": "Note it, leave"
+              },
+              "next": null,
+              "effects": {
+                "teaLeaves": 1
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "n6_week2_echo",
+      "neighborId": "n6",
+      "title": {
+        "tr": "Yankı Akşamı",
+        "en": "Echo Evening"
+      },
+      "startNode": "echo_start",
+      "minDay": 4,
+      "requiresFlags": {},
+      "nodes": {
+        "echo_start": {
+          "text": {
+            "tr": "Geçen seçimlerin hâlâ konuşuluyor. Nasıl devam?",
+            "en": "Your past choices are still gossip. How continue?"
+          },
+          "choices": [
+            {
+              "id": "a",
+              "label": {
+                "tr": "Doubling down",
+                "en": "Double down"
+              },
+              "next": "echo_mid",
+              "effects": {
+                "traits": {
+                  "Gossip": 1
+                },
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "b",
+              "label": {
+                "tr": "Özür / yumuşat",
+                "en": "Apologize / soften"
+              },
+              "next": "echo_mid",
+              "effects": {
+                "traits": {
+                  "Soft": 1
+                },
+                "affinityDelta": 2,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "c",
+              "label": {
+                "tr": "Cup hikayesine bağla",
+                "en": "Tie it to Cup lore"
+              },
+              "next": "echo_mid",
+              "effects": {
+                "storyFlags": {
+                  "lore_cup": 1
+                },
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            }
+          ]
+        },
+        "echo_mid": {
+          "text": {
+            "tr": "Mahalle nefes alır. Bir kapı daha açılır.",
+            "en": "The block exhales. One more door opens."
+          },
+          "choices": [
+            {
+              "id": "a",
+              "label": {
+                "tr": "İlişkiyi pekiştir",
+                "en": "Reinforce the bond"
+              },
+              "next": "echo_end",
+              "effects": {
+                "affinityDelta": 2,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "b",
+              "label": {
+                "tr": "Kaynak topla",
+                "en": "Gather resources"
+              },
+              "next": "echo_end",
+              "effects": {
+                "ovenCoins": 1,
+                "teaLeaves": 2
+              }
+            },
+            {
+              "id": "c",
+              "label": {
+                "tr": "Sıradaki komşuya git",
+                "en": "Move to next neighbor"
+              },
+              "next": null,
+              "effects": {
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            }
+          ]
+        },
+        "echo_end": {
+          "text": {
+            "tr": "Akşam derinleşir. Hâlâ işin var.",
+            "en": "Evening deepens. You still have work."
+          },
+          "choices": [
+            {
+              "id": "a",
+              "label": {
+                "tr": "Devam",
+                "en": "Continue"
+              },
+              "next": null,
+              "effects": {
+                "affinityDelta": 1,
+                "teaLeaves": 1
+              }
+            },
+            {
+              "id": "b",
+              "label": {
+                "tr": "Küçük hediye",
+                "en": "Small gift"
+              },
+              "next": null,
+              "effects": {
+                "affinityDelta": 2,
+                "teaLeaves": -1
+              }
+            },
+            {
+              "id": "c",
+              "label": {
+                "tr": "Not al, çık",
+                "en": "Note it, leave"
+              },
+              "next": null,
+              "effects": {
+                "teaLeaves": 1
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

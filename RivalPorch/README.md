@@ -1,36 +1,46 @@
-# Rival Porch — Day-1 Vertical Slice
+# Rival Porch — Deep vertical slice
 
-Static web game (plain HTML / CSS / JS). Clay mahalle social loop → Porch Cup auto-battler → match comic share stub.
+Static web game (HTML / CSS / JS modules). Multi-day evening loop, Porch Cup ladder, fair cosmetics economy.
 
-## Run locally
-
-From this folder:
+## Run
 
 ```bash
+cd RivalPorch
 npx --yes serve -l 4173
 ```
 
-Or any static server:
+Open **http://localhost:4173** (not `file://` — JSON loads via fetch).
 
-```bash
-python3 -m http.server 4173
-```
+## Deep loop how-to-play (15–25+ min evenings)
 
-Open **http://localhost:4173** (or the URL printed by `serve`).
+1. **Continue / New block** on title (save in `localStorage` v3).
+2. **Evening agenda** — finish all checks before overnight:
+   - Porch check-in (streak + Porch Coins)
+   - **3 neighbor deep scenes** (branching trees, 3+ choices)
+   - Street event (4-option daily beat)
+   - Gift / shop errand (spend Porch Coins — affinity only)
+   - Weekend days 6–7: **Season Cup night** (practice Cup anytime)
+3. **End evening** → overnight affinity ticks → next day. Cup wins unlock neighbors toward **12**.
+4. **Shop** — Porch skins / poses / comic frames / emotes. Spend **Porch Coins**, **Neon Thread**, or **Clay Tokens**. Cosmetics never change combat. Ads off.
+5. **Porch Week Pass** — read-only progress track (free claimable; Clay track stub unlock). F2P story stays completable.
+6. **Ladder** — season week, bot difficulty ramp, unlock schedule.
 
-> Content is loaded via `fetch("data/content.json")`, so open through a local server — not `file://`.
+### Currencies (from store economy pack)
 
-## Play flow
+| ID | Role |
+|----|------|
+| `porch_coins` | Soft — gifts, décor, basic cosmetics |
+| `neon_thread` | Soft rare — mid cosmetics |
+| `clay_tokens` | Hard — cosmetics / Pass only (no power) |
 
-1. **Title** — tap to start (TR/EN toggle)
-2. **Street** — 6 neighbor hotspots on clay street hero
-3. **Neighbor** — gift / talk / mini drama (strings from `data/content.json`)
-4. **Porch Cup lobby** — pick 3 of 6
-5. **Placement** — drop units on 2×3 grid (or Auto-place)
-6. **Auto fight** — vs bot roster; synergies Tea / Rivalry / Neon
-7. **Match comic** — result panels + copy text / export image / share stubs
+Earn rates + catalog: `data/economy.json` (copied from Project `internal/rival-porch-economy.json`).  
+Session agenda sidecar: `data/depth-meta.json`.  
+Stories: `data/stories.json` (until store story pack lands).  
+Ladder: `data/ladder.json`.
 
-Shop is a monetization placeholder only.
+## Meshy hooks
+
+Drop exports under `art/meshy/` — see `art/meshy/README.md`. Missing files fall back to day-1 busts.
 
 ## Layout
 
@@ -38,15 +48,8 @@ Shop is a monetization placeholder only.
 RivalPorch/
   index.html
   css/style.css
-  js/game.js
-  data/content.json          # copied from Project store
-  assets/rival-porch/*.png   # street-hero, arena-stage, 6 busts
-  README.md
+  js/{game,save,wallet}.js
+  data/{content,economy,stories,ladder,depth-meta}.json
+  assets/rival-porch/*.png
+  art/meshy/...
 ```
-
-## Art / content sources
-
-- GDD: Project `docs/rival-porch-gdd-slice.md`
-- Art map: `docs/rival-porch-art-integration.md`
-- Content pack: `internal/rival-porch-content.json` → `data/content.json`
-- PNGs: Project `media/rival-porch/`

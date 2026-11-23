@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "note": "Session-depth helpers; monetization currencies/catalog live in economy.json from store pack.",
+  "eveningAgenda": {
+    "targetMinutes": { "min": 15, "max": 25 },
+    "requiredActions": [
+      { "id": "checkin", "label": { "tr": "Veranda check-in", "en": "Porch check-in" }, "weight": 1 },
+      { "id": "visits", "label": { "tr": "3 komşu sahnesi", "en": "3 neighbor scenes" }, "count": 3, "weight": 3 },
+      { "id": "streetEvent", "label": { "tr": "Sokak olayı", "en": "Street event" }, "weight": 1 },
+      { "id": "errand", "label": { "tr": "Hediye / dükkân işi", "en": "Gift / shop errand" }, "weight": 1 }
+    ],
+    "weekendExtra": {
+      "id": "cupNight",
+      "label": { "tr": "Porch Cup gecesi", "en": "Porch Cup night" },
+      "daysOfWeek": [6, 7]
+    }
+  },
+  "streak": { "checkinBonusEvery": 3, "bonusPorchCoins": 15, "maxStreakTracked": 30 },
+  "startingBalances": { "porch_coins": 80, "neon_thread": 2, "clay_tokens": 0 },
+  "giftCatalog": [
+    { "id": "gift_tea", "itemTag": "tea", "name": { "tr": "Taze çay", "en": "Fresh tea" }, "cost": { "porch_coins": 20 }, "affinityDelta": 2 },
+    { "id": "gift_pastry", "itemTag": "pastry", "name": { "tr": "Börek", "en": "Pastry" }, "cost": { "porch_coins": 25 }, "affinityDelta": 2 },
+    { "id": "gift_toy", "itemTag": "toy", "name": { "tr": "Uçurtma ipi", "en": "Kite string" }, "cost": { "porch_coins": 30 }, "affinityDelta": 2 },
+    { "id": "gift_audio", "itemTag": "audio", "name": { "tr": "Kulaklık pedi", "en": "Earpad kit" }, "cost": { "porch_coins": 35 }, "affinityDelta": 2 },
+    { "id": "gift_sport", "itemTag": "sport", "name": { "tr": "Düdük yedek", "en": "Spare whistle" }, "cost": { "porch_coins": 30 }, "affinityDelta": 2 },
+    { "id": "gift_paper", "itemTag": "newspaper", "name": { "tr": "Gazete", "en": "Newspaper" }, "cost": { "porch_coins": 15 }, "affinityDelta": 1 }
+  ],
+  "decorGoals": ["lamp", "planter", "awning", "sign"]
+}
