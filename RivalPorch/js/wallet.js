@@ -63,13 +63,52 @@ export function formatPrice(price, economy, locale) {
   return `${price.amount} ${names[price.currency] || price.currency}`;
 }
 
-function prettyItemId(id = "") {
-  return String(id)
-    .replace(/^(skin_|pose_|frame_|emote_|tint_|decor_)/, "")
-    .replace(/_/g, " ");
+function titleCaseWords(s) {
+  return String(s || "")
+    .replace(/[_-]+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-export function rewardLabel(reward, locale) {
+const COSMETIC_KIND = {
+  skin_: "porch_skins",
+  pose_: "unit_poses",
+  frame_: "comic_frames",
+  emote_: "emotes",
+  tint_: "porch_skins",
+  wrap_: "gift_wraps",
+};
+
+function prettyItemId(id = "", locale = "en", economy = null) {
+  const raw = String(id || "");
+  if (economy?.shopCatalog) {
+    for (const items of Object.values(economy.shopCatalog)) {
+      const hit = (items || []).find((x) => x.id === raw);
+      if (hit?.name) return hit.name[locale] || hit.name.en || titleCaseWords(raw);
+    }
+  }
+  // gift wraps / pass-only ids
+  const passOnly = {
+    wrap_clay_ribbon: { tr: "Kil Kurdele Paket", en: "Clay Ribbon Wrap" },
+    tint_warm_glow: { tr: "Sıcak Işık Tonu", en: "Warm Glow Tint" },
+  };
+  if (passOnly[raw]) return passOnly[raw][locale] || passOnly[raw].en;
+  const kindHint = raw.startsWith("skin_")
+    ? locale === "tr" ? "Veranda" : "Porch skin"
+    : raw.startsWith("pose_")
+      ? locale === "tr" ? "Poz" : "Pose"
+      : raw.startsWith("frame_")
+        ? locale === "tr" ? "Çerçeve" : "Frame"
+        : raw.startsWith("emote_")
+          ? locale === "tr" ? "İfade" : "Emote"
+          : raw.startsWith("wrap_")
+            ? locale === "tr" ? "Paket" : "Wrap"
+            : "";
+  const body = titleCaseWords(raw.replace(/^(skin_|pose_|frame_|emote_|tint_|decor_|wrap_)/, ""));
+  return kindHint ? `${kindHint}: ${body}` : body || "—";
+}
+
+export function rewardLabel(reward, locale, economy = null) {
   if (!reward) return "—";
   const names = {
     porch_coins: locale === "tr" ? "Veranda Jetonu" : "Porch Coins",
@@ -84,11 +123,11 @@ export function rewardLabel(reward, locale) {
       .map((i) =>
         i.currency
           ? `${i.amount} ${names[i.currency] || i.currency}`
-          : prettyItemId(i.itemId || i.type)
+          : prettyItemId(i.itemId || i.type, locale, economy)
       )
       .join(" + ");
   }
-  return prettyItemId(reward.itemId || reward.type);
+  return prettyItemId(reward.itemId || reward.type, locale, economy);
 }
 
 export function applyDailyEarn(save, economy, action) {

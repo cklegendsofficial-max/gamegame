@@ -626,332 +626,384 @@ const FREE_PORCH = {
   },
 };
 
-/** Day-2+ follow-ups that remember yesterday's porch chat. */
-const FREE_PORCH_FOLLOWUP = {
-  n1: {
-    id: "free_n1_d2",
+/** Day-2+ follow-ups that remember yesterday's porch chat — flag-specific 2-beat trees. */
+const FOLLOWUP_FLAG_BEATS = {
+  n1: [
+    {
+      flags: ["free_n1_debt_watch", "free_n1_debt_ask", "free_n1_debt_spread"],
+      root: {
+        tr: "Dün Can'ın borcunu konuştuk. Defter hâlâ titreşiyor — bugün ne yazıyoruz?",
+        en: "Yesterday we talked Can's debt. The ledger's still humming — what do we write today?",
+      },
+      a: { tr: "Koruyucu satır", en: "A protective line", next: "a1" },
+      b: { tr: "Söylentiyi dondur", en: "Freeze the rumor", next: "b1" },
+      a1: {
+        tr: "Koruma satırı hazır. Peri bass açarsa satır titrer. Ne yaparsın?",
+        en: "Protection line ready. If Peri opens the bass, it shakes. What then?",
+      },
+      a2: { tr: "Peri'ye kısık söyle", en: "Ask Peri to soften", flag: "free_n1_d2_protect" },
+      a3: { tr: "Defteri kapat, dinle", en: "Close the ledger, listen", flag: "free_n1_d2_protect_quiet" },
+      b1: {
+        tr: "Söylenti donduruldu. Kim hâlâ duysun — yoksa sadece sen?",
+        en: "Rumor iced. Who still hears — or only you?",
+      },
+      b2: { tr: "Sadece ikimiz", en: "Just us two", flag: "free_n1_d2_blank" },
+      b3: { tr: "Leyla da sonra", en: "Leyla later", flag: "free_n1_d2_blank_leyla" },
+    },
+    {
+      flags: ["free_n1_quiet_tea", "free_n1_tip_peri"],
+      root: {
+        tr: "Dünkü çay hâlâ dilimde. Peri'ye fısıltı gitti mi — yoksa sadece demlikte mi kaldı?",
+        en: "Yesterday's tea is still on my tongue. Did the Peri whisper travel — or stay in the pot?",
+      },
+      a: { tr: "Fısıltıyı doğrula", en: "Confirm the whisper", next: "a1" },
+      b: { tr: "Cup satırına çevir", en: "Turn it into a Cup line", next: "b1" },
+      a1: {
+        tr: "Peri dinledi. Bass kısılacak mı, yoksa Orhan'a mı bırakacağız?",
+        en: "Peri listened. Soften the bass — or leave it to Orhan?",
+      },
+      a2: { tr: "Peri kısık", en: "Peri softens", flag: "free_n1_d2_protect" },
+      a3: { tr: "Orhan karar versin", en: "Let Orhan decide", flag: "free_n1_d2_protect_quiet" },
+      b1: {
+        tr: "Cup fısıltısı hazır. Kimi öne koyayım?",
+        en: "Cup whisper ready. Who goes front in the gossip?",
+      },
+      b2: { tr: "Cem — formasyon", en: "Cem — formation", flag: "free_n1_d2_cup" },
+      b3: { tr: "Orhan — kural", en: "Orhan — rules", flag: "free_n1_d2_cup_orhan" },
+    },
+    {
+      flags: ["free_n1_cup_orhan", "free_n1_cup_leyla"],
+      root: {
+        tr: "Dün Cup dedikodusunu ayarladık. Bugün sahne kuruluyor — kimin adını yazıyorum?",
+        en: "Yesterday we set Cup gossip. Stage is building — whose name do I ink?",
+      },
+      a: { tr: "Dünkü ismi tut", en: "Keep yesterday's name", next: "a1" },
+      b: { tr: "Yeni bir twist", en: "Add a twist", next: "b1" },
+      a1: {
+        tr: "İsim sabit. İkinci satır: zafer mi, kaos mu?",
+        en: "Name locked. Second line: victory — or chaos?",
+      },
+      a2: { tr: "Zafer satırı", en: "Victory line", flag: "free_n1_d2_cup" },
+      a3: { tr: "Kaos satırı", en: "Chaos line", flag: "free_n1_d2_cup_orhan" },
+      b1: {
+        tr: "Twist hazır. Kime sızdırayım?",
+        en: "Twist ready. Who gets the leak?",
+      },
+      b2: { tr: "Sadece Cem", en: "Only Cem", flag: "free_n1_d2_blank" },
+      b3: { tr: "Leyla da duysun", en: "Leyla hears too", flag: "free_n1_d2_blank_leyla" },
+    },
+  ],
+  n2: [
+    {
+      flags: ["free_n2_hard", "free_n2_protect"],
+      root: {
+        tr: "Dünkü sert koşunun hesabı: diz yanıyor. Bugün formasyon testi — aynı baskı mı?",
+        en: "Yesterday's hard laps: knee burning. Formation test today — same pressure?",
+      },
+      a: { tr: "Sol kanat sıkı", en: "Pin the left wing", next: "a1" },
+      b: { tr: "Can'ı koru yine", en: "Guard Can again", next: "b1" },
+      a1: { tr: "Sol kilit. Kim destekler?", en: "Left locked. Who supports?", },
+      a2: { tr: "Orhan tank", en: "Orhan tank", flag: "free_n2_d2_left" },
+      a3: { tr: "Ben önde", en: "I go front", flag: "free_n2_d2_mid" },
+      b1: { tr: "Can korunacak. Sen nereye?", en: "Can stays safe. Where do you go?", },
+      b2: { tr: "Orta saha", en: "Midfield", flag: "free_n2_d2_mid" },
+      b3: { tr: "Sol baskı", en: "Left press", flag: "free_n2_d2_left" },
+    },
+    {
+      flags: ["free_n2_care", "free_n2_tip"],
+      root: {
+        tr: "Dün esnedik — diz teşekkür etti. Karşı Sırt notu hâlâ cebimde. Bugün ne yapıyoruz?",
+        en: "Yesterday we stretched — knee thanks you. Rival Ridge note still in my pocket. Today?",
+      },
+      a: { tr: "Formasyonu del", en: "Drill the formation", next: "a1" },
+      b: { tr: "Merve'ye güncelle", en: "Update Merve", next: "b1" },
+      a1: { tr: "Formasyon çizildi. Sol mu orta mı?", en: "Formation drawn. Left or mid?", },
+      a2: { tr: "Sol kanat", en: "Left wing", flag: "free_n2_d2_left" },
+      a3: { tr: "Orta yumuşak", en: "Soft mid", flag: "free_n2_d2_mid" },
+      b1: { tr: "Merve dinliyor. Ne fısıldayayım?", en: "Merve's listening. What whisper?", },
+      b2: { tr: "Sol şişirme", en: "Left overload", flag: "free_n2_d2_left" },
+      b3: { tr: "Merhamet temposu", en: "Mercy tempo", flag: "free_n2_d2_mid" },
+    },
+    {
+      flags: ["free_n2_rival", "free_n2_bluff"],
+      root: {
+        tr: "Dün Karşı Sırt'ı ölçtük. Bugün blöf mü, demir formasyon mu?",
+        en: "Yesterday we measured Rival Ridge. Today: bluff — or iron formation?",
+      },
+      a: { tr: "Demir formasyon", en: "Iron formation", next: "a1" },
+      b: { tr: "Blöfü büyüt", en: "Grow the bluff", next: "b1" },
+      a1: { tr: "Demir hazır. Hangi kanat?", en: "Iron ready. Which wing?", },
+      a2: { tr: "Sol", en: "Left", flag: "free_n2_d2_left" },
+      a3: { tr: "Orta", en: "Mid", flag: "free_n2_d2_mid" },
+      b1: { tr: "Blöf neon'la parla. Kim önde?", en: "Bluff with neon. Who fronts?", },
+      b2: { tr: "Peri tempo", en: "Peri tempo", flag: "free_n2_d2_left" },
+      b3: { tr: "Sen + Can", en: "You + Can", flag: "free_n2_d2_mid" },
+    },
+  ],
+  n3: [
+    {
+      flags: ["free_n3_coop", "free_n3_sorry"],
+      root: {
+        tr: "Dün ipi birlikte çözdük. Orhan hâlâ antene bakıyor — bugün alçak mı, yüksek mi?",
+        en: "Yesterday we untangled together. Orhan's still watching the antenna — low or high today?",
+      },
+      a: { tr: "Alçak — barış", en: "Low — peace", next: "a1" },
+      b: { tr: "Biraz yüksek — heyecan", en: "A bit higher — spice", next: "b1" },
+      a1: { tr: "Alçak uçuş. Kim onaylasın?", en: "Low flight. Who signs off?", },
+      a2: { tr: "Orhan razı", en: "Orhan okays", flag: "free_n3_d2_low" },
+      a3: { tr: "Merve şahit", en: "Merve witnesses", flag: "free_n3_d2_low" },
+      b1: { tr: "Yükseklik çağırıyor. Risk?", en: "Height calls. Risk it?", },
+      b2: { tr: "Kontrollü yüksek", en: "Controlled high", flag: "free_n3_d2_high" },
+      b3: { tr: "Tam efsane", en: "Full legend", flag: "free_n3_d2_high" },
+    },
+    {
+      flags: ["free_n3_spicy", "free_n3_chaos"],
+      root: {
+        tr: "Dün antene meydan okuduk. İp hâlâ cebimde — bugün barış mı, devam mı?",
+        en: "Yesterday we dared the antenna. String still in my pocket — peace or continue?",
+      },
+      a: { tr: "Barış uçuşu", en: "Peace flight", next: "a1" },
+      b: { tr: "Efsane tekrar", en: "Legend again", next: "b1" },
+      a1: { tr: "Barış için alçak. Onay?", en: "Low for peace. Confirm?", },
+      a2: { tr: "Evet — Orhan rahat", en: "Yes — Orhan chill", flag: "free_n3_d2_low" },
+      a3: { tr: "Poğaça ile özür", en: "Apology pastry", flag: "free_n3_d2_low" },
+      b1: { tr: "Yüksek yine. Kim izler?", en: "High again. Who watches?", },
+      b2: { tr: "Tüm mahalle", en: "Whole block", flag: "free_n3_d2_high" },
+      b3: { tr: "Sadece sen + ben", en: "Just you + me", flag: "free_n3_d2_high" },
+    },
+    {
+      flags: ["free_n3_tipped", "free_n3_pastry"],
+      root: {
+        tr: "Dün sır borcu / poğaça… bugün uçurtma hafızası ne ister?",
+        en: "Yesterday's secret-debt / pastry… what does kite memory want today?",
+      },
+      a: { tr: "Alçak teşekkür uçuşu", en: "Low thank-you flight", next: "a1" },
+      b: { tr: "Yüksek gösteri", en: "High show", next: "b1" },
+      a1: { tr: "Teşekkür alçak. Kime?", en: "Thanks low. For whom?", },
+      a2: { tr: "Orhan", en: "Orhan", flag: "free_n3_d2_low" },
+      a3: { tr: "Can", en: "Can", flag: "free_n3_d2_low" },
+      b1: { tr: "Gösteri yüksek. Risk seviyesi?", en: "Show high. Risk level?", },
+      b2: { tr: "Orta risk", en: "Medium risk", flag: "free_n3_d2_high" },
+      b3: { tr: "Maksimum", en: "Max", flag: "free_n3_d2_high" },
+    },
+  ],
+  n4: [
+    {
+      flags: ["free_n4_rules", "free_n4_cup_ex"],
+      root: {
+        tr: "Dünkü kural denemesi… sonuç karışık. Bugün sert sınır mı, Cup esnekliği mi?",
+        en: "Yesterday's rule trial… mixed. Hard boundary today — or Cup flex?",
+      },
+      a: { tr: "Sert sınır", en: "Hard boundary", next: "a1" },
+      b: { tr: "Cup gecesi esnek", en: "Flex on Cup night", next: "b1" },
+      a1: { tr: "Sınır çizildi. Kim imzalar?", en: "Boundary drawn. Who signs?", },
+      a2: { tr: "Ben + anten", en: "Me + antenna", flag: "free_n4_d2_hard" },
+      a3: { tr: "Merve şahit", en: "Merve witnesses", flag: "free_n4_d2_hard" },
+      b1: { tr: "Esneklik notu. Peri dahil mi?", en: "Flex note. Include Peri?", },
+      b2: { tr: "Peri dahil", en: "Include Peri", flag: "free_n4_d2_flex" },
+      b3: { tr: "Sadece Cup saati", en: "Cup hour only", flag: "free_n4_d2_flex" },
+    },
+    {
+      flags: ["free_n4_soft", "free_n4_merve"],
+      root: {
+        tr: "Dün yumuşak kaldık / Merve arabuldu. Bugün kuralı netleştirelim.",
+        en: "Yesterday we stayed soft / Merve mediated. Sharpen the rule today.",
+      },
+      a: { tr: "Yine yumuşak ama yazılı", en: "Soft but written", next: "a1" },
+      b: { tr: "Cup için esnek madde", en: "Cup flex clause", next: "b1" },
+      a1: { tr: "Yazılı yumuşaklık. Son madde?", en: "Written softness. Final clause?", },
+      a2: { tr: "Bass sınırı", en: "Bass limit", flag: "free_n4_d2_hard" },
+      a3: { tr: "Gece sessizliği", en: "Night quiet", flag: "free_n4_d2_hard" },
+      b1: { tr: "Cup maddesi. Kim faydalanır?", en: "Cup clause. Who benefits?", },
+      b2: { tr: "Peri seti", en: "Peri's set", flag: "free_n4_d2_flex" },
+      b3: { tr: "Tüm mahalle", en: "Whole block", flag: "free_n4_d2_flex" },
+    },
+    {
+      flags: ["free_n4_letters_hint", "free_n4_letters_cup"],
+      root: {
+        tr: "Dün mektupları konuştuk. Bugün kural defterine ne düşüyor?",
+        en: "Yesterday we talked letters. What lands in the rule book today?",
+      },
+      a: { tr: "Mahalle anlayışı maddesi", en: "Understand-the-block clause", next: "a1" },
+      b: { tr: "Cup hikâyesi maddesi", en: "Cup-story clause", next: "b1" },
+      a1: { tr: "Anlayış maddesi. Sert mi esnek mi?", en: "Understanding clause. Hard or flex?", },
+      a2: { tr: "Sert", en: "Hard", flag: "free_n4_d2_hard" },
+      a3: { tr: "Esnek", en: "Flex", flag: "free_n4_d2_flex" },
+      b1: { tr: "Cup maddesi. Ne kadar geniş?", en: "Cup clause. How wide?", },
+      b2: { tr: "Dar — sadece gece", en: "Narrow — night only", flag: "free_n4_d2_flex" },
+      b3: { tr: "Geniş — tüm hafta sonu", en: "Wide — whole weekend", flag: "free_n4_d2_flex" },
+    },
+  ],
+  n5: [
+    {
+      flags: ["free_n5_soft", "free_n5_tea_neon"],
+      root: {
+        tr: "Dünkü yumuşak set hâlâ kulaklarda. Bugün remix mi, Cup drop mu?",
+        en: "Yesterday's soft set is still in the ears. Remix today — or Cup drop?",
+      },
+      a: { tr: "Remix — daha yumuşak", en: "Remix — softer", next: "a1" },
+      b: { tr: "Cup drop hazırla", en: "Prep the Cup drop", next: "b1" },
+      a1: { tr: "Remix. Hangi renk?", en: "Remix. Which color?", },
+      a2: { tr: "Mercan", en: "Coral", flag: "free_n5_d2_soft" },
+      a3: { tr: "Çay kreması", en: "Tea cream", flag: "free_n5_d2_soft" },
+      b1: { tr: "Cup drop. Bass seviyesi?", en: "Cup drop. Bass level?", },
+      b2: { tr: "Kısık — Orhan razı", en: "Soft — Orhan ok", flag: "free_n5_d2_cup" },
+      b3: { tr: "Tam drop", en: "Full drop", flag: "free_n5_d2_cup" },
+    },
+    {
+      flags: ["free_n5_loud", "free_n5_mid"],
+      root: {
+        tr: "Dün risk aldık / yarıya çektik. Kulaklar çınlıyor. Bugün ne?",
+        en: "Yesterday we risked it / pulled halfway. Ears ringing. Today?",
+      },
+      a: { tr: "Yumuşat — barış", en: "Soften — peace", next: "a1" },
+      b: { tr: "Cup için sakla", en: "Save it for Cup", next: "b1" },
+      a1: { tr: "Yumuşak remix. Orhan'a haber?", en: "Soft remix. Tell Orhan?", },
+      a2: { tr: "Evet haber ver", en: "Yes, tell him", flag: "free_n5_d2_soft" },
+      a3: { tr: "Sadece çal", en: "Just play", flag: "free_n5_d2_soft" },
+      b1: { tr: "Cup'a saklandı. Hook rengi?", en: "Saved for Cup. Hook color?", },
+      b2: { tr: "Neon mercan", en: "Neon coral", flag: "free_n5_d2_cup" },
+      b3: { tr: "Fırın ısısı", en: "Oven heat", flag: "free_n5_d2_cup" },
+    },
+    {
+      flags: ["free_n5_theme", "free_n5_oven"],
+      root: {
+        tr: "Dün Cup hook'unu yazdık. Bugün track'i kilitleyelim mi?",
+        en: "Yesterday we wrote the Cup hook. Lock the track today?",
+      },
+      a: { tr: "Yumuşak final mix", en: "Soft final mix", next: "a1" },
+      b: { tr: "Cup drop kilidi", en: "Lock Cup drop", next: "b1" },
+      a1: { tr: "Final mix. Tema?", en: "Final mix. Theme?", },
+      a2: { tr: "Mercan + çay", en: "Coral + tea", flag: "free_n5_d2_soft" },
+      a3: { tr: "Sadece çay", en: "Tea only", flag: "free_n5_d2_soft" },
+      b1: { tr: "Drop kilit. Kim ilk dinlesin?", en: "Drop locked. Who hears first?", },
+      b2: { tr: "Cem", en: "Cem", flag: "free_n5_d2_cup" },
+      b3: { tr: "Can", en: "Can", flag: "free_n5_d2_cup" },
+    },
+  ],
+  n6: [
+    {
+      flags: ["free_n6_share", "free_n6_leyla"],
+      root: {
+        tr: "Dünkü poğaçalar bitti — Orhan/Leyla payı gitti. Bugün fırın kime?",
+        en: "Yesterday's pastries gone — Orhan/Leyla share delivered. Oven for whom today?",
+      },
+      a: { tr: "Cup takımı", en: "Cup team", next: "a1" },
+      b: { tr: "Barış tepsisi", en: "Peace tray", next: "b1" },
+      a1: { tr: "Cup paketi. Tatlı mı tuzlu mu?", en: "Cup pack. Sweet or savory?", },
+      a2: { tr: "Tatlı + kahve", en: "Sweet + coffee", flag: "free_n6_d2_team" },
+      a3: { tr: "Tuzlu + çay", en: "Savory + tea", flag: "free_n6_d2_team" },
+      b1: { tr: "Barış tepsisi. Kim önce?", en: "Peace tray. Who first?", },
+      b2: { tr: "Orhan", en: "Orhan", flag: "free_n6_d2_peace" },
+      b3: { tr: "Herkes birlikte", en: "Everyone together", flag: "free_n6_d2_peace" },
+    },
+    {
+      flags: ["free_n6_ledger", "free_n6_joke"],
+      root: {
+        tr: "Dün defteri açtık. Bugün fırın borç mu yazar, yoksa poğaça mı?",
+        en: "Yesterday we opened the book. Today: oven writes debt — or pastry?",
+      },
+      a: { tr: "Poğaça ile sil", en: "Erase with pastry", next: "a1" },
+      b: { tr: "Cup enerjisi yaz", en: "Write Cup energy", next: "b1" },
+      a1: { tr: "Poğaça silgisi. Kime?", en: "Pastry eraser. For whom?", },
+      a2: { tr: "Mahalle barışı", en: "Block peace", flag: "free_n6_d2_peace" },
+      a3: { tr: "Merve defteri", en: "Merve's ledger", flag: "free_n6_d2_peace" },
+      b1: { tr: "Cup enerjisi. Paket?", en: "Cup energy. Pack?", },
+      b2: { tr: "Takım paketi", en: "Team pack", flag: "free_n6_d2_team" },
+      b3: { tr: "Sadece Cem", en: "Cem only", flag: "free_n6_d2_team" },
+    },
+    {
+      flags: ["free_n6_fuel", "free_n6_tea_snack"],
+      root: {
+        tr: "Dün Cup ikramını paketledik. Bugün fırın aynı siparişi mi basacak?",
+        en: "Yesterday we packed Cup snacks. Same order from the oven today?",
+      },
+      a: { tr: "Aynı paket — takım", en: "Same pack — team", next: "a1" },
+      b: { tr: "Barışa çevir", en: "Flip to peace", next: "b1" },
+      a1: { tr: "Takım paketi onay. Ekstra?", en: "Team pack confirmed. Extra?", },
+      a2: { tr: "Çift kahve", en: "Double coffee", flag: "free_n6_d2_team" },
+      a3: { tr: "Ekstra çay", en: "Extra tea", flag: "free_n6_d2_team" },
+      b1: { tr: "Barış tepsisi. Kim?", en: "Peace tray. Who?", },
+      b2: { tr: "Herkes", en: "Everyone", flag: "free_n6_d2_peace" },
+      b3: { tr: "Orhan + Leyla", en: "Orhan + Leyla", flag: "free_n6_d2_peace" },
+    },
+  ],
+};
+
+function buildFlagFollowup(neighborId, pack) {
+  return {
+    id: `free_${neighborId}_d2`,
     start: "root",
     nodes: [
       {
         id: "root",
-        speaker: "n1",
-        text: {
-          tr: "Dünkü demlik hâlâ sıcak. Defterde bir satır eksik — sen mi yazacaksın?",
-          en: "Yesterday's pot is still warm. One ledger line is blank — will you write it?",
-        },
+        speaker: neighborId,
+        text: pack.root,
         choices: [
-          {
-            id: "a",
-            label: { tr: "Can'ı koruyan satır", en: "A line that protects Can" },
-            next: "a1",
-            affinity: [{ id: "n6", delta: 2 }, { id: "n1", delta: 2 }],
-            rep: { rep_mediator: 2 },
-          },
-          {
-            id: "b",
-            label: { tr: "Cup dedikodu satırı", en: "A Cup-gossip line" },
-            next: "b1",
-            affinity: [{ id: "n1", delta: 2 }, { id: "n2", delta: 1 }],
-            rep: { rep_stage: 2 },
-          },
-          {
-            id: "c",
-            label: { tr: "Boş bırak — sır kalsın", en: "Leave it blank — keep the secret" },
-            next: "c1",
-            affinity: [{ id: "n1", delta: 2 }],
-            rep: { rep_instigator: 1 },
-          },
+          { id: "a", label: { tr: pack.a.tr, en: pack.a.en }, next: pack.a.next, affinity: [{ id: neighborId, delta: 2 }] },
+          { id: "b", label: { tr: pack.b.tr, en: pack.b.en }, next: pack.b.next, affinity: [{ id: neighborId, delta: 2 }] },
         ],
       },
       {
         id: "a1",
-        speaker: "n1",
-        text: {
-          tr: "Can rahatlar. Ama Peri bass açarsa satır titrer. Ne yaparsın?",
-          en: "Can breathes easier. But if Peri opens the bass, the line shakes. What then?",
-        },
+        speaker: neighborId,
+        text: pack.a1,
         choices: [
-          {
-            id: "a2",
-            label: { tr: "Peri'ye kısık söyle", en: "Ask Peri to soften" },
-            next: "end",
-            affinity: [{ id: "n5", delta: 2 }, { id: "n6", delta: 1 }],
-            setFlags: ["free_n1_d2_protect"],
-          },
-          {
-            id: "a3",
-            label: { tr: "Defteri kapat, dinle", en: "Close the ledger, listen" },
-            next: "end",
-            affinity: [{ id: "n1", delta: 2 }],
-            setFlags: ["free_n1_d2_protect_quiet"],
-          },
+          { id: "a2", label: { tr: pack.a2.tr, en: pack.a2.en }, next: "end", affinity: [{ id: neighborId, delta: 2 }], setFlags: [pack.a2.flag] },
+          { id: "a3", label: { tr: pack.a3.tr, en: pack.a3.en }, next: "end", affinity: [{ id: neighborId, delta: 2 }], setFlags: [pack.a3.flag] },
         ],
       },
       {
         id: "b1",
-        speaker: "n1",
-        text: {
-          tr: "Cup fısıltısı hazır. Kimi öne koyayım dedikoduda?",
-          en: "Cup whisper ready. Who do I put in the gossip front row?",
-        },
+        speaker: neighborId,
+        text: pack.b1,
         choices: [
-          {
-            id: "b2",
-            label: { tr: "Cem — formasyon", en: "Cem — formation" },
-            next: "end",
-            affinity: [{ id: "n2", delta: 2 }],
-            setFlags: ["free_n1_d2_cup"],
-          },
-          {
-            id: "b3",
-            label: { tr: "Orhan — kural", en: "Orhan — rules" },
-            next: "end",
-            affinity: [{ id: "n4", delta: 2 }],
-            setFlags: ["free_n1_d2_cup_orhan"],
-          },
-        ],
-      },
-      {
-        id: "c1",
-        speaker: "n1",
-        text: {
-          tr: "Boş satır… bazen en güçlü silah. Kimseye mi, yoksa sadece bana mı?",
-          en: "A blank line… sometimes the sharpest tool. Keep it from everyone — or just from them?",
-        },
-        choices: [
-          {
-            id: "c2",
-            label: { tr: "Sadece ikimiz", en: "Just us two" },
-            next: "end",
-            affinity: [{ id: "n1", delta: 3 }],
-            setFlags: ["free_n1_d2_blank"],
-          },
-          {
-            id: "c3",
-            label: { tr: "Leyla da duysun sonra", en: "Leyla hears later" },
-            next: "end",
-            affinity: [{ id: "n3", delta: 2 }],
-            setFlags: ["free_n1_d2_blank_leyla"],
-          },
+          { id: "b2", label: { tr: pack.b2.tr, en: pack.b2.en }, next: "end", affinity: [{ id: neighborId, delta: 2 }], setFlags: [pack.b2.flag] },
+          { id: "b3", label: { tr: pack.b3.tr, en: pack.b3.en }, next: "end", affinity: [{ id: neighborId, delta: 2 }], setFlags: [pack.b3.flag] },
         ],
       },
       {
         id: "end",
-        speaker: "n1",
+        speaker: neighborId,
         text: {
-          tr: "Yazıldı. Bu mahallede mürekkep kurur ama unutmaz.",
-          en: "Written. On this street, ink dries — memory doesn't.",
+          tr: "Not alındı. Dünün izi bugüne yazıldı.",
+          en: "Logged. Yesterday's mark is written into today.",
         },
         ends: true,
       },
     ],
-  },
-  n2: {
-    id: "free_n2_d2",
-    start: "root",
-    nodes: [
-      {
-        id: "root",
-        speaker: "n2",
-        text: {
-          tr: "Dünkü antrenmanın hesabı: diz iyi. Bugün formasyon testi. Hazır mısın?",
-          en: "Yesterday's drill report: knee OK. Formation test today. Ready?",
-        },
-        choices: [
-          {
-            id: "a",
-            label: { tr: "Sol kanat sıkı", en: "Pin the left wing" },
-            next: "end",
-            affinity: [{ id: "n2", delta: 3 }],
-            rep: { rep_stage: 2 },
-            setFlags: ["free_n2_d2_left"],
-          },
-          {
-            id: "b",
-            label: { tr: "Orta sahayı yumuşat", en: "Soften midfield" },
-            next: "end",
-            affinity: [{ id: "n2", delta: 2 }, { id: "n6", delta: 1 }],
-            rep: { rep_mediator: 1 },
-            setFlags: ["free_n2_d2_mid"],
-          },
-        ],
-      },
-      {
-        id: "end",
-        speaker: "n2",
-        text: {
-          tr: "Not alındı. Cumartesi bu çizgi konuşur.",
-          en: "Logged. Saturday, that line will talk.",
-        },
-        ends: true,
-      },
-    ],
-  },
-  n3: {
-    id: "free_n3_d2",
-    start: "root",
-    nodes: [
-      {
-        id: "root",
-        speaker: "n3",
-        text: {
-          tr: "Dünkü ip hâlâ cebimde. Bugün uçuralım mı, yoksa barış mı?",
-          en: "Yesterday's string's still in my pocket. Fly today — or make peace?",
-        },
-        choices: [
-          {
-            id: "a",
-            label: { tr: "Alçak uçuş — Orhan rahat", en: "Low flight — Orhan chill" },
-            next: "end",
-            affinity: [{ id: "n3", delta: 2 }, { id: "n4", delta: 3 }],
-            rep: { rep_mediator: 2 },
-            setFlags: ["free_n3_d2_low"],
-          },
-          {
-            id: "b",
-            label: { tr: "Yüksek — efsane!", en: "High — legendary!" },
-            next: "end",
-            affinity: [{ id: "n3", delta: 4 }, { id: "n4", delta: -1 }],
-            rep: { rep_instigator: 2 },
-            setFlags: ["free_n3_d2_high"],
-          },
-        ],
-      },
-      {
-        id: "end",
-        speaker: "n3",
-        text: { tr: "Tamam! Uçurtma hafızası silinmez.", en: "Deal! Kite memory never wipes." },
-        ends: true,
-      },
-    ],
-  },
-  n4: {
-    id: "free_n4_d2",
-    start: "root",
-    nodes: [
-      {
-        id: "root",
-        speaker: "n4",
-        text: {
-          tr: "Dünkü kural denemesi… sonuç karışık. Bugün netleştirelim.",
-          en: "Yesterday's rule trial… mixed results. Let's sharpen it today.",
-        },
-        choices: [
-          {
-            id: "a",
-            label: { tr: "Sert sınır", en: "Hard boundary" },
-            next: "end",
-            affinity: [{ id: "n4", delta: 3 }],
-            traitDeltas: { Grumpy: 1 },
-            setFlags: ["free_n4_d2_hard"],
-          },
-          {
-            id: "b",
-            label: { tr: "Cup gecesi esnek", en: "Flex on Cup night" },
-            next: "end",
-            affinity: [{ id: "n4", delta: 2 }, { id: "n5", delta: 2 }],
-            rep: { rep_stage: 1 },
-            setFlags: ["free_n4_d2_flex"],
-          },
-        ],
-      },
-      {
-        id: "end",
-        speaker: "n4",
-        text: { tr: "Yazıldı. Anten onayladı.", en: "Filed. Antenna approved." },
-        ends: true,
-      },
-    ],
-  },
-  n5: {
-    id: "free_n5_d2",
-    start: "root",
-    nodes: [
-      {
-        id: "root",
-        speaker: "n5",
-        text: {
-          tr: "Dünkü set hâlâ kulaklarda. Bugün remix mi, yoksa sustur mu?",
-          en: "Yesterday's set is still in the ears. Remix today — or mute?",
-        },
-        choices: [
-          {
-            id: "a",
-            label: { tr: "Remix — daha yumuşak", en: "Remix — softer" },
-            next: "end",
-            affinity: [{ id: "n5", delta: 2 }, { id: "n4", delta: 2 }],
-            rep: { rep_mediator: 1 },
-            setFlags: ["free_n5_d2_soft"],
-          },
-          {
-            id: "b",
-            label: { tr: "Cup drop hazırla", en: "Prep the Cup drop" },
-            next: "end",
-            affinity: [{ id: "n5", delta: 3 }],
-            rep: { rep_stage: 3 },
-            setFlags: ["free_n5_d2_cup"],
-          },
-        ],
-      },
-      {
-        id: "end",
-        speaker: "n5",
-        text: { tr: "Track kaydı. Mahalle titreyecek — kontrollü.", en: "Track locked. Block will vibrate — on purpose." },
-        ends: true,
-      },
-    ],
-  },
-  n6: {
-    id: "free_n6_d2",
-    start: "root",
-    nodes: [
-      {
-        id: "root",
-        speaker: "n6",
-        text: {
-          tr: "Dünkü poğaçalar bitti. Bugün fırın kime çalışacak?",
-          en: "Yesterday's pastries are gone. Who does the oven work for today?",
-        },
-        choices: [
-          {
-            id: "a",
-            label: { tr: "Cup takımı için", en: "For the Cup team" },
-            next: "end",
-            affinity: [{ id: "n6", delta: 2 }, { id: "n2", delta: 2 }],
-            rep: { rep_oven: 2 },
-            setFlags: ["free_n6_d2_team"],
-          },
-          {
-            id: "b",
-            label: { tr: "Barış tepsisi — herkese", en: "Peace tray — everyone" },
-            next: "end",
-            affinity: [{ id: "n6", delta: 2 }, { id: "n1", delta: 1 }, { id: "n4", delta: 1 }],
-            rep: { rep_mediator: 2 },
-            setFlags: ["free_n6_d2_peace"],
-          },
-        ],
-      },
-      {
-        id: "end",
-        speaker: "n6",
-        text: { tr: "Sipariş alındı. Fırın yalan söylemez.", en: "Order in. The oven doesn't lie." },
-        ends: true,
-      },
-    ],
-  },
-};
+  };
+}
 
 export function freePorchTree(neighborId, save = null) {
   const base = FREE_PORCH[neighborId];
   if (!base) return null;
   if (!save) return base;
-  // After day 1, if any free_* flag exists for this neighbor, serve the follow-up tree
+  const day = save.dayIndex || 1;
+  if (day < 2) return base;
   const flags = Object.keys(save.storyFlags || {}).filter((f) => save.storyFlags[f]);
-  const touched = flags.some((f) => f.startsWith(`free_${neighborId}`));
-  if ((save.dayIndex || 1) >= 2 && touched && FREE_PORCH_FOLLOWUP[neighborId]) {
-    // Don't re-serve follow-up if its end flags already set this evening's visit path fully —
-    // still OK to show follow-up once per day via evening.visits gate in UI.
-    return FREE_PORCH_FOLLOWUP[neighborId];
+  // Prefer flag-specific Day2+ follow-up (not already consumed d2 flags)
+  const packs = FOLLOWUP_FLAG_BEATS[neighborId] || [];
+  for (const pack of packs) {
+    if (pack.flags.some((f) => flags.includes(f))) {
+      // Skip if this evening already finished a d2 follow-up for this neighbor
+      const d2Done = flags.some((f) => f.startsWith(`free_${neighborId}_d2`));
+      if (!d2Done) return buildFlagFollowup(neighborId, pack);
+    }
+  }
+  // Fallback: any free_* touch without matching pack still gets generic 2-beat echo
+  const touched = flags.some((f) => f.startsWith(`free_${neighborId}_`) && !f.includes("_d2"));
+  if (touched) {
+    const fallback = packs[0];
+    if (fallback && !flags.some((f) => f.startsWith(`free_${neighborId}_d2`))) {
+      return buildFlagFollowup(neighborId, {
+        ...fallback,
+        root: {
+          tr: `Dünkü porch konuşmamız hâlâ duruyor. Bugün ikinci tur — ne diyorsun?`,
+          en: `Yesterday's porch talk is still standing. Second round today — what do you say?`,
+        },
+      });
+    }
   }
   return base;
 }

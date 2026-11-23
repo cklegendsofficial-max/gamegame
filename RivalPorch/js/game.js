@@ -264,6 +264,8 @@ function hudHtml() {
 function buildShell() {
   el.app.innerHTML = `
     <section class="screen screen-title active" id="screen-title"></section>
+    <section class="screen" id="screen-cold"></section>
+    <section class="screen" id="screen-overnight"></section>
     <section class="screen" id="screen-evening"></section>
     <section class="screen screen-street" id="screen-street"></section>
     <section class="screen screen-neighbor" id="screen-neighbor"></section>
@@ -298,6 +300,130 @@ function renderTitle() {
       <button class="btn btn-secondary" type="button" data-action="open-shop">${t("shop.title")}</button>
     </div>`;
 }
+
+
+function daysUntilCupNight() {
+  const days = state.depthMeta?.eveningAgenda?.weekendExtra?.daysOfWeek || [6, 7];
+  const dow = dayOfWeek();
+  let best = 7;
+  for (const d of days) {
+    const delta = (d - dow + 7) % 7;
+    if (delta < best) best = delta;
+  }
+  return best;
+}
+
+function dayHeadline() {
+  const d = state.save.dayIndex;
+  const map = {
+    1: { tr: "İlk Gece — Kapı Çalıyor", en: "Night One — Someone's Knocking" },
+    2: { tr: "İkinci Gece — Yankı", en: "Night Two — The Echo" },
+    3: { tr: "Üçüncü Gece — Ölçüm", en: "Night Three — Being Measured" },
+    4: { tr: "Dördüncü Gece — İpler Geriliyor", en: "Night Four — Strings Tighten" },
+    5: { tr: "Cup Öncesi — Isınma", en: "Cup Eve Warmup" },
+    6: { tr: "Sezon Cup Gecesi", en: "Season Cup Night" },
+    7: { tr: "Cup Sonrası — Mahalle Konuşur", en: "After Cup — The Block Talks" },
+  };
+  if (map[d]) return map[d];
+  const week = Story.weekDef(state.stories, d);
+  return week?.title || { tr: `Gün ${d}`, en: `Day ${d}` };
+}
+
+function renderColdOpen() {
+  const screen = document.getElementById("screen-cold");
+  screen.style.backgroundImage = `url("${ART.streetHero}")`;
+  const tr = state.locale === "tr";
+  screen.innerHTML = `
+    <div class="cold-open">
+      <p class="cold-knock" id="cold-knock">${tr ? "…tak. tak. tak." : "…knock. knock. knock."}</p>
+      <h1 class="brand cold-brand cold-reveal" id="cold-brand" hidden>${t("app.title")}</h1>
+      <div class="dialog-box cold-box cold-reveal" id="cold-box" hidden>
+        <p class="prompt">${tr
+          ? "Kapıda Leyla — uçurtma ipi Orhan'ın antenine dolanmış. Karşı Sırt fenerleri yanıyor. Bu ilk seçimin mahalleyi şekillendirir."
+          : "Leyla at your door — kite string tangled in Orhan's antenna. Rival Ridge lanterns are already lit. This first choice shapes the block."}</p>
+        <div class="choice-stack">
+          <button class="btn btn-primary" type="button" data-action="cold-choice" data-cid="mediate">${tr ? "Arabulucu ol — birlikte çözün" : "Mediate — untangle together"}</button>
+          <button class="btn btn-ember" type="button" data-action="cold-choice" data-cid="instigate">${tr ? "Uçurtmayı savun — antene meydan oku" : "Defend the kite — dare the antenna"}</button>
+          <button class="btn btn-teal" type="button" data-action="cold-choice" data-cid="stage">${tr ? "Cup'a çevir — bu bir sahne" : "Make it Cup drama — stage it"}</button>
+        </div>
+      </div>
+      <p class="muted cold-hint cold-reveal" id="cold-hint" hidden>${tr ? "Sonra akşam gündemi açılır." : "Then the evening agenda opens."}</p>
+    </div>`;
+  showScreen("screen-cold");
+  // Staggered cold open: knock → brand → stake choices
+  setTimeout(() => {
+    const b = document.getElementById("cold-brand");
+    if (b) b.hidden = false;
+  }, 550);
+  setTimeout(() => {
+    const box = document.getElementById("cold-box");
+    const hint = document.getElementById("cold-hint");
+    if (box) box.hidden = false;
+    if (hint) hint.hidden = false;
+  }, 1100);
+}
+
+function resolveColdOpen(cid) {
+  ensureNeighborState("n3");
+  ensureNeighborState("n4");
+  const packs = {
+    mediate: {
+      aff: [["n3", 4], ["n4", 3]],
+      rep: { rep_mediator: 3 },
+      flags: ["cold_open_mediate", "kite_path_coop"],
+      note: { tr: "İlk kapı: arabuluculuk.", en: "First knock: mediation." },
+    },
+    instigate: {
+      aff: [["n3", 5], ["n4", -2]],
+      rep: { rep_instigator: 3 },
+      flags: ["cold_open_instigate", "kite_path_defend"],
+      note: { tr: "İlk kapı: uçurtma isyanı.", en: "First knock: kite rebellion." },
+    },
+    stage: {
+      aff: [["n3", 2], ["n4", 1], ["n2", 2]],
+      rep: { rep_stage: 3 },
+      flags: ["cold_open_stage", "kite_path_coop"],
+      note: { tr: "İlk kapı: sahne kuruldu.", en: "First knock: the stage is set." },
+    },
+  };
+  const p = packs[cid] || packs.mediate;
+  for (const [id, d] of p.aff) bumpAffinity(id, d);
+  Story.bumpRep(state.save, p.rep);
+  for (const f of p.flags) Story.setFlag(state.save, f);
+  state.save.coldOpenDone = true;
+  if (!state.save.storyRecap) state.save.storyRecap = [];
+  state.save.storyRecap.unshift({ day: 1, text: loc(p.note) });
+  saveNow();
+  const fb = Story.formatChoiceSummary(
+    { affinity: p.aff.map(([id, delta]) => ({ id, delta })), rep: Object.entries(p.rep).map(([id, delta]) => ({ id, delta })) },
+    state.locale,
+    (nid) => loc(neighborById(nid)?.name)
+  );
+  toast(fb || loc(p.note));
+  renderEvening();
+  showScreen("screen-evening");
+}
+
+function renderOvernight(payoff) {
+  const screen = document.getElementById("screen-overnight");
+  const tr = state.locale === "tr";
+  const bits = (payoff?.lines || []).map((l) => `<li>${l}</li>`).join("") || `<li>${tr ? "Mahalle uyudu." : "The block slept."}</li>`;
+  const tomorrow = loc(dayHeadline());
+  screen.innerHTML = `
+    ${hudHtml()}
+    <div class="overnight-card">
+      <p class="muted overnight-kicker">${tr ? "Gece geçti" : "Night passed"}</p>
+      <h2>${tomorrow}</h2>
+      <p class="prompt">${fillTemplate(t("idle.overnight_done"), { day: state.save.dayIndex })}</p>
+      <ul class="agenda-list">${bits}</ul>
+      <p class="evening-cup-tease">${payoff?.tease || ""}</p>
+      <div class="btn-row">
+        <button class="btn btn-primary" type="button" data-action="goto-evening">${tr ? "Yeni akşama gir" : "Enter the new evening"}</button>
+      </div>
+    </div>`;
+  showScreen("screen-overnight");
+}
+
 
 function renderEvening() {
   const st = eveningStats();
@@ -334,7 +460,7 @@ function renderEvening() {
     tr: "Cumartesi yaklaşıyor. Bağları demle, formasyonu kur.",
     en: "Saturday closes in. Brew bonds, set the formation.",
   };
-  // Personalize from last story note when available
+  // Personalize from last story note / cold-open residue
   const lastNote = (state.save.storyRecap || [])[0];
   if (state.save.dayIndex >= 2 && lastNote?.text) {
     const short = lastNote.text.length > 70 ? `${lastNote.text.slice(0, 68)}…` : lastNote.text;
@@ -342,15 +468,30 @@ function renderEvening() {
       tr: `Dünden kalan: ${short}`,
       en: `Carried from yesterday: ${short}`,
     };
+  } else if (state.save.dayIndex >= 2) {
+    const flags = Object.keys(state.save.storyFlags || {}).filter((f) => state.save.storyFlags[f] && f.startsWith("free_"));
+    if (flags.length) {
+      hook = {
+        tr: `Dünkü porch izi hâlâ sıcak (${flags.length} bayrak). Kapıları tekrar çal.`,
+        en: `Yesterday's porch mark is still warm (${flags.length} flags). Knock the doors again.`,
+      };
+    }
   }
   const cupTease = `<p class="evening-cup-tease">${loc(hook)}</p>`;
 
+  const untilCup = daysUntilCupNight();
+  const cupCount =
+    untilCup === 0
+      ? state.locale === "tr" ? "★ Bugün Cup gecesi" : "★ Cup night is tonight"
+      : state.locale === "tr"
+        ? `Cup'a ${untilCup} gün`
+        : `${untilCup} day${untilCup === 1 ? "" : "s"} to Cup`;
   screen.innerHTML = `
     ${hudHtml()}
-    <div class="topbar"><h2>${t("evening.title")}</h2>
+    <div class="topbar"><h2>${loc(dayHeadline())}</h2>
       <button class="btn btn-secondary" type="button" data-action="open-ladder">${t("meta.ladder")}</button>
     </div>
-    <p class="muted">${fillTemplate(t("day.streak"), { n: state.save.checkinStreak })} · ${state.save.moodLabel || "calm"}${dom ? ` · ${Story.repLabel(dom, state.locale)}` : ""}</p>
+    <p class="muted">${fillTemplate(t("day.streak"), { n: state.save.checkinStreak })} · ${state.save.moodLabel || "calm"}${dom ? ` · ${Story.repLabel(dom, state.locale)}` : ""} · <strong class="cup-countdown">${cupCount}</strong></p>
     <div class="dialog-box evening-hook" style="min-height:auto;margin-bottom:0.5rem">
       <p class="prompt" style="margin:0 0 0.35rem">${loc(week?.title)} — ${loc(week?.focus)}</p>
       ${arcBeat
@@ -643,16 +784,21 @@ function doGift(id) {
     text: { tr: "Teşekkürler.", en: "Thanks." },
     affinityDelta: affordable.affinityDelta || 1,
   };
-  bumpAffinity(id, (line.affinityDelta || affordable.affinityDelta || 1) * 3);
+  const gain = (line.affinityDelta || affordable.affinityDelta || 1) * 3;
+  bumpAffinity(id, gain);
   state.save.evening.errand = true;
   addPassXp(state.save, 0.2);
   saveNow();
   renderNeighbor(id);
-  const gain = (line.affinityDelta || affordable.affinityDelta || 1) * 3;
-  document.getElementById("neighbor-dialog").innerHTML = `<p>${loc(line.text)}</p>
-    <p class="choice-feedback">-${affordable.cost.porch_coins} 🪙 · ${loc(affordable.name)} · ${t("neighbor.affinity")} +${gain}</p>
-    <p class="muted">${state.locale === "tr" ? "Hediye errandı tamam." : "Gift errand complete."}</p>`;
-  toast(state.locale === "tr" ? `Hediye verildi · ilişki +${gain}` : `Gift given · bond +${gain}`);
+  const tr = state.locale === "tr";
+  document.getElementById("neighbor-dialog").innerHTML = `
+    <div class="gift-confirm">
+      <p class="gift-confirm-title">${tr ? "Hediye alındı" : "Gift received"}</p>
+      <p>${loc(line.text)}</p>
+      <p class="choice-feedback">−${affordable.cost.porch_coins} 🪙 · ${loc(affordable.name)} · ${t("neighbor.affinity")} +${gain}</p>
+      <p class="muted">${tr ? "Errand ✓ — akşam gündemine dönebilirsin." : "Errand ✓ — you can return to the evening agenda."}</p>
+    </div>`;
+  toast(tr ? `Hediye onay · ${loc(n.name)} +${gain}` : `Gift confirmed · ${loc(n.name)} +${gain}`);
 }
 
 function doTalk(id) {
@@ -793,12 +939,24 @@ function endEvening() {
     return;
   }
   const overnight = state.stories.relationshipThresholds?.overnightIdle || { minDelta: 1, maxDelta: 3 };
+  const lines = [];
+  const tr = state.locale === "tr";
+  let affTotal = 0;
   for (const n of unlockedNeighbors()) {
     const gain = overnight.minDelta + Math.floor(Math.random() * (overnight.maxDelta - overnight.minDelta + 1));
     bumpAffinity(n.id, gain);
+    affTotal += gain;
   }
+  lines.push(tr ? `İlişkiler +${affTotal} (dağınık)` : `Bonds +${affTotal} across the block`);
+  const beforeCoins = state.save.currencies.porch_coins || 0;
   applyDailyEarn(state.save, state.economy, "overnight");
+  const coinGain = (state.save.currencies.porch_coins || 0) - beforeCoins;
+  if (coinGain) lines.push(tr ? `Gece jetonu +${coinGain}` : `Overnight coins +${coinGain}`);
   addPassXp(state.save, 1);
+  lines.push(tr ? "Pass XP +1" : "Pass XP +1");
+
+  const lastNote = (state.save.storyRecap || [])[0]?.text;
+  if (lastNote) lines.push(tr ? `Hatırlanan: ${lastNote}` : `Remembered: ${lastNote}`);
 
   state.save.dayIndex += 1;
   state.save.weekNumber = weekNumber();
@@ -817,20 +975,28 @@ function endEvening() {
   Story.applyStoryUnlocks(state.stories, state.save);
   unlockNeighborsIfReady();
 
-  // Season finale ending check (day 28+)
   if (state.save.dayIndex >= 28) {
     const ending = Story.evaluateEndings(state.stories, state.save);
     if (ending) state.save.endingId = ending.id;
   }
   saveNow();
-  toast(fillTemplate(t("idle.overnight_done"), { day: state.save.dayIndex }));
+
+  const until = daysUntilCupNight();
+  const tease =
+    until === 0
+      ? tr
+        ? "Sabah: Cup gecesi. Formasyonunu hazırla."
+        : "Morning: Cup night. Set your formation."
+      : tr
+        ? `${loc(dayHeadline())} · Cup'a ${until} gün`
+        : `${loc(dayHeadline())} · ${until} day${until === 1 ? "" : "s"} to Cup`;
+
   if (state.save.endingId && state.save.dayIndex >= 30) {
     renderEnding();
     showScreen("screen-story");
     return;
   }
-  renderEvening();
-  showScreen("screen-evening");
+  renderOvernight({ lines, tease });
 }
 
 function renderEnding() {
@@ -968,43 +1134,60 @@ function renderDraft() {
   const bot = state.content.botCupRoster;
   if (!state.enemyLineup?.length) state.enemyLineup = pickEnemyLineup(state.cupPicks);
   const enemyIds = state.enemyLineup;
+  const tr = state.locale === "tr";
   const allyCells = state.placement
     .map((pid, idx) => {
-      const filled = pid ? `<img src="${bust(pid)}" alt="" onerror="this.src='${DAY1_BUSTS.n1}'" />` : "";
-      return `<button class="cell ${pid ? "filled" : ""}" type="button" data-action="place-cell" data-idx="${idx}">${filled}</button>`;
+      const lane = idx < 3 ? (tr ? "ön" : "F") : (tr ? "arka" : "B");
+      const filled = pid ? `<img src="${bust(pid)}" alt="" onerror="this.src='${DAY1_BUSTS.n1}'" />` : `<span class="cell-lane">${lane}</span>`;
+      return `<button class="cell ${pid ? "filled" : ""} ${idx < 3 ? "lane-front" : "lane-back"}" type="button" data-action="place-cell" data-idx="${idx}">${filled}</button>`;
     })
     .join("");
+  // Bots: 2 front + 1 back so formation reads
   const enemyLayout = [enemyIds[0], enemyIds[1], null, enemyIds[2], null, null];
   const enemyHtml = enemyLayout
-    .map((botId) => {
-      if (!botId) return `<div class="cell enemy"></div>`;
+    .map((botId, idx) => {
+      if (!botId) {
+        const lane = idx < 3 ? (tr ? "ön" : "F") : (tr ? "arka" : "B");
+        return `<div class="cell enemy ${idx < 3 ? "lane-front" : "lane-back"}"><span class="cell-lane">${lane}</span></div>`;
+      }
       const unit = bot.units.find((u) => u.id === botId);
-      return `<div class="cell enemy filled"><img src="${bust(unit.mirrorOf)}" alt="" /></div>`;
+      return `<div class="cell enemy filled ${idx < 3 ? "lane-front" : "lane-back"}"><img src="${bust(unit.mirrorOf)}" alt="" /></div>`;
     })
     .join("");
   const bench = state.cupPicks
     .map((id) => {
       const placed = state.placement.includes(id);
+      const role = neighborById(id)?.role || "";
       return `<button class="bench-unit ${placed ? "placed" : ""} ${state.selectedBench === id ? "selected" : ""}" type="button" data-action="select-bench" data-id="${id}" ${placed ? "disabled" : ""}>
-        <img src="${bust(id)}" alt="" onerror="this.src='${DAY1_BUSTS.n1}'" /></button>`;
+        <img src="${bust(id)}" alt="" onerror="this.src='${DAY1_BUSTS.n1}'" /><span class="bench-role">${role}</span></button>`;
     })
     .join("");
   const placedCount = state.placement.filter(Boolean).length;
+  const frontCount = state.placement.slice(0, 3).filter(Boolean).length;
+  const backCount = state.placement.slice(3).filter(Boolean).length;
+  const formHint =
+    placedCount === 0
+      ? tr
+        ? "Tank/ön · burst/heal arka — Auto akıllı dizer"
+        : "Tanks front · burst/heal back — Auto places smart"
+      : tr
+        ? `Ön ${frontCount} · Arka ${backCount}${frontCount === placedCount && placedCount > 1 ? " ⚠ hep ön" : ""}`
+        : `Front ${frontCount} · Back ${backCount}${frontCount === placedCount && placedCount > 1 ? " ⚠ all-front" : ""}`;
   const screen = document.getElementById("screen-draft");
   screen.innerHTML = `
     ${hudHtml()}
     <div class="topbar"><h2>${t("draft.title")}</h2>
       <button class="btn btn-secondary" type="button" data-action="goto-cup">${t("common.back")}</button>
     </div>
-    <p class="street-hint">${t("draft.hint")} · ${state.locale === "tr" ? "Ön sıra / arka sıra" : "Front row / back row"}</p>
+    <p class="street-hint">${t("draft.hint")} · ${formHint}</p>
     <div class="placement-board">
-      <div><div class="grid-label">${state.locale === "tr" ? "Sen (ön→arka)" : "You (front→back)"}</div><div class="grid-side ally-side">${allyCells}</div></div>
+      <div><div class="grid-label">${tr ? "Sen (ön→arka)" : "You (front→back)"}</div><div class="grid-side ally-side">${allyCells}</div></div>
       <div><div class="grid-label">${loc(bot.label)}</div><div class="grid-side enemy-side">${enemyHtml}</div></div>
     </div>
     <div class="bench">${bench}</div>
-    <p class="muted">${state.selectedBench ? (state.locale === "tr" ? "Şimdi bir hücreye dokun" : "Now tap a cell") : (state.locale === "tr" ? "Önce tepside birim seç" : "Pick a unit from the tray first")}</p>
+    <p class="muted">${state.selectedBench ? (tr ? "Şimdi bir hücreye dokun" : "Now tap a cell") : (tr ? "Önce tepside birim seç" : "Pick a unit from the tray first")}</p>
     <div class="btn-row">
-      <button class="btn btn-secondary" type="button" data-action="auto-place">${state.locale === "tr" ? "Otomatik" : "Auto"}</button>
+      <button class="btn btn-secondary" type="button" data-action="auto-place">${tr ? "Otomatik (rol)" : "Auto (by role)"}</button>
       <button class="btn btn-primary" type="button" data-action="start-fight" ${placedCount === state.cupPicks.length ? "" : "disabled"}>${t("draft.confirm")}</button>
     </div>`;
 }
@@ -1036,18 +1219,34 @@ function autoPlace() {
     if (/tank|bruiser/.test(role)) return 0;
     if (/support/.test(role)) return 1;
     if (/heal/.test(role)) return 2;
-    if (/burst|aoe|assassin/.test(role)) return 3;
+    if (/burst|aoe|assassin|glass|cannon/.test(role)) return 3;
     return 2;
   };
-  // 2×3 grid: prefer front row (0,1) then back (3,4) — never dump supports in pure front forever
-  const slots = [0, 1, 3, 4, 2, 5];
-  [...state.cupPicks]
-    .sort((a, b) => rank(a) - rank(b))
-    .forEach((id, i) => {
-      state.placement[slots[i] ?? i] = id;
+  // Front slots 0–1 for tanks/bruisers; back 3–4 for burst/heal — never all-front
+  const front = [0, 1];
+  const back = [3, 4, 2, 5];
+  const ordered = [...state.cupPicks].sort((a, b) => rank(a) - rank(b));
+  const frontIds = ordered.filter((id) => rank(id) <= 1).slice(0, 2);
+  const backIds = ordered.filter((id) => !frontIds.includes(id));
+  frontIds.forEach((id, i) => {
+    state.placement[front[i]] = id;
+  });
+  backIds.forEach((id, i) => {
+    state.placement[back[i] ?? 5] = id;
+  });
+  // If only one front-capable, still keep at least one in back when 3 picks
+  const filled = state.placement.filter(Boolean).length;
+  if (filled < state.cupPicks.length) {
+    ordered.forEach((id) => {
+      if (state.placement.includes(id)) return;
+      const slot = state.placement.findIndex((x) => !x);
+      if (slot >= 0) state.placement[slot] = id;
     });
+  }
   state.selectedBench = null;
   renderDraft();
+  const allFront = state.placement.slice(0, 3).filter(Boolean).length === state.cupPicks.length;
+  if (allFront) toast(state.locale === "tr" ? "Uyarı: hep ön sıra — bot cezalandırır" : "Warn: all-front — bots will punish");
 }
 
 function makeFighter(neighborId, side, slot) {
@@ -1129,12 +1328,22 @@ function startFight() {
   if (state.fightTimer) clearInterval(state.fightTimer);
   const allyIds = state.placement.filter(Boolean);
   const bot = state.content.botCupRoster;
-  // Practice Cup bots fight harder so placement matters; season nights use ladder mult
-  const mult = (state.botMult || 1) * (isCupNight() ? 1 : 1.22);
+  const placedSlots = state.placement
+    .map((id, slot) => (id ? slot : null))
+    .filter((s) => s != null);
+  const allFront = placedSlots.length > 0 && placedSlots.every((s) => s < 3);
+  // Practice Cup bots fight harder; all-front placement gets punished harder
+  let mult = (state.botMult || 1) * (isCupNight() ? 1 : 1.18);
+  if (allFront) mult *= 1.28;
   const enemyIds = state.enemyLineup?.length ? state.enemyLineup : pickEnemyLineup(allyIds);
   state.enemyLineup = enemyIds;
-  const enemies = enemyIds.map((id, i) => makeBotFighter(bot.units.find((x) => x.id === id), i, mult));
-  const allies = allyIds.map((id, i) => makeFighter(id, "ally", i));
+  // Match draft board: bots sit front/front/back (slots 0,1,3)
+  const enemySlots = [0, 1, 3];
+  const enemies = enemyIds.map((id, i) => makeBotFighter(bot.units.find((x) => x.id === id), enemySlots[i] ?? i, mult));
+  // Preserve placement slots on fighters
+  const allies = state.placement
+    .map((id, slot) => (id ? makeFighter(id, "ally", slot) : null))
+    .filter(Boolean);
   const battle = {
     allies,
     enemies,
@@ -1144,28 +1353,134 @@ function startFight() {
     finished: false,
     log: [],
     floaters: [],
+    paused: false,
+    actionUsed: false,
+    actionOffered: false,
+    focusTargetSlot: null,
+    allFront,
+    propReady: true,
   };
+  if (allFront) {
+    battle.log.unshift(state.locale === "tr" ? "Bot: hep ön sıra cezası!" : "Bot: all-front punish!");
+  }
+  state.battle = battle;
   renderFight(battle);
   showScreen("screen-fight");
+  resumeFightLoop(battle);
+}
+
+function resumeFightLoop(battle) {
+  if (state.fightTimer) clearInterval(state.fightTimer);
   const tickMs = 700;
   const uiMs = 100;
   let combatAcc = 0;
-  const startedAt = performance.now();
+  const startedAt = performance.now() - battle.elapsed * 1000;
   state.fightTimer = setInterval(() => {
-    if (battle.finished) return;
+    if (battle.finished || battle.paused) return;
     battle.elapsed = (performance.now() - startedAt) / 1000;
+    // Offer one player action mid-fight
+    if (!battle.actionOffered && battle.elapsed >= 2.4 && battle.allies.some((u) => u.alive) && battle.enemies.some((u) => u.alive)) {
+      battle.actionOffered = true;
+      battle.paused = true;
+      updateFightUI(battle);
+      showFightActions(battle);
+      return;
+    }
     combatAcc += uiMs;
     while (combatAcc >= tickMs) {
       combatAcc -= tickMs;
       combatTick(battle);
     }
-    // prune floaters
     battle.floaters = (battle.floaters || []).filter((f) => battle.elapsed - f.t < 0.85);
     updateFightUI(battle);
     if (battle.elapsed >= 75 || !battle.allies.some((u) => u.alive) || !battle.enemies.some((u) => u.alive)) {
       endFight(battle);
     }
   }, uiMs);
+}
+
+function showFightActions(battle) {
+  const bar = document.getElementById("fight-actions");
+  if (!bar) return;
+  const tr = state.locale === "tr";
+  const foes = battle.enemies.filter((u) => u.alive);
+  const focusBtns = foes
+    .map(
+      (u) =>
+        `<button class="btn btn-ember" type="button" data-action="fight-focus" data-slot="${u.slot}">${tr ? "Hedef" : "Focus"} ${u.name}</button>`
+    )
+    .join("");
+  bar.innerHTML = `
+    <p class="fight-action-prompt">${tr ? "Porch hamlesi — birini seç" : "Porch call — pick one"}</p>
+    <div class="btn-row wrap">${focusBtns}
+      <button class="btn btn-teal" type="button" data-action="fight-prop">${tr ? "Prop: demlik heal" : "Prop: teapot heal"}</button>
+      <button class="btn btn-secondary" type="button" data-action="fight-swap">${tr ? "Ön↔Arka swap" : "Front↔Back swap"}</button>
+    </div>`;
+  bar.hidden = false;
+}
+
+function applyFightFocus(slot) {
+  const battle = state.battle;
+  if (!battle || battle.actionUsed) return;
+  battle.focusTargetSlot = Number(slot);
+  battle.actionUsed = true;
+  battle.paused = false;
+  const foe = battle.enemies.find((u) => u.slot === Number(slot));
+  const msg = state.locale === "tr" ? `Odak: ${foe?.name || slot}` : `Focus fire: ${foe?.name || slot}`;
+  battle.log.unshift(msg);
+  toast(msg);
+  hideFightActions();
+  updateFightUI(battle);
+  resumeFightLoop(battle);
+}
+
+function applyFightProp() {
+  const battle = state.battle;
+  if (!battle || battle.actionUsed) return;
+  const hurt = battle.allies.filter((u) => u.alive).sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
+  if (hurt) {
+    const heal = Math.max(12, Math.floor(hurt.maxHp * 0.22));
+    hurt.hp = Math.min(hurt.maxHp, hurt.hp + heal);
+    const msg = state.locale === "tr" ? `Demlik +${heal} → ${hurt.name}` : `Teapot +${heal} → ${hurt.name}`;
+    battle.log.unshift(msg);
+    toast(msg);
+  }
+  battle.actionUsed = true;
+  battle.paused = false;
+  hideFightActions();
+  updateFightUI(battle);
+  resumeFightLoop(battle);
+}
+
+function applyFightSwap() {
+  const battle = state.battle;
+  if (!battle || battle.actionUsed) return;
+  const living = battle.allies.filter((u) => u.alive);
+  if (living.length >= 2) {
+    const front = living.find((u) => u.slot < 3) || living[0];
+    const back = living.find((u) => u.slot >= 3 && u !== front) || living.find((u) => u !== front);
+    if (front && back) {
+      const s = front.slot;
+      front.slot = back.slot;
+      back.slot = s;
+      const msg = `Swap: ${front.name} ↔ ${back.name}`;
+      battle.log.unshift(msg);
+      toast(msg);
+    }
+  }
+  battle.actionUsed = true;
+  battle.paused = false;
+  hideFightActions();
+  updateFightUI(battle);
+  resumeFightLoop(battle);
+}
+
+function hideFightActions() {
+  const bar = document.getElementById("fight-actions");
+  if (bar) {
+    bar.hidden = true;
+    bar.innerHTML = "";
+  }
 }
 
 function combatTick(battle) {
@@ -1179,12 +1494,21 @@ function combatTick(battle) {
     const foes = attacker.side === "ally" ? battle.enemies.filter((u) => u.alive) : battle.allies.filter((u) => u.alive);
     if (!foes.length) break;
     let target = foes.reduce((a, b) => (a.hp < b.hp ? a : b));
+    if (attacker.side === "ally" && battle.focusTargetSlot != null) {
+      const focused = foes.find((f) => f.slot === battle.focusTargetSlot);
+      if (focused) target = focused;
+    }
+    // All-front punish: enemy attackers get +20% vs front-row allies
+    if (attacker.side === "enemy" && battle.allFront) {
+      /* applied below via dmg mult */
+    }
 
     const syns = attacker.side === "ally" ? battle.enemySyn : battle.allySyn;
     const neon = syns.find((s) => s.rules.type === "opening_dodge");
     if (neon && battle.elapsed <= neon.rules.windowSec && Math.random() < neon.rules.dodgeChance) continue;
 
     let dmg = Math.max(1, attacker.atk - Math.floor(target.def * 0.45));
+    if (attacker.side === "enemy" && battle.allFront && target.slot < 3) dmg = Math.floor(dmg * 1.2);
     const selfSyn = attacker.side === "ally" ? battle.allySyn : battle.enemySyn;
     const rivalry = selfSyn.find((s) => s.rules.type === "low_hp_damage_buff");
     if (rivalry && attacker.hp / attacker.maxHp <= rivalry.rules.hpThresholdPercent) {
@@ -1249,6 +1573,7 @@ function renderFight(battle) {
   const allyPills = battle.allySyn.map((s) => `<span class="chip ${s.tagsRequired[0].toLowerCase()}">${loc(s.name)}</span>`).join("");
   const enemyPills = battle.enemySyn.map((s) => `<span class="chip ${s.tagsRequired[0].toLowerCase()}">Bot · ${loc(s.name)}</span>`).join("");
   const synPills = allyPills || enemyPills ? allyPills + enemyPills : `<span class="muted">${t("synergy.active")}: —</span>`;
+  const tr = state.locale === "tr";
   const screen = document.getElementById("screen-fight");
   screen.innerHTML = `
     <div class="topbar"><h2>${t("fight.title")}</h2>
@@ -1258,13 +1583,20 @@ function renderFight(battle) {
       <span id="ally-hp-total" class="hud-ally"></span><span id="fight-timer">0.0s</span><span id="enemy-hp-total" class="hud-enemy"></span>
     </div>
     <div class="fight-stage" style="background-image:url('${ART.arenaStage}')">
-      <div class="fight-side-label enemy-label">${state.locale === "tr" ? "Rakip" : "Rival"}</div>
-      <div class="fight-row" id="enemy-row"></div>
+      <div class="fight-side-label enemy-label">${tr ? "Rakip" : "Rival"}</div>
+      <div class="fight-lane-label">${tr ? "ön" : "front"}</div>
+      <div class="fight-row front" id="enemy-front"></div>
+      <div class="fight-lane-label muted">${tr ? "arka" : "back"}</div>
+      <div class="fight-row back" id="enemy-back"></div>
       <div class="fight-vs">VS</div>
-      <div class="fight-row" id="ally-row"></div>
-      <div class="fight-side-label ally-label">${state.locale === "tr" ? "Senin porch" : "Your porch"}</div>
+      <div class="fight-lane-label">${tr ? "ön" : "front"}</div>
+      <div class="fight-row front" id="ally-front"></div>
+      <div class="fight-lane-label muted">${tr ? "arka" : "back"}</div>
+      <div class="fight-row back" id="ally-back"></div>
+      <div class="fight-side-label ally-label">${tr ? "Senin porch" : "Your porch"}</div>
     </div>
     <div class="synergy-pills">${synPills}</div>
+    <div class="fight-actions" id="fight-actions" hidden></div>
     <p class="fight-log muted" id="fight-log"></p>`;
   screen._battle = battle;
   updateFightUI(battle);
@@ -1286,12 +1618,29 @@ function unitCard(u, side, floaters = []) {
 }
 
 function updateFightUI(battle) {
-  const enemyRow = document.getElementById("enemy-row");
-  const allyRow = document.getElementById("ally-row");
-  if (!enemyRow || !allyRow) return;
+  const enemyFront = document.getElementById("enemy-front");
+  const enemyBack = document.getElementById("enemy-back");
+  const allyFront = document.getElementById("ally-front");
+  const allyBack = document.getElementById("ally-back");
+  if (!enemyFront || !allyFront) return;
   const floaters = battle.floaters || [];
-  enemyRow.innerHTML = battle.enemies.map((u) => unitCard(u, "enemy", floaters)).join("");
-  allyRow.innerHTML = battle.allies.map((u) => unitCard(u, "ally", floaters)).join("");
+  const split = (units, side) => {
+    const front = units.filter((u) => (u.slot ?? 0) < 3).sort((a, b) => a.slot - b.slot);
+    const back = units.filter((u) => (u.slot ?? 0) >= 3).sort((a, b) => a.slot - b.slot);
+    // If all were placed in one band, still show them (fallback)
+    if (!front.length && !back.length) return { front: units, back: [] };
+    if (!front.length) return { front: back.slice(0, Math.ceil(back.length / 2)), back: back.slice(Math.ceil(back.length / 2)) };
+    if (!back.length && units.length > 2) {
+      return { front: front.slice(0, 2), back: front.slice(2) };
+    }
+    return { front, back };
+  };
+  const e = split(battle.enemies, "enemy");
+  const a = split(battle.allies, "ally");
+  enemyFront.innerHTML = e.front.map((u) => unitCard(u, "enemy", floaters)).join("") || `<span class="muted">—</span>`;
+  enemyBack.innerHTML = e.back.map((u) => unitCard(u, "enemy", floaters)).join("") || `<span class="muted lane-empty">·</span>`;
+  allyFront.innerHTML = a.front.map((u) => unitCard(u, "ally", floaters)).join("") || `<span class="muted">—</span>`;
+  allyBack.innerHTML = a.back.map((u) => unitCard(u, "ally", floaters)).join("") || `<span class="muted lane-empty">·</span>`;
   const allyHp = battle.allies.reduce((s, u) => s + Math.max(0, u.hp), 0);
   const enemyHp = battle.enemies.reduce((s, u) => s + Math.max(0, u.hp), 0);
   document.getElementById("ally-hp-total").textContent = `${state.locale === "tr" ? "Sen" : "You"} ${allyHp}`;
@@ -1418,11 +1767,28 @@ async function nativeShare(text) {
   copyShare(text);
 }
 
+function wrapCanvasText(ctx, text, maxWidth) {
+  const words = String(text || "").split(/\s+/);
+  const lines = [];
+  let line = "";
+  for (const w of words) {
+    const test = line ? `${line} ${w}` : w;
+    if (ctx.measureText(test).width > maxWidth && line) {
+      lines.push(line);
+      line = w;
+    } else line = test;
+  }
+  if (line) lines.push(line);
+  return lines.slice(0, 3);
+}
+
 function exportShareImage() {
   const r = state.lastResult;
   if (!r) return;
   const canvas = el.canvas;
   const ctx = canvas.getContext("2d");
+  const W = canvas.width;
+  const H = canvas.height;
   const finish = () => {
     canvas.toBlob((blob) => {
       if (!blob) return;
@@ -1436,54 +1802,76 @@ function exportShareImage() {
     });
   };
   ctx.fillStyle = "#1A1612";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillRect(0, 0, W, H);
   const arena = new Image();
   arena.onload = () => {
-    ctx.drawImage(arena, 0, 0, canvas.width, Math.floor(canvas.height * 0.38));
-    ctx.fillStyle = "rgba(26,22,18,0.45)";
-    ctx.fillRect(0, 0, canvas.width, Math.floor(canvas.height * 0.38));
+    const heroH = Math.floor(H * 0.34);
+    ctx.drawImage(arena, 0, 0, W, heroH);
+    ctx.fillStyle = "rgba(26,22,18,0.55)";
+    ctx.fillRect(0, 0, W, heroH);
     ctx.fillStyle = "#F2E6D8";
-    ctx.font = "bold 64px Fraunces, serif";
-    ctx.fillText(t("app.title"), 64, 110);
-    ctx.font = "bold 48px Nunito, sans-serif";
+    ctx.font = "bold 56px Fraunces, serif";
+    ctx.fillText(t("app.title"), 48, 88);
+    ctx.font = "bold 42px Nunito, sans-serif";
     ctx.fillStyle = r.won ? "#2EC4B6" : "#FF6B4A";
-    ctx.fillText(r.won ? t("common.win") : t("common.lose"), 64, 180);
+    const resultLine = r.won
+      ? state.locale === "tr" ? "Cup Zaferi" : "Cup Victory"
+      : state.locale === "tr" ? "Cup Yenilgisi" : "Cup Defeat";
+    ctx.fillText(resultLine, 48, 150);
     ctx.fillStyle = "#F5C878";
-    ctx.font = "32px Nunito, sans-serif";
-    ctx.fillText(`${r.allyHp} vs ${r.enemyHp} · MVP ${r.mvp}`, 64, 230);
-    ctx.fillText(`${r.synergy}`, 64, 275);
+    ctx.font = "28px Nunito, sans-serif";
+    ctx.fillText(`${r.allyHp} vs ${r.enemyHp} · MVP ${r.mvp}`, 48, 200);
+    ctx.fillStyle = "#E8A045";
+    ctx.font = "24px Nunito, sans-serif";
+    const comic = state.content.matchComic;
+    const headlineTpl = comic?.panels?.[0]?.textTemplate || {
+      tr: "{winner} kazandı · {synergy}",
+      en: "{winner} wins · {synergy}",
+    };
+    const headline = fillTemplate(loc(headlineTpl), {
+      winner: r.winner,
+      synergy: r.synergy,
+      mvp: r.mvp,
+    });
+    wrapCanvasText(ctx, headline, W - 96).forEach((ln, i) => ctx.fillText(ln, 48, 245 + i * 30));
     if (r.rewardLine) {
       ctx.fillStyle = "#F2E6D8";
-      ctx.font = "28px Nunito, sans-serif";
-      ctx.fillText(r.rewardLine, 64, 320);
+      ctx.font = "22px Nunito, sans-serif";
+      ctx.fillText(r.rewardLine, 48, 340);
     }
+    // Bottom strip caption — one clean line, not per-bust repeats
+    const stripY = H - 110;
+    ctx.fillStyle = "rgba(26,22,18,0.92)";
+    ctx.fillRect(0, stripY, W, 110);
+    const stripTpl = comic?.panels?.[1]?.textTemplate || {
+      tr: "MVP {mvp} · {synergy} parladi",
+      en: "MVP {mvp} · {synergy} lit up",
+    };
+    const strip = fillTemplate(loc(stripTpl), {
+      winner: r.winner,
+      synergy: r.synergy,
+      mvp: r.mvp,
+    });
+    ctx.fillStyle = "#F2E6D8";
+    ctx.font = "26px Nunito, sans-serif";
+    const stripLines = wrapCanvasText(ctx, strip, W - 96);
+    stripLines.forEach((ln, i) => ctx.fillText(ln, 48, stripY + 42 + i * 30));
+
     let loaded = 0;
     const team = r.team.slice(0, 3);
     if (!team.length) {
       finish();
       return;
     }
+    const bustY = 380;
     team.forEach((id, i) => {
       const img = new Image();
       img.onload = () => {
-        const x = 80 + i * 320;
-        const y = 420;
-        ctx.drawImage(img, x, y, 280, 280);
+        const x = 64 + i * 340;
+        ctx.drawImage(img, x, bustY, 260, 260);
         ctx.fillStyle = "#F2E6D8";
-        ctx.font = "26px Nunito, sans-serif";
-        const name = loc(neighborById(id)?.name) || id;
-        ctx.fillText(name, x, y + 320);
-        const comic = state.content.matchComic;
-        const panel = comic.panels[Math.min(i, comic.panels.length - 1)];
-        const caption = fillTemplate(loc(panel.textTemplate), {
-          winner: r.winner,
-          synergy: r.synergy,
-          mvp: r.mvp,
-        });
-        ctx.font = "22px Nunito, sans-serif";
-        ctx.fillStyle = "#E8A045";
-        const lines = caption.length > 42 ? [caption.slice(0, 42), caption.slice(42, 84)] : [caption];
-        lines.forEach((ln, li) => ctx.fillText(ln, x, y + 360 + li * 28));
+        ctx.font = "bold 24px Nunito, sans-serif";
+        ctx.fillText(loc(neighborById(id)?.name) || id, x, bustY + 290);
         loaded += 1;
         if (loaded === team.length) finish();
       };
@@ -1614,12 +2002,12 @@ function renderPassTrackHtml() {
         <div class="pass-lvl">${r.level}</div>
         <div class="pass-cell free">
           <div class="muted">${shopStr("pass.free")}</div>
-          <div>${rewardLabel(r.free, state.locale)}</div>
+          <div>${rewardLabel(r.free, state.locale, state.economy)}</div>
           <button class="btn btn-secondary" type="button" data-action="claim-pass" data-track="free" data-level="${r.level}" ${unlocked && !freeClaimed ? "" : "disabled"}>${freeClaimed ? "✓" : shopStr("shop.claim")}</button>
         </div>
         <div class="pass-cell paid">
           <div class="muted">${shopStr("pass.paid")}</div>
-          <div>${rewardLabel(r.paid, state.locale)}</div>
+          <div>${rewardLabel(r.paid, state.locale, state.economy)}</div>
           <button class="btn btn-ember" type="button" data-action="claim-pass" data-track="paid" data-level="${r.level}" ${unlocked && state.save.passPaidUnlocked && !paidClaimed ? "" : "disabled"}>${paidClaimed ? "✓" : state.save.passPaidUnlocked ? shopStr("shop.claim") : "🔒"}</button>
         </div>
       </div>`;
@@ -1634,6 +2022,13 @@ function renderPassTrackHtml() {
     street_finale: { tr: "Sokak finali", en: "Street finale" },
   };
   const xpShown = Number(state.save.passXp || 0).toFixed(1).replace(/\.0$/, "");
+  const passIap = (state.economy.iaps?.recommendedFirst3 || []).find((i) => i.sku === "iap_porch_week_pass");
+  const passPrice = passIap?.priceBandUsd ? `$${Number(passIap.priceBandUsd).toFixed(2)}` : "$4.99";
+  const ctaLabel = state.save.passPaidUnlocked
+    ? shopStr("shop.owned")
+    : state.locale === "tr"
+      ? `Kil Yol · ${passPrice}`
+      : `Clay Track · ${passPrice}`;
   return `
     <div class="pass-header">
       <h3>${loc(pass.name)}</h3>
@@ -1643,8 +2038,8 @@ function renderPassTrackHtml() {
         ? "Ücretsiz yol herkese açık. Kil yol sadece kozmetik — hikâyeyi kilitlemez."
         : "Free track for everyone. Clay track is cosmetics only — never gates story."}</p>
       <p class="pick-status">Lv ${level}/30 · XP ${xpShown}</p>
-      <button class="btn btn-ember" type="button" data-action="unlock-pass-stub" ${state.save.passPaidUnlocked ? "disabled" : ""}>${state.save.passPaidUnlocked ? shopStr("shop.owned") : shopStr("pass.unlock_cta")}</button>
-      <p class="muted">${shopStr("iap.story_clear")}</p>
+      <button class="btn btn-ember" type="button" data-action="iap-stub" data-sku="iap_porch_week_pass" ${state.save.passPaidUnlocked ? "disabled" : ""}>${ctaLabel}</button>
+      <p class="muted">${shopStr("iap.story_clear")} · ${shopStr("iap.disclaimer")}</p>
     </div>
     <div class="pass-track">${rows}</div>`;
 }
@@ -1741,11 +2136,14 @@ function onAction(action, target) {
     case "new-game":
       state.save = defaultSave(state.economy, state.depthMeta);
       state.save.locale = state.locale;
+      state.save.coldOpenDone = false;
       for (const n of state.content.neighbors) ensureNeighborState(n.id);
       Story.syncWeekArcs(state.stories, state.save);
       saveNow();
-      renderEvening();
-      showScreen("screen-evening");
+      renderColdOpen();
+      break;
+    case "cold-choice":
+      resolveColdOpen(target.dataset.cid);
       break;
     case "shop-tab":
       state.shopTab = target.dataset.id;
@@ -1776,12 +2174,13 @@ function onAction(action, target) {
       renderShop();
       break;
     case "iap-stub":
-      toast((state.locale === "tr" ? "Önizleme: " : "Preview: ") + target.dataset.sku);
       if (target.dataset.sku === "iap_porch_week_pass") {
         state.save.passPaidUnlocked = true;
         saveNow();
+        toast(state.locale === "tr" ? "Kil Yol açıldı · $4.99 (önizleme)" : "Clay Track unlocked · $4.99 (preview)");
         renderShop();
       } else if (target.dataset.sku === "iap_clay_tokens_mini") {
+        toast((state.locale === "tr" ? "Önizleme: " : "Preview: ") + target.dataset.sku);
         grant(state.save, { clay_tokens: 80 });
         saveNow();
         renderShop();
@@ -1880,7 +2279,17 @@ function onAction(action, target) {
       startFight();
       break;
     case "skip-fight":
+      hideFightActions();
       skipFight();
+      break;
+    case "fight-focus":
+      applyFightFocus(target.dataset.slot);
+      break;
+    case "fight-prop":
+      applyFightProp();
+      break;
+    case "fight-swap":
+      applyFightSwap();
       break;
     case "share-copy":
       copyShare(decodeURIComponent(target.dataset.text || ""));
@@ -1891,7 +2300,7 @@ function onAction(action, target) {
     case "share-export":
       exportShareImage();
       break;
-        default:
+    default:
       break;
   }
 }

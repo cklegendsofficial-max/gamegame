@@ -1032,3 +1032,138 @@ h2,
 .neighbor-hero.compact { grid-template-columns: 72px 1fr; }
 .neighbor-hero.compact .bust-frame { width: 72px; }
 .pick-grid-dense { grid-template-columns: repeat(3, 1fr); }
+
+/* Cold open — urgent knock before agenda */
+#screen-cold {
+  background-size: cover;
+  background-position: center;
+  min-height: 100dvh;
+}
+.cold-open {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  min-height: 88dvh;
+  padding: 1.25rem 1rem 2rem;
+  background: linear-gradient(180deg, rgba(26,22,18,0.15) 0%, rgba(26,22,18,0.72) 42%, rgba(26,22,18,0.94) 100%);
+}
+.cold-knock {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  letter-spacing: 0.12em;
+  color: var(--ember, #ff6b4a);
+  margin: 0;
+  animation: cold-knock-pulse 1.4s ease-in-out infinite;
+}
+@keyframes cold-knock-pulse {
+  0%, 100% { opacity: 0.55; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-2px); }
+}
+.cold-brand { margin: 0; font-size: clamp(2rem, 7vw, 3rem); }
+.cold-box { margin: 0; }
+.cold-hint { margin: 0; opacity: 0.75; }
+
+/* Overnight payoff card */
+#screen-overnight {
+  background: radial-gradient(ellipse at 30% 0%, rgba(46,196,182,0.12), transparent 50%),
+    linear-gradient(165deg, #1a1612 0%, #241c18 55%, #1a1612 100%);
+}
+.overnight-card {
+  margin: 1rem auto;
+  max-width: 36rem;
+  padding: 1.25rem 1.1rem 1.5rem;
+  border-radius: 18px;
+  border: 1px solid rgba(242,230,216,0.14);
+  background: rgba(26,22,18,0.72);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+}
+.overnight-card h2 {
+  font-family: var(--font-display);
+  margin: 0 0 0.4rem;
+}
+.overnight-card .agenda-list { margin: 0.75rem 0; }
+
+.cup-countdown {
+  color: var(--ember, #e8a045);
+  font-weight: 800;
+}
+.evening-cup-tease {
+  margin: 0.45rem 0 0;
+  color: #f5c878;
+  font-size: 0.92rem;
+}
+
+/* Mid-fight agency bar */
+.fight-actions {
+  margin: 0.55rem 0 0.35rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 14px;
+  border: 1px solid rgba(232,160,69,0.45);
+  background: rgba(26,22,18,0.88);
+  animation: fight-action-in 0.25s ease-out;
+}
+.fight-actions[hidden] { display: none !important; }
+@keyframes fight-action-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fight-action-prompt {
+  margin: 0 0 0.45rem;
+  font-weight: 800;
+  color: #f5c878;
+}
+.btn-row.wrap { flex-wrap: wrap; gap: 0.4rem; }
+
+.gift-confirm-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  margin: 0 0 0.35rem;
+  color: #2ec4b6;
+}
+.gift-confirm .choice-feedback { margin-top: 0.5rem; }
+
+.fight-lane-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+  margin: 0.15rem 0 0.05rem;
+  text-align: center;
+}
+.fight-row.front { min-height: 5.5rem; }
+.fight-row.back { min-height: 5.2rem; opacity: 0.95; }
+.lane-empty { opacity: 0.35; }
+.cell-lane {
+  font-size: 0.62rem;
+  opacity: 0.55;
+  letter-spacing: 0.04em;
+}
+.cell.lane-front { border-color: rgba(255, 107, 74, 0.35); }
+.cell.lane-back { border-color: rgba(46, 196, 182, 0.35); }
+.bench-unit { position: relative; }
+.bench-role {
+  display: block;
+  font-size: 0.55rem;
+  opacity: 0.75;
+  text-align: center;
+  margin-top: 0.15rem;
+  max-width: 4.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cold-reveal { animation: cold-fade-up 0.45s ease-out; }
+@keyframes cold-fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.overnight-kicker {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  margin: 0 0 0.2rem;
+}
+.overnight-card h2 {
+  color: #f5c878;
+}

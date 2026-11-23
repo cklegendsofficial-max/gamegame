@@ -64,6 +64,7 @@ export function defaultSave(economy, depthMeta) {
     cupFlair: false,
     unlockedNeighbors: ["n1", "n2", "n3", "n4", "n5", "n6"],
     cupHistory: [],
+    coldOpenDone: false,
   };
 }
 
