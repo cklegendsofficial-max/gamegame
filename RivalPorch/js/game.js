@@ -23,33 +23,33 @@ const DAY1_BUSTS = {
 };
 
 const MESHY_BUSTS = {
-  n1: "assets/rival-porch/meshy/fig-bust-n1-aunt-merve.png",
-  n2: "assets/rival-porch/meshy/fig-bust-n2-coach-cem.png",
-  n3: "assets/rival-porch/meshy/fig-bust-n3-kid-leyla.png",
-  n4: "assets/rival-porch/meshy/fig-bust-n4-mr-orhan.png",
-  n5: "assets/rival-porch/meshy/fig-bust-n5-dj-peri.png",
-  n6: "assets/rival-porch/meshy/fig-bust-n6-baker-can.png",
+  n1: "assets/rival-porch/meshy/wave3/busts/bust-n1-aunt-merve.png",
+  n2: "assets/rival-porch/meshy/wave3/busts/bust-n2-coach-cem.png",
+  n3: "assets/rival-porch/meshy/wave3/busts/bust-n3-kid-leyla.png",
+  n4: "assets/rival-porch/meshy/wave3/busts/bust-n4-mr-orhan.png",
+  n5: "assets/rival-porch/meshy/wave3/busts/bust-n5-dj-peri.png",
+  n6: "assets/rival-porch/meshy/wave3/busts/bust-n6-baker-can.png",
 };
 
 const ART = {
-  // Wave3 Meshy phone-bleed stages + busts (gold Day1 as fallback)
-  streetHero: "assets/rival-porch/meshy/env-street-block.png",
-  streetHeroFallback: "assets/rival-porch/street-hero.png",
-  arenaStage: "assets/rival-porch/meshy/env-arena-stage.png",
-  arenaStageFallback: "assets/rival-porch/arena-stage.png",
+  // visual-fix-2: wave3 landscape heroes + busts/props (cover ≤1.12, data-wave=3)
+  streetHero: "assets/rival-porch/meshy/wave3/heroes/hero-street-title.png",
+  streetHeroFallback: "assets/rival-porch/meshy/env-street-block.png",
+  arenaStage: "assets/rival-porch/meshy/wave3/heroes/hero-arena-cup.png",
+  arenaStageFallback: "assets/rival-porch/meshy/env-arena-stage.png",
   busts: { ...MESHY_BUSTS },
   meshyBusts: { ...MESHY_BUSTS },
   goldBusts: { ...DAY1_BUSTS },
   meshyRoot: "assets/rival-porch/meshy/",
   props: {
-    demlik: "assets/rival-porch/meshy/props/prop-hero-demlik.png",
-    duduk: "assets/rival-porch/meshy/props/prop-hero-duduk.png",
-    gazete: "assets/rival-porch/meshy/props/prop-hero-gazete.png",
-    kulaklik: "assets/rival-porch/meshy/props/prop-hero-kulaklik.png",
-    tepsi: "assets/rival-porch/meshy/props/prop-hero-tepsi.png",
-    ucurtma: "assets/rival-porch/meshy/props/prop-hero-ucurtma.png",
+    demlik: "assets/rival-porch/meshy/wave3/props/prop-hero-demlik.png",
+    duduk: "assets/rival-porch/meshy/wave3/props/prop-hero-duduk.png",
+    gazete: "assets/rival-porch/meshy/wave3/props/prop-hero-gazete.png",
+    kulaklik: "assets/rival-porch/meshy/wave3/props/prop-hero-kulaklik.png",
+    tepsi: "assets/rival-porch/meshy/wave3/props/prop-hero-tepsi.png",
+    ucurtma: "assets/rival-porch/meshy/wave3/props/prop-hero-ucurtma.png",
   },
-  vfxRivalry: "assets/rival-porch/meshy/vfx-rivalry-still.png",
+  vfxRivalry: "assets/rival-porch/meshy/wave3/vfx/vfx-rivalry-still.png",
 };
 
 const UNIT_STATS = {
@@ -515,8 +515,8 @@ function stageBg(primary, fallback) {
 function stageLayer(kind = "street", dim = false) {
   const primary = kind === "arena" ? ART.arenaStage : ART.streetHero;
   const fallback = kind === "arena" ? ART.arenaStageFallback : ART.streetHeroFallback;
-  return `<div class="rp-stage" data-stage="${kind}" ${dim ? 'data-dim="night"' : ""} aria-hidden="true">
-    <img class="rp-stage__img" src="${primary}" alt="" decoding="async" onerror="this.src='${fallback}'" />
+  return `<div class="rp-stage" data-stage="${kind}" data-wave="3" ${dim ? 'data-dim="night"' : ""} aria-hidden="true">
+    <img class="rp-stage__img" src="${primary}" alt="" decoding="async" onerror="this.onerror=null;this.src='${fallback}'" />
     <div class="rp-stage__vignette"></div>
   </div>`;
 }
@@ -1063,13 +1063,14 @@ function renderEvening() {
 
 function renderStreet() {
   const screen = document.getElementById("screen-street");
+  // visual-fix-2 wave3 L-block hotspots
   const HOT = {
-    n1: [12, 48],
-    n2: [28, 46],
-    n3: [42, 44],
-    n4: [56, 46],
-    n5: [70, 45],
-    n6: [84, 48],
+    n1: [18, 42],
+    n2: [32, 40],
+    n3: [46, 39],
+    n4: [58, 40],
+    n5: [70, 39],
+    n6: [82, 41],
   };
   const spots = unlockedNeighbors()
     .slice(0, 6)
@@ -2034,11 +2035,12 @@ function startFight() {
   const prac = state.practiceMode ? Combat.practiceSetup(state.combatPack) : null;
   const lineup = prac ? Density.practiceLineup(prac, state.densityPack) : null;
   if (prac && !state.save.storyFlags?.practice_cup_done) {
-    // Scripted practice lineup (density pack overrides combat pack)
+    // Scripted practice lineup — visual-fix-2 mid-front pads (slots 1/2/3)
     const placement = Array(6).fill(null);
-    for (const row of lineup.playerLineup || []) {
-      placement[Combat.cellToSlot(row.cell)] = row.neighborId;
-    }
+    const practiceSlots = [1, 2, 3];
+    (lineup.playerLineup || []).forEach((row, i) => {
+      placement[practiceSlots[i] ?? Combat.cellToSlot(row.cell)] = row.neighborId;
+    });
     state.placement = placement;
     state.cupPicks = (lineup.playerLineup || []).map((r) => r.neighborId);
     state.enemyLineup = (lineup.enemyLineup || []).map((r) => r.botId);
@@ -2066,7 +2068,7 @@ function startFight() {
   state.enemyLineup = enemyIds;
   // Match draft board: bots sit front/front/back (slots 0,1,3)
   const enemySlots = prac
-    ? (lineup.enemyLineup || []).map((r) => Combat.cellToSlot(r.cell))
+    ? [1, 2, 3].slice(0, (lineup.enemyLineup || []).length)
     : [0, 1, 3];
   const enemies = enemyIds.map((id, i) => makeBotFighter(bot.units.find((x) => x.id === id), enemySlots[i] ?? i, mult));
   // Preserve placement slots on fighters
@@ -2097,6 +2099,8 @@ function startFight() {
     battle.log.unshift(state.locale === "tr" ? "Bot: hep ön sıra cezası!" : "Bot: all-front punish!");
   }
   state.battle = battle;
+  // Clear lobby toast chrome before fight stage
+  document.querySelectorAll(".toast").forEach((n) => n.remove());
   renderFight(battle);
   showScreen("screen-fight");
   resumeFightLoop(battle);
@@ -2535,19 +2539,24 @@ function showSynProc(text) {
   node.classList.add("pop");
   const rivalry = /rivalry|rekabet/i.test(String(text || ""));
   if (rivalry && ART.vfxRivalry) {
-    let vfx = stage.querySelector(".syn-rivalry-vfx");
+    let vfx = stage.querySelector('.rp-vfx[data-vfx="rivalry"]');
     if (!vfx) {
       vfx = document.createElement("img");
-      vfx.className = "syn-rivalry-vfx";
+      vfx.className = "rp-vfx syn-rivalry-vfx";
+      vfx.dataset.vfx = "rivalry";
       vfx.alt = "";
       stage.appendChild(vfx);
     }
+    vfx.hidden = false;
     vfx.src = ART.vfxRivalry;
     vfx.classList.remove("pop");
     void vfx.offsetWidth;
     vfx.classList.add("pop");
     clearTimeout(vfx._t);
-    vfx._t = setTimeout(() => vfx.remove(), 750);
+    vfx._t = setTimeout(() => {
+      vfx.hidden = true;
+      vfx.remove();
+    }, 900);
   }
 }
 
@@ -2653,24 +2662,24 @@ function unitCard(u, side, floaters = []) {
 }
 
 function padPositions(side) {
-  // visual-fix-1 pad map (% of .rp-arena)
+  // visual-fix-2 wave3 8×4 grid — 3-man uses mid front (1/2/3)
   if (side === "enemy") {
     return {
-      0: [28, 30],
-      1: [50, 28],
-      2: [72, 30],
-      3: [34, 22],
-      4: [66, 22],
-      5: [50, 22],
+      0: [26, 32],
+      1: [38, 30],
+      2: [50, 29],
+      3: [62, 30],
+      4: [74, 32],
+      5: [50, 24],
     };
   }
   return {
-    0: [28, 64],
-    1: [50, 66],
-    2: [72, 64],
-    3: [34, 74],
-    4: [66, 74],
-    5: [50, 78],
+    0: [26, 62],
+    1: [38, 64],
+    2: [50, 65],
+    3: [62, 64],
+    4: [74, 62],
+    5: [50, 72],
   };
 }
 
