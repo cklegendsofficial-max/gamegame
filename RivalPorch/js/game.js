@@ -1190,14 +1190,22 @@ function renderEvening() {
       }
     </div>
     <footer class="rp-dock">
-      <button class="rp-btn rp-btn--primary" type="button" data-action="${cta.action}">${cta.label}</button>
+      <button class="rp-btn rp-btn--primary" type="button" data-action="${cta.action}" ${cta.action === "end-evening" && !endEnabled ? "disabled" : ""} data-end-enabled="${endEnabled ? "1" : "0"}">${cta.label}</button>
       <button class="rp-btn" type="button" data-action="open-quests">${state.locale === "tr" ? "Görevler" : "Quests"}</button>
-      <button class="rp-btn ${st.cupRequired && !st.cupDone ? "rp-btn--ember" : ""}" type="button" data-action="goto-cup">${isCupNight() ? t("cup.season_night") : t("cup.practice")}${st.cupRequired && !st.cupDone ? " ★" : ""}</button>
+      ${
+        endEnabled
+          ? `<button class="rp-btn" type="button" data-action="goto-street">${state.locale === "tr" ? "Sokak" : "Street"}</button>`
+          : `<button class="rp-btn ${st.cupRequired && !st.cupDone ? "rp-btn--ember" : ""}" type="button" data-action="goto-cup">${isCupNight() ? t("cup.season_night") : t("cup.practice")}${st.cupRequired && !st.cupDone ? " ★" : ""}</button>`
+      }
     </footer>
     <div class="rp-dock-extra">
       <button class="rp-btn rp-btn--ghost" type="button" data-action="open-shop">${t("shop.title")}</button>
       <button class="rp-btn rp-btn--ghost" type="button" data-action="open-story-log">${state.locale === "tr" ? "Hikâye" : "Journal"}</button>
-      <button class="rp-btn rp-btn--ghost" type="button" data-action="end-evening" ${endEnabled ? "" : "disabled"} data-end-enabled="${endEnabled ? "1" : "0"}">${endLabel}</button>
+      ${
+        endEnabled
+          ? ""
+          : `<button class="rp-btn rp-btn--ghost" type="button" data-action="end-evening" disabled data-end-enabled="0">${endLabel}</button>`
+      }
     </div>
     ${endEnabled ? "" : `<p class="street-hint">${lockedCopy}</p>`}
   `;
@@ -3165,7 +3173,7 @@ function renderComic() {
     .map((p, i) => {
       const imgId = r.team[i % Math.max(1, r.team.length)];
       return `<article class="comic-panel" style="animation-delay:${i * 0.08}s">
-        <img src="${bust(imgId)}" alt="" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" />
+        <img src="${goldBust(imgId)}" alt="" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" />
         <p>${fillTemplate(loc(p.textTemplate || p.text), vars)}</p>
       </article>`;
     })
