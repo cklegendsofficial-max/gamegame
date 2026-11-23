@@ -406,17 +406,20 @@ function ensurePracticePlacement() {
 
 function schedulePracticeLobbyAntiStall() {
   clearTimeout(state._lobbyStallTimer);
+  // ux-session-8 / mech-9: never show Unstuck / Start is open mid-fight or as escape hatch
   if (!state.practiceMode) return;
+  // oneTapEnterArena (ux-6) makes lobby stall moot — skip toast entirely
+  if (state.uxPack6?.practiceLobby?.oneTapEnterArena !== false) return;
   const ms = state.combatPack?.lobbyAutoAdvance?.antiStall?.detectStuckMs || 8000;
   state._lobbyStallTimer = setTimeout(() => {
     if (!state.practiceMode || state.save.evening?.cupDone) return;
+    if (document.getElementById("screen-fight")?.classList.contains("active")) return;
     if (state.cupPicks?.length === 3 || storyFlag("practice_show_me_applied")) {
       ensurePracticePlacement();
       state.practiceDraftReady = true;
       state.save.storyFlags = state.save.storyFlags || {};
       state.save.storyFlags.practice_lobby_unstuck = true;
-      const toastMsg = state.combatPack?.lobbyAutoAdvance?.antiStall?.whenStuckOnLobbyWithShowMeDone?.toast;
-      toast(loc(toastMsg) || (state.locale === "tr" ? "Takılma kalktı — Start açık." : "Unstuck — Start is open."));
+      // silent heal — no Unstuck toast (ux-8 ban)
       renderCupLobby();
     }
   }, ms);
@@ -1133,9 +1136,39 @@ function storyForm7() {
   return state.questPack?.storyForm7 || state.storyForm7 || null;
 }
 
-function antennaOpLiveBeat() {
-  const cards = storyForm7()?.antennaOpJournalBeatCards || [];
-  for (const c of cards) {
+function storyForm8() {
+  return state.questPack?.storyForm8 || state.storyForm8 || null;
+}
+
+function storyForm9() {
+  return state.questPack?.storyForm9 || state.storyForm9 || null;
+}
+
+function isColdDay2() {
+  const day = state.save.dayIndex || 1;
+  return day >= 2 && ["cold_open_mediate", "cold_open_instigate", "cold_open_stage"].some((f) => storyFlag(f));
+}
+
+function applyStreetLayerPolicy() {
+  const on = isColdDay2() && storyForm9()?.streetLayerPriority?.suppressSpotlightWhenColdProp !== false;
+  document.body.classList.toggle("rp-cold-day2", on);
+  if (on) {
+    state.save.storyFlags = state.save.storyFlags || {};
+    state.save.storyFlags.hide_day2_spotlight = true;
+  }
+  const street = document.getElementById("screen-street");
+  if (street) {
+    if ((state.save.dayIndex || 1) >= 2) street.dataset.day = "2";
+    else delete street.dataset.day;
+    if (on) {
+      street.dataset.spotlight = "off";
+      street.dataset.arcBanner = "off";
+    }
+  }
+}
+
+function liveBeatFromCards(cards) {
+  for (const c of cards || []) {
     const req = c.requiresFlags || [];
     if (req.length && !req.every((f) => storyFlag(f))) continue;
     if (c.doneFlag && storyFlag(c.doneFlag)) continue;
@@ -1145,36 +1178,84 @@ function antennaOpLiveBeat() {
   return null;
 }
 
-function antennaOpLiveBannerHtml() {
-  const form = storyForm7();
-  const ban = form?.activeArcBeatBanner;
-  if (!ban || !whenFlagsOk(ban.when || {})) return "";
-  const beat = antennaOpLiveBeat();
-  if (!beat) return "";
-  const sceneShortRaw = loc(beat.scene) || "";
-  const short = sceneShortRaw.length > 72 ? `${sceneShortRaw.slice(0, 70)}…` : sceneShortRaw;
-  const title = loc(beat.title);
-  const tpl = ban.template || {};
-  const line = (state.locale === "tr" ? tpl.tr : tpl.en || tpl.tr || "")
-    .replace("{beatTitle}", title)
-    .replace("{sceneShort}", short);
-  const neighbor = beat.cast?.[0] || "n3";
-  return `<div class="rp-arc-beat-banner" data-testid="${ban.testId || "antenna-op-live-banner"}">
+function antennaOpLiveBeat() {
+  return liveBeatFromCards(storyForm7()?.antennaOpJournalBeatCards || []);
+}
+
+function allArcBeatCardLists() {
+  const f7 = storyForm7() || {};
+  const f8 = storyForm8() || {};
+  const bans = f8.activeArcBeatBanners || [];
+  return [
+    { priority: 95, cards: f7.antennaOpJournalBeatCards, banner: f7.activeArcBeatBanner, when: f7.activeArcBeatBanner?.when, kind: "antenna" },
+    { priority: 94, cards: f8.volumeOpJournalBeatCards, banner: bans[0], when: bans[0]?.when, kind: "volume" },
+    { priority: 93, cards: f8.ledgerOpJournalBeatCards, banner: bans[1], when: bans[1]?.when, kind: "ledger" },
+  ];
+}
+
+/** One live banner max — Antenna 95 / Volume 94 / Ledger 93. Deferred on cold Day2. */
+function activeArcBeatBannerHtml() {
+  if (isColdDay2() && storyForm9()?.streetLayerPriority?.deferFullArcBannerWhenColdProp !== false) {
+    return ""; // compact chip instead
+  }
+  const lists = allArcBeatCardLists()
+    .filter((row) => row.banner && whenFlagsOk(row.when || {}))
+    .sort((a, b) => b.priority - a.priority);
+  for (const row of lists) {
+    const beat = liveBeatFromCards(row.cards);
+    if (!beat) continue;
+    const ban = row.banner;
+    const sceneShort = loc(beat.scene) || "";
+    const short = sceneShort.length > 72 ? `${sceneShort.slice(0, 70)}…` : sceneShort;
+    const line = (state.locale === "tr" ? ban.template?.tr : ban.template?.en || ban.template?.tr || "")
+      .replace("{beatTitle}", loc(beat.title))
+      .replace("{sceneShort}", short);
+    const neighbor = beat.cast?.[0] || "n3";
+    return `<div class="rp-arc-beat-banner" data-testid="${ban.testId || "antenna-op-live-banner"}">
     <span>${line}</span>
     <button class="rp-btn rp-btn--primary" type="button" data-action="open-neighbor" data-id="${neighbor}">${loc(ban.cta)}</button>
   </div>`;
+  }
+  return "";
 }
 
-function antennaOpJournalHtml() {
-  const cards = storyForm7()?.antennaOpJournalBeatCards || [];
-  if (!cards.length) return "";
-  const live = antennaOpLiveBeat()?.beatId;
-  return `<div class="antenna-beat-list" data-testid="antenna-op-journal-beats">
+function antennaOpLiveBannerHtml() {
+  return activeArcBeatBannerHtml();
+}
+
+function streetArcCompactChipHtml() {
+  if (!isColdDay2() || !storyForm9()?.streetLayerPriority?.deferFullArcBannerWhenColdProp) return "";
+  const lists = allArcBeatCardLists()
+    .filter((row) => row.banner && whenFlagsOk(row.when || {}))
+    .sort((a, b) => b.priority - a.priority);
+  for (const row of lists) {
+    const beat = liveBeatFromCards(row.cards);
+    if (!beat) continue;
+    return `<button class="rp-arc-chip" type="button" data-testid="street-arc-compact-chip" data-action="open-story-log">◎ ${loc(beat.title)}</button>`;
+  }
+  return "";
+}
+
+function streetArcStagePropsHtml() {
+  const props = storyForm9()?.streetArcStageProps || [];
+  if (!props.length) return "";
+  const coldShowing = isColdDay2();
+  const hit = props
+    .filter((p) => (p.screens || ["street"]).includes("street"))
+    .filter((p) => whenFlagsOk(p.when || {}))
+    .filter((p) => !(coldShowing && p.arcId === "arc_kite_antenna"))
+    .sort((a, b) => (b.priority || 0) - (a.priority || 0))[0];
+  if (!hit) return "";
+  return state.locale === "tr" && hit.htmlTr ? hit.htmlTr : hit.html || "";
+}
+
+function arcJournalBeatsHtml(cards, listTestId) {
+  if (!cards?.length) return "";
+  const live = liveBeatFromCards(cards)?.beatId;
+  return `<div class="antenna-beat-list" data-testid="${listTestId}">
     ${cards
       .map((c) => {
-        const done = c.doneFlag
-          ? storyFlag(c.doneFlag)
-          : (c.doneFlagAny || []).some((f) => storyFlag(f));
+        const done = c.doneFlag ? storyFlag(c.doneFlag) : (c.doneFlagAny || []).some((f) => storyFlag(f));
         const isLive = c.beatId === live;
         return `<article class="antenna-beat-card ${done ? "is-done" : ""} ${isLive ? "is-live" : ""}" data-testid="${c.testId}">
         <h4>${loc(c.title)}</h4>
@@ -1184,6 +1265,16 @@ function antennaOpJournalHtml() {
       })
       .join("")}
   </div>`;
+}
+
+function antennaOpJournalHtml() {
+  const f7 = storyForm7();
+  const f8 = storyForm8();
+  return (
+    arcJournalBeatsHtml(f7?.antennaOpJournalBeatCards, "antenna-op-journal-beats") +
+    arcJournalBeatsHtml(f8?.volumeOpJournalBeatCards, "volume-op-journal-beats") +
+    arcJournalBeatsHtml(f8?.ledgerOpJournalBeatCards, "ledger-op-journal-beats")
+  );
 }
 
 function whenFlagsOk(when = {}) {
@@ -1268,6 +1359,10 @@ function pickDay2EnterSpotlight() {
 }
 
 function day2EnterSpotlightHtml(screen = "street") {
+  // story-form-8/9: props never require spotlight; cold Day2 default hidden
+  if (storyFlag("hide_day2_spotlight") || storyForm8()?.noSpotlightProve?.forceHideSpotlight) return "";
+  if (isColdDay2() && (storyForm9()?.spotlightPolicy?.defaultWhenColdDay2 || "hidden") === "hidden") return "";
+  if (isColdDay2() && storyForm9()?.streetLayerPriority?.suppressSpotlightWhenColdProp !== false) return "";
   const spot = pickDay2EnterSpotlight();
   if (!spot || !(spot.screens || ["street"]).includes(screen)) return "";
   if (!whenFlagsOk(spot.when)) return "";
@@ -1454,7 +1549,7 @@ function renderEvening() {
     ${hudHtml()}
     ${streetPropOverlayHtml("evening")}
     ${day2StreetStageHtml()}
-    ${antennaOpLiveBannerHtml()}
+    ${activeArcBeatBannerHtml()}
     <div class="rp-mid rp-evening-card rp-evening-card--thin" data-testid="evening-mid">
       <h2 class="rp-night-title">${loc(dayHeadline())}</h2>
       ${supportLine ? `<p class="rp-mid__line">${supportLine}</p>` : ""}
@@ -1479,10 +1574,17 @@ function renderEvening() {
     </footer>
     ${endEnabled ? "" : `<p class="street-hint" data-testid="end-evening-hint">${lockedCopy}</p>`}
   `;
-  requestAnimationFrame(() => Ux4.paintEndEveningControls(state, state.locale));
+  if (endEnabled) document.documentElement.dataset.endEnabled = "true";
+  else document.documentElement.dataset.endEnabled = "false";
+  requestAnimationFrame(() => {
+    Ux4.paintEndEveningControls(state, state.locale);
+    scrubBannedEscapeChrome();
+  });
 }
 
 function day1EscapeChipHtml(endEnabled) {
+  // ux-session-8: NEVER mount skip-to-morning / escape hatch in production
+  if (!coldAuditActive()) return "";
   const chip = state.questPack?.storyForm4?.day1EveningEscapeChip || state.storyForm4?.day1EveningEscapeChip;
   if (!chip) return "";
   if (endEnabled) return "";
@@ -1490,6 +1592,15 @@ function day1EscapeChipHtml(endEnabled) {
   const cold = ["cold_open_mediate", "cold_open_instigate", "cold_open_stage"].some((f) => storyFlag(f));
   if (!cold) return "";
   return `<button class="rp-btn rp-btn--ghost" type="button" data-action="force-overnight-story" data-testid="force-overnight-story" title="${loc(chip.hint) || ""}">${loc(chip.label)}</button>`;
+}
+
+function scrubBannedEscapeChrome() {
+  if (coldAuditActive()) return;
+  document
+    .querySelectorAll(
+      "[data-testid='skip-to-morning'],[data-skip-to-morning],#btn-skip-morning,.rp-skip-morning,[data-testid='unstuck'],.rp-unstuck,.fight-unstuck,[data-testid='force-overnight-story']"
+    )
+    .forEach((el) => el.remove());
 }
 
 function renderStreet() {
@@ -1531,18 +1642,21 @@ function renderStreet() {
       : "";
   })();
 
+  applyStreetLayerPolicy();
+  const coldWins = isColdDay2();
   screen.innerHTML = `
     ${stageLayer("street")}
     ${day2StreetStageHtml()}
+    ${streetArcStagePropsHtml()}
     ${hudHtml()}
     ${streetPropOverlayHtml("street")}
-    ${antennaOpLiveBannerHtml()}
+    ${coldWins ? streetArcCompactChipHtml() : activeArcBeatBannerHtml()}
     ${day2EnterSpotlightHtml("street")}
     <button class="rp-chip rp-back" type="button" data-action="goto-evening">${t("common.back")}</button>
-    <div class="rp-hotspots" role="list">${spots}</div>
-    ${worldBits.length ? `<div class="world-banner street-float rp-wc-loud">${worldBits.map((l) => `<span>◈ ${l}</span>`).join("")}</div>` : ""}
+    <div class="rp-hotspots" role="list" data-testid="${coldWins ? "street-layer-cold-wins" : "street-hotspots"}">${spots}</div>
+    ${coldWins ? "" : (worldBits.length ? `<div class="world-banner street-float rp-wc-loud">${worldBits.map((l) => `<span>◈ ${l}</span>`).join("")}</div>` : "")}
     ${npcWhisper ? `<div class="rp-npc-remember"><span>${npcWhisper}</span></div>` : ""}
-    ${spine ? `<div class="rp-whisper"><span>◎ ${spine}</span></div>` : ""}
+    ${!coldWins && spine ? `<div class="rp-whisper"><span>◎ ${spine}</span></div>` : ""}
     <footer class="rp-dock">
       <button class="rp-btn rp-btn--primary" type="button" data-action="checkin" ${needCheckin ? "" : "disabled"}>${needCheckin ? checkinLabel : t("street.porch_checkin")}</button>
       <button class="rp-btn" type="button" data-action="street-event" ${state.save.evening.streetEvent ? "disabled" : ""}>${t("street.event")}</button>
@@ -2150,9 +2264,11 @@ function renderStoryLog() {
   const tr = state.locale === "tr";
   const form7 = storyForm7();
   const layout = form7?.journalLayout;
+  const form8 = storyForm8();
   const dramaSrc = [
     ...(state.questPack?.storyForm3?.journalDramaCards || []),
     ...(form7?.journalDramaCardsAppend || []),
+    ...(form8?.journalDramaCardsAppend || []),
   ];
   const dramaCards = dramaSrc
     .filter((c) => (c.when?.dayIndexMin || 1) <= day)
@@ -2756,13 +2872,23 @@ function resumeFightLoop(battle) {
         if (u.alive && u.hp < 1) u.hp = 1;
       }
     }
-    // Second mid-fight decision after Call resolved (~5.8s)
+    // mechanics-fix-9: Porch Call II — arm dock ~2.5s after Call I, force open ~3.0s / elapsed≥5.5
+    if (
+      battle.practice &&
+      battle.actionUsed &&
+      !battle.secondCallUsed &&
+      !battle.callTwoArmed &&
+      battle.elapsed >= 5.0
+    ) {
+      battle.callTwoArmed = true;
+      updateFightUI(battle);
+    }
     if (
       battle.practice &&
       battle.actionUsed &&
       !battle.secondCallUsed &&
       !battle.secondCallOffered &&
-      battle.elapsed >= 5.8 &&
+      battle.elapsed >= 5.5 &&
       battle.allies.some((u) => u.alive) &&
       battle.enemies.some((u) => u.alive)
     ) {
@@ -2770,6 +2896,17 @@ function resumeFightLoop(battle) {
       battle.paused = true;
       updateFightUI(battle);
       showSecondFightChoice(battle);
+      return;
+    }
+    // Comic watchdog: after Call II open, never strand >8s without resolve
+    if (
+      battle.practice &&
+      battle.secondCallOffered &&
+      !battle.secondCallUsed &&
+      battle.secondCallOfferedAt != null &&
+      battle.elapsed - battle.secondCallOfferedAt > 8
+    ) {
+      applySecondFightChoice("focus", { auto: true });
       return;
     }
     // Practice hard gate: don't finish until porch call resolved
@@ -2895,65 +3032,191 @@ function runScriptedMoments(battle) {
 
 
 function showSecondFightChoice(battle) {
+  // mechanics-fix-9: Porch Call II — same card chrome as Call I; soft-timeout 6s
   const bar = document.getElementById("fight-actions");
   if (!bar) return;
   const tr = state.locale === "tr";
-  bar.setAttribute("data-testid", "second-fight-choice");
+  const lang = state.mechFix9?.porchCallLanguageCallTwo || {};
+  const labels = Object.fromEntries((lang.optionLabels || []).map((o) => [o.id, o]));
+  const ids = ["call_focus_fire", "call_prop_assist", "call_chaos_kite"];
+  // Prefer different from first call
+  const firstId = battle.firstCallId;
+  const ordered = firstId ? [...ids.filter((id) => id !== firstId), firstId] : ids;
+  const all = state.combatPack?.porchCalls?.options || [];
+  const opts = ordered.map((id) => all.find((o) => o.id === id)).filter(Boolean);
+  battle.porchCallTwoOptions = opts.length ? opts : ordered.map((id) => ({ id }));
+  const stage =
+    document.querySelector("#screen-fight.active .rp-arena") ||
+    document.querySelector("#screen-fight.active .fight-stage");
+  if (stage) stage.classList.add("porch-call-dim");
+  const title =
+    loc(state.mechFix9?.uiStringsPatch?.["fight.porch_call_two_title"]) ||
+    loc(lang.ui?.title) ||
+    (tr ? "Veranda Çağrısı II — birini seç" : "Porch Call II — pick one");
+  const subtitle =
+    loc(lang.ui?.subtitle) ||
+    (tr ? "Skor sallanır · güvenli / riskli / sinerji" : "Score swings · safe / swingy / synergy");
+  const layout = state.combatPack?.porchCalls?.optionCardLayout || {};
+  const chips = layout.categoryChips || {};
+  const tid = lang.testIds || {};
+  const card = (o) => {
+    const meta = labels[o.id] || {};
+    const cat = meta.category || o.category || "swingy";
+    const chip = loc(chips[cat]) || cat;
+    const label = loc(meta.label) || loc(o.label) || o.id;
+    const blurb = loc(o.blurb) || "";
+    const prop = typeof porchCallProp === "function" ? porchCallProp(o) : ART.props.duduk;
+    const testId =
+      o.id === "call_focus_fire"
+        ? tid.optFocus || "porch-call-2-focus"
+        : o.id === "call_prop_assist"
+          ? tid.optProp || "porch-call-2-prop"
+          : tid.optSwap || "porch-call-2-swap";
+    const action =
+      o.id === "call_focus_fire" ? "second-focus" : o.id === "call_prop_assist" ? "second-prop" : "second-swap";
+    return `<button class="porch-call-card btn ${cat === "safe" ? "btn-teal" : cat === "swingy" ? "btn-ember" : "btn-primary"}" type="button" data-action="${action}" data-id="${o.id}" data-testid="${testId}">
+      <img class="porch-call-prop" src="${prop}" alt="" width="36" height="36" />
+      <span class="porch-call-chip">${chip}</span>
+      <strong>${label}</strong>
+      <em>${blurb}</em>
+    </button>`;
+  };
+  bar.setAttribute("data-testid", tid.modal || "porch-call-modal-2");
   bar.innerHTML = `
-    <p class="fight-action-prompt">${tr ? "İkinci hamle — skor değişsin" : "Second move — swing the score"}</p>
-    <div class="btn-row wrap">
-      <button class="btn btn-ember" type="button" data-action="second-focus" data-testid="second-focus">${tr ? "Focus+" : "Focus+"}</button>
-      <button class="btn btn-teal" type="button" data-action="second-prop" data-testid="second-prop">${tr ? "Prop+" : "Prop+"}</button>
-      <button class="btn btn-secondary" type="button" data-action="second-swap" data-testid="second-swap">${tr ? "Swap+" : "Swap+"}</button>
-    </div>`;
+    <p class="fight-action-prompt">${title}</p>
+    <p class="muted porch-call-sub">${subtitle}</p>
+    <div class="btn-row wrap porch-call-row">${(battle.porchCallTwoOptions || []).map(card).join("")}</div>`;
   bar.hidden = false;
+  battle.secondCallOfferedAt = battle.elapsed || 0;
+  clearTimeout(battle._callTwoTimeout);
+  // Soft-timeout 6s → auto Focus — never softlock (mech-9)
+  battle._callTwoTimeout = setTimeout(() => {
+    if (!state.battle || state.battle.secondCallUsed || state.battle.finished) return;
+    toast(
+      loc(state.mechFix9?.uiStringsPatch?.["fight.porch_call_two_auto"]) ||
+        (state.locale === "tr" ? "Çağrı II — Focus (otomatik)" : "Call II — Focus (auto)")
+    );
+    applySecondFightChoice("focus", { auto: true });
+  }, (state.mechFix9?.softlockProofSecondCall?.noSoftlock?.practiceSoftTimeoutSec || 6) * 1000);
 }
 
-function applySecondFightChoice(kind) {
+function applySecondFightChoice(kind, opts = {}) {
   const battle = state.battle;
   if (!battle || battle.secondCallUsed) return;
+  clearTimeout(battle._callTwoTimeout);
   battle.secondCallUsed = true;
   battle.playerAgencyActions = (battle.playerAgencyActions || 0) + 1;
-  const before = battle.allies.reduce((s, u) => s + Math.max(0, u.hp), 0);
+  const beforeYou = battle.allies.reduce((s, u) => s + Math.max(0, u.hp), 0);
+  const beforeBot = battle.enemies.reduce((s, u) => s + Math.max(0, u.hp), 0);
+  const bias = state.mechFix9?.visibleScoreSwing?.effectBiasPractice || {};
+  let label = kind;
+  let callId = "call_focus_fire";
   if (kind === "focus") {
+    callId = "call_focus_fire";
+    label = state.locale === "tr" ? "Hedef göster" : "Focus fire";
     const foe = battle.enemies.filter((u) => u.alive).sort((a, b) => b.atk - a.atk)[0];
+    const b = bias.call_focus_fire || {};
     if (foe) {
       battle.focusTargetSlot = foe.slot;
-      battle.focusUntil = (battle.elapsed || 0) + 5;
-      battle.focusDmgBonus = 0.22;
-      const dmg = Math.max(8, Math.floor(foe.maxHp * 0.08));
-      foe.hp = Math.max(1, foe.hp - dmg);
-      battle.floaters.push({ side: foe.side, slot: foe.slot, dmg, t: battle.elapsed });
+      battle.focusUntil = (battle.elapsed || 0) + (b.durationSec || 6);
+      battle.focusDmgBonus = b.damageTakenBonusPercent || 0.28;
+      const dmg = Math.max(8, Math.floor(foe.maxHp * 0.1));
+      foe.hp = Math.max(0, foe.hp - dmg);
+      battle.floaters = battle.floaters || [];
+      battle.floaters.push({ side: foe.side, slot: foe.slot, dmg, t: battle.elapsed, proc: true });
     }
   } else if (kind === "prop") {
+    callId = "call_prop_assist";
+    label = state.locale === "tr" ? "Prop savur" : "Prop toss";
     const ally = battle.allies.filter((u) => u.alive).sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
+    const b = bias.call_prop_assist || {};
     if (ally) {
-      const heal = Math.max(10, Math.floor(ally.maxHp * 0.12));
+      const heal = Math.max(10, Math.floor(ally.maxHp * 0.14));
       ally.hp = Math.min(ally.maxHp, ally.hp + heal);
-      battle.floaters.push({ side: ally.side, slot: ally.slot, heal, t: battle.elapsed });
-      battle.atkBuffUntil = (battle.elapsed || 0) + 4;
-      battle.atkBuffPct = 0.1;
+      battle.floaters = battle.floaters || [];
+      battle.floaters.push({ side: ally.side, slot: ally.slot, heal, t: battle.elapsed, proc: true });
+      battle.atkBuffUntil = (battle.elapsed || 0) + (b.durationSec || 5);
+      battle.atkBuffPct = b.atkBonusPercent || 0.12;
     }
   } else if (kind === "swap") {
+    callId = "call_chaos_kite";
+    label = state.locale === "tr" ? "Kaos yer değiştir" : "Chaos kite";
     const alive = battle.allies.filter((u) => u.alive);
     if (alive.length >= 2) {
       const a = alive[0], b = alive[alive.length - 1];
       const tmp = a.slot; a.slot = b.slot; b.slot = tmp;
-      showSynProc(state.locale === "tr" ? "Swap+" : "Swap+");
+    }
+    const foe = battle.enemies.find((u) => u.alive);
+    if (foe) {
+      const dmg = Math.max(6, Math.floor(foe.maxHp * 0.08));
+      foe.hp = Math.max(0, foe.hp - dmg);
+      battle.floaters = battle.floaters || [];
+      battle.floaters.push({ side: foe.side, slot: foe.slot, dmg, t: battle.elapsed, proc: true });
     }
   }
-  const after = battle.allies.reduce((s, u) => s + Math.max(0, u.hp), 0);
-  const delta = after - before;
+  // Instant You score bonus so swing is always ≥8 (never 253→253)
+  const bonusMap = { focus: 10, prop: 9, swap: 8 };
+  const instant = bias[`call_${kind === "swap" ? "chaos_kite" : kind === "prop" ? "prop_assist" : "focus_fire"}`]?.instantYouScoreBonus || bonusMap[kind] || 8;
+  const ally = battle.allies.find((u) => u.alive) || battle.allies[0];
+  if (ally) {
+    ally.hp = Math.min(ally.maxHp, ally.hp + instant);
+    battle.floaters = battle.floaters || [];
+    battle.floaters.push({ side: ally.side, slot: ally.slot, heal: instant, t: battle.elapsed, proc: true });
+  }
+  const afterYou = battle.allies.reduce((s, u) => s + Math.max(0, u.hp), 0);
+  const afterBot = battle.enemies.reduce((s, u) => s + Math.max(0, u.hp), 0);
+  // Ensure visible You/Bot delta ≥8 (heal ally if room, else hurt bot)
+  let scoreBefore = Math.round(beforeYou);
+  let scoreAfter = Math.round(battle.allies.reduce((s, u) => s + Math.max(0, u.hp), 0));
+  let botBefore = Math.round(beforeBot);
+  let botAfter = Math.round(battle.enemies.reduce((s, u) => s + Math.max(0, u.hp), 0));
+  const youDelta = Math.abs(scoreAfter - scoreBefore);
+  const botDelta = Math.abs(botAfter - botBefore);
+  if (Math.max(youDelta, botDelta) < 8) {
+    const need = 8 - Math.max(youDelta, botDelta);
+    const room = ally ? Math.max(0, ally.maxHp - ally.hp) : 0;
+    if (room >= need && ally) {
+      ally.hp = Math.min(ally.maxHp, ally.hp + need);
+    } else {
+      const foe = battle.enemies.find((u) => u.alive) || battle.enemies[0];
+      if (foe) {
+        foe.hp = Math.max(0, foe.hp - need);
+        battle.floaters = battle.floaters || [];
+        battle.floaters.push({ side: foe.side, slot: foe.slot, dmg: need, t: battle.elapsed, proc: true });
+      }
+      if (ally && room > 0) ally.hp = Math.min(ally.maxHp, ally.hp + room);
+    }
+    scoreAfter = Math.round(battle.allies.reduce((s, u) => s + Math.max(0, u.hp), 0));
+    botAfter = Math.round(battle.enemies.reduce((s, u) => s + Math.max(0, u.hp), 0));
+  }
+  // Prefer toasting the larger swing axis
+  if (Math.abs(botAfter - botBefore) > Math.abs(scoreAfter - scoreBefore)) {
+    scoreBefore = botBefore;
+    scoreAfter = botAfter;
+  }
+  battle.lastCallTwoLabel = label;
+  const tpl =
+    loc(state.mechFix9?.uiStringsPatch?.["fight.porch_call_two_delta"]) ||
+    (state.locale === "tr"
+      ? `Çağrı II · {label}: {scoreBefore}→{scoreAfter}`
+      : `Call II · {label}: {scoreBefore}→{scoreAfter}`);
   toast(
-    state.locale === "tr"
-      ? `İkinci hamle · skor ${before}→${after} (${delta >= 0 ? "+" : ""}${delta})`
-      : `Second move · score ${before}→${after} (${delta >= 0 ? "+" : ""}${delta})`,
+    tpl.replace("{label}", label).replace("{scoreBefore}", String(scoreBefore)).replace("{scoreAfter}", String(scoreAfter)),
     1600
   );
+  showSynProc(label);
+  stageShake("shake-medium");
   state.save.storyFlags = state.save.storyFlags || {};
   state.save.storyFlags.practice_second_call_done = true;
+  state.save.storyFlags.practice_second_decision_done = true;
+  if (opts.auto) state.save.storyFlags.practice_call_two_auto = true;
+  const stage =
+    document.querySelector("#screen-fight.active .rp-arena") ||
+    document.querySelector("#screen-fight.active .fight-stage");
+  if (stage) stage.classList.remove("porch-call-dim");
   hideFightActions();
   battle.paused = false;
+  battle.secondCallOffered = true;
   updateFightUI(battle);
   resumeFightLoop(battle);
   saveNow();
@@ -3064,6 +3327,7 @@ function applyPorchCall(callId) {
     saveNow();
   }
   battle.actionUsed = true;
+  battle.firstCallId = callId;
   battle.playerAgencyActions = (battle.playerAgencyActions || 0) + 1;
   battle.cannotDismissPorch = false;
   battle.porchCallArmed = false;
@@ -3410,7 +3674,7 @@ function renderFight(battle) {
     return loc(s.name);
   };
   const coachBanner = battle.allySyn.length
-    ? `<div class="syn-fight-tip">${battle.allySyn.map(teachLine).join(" · ")}</div>`
+    ? `<div class="syn-fight-tip rp-fight-tip">${battle.allySyn.map(teachLine).join(" · ")}</div>`
     : `<div class="syn-fight-tip soft">${tr ? "Sinerji yok — Cup'ta Tea/Rivalry/Neon eşleştir" : "No synergy — match Tea/Rivalry/Neon in Cup"}</div>`;
   const canSkip = !Density.practiceSkipBlocked(state.densityPack, state.save) && !(state.practiceMode || practiceCupRequired());
   const screen = document.getElementById("screen-fight");
@@ -3573,10 +3837,31 @@ function updateFightUI(battle) {
       battle.practice &&
       battle.actionUsed &&
       !battle.finished &&
-      !modalOpen
+      !modalOpen &&
+      !battle.secondCallUsed
     );
     between.hidden = !showBetween;
   }
+  // mechanics-fix-9: Porch Call II dock
+  let dock2 = document.getElementById("porch-call-two-dock");
+  if (!dock2) {
+    const arena = document.querySelector("#screen-fight .rp-arena") || document.getElementById("screen-fight");
+    if (arena) {
+      dock2 = document.createElement("div");
+      dock2.id = "porch-call-two-dock";
+      dock2.className = "rp-call-dock";
+      dock2.hidden = true;
+      dock2.innerHTML = `<button class="btn btn-ember rp-cta-pulse" type="button" id="btn-porch-call-two" data-action="open-porch-call-two" data-testid="porch-call-two-ready">${state.locale === "tr" ? "Veranda Çağrısı II" : "Porch Call II"}</button>`;
+      const actions = document.getElementById("fight-actions");
+      if (actions) actions.parentNode.insertBefore(dock2, actions);
+      else arena.appendChild(dock2);
+    }
+  }
+  if (dock2) {
+    const show2 = !!(battle.callTwoArmed && !battle.secondCallUsed && !battle.finished && !battle.secondCallOffered);
+    dock2.hidden = !show2;
+  }
+  scrubBannedEscapeChrome();
 }
 
 function betweenCallWindowOpen(battle) {
@@ -4591,6 +4876,16 @@ function onAction(action, target) {
       showFightActions(b);
       break;
     }
+    case "open-porch-call-two": {
+      const b = state.battle;
+      if (!b || b.secondCallUsed) break;
+      b.callTwoArmed = true;
+      b.secondCallOffered = true;
+      b.paused = true;
+      updateFightUI(b);
+      showSecondFightChoice(b);
+      break;
+    }
     case "ack-day2-spotlight": {
       const spot = pickDay2EnterSpotlight();
       state.save.storyFlags = state.save.storyFlags || {};
@@ -4722,7 +5017,7 @@ async function tryPullStorePacks() {
 
 async function boot() {
   try {
-    const [content, economy, stories, ladder, depthMeta, questPack, combatPack, densityPack, uxPack, uxPack2, uxPack3, uxPack4, uxPack5, uxPack6, uxPack7, mechFix4, mechFix5, mechFix6, mechFix7, mechFix8] = await Promise.all([
+    const [content, economy, stories, ladder, depthMeta, questPack, combatPack, densityPack, uxPack, uxPack2, uxPack3, uxPack4, uxPack5, uxPack6, uxPack7, uxPack8, mechFix4, mechFix5, mechFix6, mechFix7, mechFix8, mechFix9] = await Promise.all([
       fetch("data/content.json").then((r) => r.json()),
       fetch("data/economy.json").then((r) => r.json()),
       fetch("data/stories.json").then((r) => r.json()),
@@ -4738,11 +5033,13 @@ async function boot() {
       fetch("data/ux-session-5.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
       fetch("data/ux-session-6.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
       fetch("data/ux-session-7.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      fetch("data/ux-session-8.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
       fetch("data/mechanics-fix-4.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
       fetch("data/mechanics-fix-5.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
       fetch("data/mechanics-fix-6.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
       fetch("data/mechanics-fix-7.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
       fetch("data/mechanics-fix-8.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      fetch("data/mechanics-fix-9.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
     ]);
     state.content = content;
     state.economy = economy;
@@ -4759,18 +5056,22 @@ async function boot() {
     state.uxPack5 = uxPack5;
     state.uxPack6 = uxPack6;
     state.uxPack7 = uxPack7;
+    state.uxPack8 = uxPack8;
     state.mechFix4 = mechFix4;
     state.mechFix5 = mechFix5;
     state.mechFix6 = mechFix6;
     state.mechFix7 = mechFix7;
     state.mechFix8 = mechFix8;
+    state.mechFix9 = mechFix9;
     state.storyForm2 = questPack?.storyForm2 || null;
     state.storyForm3 = questPack?.storyForm3 || null;
     state.storyForm4 = questPack?.storyForm4 || null;
     state.storyForm5 = questPack?.storyForm5 || null;
     state.storyForm6 = questPack?.storyForm6 || null;
     state.storyForm7 = questPack?.storyForm7 || null;
-    if (uxPack2?.strings || uxPack3?.copy || uxPack5 || uxPack6 || uxPack7) {
+    state.storyForm8 = questPack?.storyForm8 || null;
+    state.storyForm9 = questPack?.storyForm9 || null;
+    if (uxPack2?.strings || uxPack3?.copy || uxPack5 || uxPack6 || uxPack7 || uxPack8) {
       state.uxPack = {
         ...(uxPack || {}),
         ...(uxPack2 || {}),
@@ -4779,6 +5080,7 @@ async function boot() {
         ...(uxPack5 || {}),
         ...(uxPack6 || {}),
         ...(uxPack7 || {}),
+        ...(uxPack8 || {}),
         strings: { ...(uxPack?.strings || {}), ...(uxPack2?.strings || {}), ...(uxPack5?.copy || {}), ...(uxPack6?.copy || {}) },
       };
     }

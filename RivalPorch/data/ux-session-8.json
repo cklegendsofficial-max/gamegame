@@ -1,0 +1,46 @@
+{
+  "packId": "ux-session-8",
+  "schemaVersion": 1,
+  "scoreReact": {
+    "buildCommit": "37aae6b",
+    "overall": 8.1,
+    "gameplay": 8.0,
+    "gap": "skip-to-morning + Unstuck escape hatches; oneEveningCta false"
+  },
+  "productionBan": {
+    "selectors": [
+      "[data-testid='skip-to-morning']",
+      "[data-skip-to-morning]",
+      "#btn-skip-morning",
+      ".rp-skip-morning",
+      "[data-testid='unstuck']",
+      ".rp-unstuck",
+      ".fight-unstuck"
+    ],
+    "stringPatterns": [
+      "skip to morning",
+      "skip-to-morning",
+      "Unstuck",
+      "Start is open"
+    ]
+  },
+  "earnedEndEvening": {
+    "requiresFlagsAll": [
+      "practice_cup_done",
+      "syn_taught_syn_rivalry"
+    ],
+    "primaryTestId": "end-evening",
+    "solePrimaryWhenEarned": true,
+    "nav": "overnight"
+  },
+  "retain": {
+    "eveningMidVhMax": 0.35
+  },
+  "acceptanceChecks": [
+    "zero_skip_to_morning_in_production_dom",
+    "zero_unstuck_in_fight_dom",
+    "after_practice_exactly_one_end_evening_primary",
+    "end_evening_nav_overnight",
+    "midVh_le_35"
+  ]
+}

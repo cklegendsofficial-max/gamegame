@@ -4766,5 +4766,892 @@
         "desc": "Player can identify current Antenna Op beat without opening dialogue — banner or journal card alone suffices."
       }
     ]
+  },
+  "storyForm8": {
+    "schemaVersion": 1,
+    "packId": "story-form-8",
+    "kind": "story-quest-form",
+    "formIndex": 8,
+    "localeDefault": "tr",
+    "purpose": "Long-arc visibility parity: Decibel Accord + Ledger & Tray beat banners/journal cards like Antenna Op; journal drama for Arc B/C; props carry without spotlight.",
+    "integrator": {
+      "owner": "code owner on cursor/rival-porch-slice-31f7",
+      "noPrFromThisPackAuthor": true,
+      "mergeMode": "patch-overlay",
+      "wire": [
+        "Merge storyForm8; normalizeQuestPack passes storyForm8",
+        "Generalize antennaOpLiveBannerHtml → activeArcBeatBannerHtml that picks from form7 Antenna + form8 Volume/Ledger beat card lists",
+        "Journal: append journalDramaCardsAppend + render volumeOpJournalBeatCards / ledgerOpJournalBeatCards when those arcs active (same pattern as antenna)",
+        "Respect noSpotlightProve: never require day2EnterSpotlight for prop visibility; optional hideSpotlightForAudit flag",
+        "Evening/street: one live banner max — highest priority among active arcs (Antenna 95, Volume 94, Ledger 93)"
+      ],
+      "doNot": [
+        "Gate Arc B/C beats behind spend",
+        "Make Day2 props depend on spotlight ack",
+        "Replace form-7 Antenna cards — merge alongside"
+      ]
+    },
+    "principles": {
+      "storyNeverGatedBySpend": true,
+      "allThreeArcsHaveBeatUi": true,
+      "journalIsDramaNotLog": true,
+      "propsIndependentOfSpotlight": true
+    },
+    "noSpotlightProve": {
+      "id": "props_without_spotlight",
+      "rule": "Day2 SVG/NPC props (forms 5–6) must render when cold_open_* && dayIndex>=2 even if day2_*_spotlight_ack is unset and day2EnterSpotlight HTML is suppressed.",
+      "integratorFlag": "hideDay2EnterSpotlight",
+      "auditHint": "Set save.storyFlags.hide_day2_spotlight=true or form8.noSpotlightProve.forceHideSpotlight to verify props alone.",
+      "forceHideSpotlight": false,
+      "testId": "prove-props-without-spotlight"
+    },
+    "journalDramaCardsAppend": [
+      {
+        "id": "jdrama_volume_active",
+        "when": {
+          "flagsAny": [
+            "quest_volume_active",
+            "arc_volume_war_active",
+            "arc_volume_war_beat1"
+          ],
+          "flagsNone": [
+            "arc_volume_war_complete",
+            "quest_volume_complete"
+          ]
+        },
+        "tone": "sharp",
+        "eyebrow": {
+          "tr": "Canlı ark · Arc B",
+          "en": "Living arc · Arc B"
+        },
+        "title": {
+          "tr": "Desibel Antlaşması devam ediyor",
+          "en": "Decibel Accord is live"
+        },
+        "body": {
+          "tr": "01:12 bas, KULAKLIK notu, gece poğaçası — checklist değil, gece dramı. Beat panoda.",
+          "en": "01:12 bass, HEADPHONES note, midnight pastry — not a checklist, night drama. Beat on the board."
+        },
+        "cta": {
+          "tr": "Sokağa / beat'e git",
+          "en": "Go to street / beat"
+        },
+        "testId": "journal-drama-volume-live"
+      },
+      {
+        "id": "jdrama_volume_stay",
+        "when": {
+          "flagsAll": [
+            "flag_peri_stay"
+          ]
+        },
+        "tone": "soft",
+        "eyebrow": {
+          "tr": "Yankı · Arc B",
+          "en": "Aftermath · Arc B"
+        },
+        "title": {
+          "tr": "Sessiz neon — Peri kaldı",
+          "en": "Quiet neon — Peri stayed"
+        },
+        "body": {
+          "tr": "Sessiz saatler yazılı. Cumartesi drop kısık ama burada. Defter bunu drama tutuyor.",
+          "en": "Quiet hours written down. Saturday drop is low but here. Journal keeps the drama."
+        },
+        "cta": {
+          "tr": "Sokağı gör",
+          "en": "See the street"
+        },
+        "testId": "journal-drama-volume-stay"
+      },
+      {
+        "id": "jdrama_volume_leave",
+        "when": {
+          "flagsAll": [
+            "flag_peri_leaving_threat"
+          ]
+        },
+        "tone": "sharp",
+        "eyebrow": {
+          "tr": "Yankı · Arc B",
+          "en": "Aftermath · Arc B"
+        },
+        "title": {
+          "tr": "Veda gerilimi — kariyer yolu",
+          "en": "Leaving tension — career path"
+        },
+        "body": {
+          "tr": "Bilet taslağı duruyor. AoE veda gibi. Log satırı değil — mahalle fısıltısı.",
+          "en": "Ticket draft stays. AoE like goodbye. Not a log line — a block whisper."
+        },
+        "cta": {
+          "tr": "Sokağı gör",
+          "en": "See the street"
+        },
+        "testId": "journal-drama-volume-leave"
+      },
+      {
+        "id": "jdrama_ledger_active",
+        "when": {
+          "flagsAny": [
+            "quest_ledger_active",
+            "arc_tea_ledger_active",
+            "arc_tea_ledger_beat1"
+          ],
+          "flagsNone": [
+            "arc_tea_ledger_complete",
+            "quest_ledger_complete"
+          ]
+        },
+        "tone": "soft",
+        "eyebrow": {
+          "tr": "Canlı ark · Arc C",
+          "en": "Living arc · Arc C"
+        },
+        "title": {
+          "tr": "Defter ve Tepsi açık",
+          "en": "Ledger & Tray is open"
+        },
+        "body": {
+          "tr": "Poğaça kıtlığı, Merve'nin duvarı, Can'ın gururu — Tea Circle'ın gerçek anlamı burada yazılıyor.",
+          "en": "Pastry shortage, Merve's wall, Can's pride — Tea Circle's real meaning is being written here."
+        },
+        "cta": {
+          "tr": "Beat'e git",
+          "en": "Go to beat"
+        },
+        "testId": "journal-drama-ledger-live"
+      },
+      {
+        "id": "jdrama_ledger_chain",
+        "when": {
+          "flagsAll": [
+            "flag_ledger_closed_kind"
+          ]
+        },
+        "tone": "soft",
+        "eyebrow": {
+          "tr": "Yankı · Arc C",
+          "en": "Aftermath · Arc C"
+        },
+        "title": {
+          "tr": "Borç = iyilik zinciri",
+          "en": "Debt = favor chain"
+        },
+        "body": {
+          "tr": "Kırmızı satırlar skor değil — kim kime çay koydu. Defter drama.",
+          "en": "Red lines aren't scores — who poured tea for whom. Ledger drama."
+        },
+        "cta": {
+          "tr": "Sokağı gör",
+          "en": "See the street"
+        },
+        "testId": "journal-drama-ledger-chain"
+      },
+      {
+        "id": "jdrama_ledger_private",
+        "when": {
+          "flagsAll": [
+            "flag_ledger_private"
+          ]
+        },
+        "tone": "soft",
+        "eyebrow": {
+          "tr": "Yankı · Arc C",
+          "en": "Aftermath · Arc C"
+        },
+        "title": {
+          "tr": "Defter kapalı — mahrem",
+          "en": "Ledger closed — private"
+        },
+        "body": {
+          "tr": "Bazı sayfalar sadece demliğe bakar. Sessiz drama da drama.",
+          "en": "Some pages face only the teapot. Quiet drama is still drama."
+        },
+        "cta": {
+          "tr": "Sokağı gör",
+          "en": "See the street"
+        },
+        "testId": "journal-drama-ledger-private"
+      }
+    ],
+    "volumeOpJournalBeatCards": [
+      {
+        "beatId": "arc_volume_war_beat1",
+        "objectiveId": "mq_volume_o1",
+        "order": 1,
+        "title": {
+          "tr": "Beat 1 — 01:12 bas",
+          "en": "Beat 1 — 01:12 bass"
+        },
+        "scene": {
+          "tr": "Duvar titredi. Orhan'ın ışığı yandı. Gece artık sessiz değil.",
+          "en": "The wall shook. Orhan's light flicked on. Night is no longer quiet."
+        },
+        "cast": [
+          "n4",
+          "n5"
+        ],
+        "dialogueTreeId": "dlg_volume_day1",
+        "doneFlag": "arc_volume_war_beat1",
+        "cta": {
+          "tr": "Şoku yaşa",
+          "en": "Face the shock"
+        },
+        "testId": "volume-beat-1"
+      },
+      {
+        "beatId": "arc_volume_war_beat2",
+        "objectiveId": "mq_volume_o2",
+        "order": 2,
+        "title": {
+          "tr": "Beat 2 — KULAKLIK notu",
+          "en": "Beat 2 — HEADPHONES note"
+        },
+        "scene": {
+          "tr": "Peri'nin kapısında gazete mürekkebiyle KULAKLIK. Büyük harf, büyük sınır.",
+          "en": "HEADPHONES on Peri's door in newspaper ink. Block capitals, hard boundary."
+        },
+        "cast": [
+          "n4",
+          "n5"
+        ],
+        "dialogueTreeId": "dlg_volume_day2",
+        "requiresFlags": [
+          "arc_volume_war_beat1"
+        ],
+        "doneFlag": "arc_volume_war_beat2",
+        "cta": {
+          "tr": "Notu yanıtla",
+          "en": "Answer the note"
+        },
+        "testId": "volume-beat-2"
+      },
+      {
+        "beatId": "arc_volume_war_beat3",
+        "objectiveId": "mq_volume_o3",
+        "order": 3,
+        "title": {
+          "tr": "Beat 3 — Gece poğaçası",
+          "en": "Beat 3 — Midnight pastry"
+        },
+        "scene": {
+          "tr": "Can kapı kapı Soft diplomasi. Poğaça, barışın sıcak dili.",
+          "en": "Can works the doors with Soft diplomacy. Pastry is the warm language of peace."
+        },
+        "cast": [
+          "n6",
+          "n4",
+          "n5"
+        ],
+        "dialogueTreeId": "dlg_volume_day3",
+        "requiresFlags": [
+          "arc_volume_war_beat2"
+        ],
+        "doneFlag": "arc_volume_war_beat3",
+        "cta": {
+          "tr": "Diplomasiye katıl",
+          "en": "Join diplomacy"
+        },
+        "testId": "volume-beat-3"
+      },
+      {
+        "beatId": "arc_volume_war_beat4",
+        "objectiveId": "mq_volume_o4",
+        "order": 4,
+        "title": {
+          "tr": "Beat 4 — Teklif sırrı",
+          "en": "Beat 4 — Offer secret"
+        },
+        "scene": {
+          "tr": "Peri kulüp mektubunu neredeyse ağzından kaçırır. Tren bileti taslağı cebinde.",
+          "en": "Peri almost blurts the club letter. A ticket draft sits in the pocket."
+        },
+        "cast": [
+          "n5"
+        ],
+        "dialogueTreeId": "dlg_volume_day4",
+        "requiresFlags": [
+          "arc_volume_war_beat3"
+        ],
+        "doneFlag": "arc_volume_war_beat4",
+        "cta": {
+          "tr": "Sırrı duy",
+          "en": "Hear the secret"
+        },
+        "testId": "volume-beat-4"
+      },
+      {
+        "beatId": "arc_volume_war_beat5",
+        "objectiveId": "mq_volume_o5",
+        "order": 5,
+        "title": {
+          "tr": "Beat 5 — Antlaşma veya kariyer",
+          "en": "Beat 5 — Accord or career"
+        },
+        "scene": {
+          "tr": "Masada sessiz saatler + Cumartesi Neon Night, ya da veda gerilimi.",
+          "en": "On the table: quiet hours + Saturday Neon Night, or leaving tension."
+        },
+        "cast": [
+          "n4",
+          "n5",
+          "n1"
+        ],
+        "dialogueTreeId": "dlg_volume_day5",
+        "requiresFlags": [
+          "arc_volume_war_beat4"
+        ],
+        "doneFlagAny": [
+          "flag_peri_stay",
+          "flag_peri_leaving_threat"
+        ],
+        "cta": {
+          "tr": "Yolu seç",
+          "en": "Choose the path"
+        },
+        "testId": "volume-beat-5"
+      }
+    ],
+    "ledgerOpJournalBeatCards": [
+      {
+        "beatId": "arc_tea_ledger_beat1",
+        "objectiveId": "mq_ledger_o1",
+        "order": 1,
+        "title": {
+          "tr": "Beat 1 — Poğaça kıtlığı",
+          "en": "Beat 1 — Pastry shortage"
+        },
+        "scene": {
+          "tr": "Tepsi yetmiyor. Cup kadrosu mu, bütün sokak mı?",
+          "en": "Not enough on the tray. Cup roster first, or the whole street?"
+        },
+        "cast": [
+          "n6",
+          "n1"
+        ],
+        "dialogueTreeId": "dlg_tea_day1",
+        "doneFlag": "arc_tea_ledger_beat1",
+        "cta": {
+          "tr": "Kıtlığı yönet",
+          "en": "Manage the shortage"
+        },
+        "testId": "ledger-beat-1"
+      },
+      {
+        "beatId": "arc_tea_ledger_beat2",
+        "objectiveId": "mq_ledger_o2",
+        "order": 2,
+        "title": {
+          "tr": "Beat 2 — Ben biliyorum",
+          "en": "Beat 2 — I know"
+        },
+        "scene": {
+          "tr": "Merve: 'Ben biliyorum.' Demlik çalar; defter gizli kalır.",
+          "en": "Merve: 'I know.' Teapot chimes; the ledger stays hidden."
+        },
+        "cast": [
+          "n1"
+        ],
+        "dialogueTreeId": "dlg_tea_day2",
+        "requiresFlags": [
+          "arc_tea_ledger_beat1"
+        ],
+        "doneFlag": "arc_tea_ledger_beat2",
+        "cta": {
+          "tr": "Duvarı aş",
+          "en": "Crack the wall"
+        },
+        "testId": "ledger-beat-2"
+      },
+      {
+        "beatId": "arc_tea_ledger_beat3",
+        "objectiveId": "mq_ledger_o3",
+        "order": 3,
+        "title": {
+          "tr": "Beat 3 — Gurur veya güven",
+          "en": "Beat 3 — Pride or trust"
+        },
+        "scene": {
+          "tr": "Can'a yardım: gururu zedeler misin, yoksa güven mi örersin?",
+          "en": "Help Can: bruise pride, or grow trust?"
+        },
+        "cast": [
+          "n6",
+          "n1"
+        ],
+        "dialogueTreeId": "dlg_tea_day3",
+        "requiresFlags": [
+          "arc_tea_ledger_beat2"
+        ],
+        "doneFlag": "arc_tea_ledger_beat3",
+        "cta": {
+          "tr": "Can'ı bul",
+          "en": "Find Can"
+        },
+        "testId": "ledger-beat-3"
+      },
+      {
+        "beatId": "arc_tea_ledger_beat4",
+        "objectiveId": "mq_ledger_o4",
+        "order": 4,
+        "title": {
+          "tr": "Beat 4 — İyilik zinciri",
+          "en": "Beat 4 — Favor chain"
+        },
+        "scene": {
+          "tr": "Defter açılır: borç aslında zincir. Tea Circle anlam kazanır.",
+          "en": "Ledger opens: debt is a favor chain. Tea Circle gains meaning."
+        },
+        "cast": [
+          "n1",
+          "n6"
+        ],
+        "dialogueTreeId": "dlg_tea_day4",
+        "requiresFlags": [
+          "arc_tea_ledger_beat3"
+        ],
+        "doneFlagAny": [
+          "flag_ledger_closed_kind",
+          "flag_ledger_private"
+        ],
+        "cta": {
+          "tr": "Defteri aç",
+          "en": "Open the ledger"
+        },
+        "testId": "ledger-beat-4"
+      }
+    ],
+    "activeArcBeatBanners": [
+      {
+        "id": "volume_op_live_banner",
+        "arcId": "arc_volume_war",
+        "questId": "mq_decibel_accord",
+        "beatCardsKey": "volumeOpJournalBeatCards",
+        "screens": [
+          "evening",
+          "street"
+        ],
+        "priority": 94,
+        "when": {
+          "flagsAny": [
+            "quest_volume_active",
+            "arc_volume_war_active",
+            "arc_volume_war_beat1"
+          ],
+          "flagsNone": [
+            "arc_volume_war_complete",
+            "quest_volume_complete"
+          ]
+        },
+        "template": {
+          "tr": "Desibel · {beatTitle} — {sceneShort}",
+          "en": "Decibel · {beatTitle} — {sceneShort}"
+        },
+        "cta": {
+          "tr": "Beat'i oyna",
+          "en": "Play the beat"
+        },
+        "testId": "volume-op-live-banner"
+      },
+      {
+        "id": "ledger_op_live_banner",
+        "arcId": "arc_tea_ledger",
+        "questId": "mq_ledger_tray",
+        "beatCardsKey": "ledgerOpJournalBeatCards",
+        "screens": [
+          "evening",
+          "street"
+        ],
+        "priority": 93,
+        "when": {
+          "flagsAny": [
+            "quest_ledger_active",
+            "arc_tea_ledger_active",
+            "arc_tea_ledger_beat1"
+          ],
+          "flagsNone": [
+            "arc_tea_ledger_complete",
+            "quest_ledger_complete"
+          ]
+        },
+        "template": {
+          "tr": "Defter · {beatTitle} — {sceneShort}",
+          "en": "Ledger · {beatTitle} — {sceneShort}"
+        },
+        "cta": {
+          "tr": "Beat'i oyna",
+          "en": "Play the beat"
+        },
+        "testId": "ledger-op-live-banner"
+      }
+    ],
+    "questPanelBlurbs": [
+      {
+        "whenQuestId": "mq_decibel_accord",
+        "activeBlurb": {
+          "tr": "Arc B canlı: bas ↔ uyku. Bugünün beat'i panoda.",
+          "en": "Arc B live: bass ↔ sleep. Today's beat is on the board."
+        },
+        "testId": "volume-op-quest-blurb"
+      },
+      {
+        "whenQuestId": "mq_ledger_tray",
+        "activeBlurb": {
+          "tr": "Arc C canlı: defter ↔ tepsi. Beat sahnesi checklist'ten önce.",
+          "en": "Arc C live: ledger ↔ tray. Beat scene before the checklist."
+        },
+        "testId": "ledger-op-quest-blurb"
+      }
+    ],
+    "cssAppend": "\n/* story-form-8 — Volume/Ledger beat parity (extends form-7 drama styles) */\n.volume-beat-card, .ledger-beat-card {\n  padding: 0.75rem 0.9rem;\n  margin: 0.4rem 0;\n  border-left: 3px solid #7eb6c9;\n  background: rgba(18,12,8,.75);\n  color: #f2e6d8;\n}\n.ledger-beat-card { border-left-color: #c4a574; }\n.volume-beat-card.is-live, .ledger-beat-card.is-live {\n  box-shadow: inset 0 0 0 1px rgba(196,92,62,.35);\n  border-left-color: #c45c3e;\n}\n.volume-beat-card.is-done, .ledger-beat-card.is-done { opacity: 0.65; }\n",
+    "acceptanceChecks": [
+      {
+        "id": "volume_banner_and_journal",
+        "desc": "While Decibel active: volume-op-live-banner on evening/street; journal shows volume-beat-1..5 with live CTA."
+      },
+      {
+        "id": "ledger_banner_and_journal",
+        "desc": "While Ledger active: ledger-op-live-banner; journal shows ledger-beat-1..4."
+      },
+      {
+        "id": "props_without_spotlight",
+        "desc": "With hide_day2_spotlight, Day2 mediate/instigate/stage SVG+NPC still visible."
+      },
+      {
+        "id": "journal_still_drama_first",
+        "desc": "Arc B/C drama cards appear in Aftermath; recap stays collapsed log."
+      }
+    ],
+    "echoFollowUpsAppend": [
+      {
+        "id": "echo_form8_volume_beat",
+        "priority": 92,
+        "when": {
+          "flagsAny": [
+            "quest_volume_active",
+            "arc_volume_war_beat1"
+          ],
+          "flagsNone": [
+            "arc_volume_war_complete"
+          ],
+          "slots": [
+            "evening",
+            "street"
+          ]
+        },
+        "speakerId": "n5",
+        "headline": {
+          "tr": "Desibel — beat panoda",
+          "en": "Decibel — beat on the board"
+        },
+        "body": {
+          "tr": "Akşam bandında Arc B beat'i yazıyor. Defterde drama kartı.",
+          "en": "Evening banner names Arc B beat. Journal has the drama card."
+        },
+        "cta": {
+          "tr": "Beat'e git",
+          "en": "Go to beat"
+        }
+      },
+      {
+        "id": "echo_form8_ledger_beat",
+        "priority": 91,
+        "when": {
+          "flagsAny": [
+            "quest_ledger_active",
+            "arc_tea_ledger_beat1"
+          ],
+          "flagsNone": [
+            "arc_tea_ledger_complete"
+          ],
+          "slots": [
+            "evening",
+            "street"
+          ]
+        },
+        "speakerId": "n1",
+        "headline": {
+          "tr": "Defter — beat panoda",
+          "en": "Ledger — beat on the board"
+        },
+        "body": {
+          "tr": "Arc C canlı. Poğaça/defter sahnesi checklist'ten önce.",
+          "en": "Arc C live. Pastry/ledger scene before the checklist."
+        },
+        "cta": {
+          "tr": "Beat'e git",
+          "en": "Go to beat"
+        }
+      }
+    ]
+  },
+  "storyForm9": {
+    "schemaVersion": 1,
+    "packId": "story-form-9",
+    "kind": "story-quest-form",
+    "formIndex": 9,
+    "localeDefault": "tr",
+    "purpose": "Cold-choice Day2 consequence carries without spotlight; Antenna/Volume/Ledger get physical street stage props (not journal-only).",
+    "integrator": {
+      "owner": "code owner on cursor/rival-porch-slice-31f7",
+      "noPrFromThisPackAuthor": true,
+      "mergeMode": "patch-overlay",
+      "wire": [
+        "Merge storyForm9; normalizeQuestPack exposes storyForm9",
+        "day2EnterSpotlightHtml: DEFAULT OFF when any cold_open_* && dayIndex>=2 (form9.streetLayerPriority.suppressSpotlightWhenColdProp)",
+        "renderStreet layer order: stageLayer → day2StreetStageHtml (cold SVG) → streetArcStagePropsHtml → hotspots → ONE line (npc bubble OR compact arc chip) → dock. Defer full Antenna banner until spotlight dismissed OR collapse to chip",
+        "When cold Day2 prop present: do not show rp-arc-beat-banner full strip; use streetArcCompactChip instead",
+        "Inject streetArcStageProps for active Antenna/Volume/Ledger beats (physical diorama props)",
+        "Append cssAppend — larger cold props, z-index hierarchy, clean stage read for instigate/stage",
+        "Align with visual squad one-layer-wins acceptance"
+      ],
+      "doNot": [
+        "Stack spotlight + Antenna banner + cold prop on first Day2 street paint",
+        "Require spotlight ack to show cold SVG",
+        "Leave Arc B/C street presence journal-only"
+      ]
+    },
+    "principles": {
+      "storyNeverGatedBySpend": true,
+      "oneLayerWinsOnDay2Street": true,
+      "coldPropNeverNeedsSpotlight": true,
+      "longArcsHaveStreetPropsNotJustJournal": true,
+      "cleanStageReadOverTestIdOnly": true
+    },
+    "streetLayerPriority": {
+      "id": "day2_one_layer_wins",
+      "when": {
+        "dayIndexMin": 2,
+        "flagsAny": [
+          "cold_open_mediate",
+          "cold_open_instigate",
+          "cold_open_stage"
+        ]
+      },
+      "order": [
+        "stageArt",
+        "coldChoiceSvgProp",
+        "hotspotWithSingleNpcBubble",
+        "compactArcChipOptional",
+        "dock"
+      ],
+      "suppressSpotlightWhenColdProp": true,
+      "deferFullArcBannerWhenColdProp": true,
+      "maxNpcBubbles": 1,
+      "acceptance": "Prop + one NPC line readable without overlap",
+      "testId": "street-layer-cold-wins"
+    },
+    "spotlightPolicy": {
+      "id": "spotlight_optional_chrome",
+      "defaultWhenColdDay2": "hidden",
+      "showOnlyIf": {
+        "flagsNone": [
+          "day2_prop_ack",
+          "day2_mediate_spotlight_ack",
+          "day2_instigate_spotlight_ack",
+          "day2_stage_spotlight_ack"
+        ],
+        "andUserOptIn": false,
+        "note": "Do not auto-show. Cold SVG must already be visible."
+      },
+      "forceHideFlag": "hide_day2_spotlight",
+      "setsOnStreetEnter": [
+        "hide_day2_spotlight"
+      ]
+    },
+    "streetArcStageProps": [
+      {
+        "id": "street_prop_antenna_snag",
+        "arcId": "arc_kite_antenna",
+        "when": {
+          "flagsAny": [
+            "quest_antenna_active",
+            "arc_kite_antenna_beat1"
+          ],
+          "flagsNone": [
+            "arc_kite_antenna_beat4",
+            "flag_fence_and_kite",
+            "flag_kite_chaos_buff",
+            "arc_kite_antenna_complete"
+          ]
+        },
+        "preferBeats": [
+          "arc_kite_antenna_beat1",
+          "arc_kite_antenna_beat2"
+        ],
+        "screens": [
+          "street"
+        ],
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--antenna-snag\" data-testid=\"story-street-antenna-snag\" data-arc=\"arc_kite_antenna\" aria-label=\"Snagged kite\">\n  <svg class=\"rp-snag-svg\" viewBox=\"0 0 100 40\" preserveAspectRatio=\"none\" aria-hidden=\"true\">\n    <line x1=\"55\" y1=\"8\" x2=\"55\" y2=\"36\" stroke=\"#8a7a68\" stroke-width=\"0.9\"/>\n    <path d=\"M 40 12 Q 48 6 55 10 Q 62 16 70 10\" fill=\"none\" stroke=\"#c45c3e\" stroke-width=\"0.85\"/>\n    <path d=\"M 70 10 L 78 4 L 74 14 Z\" fill=\"#c45c3e\" stroke=\"#f2e6d8\" stroke-width=\"0.4\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Antenna Op · snag</span>\n</div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--antenna-snag\" data-testid=\"story-street-antenna-snag\" data-arc=\"arc_kite_antenna\" aria-label=\"Takılan uçurtma\">\n  <svg class=\"rp-snag-svg\" viewBox=\"0 0 100 40\" preserveAspectRatio=\"none\" aria-hidden=\"true\">\n    <line x1=\"55\" y1=\"8\" x2=\"55\" y2=\"36\" stroke=\"#8a7a68\" stroke-width=\"0.9\"/>\n    <path d=\"M 40 12 Q 48 6 55 10 Q 62 16 70 10\" fill=\"none\" stroke=\"#c45c3e\" stroke-width=\"0.85\"/>\n    <path d=\"M 70 10 L 78 4 L 74 14 Z\" fill=\"#c45c3e\" stroke=\"#f2e6d8\" stroke-width=\"0.4\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Anten · takılma</span>\n</div>",
+        "testId": "story-street-antenna-snag",
+        "npcLine": {
+          "speakerId": "n4",
+          "text": {
+            "tr": "Antenim oyuncak değil — ip hâlâ orada.",
+            "en": "My antenna is not a toy — the line is still there."
+          }
+        },
+        "priority": 80,
+        "note": "Skip if Day2 cold instigate/mediate kite SVG would double-draw — cold prop wins (priority < cold 100)"
+      },
+      {
+        "id": "street_prop_volume_headphones",
+        "arcId": "arc_volume_war",
+        "when": {
+          "flagsAny": [
+            "quest_volume_active",
+            "arc_volume_war_beat2",
+            "arc_volume_war_beat1"
+          ],
+          "flagsNone": [
+            "arc_volume_war_complete",
+            "flag_peri_stay",
+            "flag_peri_leaving_threat"
+          ]
+        },
+        "screens": [
+          "street"
+        ],
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-headphones-note\" data-arc=\"arc_volume_war\" aria-label=\"HEADPHONES note\">\n  <div class=\"rp-note-door\">\n    <span class=\"rp-note-caps\">HEADPHONES</span>\n  </div>\n  <span class=\"rp-stage-prop__tag\">Decibel · note</span>\n</div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-headphones-note\" data-arc=\"arc_volume_war\" aria-label=\"KULAKLIK notu\">\n  <div class=\"rp-note-door\">\n    <span class=\"rp-note-caps\">KULAKLIK</span>\n  </div>\n  <span class=\"rp-stage-prop__tag\">Desibel · not</span>\n</div>",
+        "testId": "story-street-headphones-note",
+        "npcLine": {
+          "speakerId": "n5",
+          "text": {
+            "tr": "Kapıdaki not büyük harf. Gece hâlâ müzakere.",
+            "en": "The door note is block capitals. Night is still a negotiation."
+          }
+        },
+        "priority": 85
+      },
+      {
+        "id": "street_prop_ledger_tray",
+        "arcId": "arc_tea_ledger",
+        "when": {
+          "flagsAny": [
+            "quest_ledger_active",
+            "arc_tea_ledger_beat1",
+            "arc_tea_ledger_beat2"
+          ],
+          "flagsNone": [
+            "arc_tea_ledger_complete",
+            "flag_ledger_closed_kind",
+            "flag_ledger_private"
+          ]
+        },
+        "screens": [
+          "street"
+        ],
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" aria-label=\"Ledger & tray\">\n  <svg class=\"rp-ledger-svg\" viewBox=\"0 0 80 28\" aria-hidden=\"true\">\n    <ellipse cx=\"22\" cy=\"16\" rx=\"14\" ry=\"6\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/>\n    <rect x=\"42\" y=\"6\" width=\"22\" height=\"16\" rx=\"1.5\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n    <line x1=\"46\" y1=\"10\" x2=\"60\" y2=\"10\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"14\" x2=\"58\" y2=\"14\" stroke=\"#c45c3e\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"18\" x2=\"60\" y2=\"18\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Ledger · tray</span>\n</div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" aria-label=\"Defter ve tepsi\">\n  <svg class=\"rp-ledger-svg\" viewBox=\"0 0 80 28\" aria-hidden=\"true\">\n    <ellipse cx=\"22\" cy=\"16\" rx=\"14\" ry=\"6\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/>\n    <rect x=\"42\" y=\"6\" width=\"22\" height=\"16\" rx=\"1.5\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n    <line x1=\"46\" y1=\"10\" x2=\"60\" y2=\"10\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"14\" x2=\"58\" y2=\"14\" stroke=\"#c45c3e\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"18\" x2=\"60\" y2=\"18\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Defter · tepsi</span>\n</div>",
+        "testId": "story-street-ledger-tray",
+        "npcLine": {
+          "speakerId": "n1",
+          "text": {
+            "tr": "Tepsi ve defter aynı masada — sokak görsün.",
+            "en": "Tray and ledger on one table — let the street see."
+          }
+        },
+        "priority": 84
+      }
+    ],
+    "streetArcCompactChip": {
+      "id": "arc_chip_instead_of_banner",
+      "whenColdPropPresent": true,
+      "replaceFullBanner": true,
+      "template": {
+        "tr": "◎ {arcShort}: {beatShort}",
+        "en": "◎ {arcShort}: {beatShort}"
+      },
+      "arcShort": {
+        "arc_kite_antenna": {
+          "tr": "Anten",
+          "en": "Antenna"
+        },
+        "arc_volume_war": {
+          "tr": "Desibel",
+          "en": "Decibel"
+        },
+        "arc_tea_ledger": {
+          "tr": "Defter",
+          "en": "Ledger"
+        }
+      },
+      "testId": "street-arc-compact-chip",
+      "cssClass": "rp-arc-chip"
+    },
+    "coldPropStageReadBoost": {
+      "id": "cleaner_instigate_stage_read",
+      "purpose": "Instigate/stage props read on clean stage, not only testIds",
+      "cssBoost": true,
+      "rules": [
+        "Increase .rp-stage-prop--kite-high / --chalk-cup / --shared-string size and contrast",
+        "Tag label always visible with solid scrim",
+        "FORBIDDEN ZONE chalk larger, high-contrast",
+        "Single NPC bubble only (Orhan or Cem) — no dual bubble stack on first paint"
+      ]
+    },
+    "cssAppend": "\n/* story-form-9 — one layer wins; arc street props; no spotlight dependency */\n.rp-stage-prop { z-index: 8; }\n.rp-day2-spotlight { display: none !important; } /* cold Day2: chrome off by default via class on body */\nbody.rp-cold-day2 .rp-day2-spotlight { display: none !important; }\nbody.rp-cold-day2 .rp-arc-beat-banner { display: none; }\nbody.rp-cold-day2 .rp-arc-chip { display: inline-flex; }\n\n.rp-arc-chip {\n  display: none;\n  position: absolute;\n  left: 50%;\n  bottom: 5.5rem;\n  transform: translateX(-50%);\n  z-index: 7;\n  padding: 0.35rem 0.65rem;\n  border-radius: 999px;\n  background: rgba(18,12,8,.82);\n  color: #f2e6d8;\n  font-size: 12px;\n  border: 1px solid rgba(232,180,120,.4);\n  max-width: 90%;\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n\n/* Larger cold props — clean stage read */\n.rp-stage-prop--shared-string { left: 10%; right: 22%; top: 24%; height: 26%; }\n.rp-stage-prop--kite-high { left: 36%; right: 4%; top: 6%; height: 42%; }\n.rp-stage-prop--chalk-cup { left: 22%; right: 22%; top: 54%; height: 22%; color: #e8f0f8; }\n.rp-door-chalk {\n  font-size: 12px !important;\n  padding: 0.35rem 0.5rem !important;\n  background: rgba(20,12,8,.9) !important;\n  border: 1px solid #f2e6d8 !important;\n}\n.rp-stage-prop__tag {\n  font-size: 12px !important;\n  padding: 0.25rem 0.5rem !important;\n  background: rgba(12,8,6,.88) !important;\n}\n\n/* Long-arc street props */\n.rp-stage-prop--antenna-snag { left: 40%; right: 15%; top: 16%; height: 28%; color: #f0d2a8; z-index: 7; }\n.rp-snag-svg { width: 100%; height: 100%; display: block; }\n.rp-stage-prop--headphones-note { left: 62%; width: 28%; top: 34%; height: auto; z-index: 7; }\n.rp-note-door {\n  background: #f4f0e4;\n  color: #1a120c;\n  padding: 0.55rem 0.65rem;\n  transform: rotate(-3deg);\n  box-shadow: 0 4px 12px rgba(0,0,0,.45);\n  border: 2px solid #1a120c;\n}\n.rp-note-caps { font: 800 13px/1.1 \"IBM Plex Mono\", ui-monospace, monospace; letter-spacing: 0.08em; }\n.rp-stage-prop--ledger-tray { left: 18%; width: 36%; top: 60%; height: 18%; z-index: 7; color: #e8c9a0; }\n.rp-ledger-svg { width: 100%; height: 100%; display: block; }\n\n/* One bubble max readability */\n.rp-hotspot__bubble { z-index: 9; max-width: 11rem; }\nbody.rp-cold-day2 .rp-hotspot--mediate-leyla .rp-hotspot__bubble,\nbody.rp-cold-day2 .rp-hotspot--instigate-leyla .rp-hotspot__bubble,\nbody.rp-cold-day2 .rp-hotspot--stage-leyla .rp-hotspot__bubble { display: none; }\n",
+    "acceptanceChecks": [
+      {
+        "id": "cold_without_spotlight",
+        "desc": "Day2 mediate/instigate/stage: cold SVG+primary NPC bubble visible; .rp-day2-spotlight absent; body.rp-cold-day2 on."
+      },
+      {
+        "id": "one_layer_wins",
+        "desc": "No overlap of full Antenna banner + spotlight + cold prop. Prop + one NPC line readable."
+      },
+      {
+        "id": "antenna_street_prop",
+        "desc": "While Antenna Op active (pre-resolution) and NOT cold Day2 kite conflict: story-street-antenna-snag on street stage."
+      },
+      {
+        "id": "volume_street_prop",
+        "desc": "While Decibel active: story-street-headphones-note physical note on street (not journal-only)."
+      },
+      {
+        "id": "ledger_street_prop",
+        "desc": "While Ledger active: story-street-ledger-tray on street stage."
+      },
+      {
+        "id": "instigate_stage_clean_read",
+        "desc": "Instigate kite + FORBIDDEN ZONE / stage chalk Cup readable on clean screenshot without relying on testId query alone."
+      }
+    ],
+    "echoFollowUpsAppend": [
+      {
+        "id": "echo_form9_street_not_journal",
+        "priority": 96,
+        "when": {
+          "flagsAny": [
+            "quest_volume_active",
+            "quest_ledger_active",
+            "quest_antenna_active"
+          ],
+          "slots": [
+            "street",
+            "evening"
+          ]
+        },
+        "speakerId": "narrator",
+        "headline": {
+          "tr": "Ark sahnede — sadece defterde değil",
+          "en": "Arc on the stage — not only in the journal"
+        },
+        "body": {
+          "tr": "Sokakta fiziksel prop var: takılan uçurtma / KULAKLIK notu / tepsi-defter.",
+          "en": "Physical prop on the street: snagged kite / HEADPHONES note / tray-ledger."
+        },
+        "cta": {
+          "tr": "Sokağa bak",
+          "en": "Look at the street"
+        }
+      }
+    ],
+    "newStoryFlags": [
+      "hide_day2_spotlight"
+    ]
   }
 }

@@ -1,0 +1,248 @@
+{
+  "schemaVersion": 1,
+  "id": "mechanics-fix-9",
+  "packNumber": 9,
+  "squad": "mechanics",
+  "shippedAt": "2026-11-23T12:51:00Z",
+  "noPrPush": true,
+  "extends": [
+    "internal/rival-porch-combat-pack.json",
+    "internal/squads/mechanics-fix-7.json",
+    "internal/squads/mechanics-fix-8.json"
+  ],
+  "mergeMode": "deepMergeIntoCombatPack",
+  "wirePathHint": "RivalPorch/js/combat.js second Call modal + score delta; reuse porch-call card chrome",
+  "scoreRef": {
+    "file": "internal/rival-porch-score-latest.json",
+    "buildCommit": "37aae6b",
+    "mechanicsScore": 8.0,
+    "overall": 8.1,
+    "priorityFixTitles": [
+      "Softlock-proof second Call with visible score swing",
+      "Second choice speaks Porch Call language"
+    ]
+  },
+  "scoreGapsAddressed": [
+    "Second-call softlocks Practice if Focus+/Prop+/Swap+ missed",
+    "Second-call score swing often invisible (253→253)",
+    "Focus+/Prop+/Swap+ reads like debug, not Porch Call II",
+    "miss → no comic is fail"
+  ],
+  "alsoUseful": [
+    "internal/squads/story-form-8.json — comic/journal can echo Call II resolve line; not required to wire mechanics"
+  ],
+  "targets": [
+    "softlockProofSecondCall",
+    "visibleScoreSwing",
+    "porchCallLanguageCallTwo",
+    "comicAlwaysAfterSecond"
+  ],
+
+  "acceptance": {
+    "softlockAndSwing": "Second choice uses Call!-grade dock pulse; picking always changes You/Bot by ≥+8 within 0.5s; Practice reaches comic without Unstuck; smoke asserts practice_second_call_done.",
+    "language": "Second decision reuses porch-call card art/ids (or clearly labeled Call II); same open→pick→resolve juice as first Call.",
+    "failCondition": "miss second Call → no comic = FAIL"
+  },
+
+  "softlockProofSecondCall": {
+    "problem": "Fight pauses at ~5.8s on Focus+/Prop+/Swap+; miss it → comic/End evening never arrive",
+    "id": "prac_call_two",
+    "renameFrom": ["prac_second_decision", "second-decision-modal", "Focus+", "Prop+", "Swap+"],
+    "arm": {
+      "tSecFromCallOneResolve": 2.5,
+      "dock": {
+        "testId": "porch-call-two-ready",
+        "label": { "tr": "Veranda Çağrısı II", "en": "Porch Call II" },
+        "pulse": true,
+        "minTapTargetPx": 52,
+        "sameChromeAs": "porch-call-ready"
+      }
+    },
+    "forceOpen": {
+      "tSecFromCallOneResolve": 3.0,
+      "modalTestId": "porch-call-modal-2",
+      "required": true,
+      "pauseAutoTicks": true
+    },
+    "noSoftlock": {
+      "practiceSoftTimeoutSec": 6,
+      "onTimeout": {
+        "action": "auto_pick_with_toast",
+        "callId": "call_focus_fire",
+        "toast": {
+          "tr": "Çağrı II — Focus (otomatik)",
+          "en": "Call II — Focus (auto)"
+        },
+        "stillApplyScoreSwing": true,
+        "stillSetFlags": true,
+        "stillReachComic": true
+      },
+      "forbidUnstuckToast": true,
+      "forbidMidFightStartIsOpen": true,
+      "neverBlockFinishOnMissedTap": true
+    },
+    "comicGate": {
+      "afterSecondResolveOrTimeout": true,
+      "maxSecFromCallTwoOpen": 8,
+      "mustReach": "screen-comic",
+      "watchdogForceFinish": true,
+      "setsFlags": [
+        "practice_second_call_done",
+        "practice_second_decision_done",
+        "practice_cup_done"
+      ]
+    },
+    "smokeAssert": "practice_second_call_done === true"
+  },
+
+  "visibleScoreSwing": {
+    "problem": "Focus+ measured You 253→253 — 'swing the score' copy lies",
+    "onPick": {
+      "applyImmediateScoreDelta": true,
+      "minYouScoreDelta": 8,
+      "withinMs": 500,
+      "alsoShowTeamHpDeltaToast": true,
+      "bannerOnScoreboard": true,
+      "template": {
+        "tr": "Çağrı II · {label}: {scoreBefore}→{scoreAfter}",
+        "en": "Call II · {label}: {scoreBefore}→{scoreAfter}"
+      }
+    },
+    "effectBiasPractice": {
+      "call_focus_fire": {
+        "instantYouScoreBonus": 10,
+        "damageTakenBonusPercent": 0.28,
+        "durationSec": 6
+      },
+      "call_prop_assist": {
+        "instantYouScoreBonus": 9,
+        "atkBonusPercent": 0.12,
+        "damageRedirectPercent": 0.35,
+        "durationSec": 5
+      },
+      "call_chaos_kite": {
+        "instantYouScoreBonus": 8,
+        "teamHpSwingHintPercent": 0.16
+      }
+    },
+    "assert": "Math.abs(scoreAfter - scoreBefore) >= 8 within 500ms of pick",
+    "failIf": "scoreBefore === scoreAfter after Focus/Prop/Swap pick"
+  },
+
+  "porchCallLanguageCallTwo": {
+    "problem": "Focus+/Prop+/Swap+ feel like debug chips beside Call! cards",
+    "ui": {
+      "title": { "tr": "Veranda Çağrısı II — birini seç", "en": "Porch Call II — pick one" },
+      "subtitle": {
+        "tr": "Skor sallanır · güvenli / riskli / sinerji",
+        "en": "Score swings · safe / swingy / synergy"
+      },
+      "reuseFirstCallCardLayout": true,
+      "reusePropIcons": true,
+      "reuseCategoryChips": true,
+      "showBlurb": true,
+      "showHpSwingHint": true,
+      "forbidDebugPlusSuffix": true,
+      "forbidLabels": ["Focus+", "Prop+", "Swap+", "Focus +", "Prop +", "Swap +"]
+    },
+    "optionLabels": [
+      {
+        "id": "call_focus_fire",
+        "label": { "tr": "Hedef göster", "en": "Focus fire" },
+        "category": "swingy"
+      },
+      {
+        "id": "call_prop_assist",
+        "label": { "tr": "Prop savur", "en": "Prop toss" },
+        "category": "synergy_leaning"
+      },
+      {
+        "id": "call_chaos_kite",
+        "label": { "tr": "Kaos yer değiştir", "en": "Chaos kite" },
+        "category": "swingy"
+      }
+    ],
+    "preferDifferentFromCallOne": true,
+    "openPickResolveJuice": {
+      "sameAsCallOne": true,
+      "dimStage": true,
+      "lampRim": true,
+      "letterboxPulse": true,
+      "resolveBurst": true,
+      "hitStopMs": 55,
+      "shakeId": "shake_medium"
+    },
+    "testIds": {
+      "dock": "porch-call-two-ready",
+      "modal": "porch-call-modal-2",
+      "optFocus": "porch-call-2-focus",
+      "optProp": "porch-call-2-prop",
+      "optSwap": "porch-call-2-swap"
+    }
+  },
+
+  "comicAlwaysAfterSecond": {
+    "rules": [
+      "After Call II resolve OR soft-timeout auto-pick → finish banner → screen-comic",
+      "Never strand on second-move modal",
+      "Never require Unstuck / Start is open mid-fight",
+      "story-form-8 optional: comic caption may cite Call II label via {porchCall2}"
+    ],
+    "comicSeed": {
+      "includePorchCall": true,
+      "includePorchCall2": true,
+      "forceSynergyId": "syn_rivalry"
+    }
+  },
+
+  "uiStringsPatch": {
+    "fight.porch_call_two_title": {
+      "tr": "Veranda Çağrısı II — birini seç",
+      "en": "Porch Call II — pick one"
+    },
+    "fight.porch_call_two_ready": {
+      "tr": "Veranda Çağrısı II",
+      "en": "Porch Call II"
+    },
+    "fight.porch_call_two_delta": {
+      "tr": "Çağrı II · {label}: {scoreBefore}→{scoreAfter}",
+      "en": "Call II · {label}: {scoreBefore}→{scoreAfter}"
+    },
+    "fight.porch_call_two_auto": {
+      "tr": "Çağrı II — Focus (otomatik)",
+      "en": "Call II — Focus (auto)"
+    }
+  },
+
+  "acceptanceChecks": [
+    "No Focus+/Prop+/Swap+ debug labels — Porch Call II card chrome",
+    "Pick always changes You score by ≥+8 within 0.5s (never 253→253)",
+    "Soft-timeout auto-picks with toast if player misses — still comic",
+    "practice_second_call_done set; comic without Unstuck",
+    "Same open→pick→resolve juice as Call I"
+  ],
+
+  "integrator": {
+    "owner": "code owner on cursor/rival-porch-slice-31f7",
+    "steps": [
+      "Replace second-decision Focus+/Prop+/Swap+ chips with porch-call-modal-2 using Call I card layout + real labels.",
+      "On pick: apply instantYouScoreBonus so You/Bot changes ≥8 within 500ms; show scoreboard toast.",
+      "Soft-timeout 6s → auto Focus with toast; still set practice_second_call_done → comic.",
+      "Remove mid-fight 'Unstuck — Start is open' from Practice path.",
+      "Smoke: Call I → tempo → Call II dock → Focus fire → score +≥8 → comic; also smoke miss-path auto→comic.",
+      "Optional: story-form-8 comic slot {porchCall2}.",
+      "No PR from this squad."
+    ],
+    "priority": "P0 — mechanics 8.0 blocked on softlock + invisible swing + debug chips"
+  },
+
+  "meta": {
+    "expectedMechanicsLift": "8.0 → ≥8.5 once Call II is softlock-proof with visible swing + Call language",
+    "nextPackIfStillLow": "mechanics-fix-10 — further cut Porch-tempo auto carry / ladder mastery",
+    "compat": {
+      "flag": "practice_second_call_done",
+      "minScoreDelta": 8,
+      "withinMs": 500
+    }
+  }
+}

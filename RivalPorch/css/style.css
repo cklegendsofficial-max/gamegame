@@ -4311,3 +4311,295 @@ details.journal-log-fold > summary {
   color: rgba(242,230,216,.7);
   font-size: 0.85rem;
 }
+
+
+/* ===== story-form-8 Volume/Ledger banners + noSpotlight ===== */
+
+/* story-form-8 — Volume/Ledger beat parity (extends form-7 drama styles) */
+.volume-beat-card, .ledger-beat-card {
+  padding: 0.75rem 0.9rem;
+  margin: 0.4rem 0;
+  border-left: 3px solid #7eb6c9;
+  background: rgba(18,12,8,.75);
+  color: #f2e6d8;
+}
+.ledger-beat-card { border-left-color: #c4a574; }
+.volume-beat-card.is-live, .ledger-beat-card.is-live {
+  box-shadow: inset 0 0 0 1px rgba(196,92,62,.35);
+  border-left-color: #c45c3e;
+}
+.volume-beat-card.is-done, .ledger-beat-card.is-done { opacity: 0.65; }
+
+
+/* ===== visual-fix-9 Day2 layer + fight tip declutter ===== */
+/* Rival Porch — visual-fix-9
+   37aae6b visual 8.0:
+   1) Day2 street — one layer wins (prop vs Antenna vs spotlight)
+   2) Fight tip floats — declutter under float cap (no QUEST / score overlap)
+   Paste after visual-fix-5/8.
+*/
+
+/* ── A. Day2 street: prop + one NPC line win on enter ───────────────────── */
+
+.rp-screen--street[data-day="2"],
+.rp-screen--street.is-day2 {
+  --rp-day2-prop-z: 6;
+  --rp-day2-npc-z: 7;
+  --rp-day2-chrome-z: 4;
+}
+
+/* Stage consequence props always above vignette, below sheets */
+.rp-screen--street[data-day="2"] .rp-stage-prop,
+.rp-screen--street.is-day2 .rp-stage-prop,
+.rp-screen--street [data-testid^="story-day2-"] {
+  z-index: var(--rp-day2-prop-z) !important;
+  pointer-events: none;
+}
+
+/* One NPC bubble — readable, not a stack of dialogues */
+.rp-screen--street[data-day="2"] .rp-hotspot__bubble,
+.rp-screen--street.is-day2 .rp-hotspot__bubble,
+.rp-screen--street [data-testid="story-day2-orhan-line"],
+.rp-screen--street [data-testid="story-day2-cem-rehearsal"] {
+  z-index: var(--rp-day2-npc-z) !important;
+  max-width: 11rem;
+  max-height: 3.6em;
+  overflow: hidden;
+  font-size: 11px;
+  line-height: 1.25;
+  padding: 6px 8px;
+  pointer-events: none;
+}
+
+/* Enter spotlight: OFF until prop layer has been visible ≥1s, or collapsed */
+.rp-screen--street[data-day="2"] .rp-day2-spotlight,
+.rp-screen--street.is-day2 .rp-day2-spotlight,
+.rp-screen--street .day2EnterSpotlight,
+.rp-screen--street [data-testid="day2-enter-spotlight"] {
+  display: none !important; /* JS may re-show AFTER prop ack; default hidden on enter */
+}
+
+.rp-screen--street[data-day="2"][data-spotlight="on"] .rp-day2-spotlight,
+.rp-screen--street.is-day2[data-spotlight="on"] .rp-day2-spotlight {
+  display: block !important;
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: calc(var(--rp-dock-h, 72px) + 48px + var(--rp-safe-bottom, 0px));
+  z-index: 5;
+  max-height: 40px;
+  padding: 8px 10px;
+  font-size: 11px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 70%, transparent);
+  pointer-events: auto;
+}
+
+/* Antenna Op / arc live banner — COLLAPSED on Day2 street enter */
+.rp-screen--street[data-day="2"] .rp-antenna-op-live-banner,
+.rp-screen--street.is-day2 .antenna-op-live-banner,
+.rp-screen--street[data-day="2"] [data-testid="antenna-op-live-banner"],
+.rp-screen--street[data-day="2"] .rp-arc-beat-banner,
+.rp-screen--street[data-day="2"] .rp-beat-panel,
+.rp-screen--street[data-day="2"] .rp-journal-beat-card {
+  display: none !important;
+}
+
+/* After Got it / dismiss: show as ONE thin chip under HUD — never a mid-screen novel */
+.rp-screen--street[data-day="2"][data-arc-banner="on"] .rp-antenna-op-live-banner,
+.rp-screen--street.is-day2[data-arc-banner="on"] .antenna-op-live-banner,
+.rp-screen--street[data-day="2"][data-arc-banner="on"] [data-testid="antenna-op-live-banner"] {
+  display: flex !important;
+  position: absolute;
+  top: calc(48px + var(--rp-safe-top, 0px));
+  left: 10px;
+  right: 10px;
+  z-index: var(--rp-day2-chrome-z);
+  max-height: 36px;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 55%, transparent);
+  border: 1px solid color-mix(in srgb, var(--neon-teal, #2EC4B6) 35%, transparent);
+}
+.rp-screen--street[data-day="2"][data-arc-banner="on"] .rp-antenna-op-live-banner .rp-beat-body,
+.rp-screen--street[data-day="2"][data-arc-banner="on"] .rp-antenna-op-live-banner button:not([data-arc-dismiss]) {
+  display: none !important; /* collapse Play the beat / prose until journal */
+}
+
+/* Kill Day2 diamond essay / task list overlays on street */
+.rp-screen--street[data-day="2"] .rp-consequence-list,
+.rp-screen--street[data-day="2"] .rp-seed-list,
+.rp-screen--street[data-day="2"] .rp-mid__bullets,
+.rp-screen--street[data-day="2"] .rp-day2-essay,
+.rp-screen--street[data-day="2"] .rp-street-agenda {
+  display: none !important;
+}
+
+/* Prop tag chips stay small — don't cover SVG */
+.rp-screen--street[data-day="2"] .rp-stage-prop__tag {
+  font-size: 10px;
+  padding: 2px 6px;
+  opacity: 0.9;
+}
+
+/* ── B. Fight tips — never intersect QUEST / score strip ────────────────── */
+
+.rp-screen--fight {
+  --rp-fight-tip-band-top: calc(108px + var(--rp-safe-top, 0px)); /* below HUD+QUEST+score */
+  --rp-fight-tip-band-bottom: calc(var(--rp-dock-h, 72px) + 36px + var(--rp-safe-bottom, 0px));
+}
+
+/* Tip / teach pops live ONLY in mid band */
+.rp-screen--fight .rp-fight-tip,
+.rp-screen--fight .rp-teach-pop,
+.rp-screen--fight .rp-synergy-tip,
+.rp-screen--fight .rp-tempo-tip,
+.rp-screen--fight [data-fight-tip],
+.rp-screen--fight .rivalry-teach,
+.rp-screen--fight .rp-float--tip {
+  position: absolute !important;
+  left: 50% !important;
+  top: auto !important;
+  bottom: calc(var(--rp-dock-h, 72px) + 40px + var(--rp-safe-bottom, 0px)) !important;
+  transform: translateX(-50%) !important;
+  z-index: 6;
+  max-width: min(92%, 22rem);
+  max-height: 36px;
+  padding: 6px 12px !important;
+  margin: 0 !important;
+  font-size: 12px !important;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 72%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--porch-lamp, #E8A045) 40%, transparent);
+  pointer-events: none;
+  text-align: center;
+}
+
+/* Rivalry teach = one badge, not a free float over QUEST */
+.rp-screen--fight .rp-rivalry-badge,
+.rp-screen--fight [data-testid="rivalry-teach-badge"] {
+  position: absolute;
+  left: 50%;
+  top: var(--rp-fight-tip-band-top);
+  transform: translateX(-50%);
+  z-index: 6;
+  max-width: 90%;
+  padding: 5px 10px;
+  font-size: 11px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 70%, transparent);
+  border: 1px solid color-mix(in srgb, #f0c14a 50%, transparent);
+  color: #f0c14a;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Damage floats stay under tip band (reinforce fix-8) */
+.rp-screen--fight .rp-float-layer {
+  top: var(--rp-fight-tip-band-top) !important;
+  bottom: var(--rp-fight-tip-band-bottom) !important;
+  left: 0;
+  right: 0;
+}
+
+/* QUEST + score strip: tip cannot paint over them */
+.rp-screen--fight .rp-hud-quest,
+.rp-screen--fight .rp-quest-banner,
+.rp-screen--fight .rp-arena__score,
+.rp-screen--fight .rp-score-strip {
+  z-index: 8;
+  position: relative;
+}
+
+/* Hide duplicate tip if badge already showing */
+.rp-screen--fight:has(.rp-rivalry-badge) .rp-fight-tip[data-tip="rivalry"],
+.rp-screen--fight:has([data-testid="rivalry-teach-badge"]) .rp-synergy-tip {
+  display: none !important;
+}
+
+/* Tempo / “Porch tempo — steer with taps” — same tip slot, one at a time */
+.rp-screen--fight .rp-tempo-tip + .rp-fight-tip,
+.rp-screen--fight .rp-fight-tip + .rp-tempo-tip {
+  display: none !important;
+}
+
+
+
+
+/* ===== story-form-9 ===== */
+
+/* story-form-9 — one layer wins; arc street props; no spotlight dependency */
+.rp-stage-prop { z-index: 8; }
+.rp-day2-spotlight { display: none !important; } /* cold Day2: chrome off by default via class on body */
+body.rp-cold-day2 .rp-day2-spotlight { display: none !important; }
+body.rp-cold-day2 .rp-arc-beat-banner { display: none; }
+body.rp-cold-day2 .rp-arc-chip { display: inline-flex; }
+
+.rp-arc-chip {
+  display: none;
+  position: absolute;
+  left: 50%;
+  bottom: 5.5rem;
+  transform: translateX(-50%);
+  z-index: 7;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(18,12,8,.82);
+  color: #f2e6d8;
+  font-size: 12px;
+  border: 1px solid rgba(232,180,120,.4);
+  max-width: 90%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Larger cold props — clean stage read */
+.rp-stage-prop--shared-string { left: 10%; right: 22%; top: 24%; height: 26%; }
+.rp-stage-prop--kite-high { left: 36%; right: 4%; top: 6%; height: 42%; }
+.rp-stage-prop--chalk-cup { left: 22%; right: 22%; top: 54%; height: 22%; color: #e8f0f8; }
+.rp-door-chalk {
+  font-size: 12px !important;
+  padding: 0.35rem 0.5rem !important;
+  background: rgba(20,12,8,.9) !important;
+  border: 1px solid #f2e6d8 !important;
+}
+.rp-stage-prop__tag {
+  font-size: 12px !important;
+  padding: 0.25rem 0.5rem !important;
+  background: rgba(12,8,6,.88) !important;
+}
+
+/* Long-arc street props */
+.rp-stage-prop--antenna-snag { left: 40%; right: 15%; top: 16%; height: 28%; color: #f0d2a8; z-index: 7; }
+.rp-snag-svg { width: 100%; height: 100%; display: block; }
+.rp-stage-prop--headphones-note { left: 62%; width: 28%; top: 34%; height: auto; z-index: 7; }
+.rp-note-door {
+  background: #f4f0e4;
+  color: #1a120c;
+  padding: 0.55rem 0.65rem;
+  transform: rotate(-3deg);
+  box-shadow: 0 4px 12px rgba(0,0,0,.45);
+  border: 2px solid #1a120c;
+}
+.rp-note-caps { font: 800 13px/1.1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.08em; }
+.rp-stage-prop--ledger-tray { left: 18%; width: 36%; top: 60%; height: 18%; z-index: 7; color: #e8c9a0; }
+.rp-ledger-svg { width: 100%; height: 100%; display: block; }
+
+/* One bubble max readability */
+.rp-hotspot__bubble { z-index: 9; max-width: 11rem; }
+body.rp-cold-day2 .rp-hotspot--mediate-leyla .rp-hotspot__bubble,
+body.rp-cold-day2 .rp-hotspot--instigate-leyla .rp-hotspot__bubble,
+body.rp-cold-day2 .rp-hotspot--stage-leyla .rp-hotspot__bubble { display: none; }
