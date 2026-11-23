@@ -6662,3 +6662,77 @@ body[data-first10="1"] .rp-dock [data-testid="practice-match"] {
   100% { transform: translateY(0); }
 }
 .rp-arena[data-kit-board-change] { box-shadow: inset 0 0 0 1px rgba(232,160,69,.35); }
+
+/* mechanics-rewrite-5 — screenshot-proof kit prop */
+.rp-kit-prop-beat {
+  position: absolute;
+  left: 50%;
+  top: 12%;
+  transform: translateX(-50%);
+  width: 52px;
+  height: 52px;
+  min-width: 48px;
+  min-height: 48px;
+  object-fit: contain;
+  z-index: 6;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
+  animation: rp-kit-prop-pulse 1.5s ease;
+}
+.rp-kit-prop-beat.is-live { opacity: 1; }
+@keyframes rp-kit-prop-pulse {
+  0% { transform: translateX(-50%) scale(0.7); opacity: 0; }
+  30% { transform: translateX(-50%) scale(1.08); opacity: 1; }
+  100% { transform: translateX(-50%) scale(1); opacity: 1; }
+}
+.rp-pad.pad-taunt,
+.rp-pad.pad-marked,
+.rp-pad.pad-swapped {
+  position: relative;
+  outline: 3px solid #5a4332;
+  outline-offset: 2px;
+}
+
+/* story-rewrite-5 — Snag choice + residue */
+.rp-snag-choice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+}
+.rp-snag-choice .rp-btn {
+  flex: 1 1 40%;
+  min-height: 40px;
+  font-size: 12px;
+}
+.rp-snag-residue { display: flex; gap: 0.45rem; align-items: flex-start; }
+.rp-snag-day1__prop.is-coiled {
+  border-color: #c45c3e;
+  background: radial-gradient(circle at 40% 40%, #c45c3e, transparent 70%);
+}
+.rp-snag-day1__prop.is-cut {
+  border-color: #8a7a68;
+  background: linear-gradient(135deg, #c45c3e 40%, transparent 41%);
+}
+
+/* ux-rewrite-5 — toast under HUD / lamp above toast */
+.rp-toast--affinity {
+  z-index: 4 !important;
+  pointer-events: none !important;
+}
+.rp-cta-lamp,
+[data-testid="evening-primary"],
+[data-testid="street-primary"] {
+  position: relative;
+  z-index: 5;
+}
+.rp-dock--street {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  justify-content: center;
+}
+.rp-dock--street .rp-cta-lamp {
+  flex: 1 1 60%;
+}

@@ -5997,6 +5997,22 @@
     ],
     "comicEchoRules": [
       {
+        "ifFlag": "flag_snag_untangle",
+        "line": {
+          "tr": "Orhan: İpi birlikte çektik. Bu maçta gazetem geç kapandı.",
+          "en": "Orhan: We pulled the line together. My paper closed late for this match."
+        },
+        "panelTestId": "comic-echo-snag-untangle"
+      },
+      {
+        "ifFlag": "flag_snag_cut",
+        "line": {
+          "tr": "Leyla: KESTİN. Arenada rüzgârım öfkeli.",
+          "en": "Leyla: You CUT it. My wind in the arena is angry."
+        },
+        "panelTestId": "comic-echo-snag-cut"
+      },
+      {
         "ifFlag": "flag_fence_and_kite",
         "line": {
           "tr": "Bayrak hâlâ antende sallanıyordu.",

@@ -15,8 +15,40 @@ import * as Density from "./density.js";
 import * as EndEvening from "./endEvening.js";
 import * as Ux4 from "./uxSession4Nuclear.js";
 import * as UxFirst from "./uxFirstSession.js";
-import { spreadPorchNiches, seatPorchNiches } from "./porchNiches.js";
+import { spreadPorchNiches, seatPorchNiches, mudPorchDoorframes } from "./porchNiches.js";
 import { mountAffinityToast } from "./uxToasts.js";
+
+const KIT_PROP_SRC = {
+  hold_fence: "assets/rival-porch/meshy/props/prop-hero-gazete.png",
+  whistle_mark: "assets/rival-porch/meshy/props/prop-hero-duduk.png",
+  kite_cut: "assets/rival-porch/meshy/props/prop-hero-ucurtma.png",
+  pour: "assets/rival-porch/meshy/props/prop-hero-demlik.png",
+  warm: "assets/rival-porch/meshy/props/prop-hero-tepsi.png",
+  bass: "assets/rival-porch/meshy/props/prop-hero-kulaklik.png",
+};
+
+const SNAG_VOICE = {
+  untangle: {
+    n3: {
+      porchWant: { tr: "İpim sağlam indi", en: "My line came down whole" },
+      porchLine: { tr: "Birlikte çektik — çocuk değilim", en: "We pulled together — I’m not a kid" },
+    },
+    n4: {
+      porchWant: { tr: "Anten temiz, gazete geç kapansın", en: "Clean aerial, paper can close late" },
+      porchLine: { tr: "Paçavra indi. Bu gece anten susar", en: "Rag’s down. Aerial sleeps tonight" },
+    },
+  },
+  cut: {
+    n3: {
+      porchWant: { tr: "Yarın daha yükseğe", en: "Fly meaner tomorrow" },
+      porchLine: { tr: "KESTİN. Çocuk gibi hissettim", en: "You CUT it. I felt like a kid" },
+    },
+    n4: {
+      porchWant: { tr: "Sessizlik — bedeli mahallede", en: "Quiet — street will price it" },
+      porchLine: { tr: "İp gitti. Utanç da gitti sanıyorlar", en: "Line’s gone. They think shame left too" },
+    },
+  },
+};
 
 const DAY1_BUSTS = {
   n1: "assets/rival-porch/bust-n1-aunt-merve.png",
@@ -1262,8 +1294,7 @@ function dayHeadline() {
 
 function fireSnagDay1Beat() {
   const f = state.save.storyFlags || (state.save.storyFlags = {});
-  if (f.snag_day1_beat_done) return;
-  f.snag_day1_beat_done = true;
+  if (f.snag_day1_choice_done || f.snag_day1_cleared) return;
   f.snag_day1_street = true;
   try {
     if (state.questPack) Quests.acceptQuest(state.save, state.questPack, "mq_antenna_op");
@@ -1271,16 +1302,128 @@ function fireSnagDay1Beat() {
   saveNow();
 }
 
+function snagChoicePending() {
+  return (
+    !!storyFlag("snag_day1_street") &&
+    !storyFlag("snag_day1_choice_done") &&
+    !storyFlag("snag_day1_cleared") &&
+    (state.save.dayIndex || 1) <= 1
+  );
+}
+
+function resolveSnagDay1Choice(branch) {
+  if (branch !== "untangle" && branch !== "cut") return;
+  if (storyFlag("snag_day1_choice_done")) return;
+  const f = state.save.storyFlags || (state.save.storyFlags = {});
+  f.snag_day1_street = true;
+  f.snag_day1_choice_done = true;
+  f.snag_day1_beat_done = true;
+  f.arc_kite_antenna_beat1 = true;
+  if (branch === "untangle") {
+    f.flag_snag_untangle = true;
+    delete f.flag_snag_cut;
+  } else {
+    f.flag_snag_cut = true;
+    delete f.flag_snag_untangle;
+  }
+  const voice = SNAG_VOICE[branch];
+  state.save.neighborVoiceOverrides = state.save.neighborVoiceOverrides || {};
+  state.save.neighborVoiceOverrides.n3 = voice.n3;
+  state.save.neighborVoiceOverrides.n4 = voice.n4;
+  if (branch === "untangle") {
+    bumpAffinity("n3", 2);
+    bumpAffinity("n4", 2);
+  } else {
+    bumpAffinity("n3", -2);
+    bumpAffinity("n4", 1);
+  }
+  document.body.dataset.snagChoice = branch;
+  saveNow();
+  renderStreet();
+  showScreen("screen-street");
+}
+
+function neighborVoice(id, field) {
+  const override = state.save.neighborVoiceOverrides?.[id]?.[field];
+  if (override) return loc(override);
+  const n = neighborById(id);
+  return loc(n?.[field]) || "";
+}
+
 function snagDay1StreetHtml() {
   if (!storyFlag("snag_day1_street") || storyFlag("snag_day1_cleared")) return "";
   const tr = state.locale === "tr";
+  if (storyFlag("snag_day1_choice_done")) {
+    const untangle = storyFlag("flag_snag_untangle");
+    const whisper = untangle
+      ? (tr ? "İp indi — düğüm cebimde." : "Line’s down — knot’s in my pocket.")
+      : (tr ? "Kesik uç hâlâ demirde sallanıyor." : "Cut end still swings on the iron.");
+    const tid = untangle ? "snag-residue-untangle" : "snag-residue-cut";
+    return `<div class="rp-snag-day1 is-resolved" data-testid="snag-day1-beat" data-snag-branch="${untangle ? "untangle" : "cut"}">
+      <div class="rp-snag-residue" data-testid="${tid}" data-snag-branch="${untangle ? "untangle" : "cut"}">
+        <span class="rp-snag-day1__prop ${untangle ? "is-coiled" : "is-cut"}" aria-hidden="true"></span>
+        <p>${whisper}</p>
+      </div>
+    </div>`;
+  }
   const line = storyFlag("cold_open_instigate") || storyFlag("cold_open_stage")
     ? (tr ? "Leyla: İpim hâlâ onun demirinde. Bugün indirmeden gece olmaz." : "Leyla: My line’s still in his iron. Night doesn’t start until it’s down.")
     : (tr ? "Orhan: Antende paçavra. Ya çöz ya kes — yarın mahalle konuşur." : "Orhan: Rag on the aerial. Untangle or cut — tomorrow the block talks.");
-  return `<div class="rp-snag-day1" data-testid="snag-day1-beat" data-snag="1">
+  return `<div class="rp-snag-day1" data-testid="snag-day1-beat" data-snag="1" data-snag-choice-pending="1">
     <span class="rp-snag-day1__prop" aria-hidden="true"></span>
-    <p>${line}</p>
+    <p class="rp-snag-prompt">${line}</p>
+    <div class="rp-snag-choice" data-testid="snag-choice-row">
+      <button type="button" class="rp-btn rp-btn--primary" data-action="snag-choice" data-snag="untangle" data-testid="snag-choice-untangle">${tr ? "Çöz — birlikte çek" : "Untangle — pull together"}</button>
+      <button type="button" class="rp-btn rp-btn--ember" data-action="snag-choice" data-snag="cut" data-testid="snag-choice-cut">${tr ? "Kes — utanç bitsin" : "Cut — end the shame"}</button>
+    </div>
   </div>`;
+}
+
+function snagCupGossipHtml() {
+  const tr = state.locale === "tr";
+  if (storyFlag("flag_snag_untangle")) {
+    return `<span class="chip on" data-testid="cup-gossip-snag-untangle">${tr ? "Çatı: ip birlikte indi" : "Roof: line came down together"}</span>`;
+  }
+  if (storyFlag("flag_snag_cut")) {
+    return `<span class="chip on" data-testid="cup-gossip-snag-cut">${tr ? "Çatı: ip kesildi — Leyla öfkeli" : "Roof: line cut — Leyla’s sharp"}</span>`;
+  }
+  return "";
+}
+
+function streetDockHtml() {
+  const tr = state.locale === "tr";
+  const needCheckin = !state.save.evening.checkin;
+  const pending = snagChoicePending();
+  let primaryAction = "goto-evening";
+  let primaryLabel = tr ? "Akşama dön" : "Back to evening";
+  if (pending) {
+    primaryAction = "focus-snag";
+    primaryLabel = tr ? "Çatıdaki utancı çöz" : "Settle the roof shame";
+  } else if (storyFlag("snag_day1_choice_done") && !storyFlag("practice_cup_done")) {
+    primaryAction = "goto-cup";
+    primaryLabel = tr ? "Verandada hallet" : "Settle it on the porch";
+  } else if (!storyFlag("practice_cup_done")) {
+    primaryAction = "goto-cup";
+    primaryLabel = tr ? "Prova" : "Practice";
+  }
+  const secondary =
+    primaryAction === "goto-evening"
+      ? ""
+      : `<button class="rp-btn rp-btn--ghost rp-cta-secondary" type="button" data-action="goto-evening" data-testid="street-secondary">${tr ? "Akşama dön" : "Back to evening"}</button>`;
+  const overflowOpen = !!state.streetOverflowOpen;
+  const overflowSheet = overflowOpen
+    ? `<div class="rp-overflow-sheet" data-testid="street-overflow-sheet">
+        <button class="rp-btn rp-btn--ghost" type="button" data-action="checkin" ${needCheckin ? "" : "disabled"}>${needCheckin ? (tr ? "Demlik" : "Check-in") : t("street.porch_checkin")}</button>
+        <button class="rp-btn rp-btn--ghost" type="button" data-action="street-event" ${state.save.evening.streetEvent ? "disabled" : ""}>${t("street.event")}</button>
+        <button class="rp-btn rp-btn--ghost" type="button" data-action="open-quests">${tr ? "Görevler" : "Quests"}</button>
+        ${!storyFlag("practice_cup_done") ? `<button class="rp-btn rp-btn--ghost" type="button" data-action="goto-cup">${tr ? "Prova" : "Practice"}</button>` : ""}
+      </div>`
+    : "";
+  return `${overflowSheet}<footer class="rp-dock rp-dock--street">
+      <button class="rp-btn rp-btn--primary rp-cta-primary rp-cta-lamp" type="button" data-action="${primaryAction}" data-testid="street-primary" data-primary="true">${primaryLabel}</button>
+      ${secondary}
+      <button class="rp-btn rp-btn--ghost" type="button" data-action="toggle-street-overflow" data-testid="street-overflow">···</button>
+    </footer>`;
 }
 
 function renderColdOpen() {
@@ -2674,15 +2817,11 @@ function renderStreet() {
     ${recommendTonightBarHtml()}
     ${!echoOff && !coldWins && npcWhisper && !oneSignal ? `<div class="rp-npc-remember"><span>${npcWhisper}</span></div>` : ""}
     ${""}
-    <footer class="rp-dock">
-      <button class="rp-btn rp-btn--primary" type="button" data-action="checkin" ${needCheckin ? "" : "disabled"}>${needCheckin ? checkinLabel : t("street.porch_checkin")}</button>
-      <button class="rp-btn" type="button" data-action="street-event" ${state.save.evening.streetEvent ? "disabled" : ""}>${t("street.event")}</button>
-      <button class="rp-btn" type="button" data-action="open-quests">${state.locale === "tr" ? "Görevler" : "Quests"}</button>
-      ${!storyFlag("practice_cup_done") ? `<button class="rp-btn" type="button" data-action="goto-cup">${state.locale === "tr" ? "Prova ★" : "Practice ★"}</button>` : ""}
-    </footer>`;
+    ${streetDockHtml()}`;
   requestAnimationFrame(() => {
     armMech15DecibelLived();
     seatPorchNiches(document);
+    mudPorchDoorframes(document);
   });
 }
 
@@ -2730,8 +2869,8 @@ function renderNeighbor(id) {
       <div class="neighbor-meta">
         <h2>${loc(n.name)}</h2>
         <p class="meta-line">${UxFirst.porchJobLabel(n, state.locale)}</p>
-        <p class="meta-line">${loc(n.porchWant) || ""}</p>
-        <p class="meta-line">${loc(n.porchLine) || ""}</p>
+        <p class="meta-line" data-testid="neighbor-porch-want">${neighborVoice(id, "porchWant")}</p>
+        <p class="meta-line" data-testid="neighbor-porch-line">${neighborVoice(id, "porchLine")}</p>
         <p class="meta-line">${t("neighbor.affinity")}: ${affinity}/100 · ${affinityLabel(id)}</p>
         <div class="affinity-bar"><div class="affinity-fill" style="width:${affinity}%"></div></div>
       </div>
@@ -3370,12 +3509,12 @@ function renderCupLobby() {
     .map((n) => {
       const selected = state.cupPicks.includes(n.id);
       const src = goldBust(n.id);
-      const tag = n.synergyTag || "";
       const dim = spotlight.size && !spotlight.has(n.id) && !selected;
+      const job = UxFirst.porchJobLabel(n, state.locale) || loc(n.porchJob) || "";
       return `<button class="pick-card ${selected ? "selected" : ""} ${spotlight.has(n.id) ? "spotlight" : ""} ${dim ? "dimmed" : ""}" type="button" data-action="toggle-pick" data-id="${n.id}">
         <img src="${src}" alt="" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" />
         <div class="name">${loc(n.name)}</div>
-        <div class="muted pick-meta">${UxFirst.porchJobLabel(n, state.locale) || loc(n.porchJob) || ""} · <span class="chip ${String(tag).toLowerCase()}">${tag}</span></div>
+        <div class="muted pick-meta">${job}</div>
       </button>`;
     })
     .join("");
@@ -3431,10 +3570,9 @@ function renderCupLobby() {
     .map((r) => {
       const stake = porchStakeFor(r.sid || r.id);
       const label = stake?.headline || r.name;
-      const chipClass = String(r.tagPool[0] || "").toLowerCase();
-      return `<span class="chip ${chipClass} ${r.active ? "on" : "off"}" title="${label}">${label}${r.active ? (state.locale === "tr" ? " · canlı" : " · live") : (state.locale === "tr" ? " · sessiz" : " · quiet")}</span>`;
+      return `<span class="chip stake ${r.active ? "on" : "off"}" title="${label}">${label}${r.active ? (state.locale === "tr" ? " · canlı" : " · live") : (state.locale === "tr" ? " · sessiz" : " · quiet")}</span>`;
     })
-    .join("");
+    .join("") + snagCupGossipHtml();
   const startLabels = state.combatPack?.startEnabledRules?.labels || {};
   const picksReady = state.cupPicks.length >= state.pickCount;
   const synHint = picksReady
@@ -3485,7 +3623,7 @@ function renderCupLobby() {
     </div>
     <div class="pick-grid pick-grid-dense">${cards}</div>
     <div class="synergy-pills" style="justify-content:center">${preview}</div>
-    <p class="pick-status">${state.cupPicks.length}/${state.pickCount}${teach && !teachSynOk ? (state.locale === "tr" ? " · sinerji kur" : " · form synergy") : ""}</p>
+    <p class="pick-status" data-testid="porch-pick-status">${state.locale === "tr" ? `${state.cupPicks.length} verandada · ${state.pickCount} koltuk` : `${state.cupPicks.length} on the porch · ${state.pickCount} seats`}${teach && !teachSynOk ? (state.locale === "tr" ? " · dedikodu kur" : " · lock gossip") : ""}</p>
     ${synergyCoachHtml(state.cupPicks)}
     <div class="btn-row">
       <button class="btn btn-teal" type="button" data-action="syn-show-me" data-testid="show-me">${state.locale === "tr" ? "Verandada hallet" : "Settle it on the porch"}</button>
@@ -3543,10 +3681,10 @@ function renderDraft() {
     .map((id) => {
       const placed = state.placement.includes(id);
       const role = neighborById(id)?.role || "";
-      const tag = neighborById(id)?.synergyTag || "";
       const src = goldBust(id);
+      const job = UxFirst.porchJobLabel(neighborById(id), state.locale) || role || "";
       return `<button class="bench-unit ${placed ? "placed" : ""} ${state.selectedBench === id ? "selected" : ""}" type="button" data-action="select-bench" data-id="${id}" ${placed ? "disabled" : ""}>
-        <img src="${src}" alt="" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" /><span class="bench-role">${UxFirst.porchJobLabel(neighborById(id), state.locale) || role || ""} · ${tag}</span></button>`;
+        <img src="${src}" alt="" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" /><span class="bench-role">${job}</span></button>`;
     })
     .join("");
   const placedCount = state.placement.filter(Boolean).length;
@@ -3565,8 +3703,8 @@ function renderDraft() {
   const liveSynLine = liveSyn.length
     ? liveSyn.map((s) => loc(s.name)).join(" · ")
     : tr
-      ? "Dedikodu yok — Tea/Rivalry/Neon etiketlerini eşleştir"
-      : "No synergy — match Tea / Rivalry / Neon tags";
+      ? "Dedikodu yok — verandada işleri hizala"
+      : "No porch gossip yet — seat matching jobs";
   screen.innerHTML = `
     ${hudHtml()}
     <div class="topbar"><h2>${t("draft.title")}</h2>
@@ -4509,6 +4647,30 @@ function paintKitBoardChange(battle) {
     arena.setAttribute("data-testid", "kit-board-change");
   }
   updateFightUI(battle);
+  requestAnimationFrame(() => {
+    const root = document.querySelector("#screen-fight .rp-arena, .rp-arena");
+    if (!root) return;
+    const padClass = ev.boardClass || ev.padClass || "pad-taunt";
+    let pad =
+      (ev.padSlot != null && root.querySelector(`[data-slot="${ev.padSlot}"]`)) ||
+      root.querySelector(`.rp-pad.${padClass}, .pad.${padClass}, [data-slot].${padClass}`) ||
+      root.querySelector(".rp-pad, .pad, [data-slot]");
+    if (!pad) {
+      pad = document.createElement("div");
+      pad.className = `rp-pad ${padClass}`;
+      pad.dataset.slot = String(ev.padSlot ?? 0);
+      root.appendChild(pad);
+    }
+    pad.classList.add(padClass);
+    pad.querySelectorAll(".rp-kit-prop-beat").forEach((n) => n.remove());
+    const img = document.createElement("img");
+    img.className = "rp-kit-prop-beat is-live";
+    img.dataset.testid = "kit-prop-beat";
+    img.setAttribute("data-testid", "kit-prop-beat");
+    img.src = KIT_PROP_SRC[ev.kitId] || KIT_PROP_SRC.hold_fence;
+    img.alt = ev.kitId || "kit";
+    pad.appendChild(img);
+  });
 }
 
 function applyPorchCall(callId) {
@@ -4940,7 +5102,7 @@ function renderFight(battle) {
   };
   const coachBanner = battle.allySyn.length
     ? `<div class="syn-fight-tip rp-fight-tip">${battle.allySyn.map(teachLine).join(" · ")}</div>`
-    : `<div class="syn-fight-tip soft">${tr ? "Dedikodu yok — Cup'ta Tea/Rivalry/Neon eşleştir" : "No porch gossip yet — match Tea/Rivalry/Neon in Cup"}</div>`;
+    : `<div class="syn-fight-tip soft">${tr ? "Dedikodu yok — verandada işleri hizala" : "No porch gossip yet — seat matching jobs"}</div>`;
   const canSkip = !Density.practiceSkipBlocked(state.densityPack, state.save) && !(state.practiceMode || practiceCupRequired());
   const screen = document.getElementById("screen-fight");
   screen.innerHTML = `
@@ -5513,10 +5675,17 @@ function renderComic() {
     (state.locale === "tr"
       ? `MVP ${r.mvp}. Blok yarın konuşacak.`
       : `MVP ${r.mvp}. The block will talk tomorrow.`);
+  // story-rewrite-5: Day1 Snag fork echoes Cup comic (before week-2 rules)
+  const snagEchoRules = state.stories?.porchCupNarrative?.comicEchoRules || [];
+  const snagEcho = snagEchoRules.find((r) => r.ifFlag && storyFlag(r.ifFlag));
+  let comicEchoHtml = "";
+  if (snagEcho) {
+    punch = loc(snagEcho.line) || punch;
+    comicEchoHtml = `<p class="comic-echo-tag" data-testid="${snagEcho.panelTestId || "comic-echo-snag"}">${loc(snagEcho.line)}</p>`;
+  }
   // story-form-11: match comic A→V / Volume accord echoes
   const comicEcho = (storyForm11()?.matchComicHandoffEchoes || []).find((e) => whenFlagsOk(e.when || {}));
-  let comicEchoHtml = "";
-  if (comicEcho) {
+  if (!snagEcho && comicEcho) {
     punch = loc(comicEcho.panel) || punch;
     comicEchoHtml = `<p class="comic-echo-tag" data-testid="${comicEcho.testId || "comic-echo-av-handoff"}">${loc(comicEcho.captionTag)}</p>`;
   }
@@ -6071,7 +6240,25 @@ function onAction(action, target) {
       renderStreet();
       showScreen("screen-street");
       break;
+    case "snag-choice":
+      resolveSnagDay1Choice(target.dataset.snag);
+      break;
+    case "focus-snag": {
+      const row = document.querySelector("[data-testid='snag-choice-row']");
+      if (row) row.scrollIntoView({ behavior: "smooth", block: "center" });
+      break;
+    }
+    case "toggle-street-overflow":
+      state.streetOverflowOpen = !state.streetOverflowOpen;
+      renderStreet();
+      break;
     case "goto-cup":
+      if (snagChoicePending()) {
+        toast(state.locale === "tr" ? "Önce çatıdaki utancı çöz" : "Settle the roof shame first");
+        renderStreet();
+        showScreen("screen-street");
+        break;
+      }
       state.cupPicks = [];
       state.enemyLineup = null;
       renderCupLobby();

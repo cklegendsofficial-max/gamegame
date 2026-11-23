@@ -447,12 +447,19 @@ export function resolveCall(battle, optionId) {
     applyEffect(battle, lead, lead.kit.signature.effect);
   }
 
+  const padSlot =
+    boardClass === 'pad-marked' && battle.markedSlot != null
+      ? battle.markedSlot
+      : lead?.slot ?? battle.tauntSlot ?? 0;
   battle.boardEvent = {
     kitId,
-    propId: lead?.propId || lead?.kit?.propId || null,
+    propId: lead?.propId || lead?.kit?.propId || kitId,
     callId: battle.callId,
     testId: 'kit-board-change',
     boardClass,
+    padClass: boardClass,
+    padSlot,
+    side: boardClass === 'pad-marked' ? 'enemy' : 'ally',
   };
   return battle;
 }

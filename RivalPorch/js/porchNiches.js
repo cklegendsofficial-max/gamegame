@@ -1,4 +1,7 @@
-/** visual-rewrite-3/4 — spread X + seat busts in porch doors */
+/** visual-rewrite-3/4/5 — spread X, seat doors, mud doorframes */
+
+const MUD = "rgb(90, 67, 50)"; // #5A4332 — auditor acceptance literal
+
 export function spreadPorchNiches(root = document) {
   return seatPorchNiches(root);
 }
@@ -33,4 +36,38 @@ export function seatPorchNiches(root = document) {
   street.querySelectorAll(
     ".rp-world-banner, .world-banner, .rp-world-consequence, [data-testid='world-banner'], .rp-street-visual, .street-float.rp-wc-loud"
   ).forEach((n) => n.remove());
+  mudPorchDoorframes(root);
+}
+
+export function mudPorchDoorframes(root = document) {
+  const street = root.querySelector(".rp-screen--street, #screen-street");
+  if (!street) return;
+
+  street.querySelectorAll(".rp-hotspot").forEach((el, i) => {
+    el.classList.add("is-porch-door");
+    el.dataset.n ||= String(i + 1);
+
+    let frame = el.querySelector(".rp-hotspot__doorframe");
+    if (!frame) {
+      frame = document.createElement("span");
+      frame.className = "rp-hotspot__doorframe";
+      frame.setAttribute("aria-hidden", "true");
+      el.insertBefore(frame, el.firstChild);
+    }
+    frame.style.setProperty("background", MUD, "important");
+    frame.style.setProperty("background-color", MUD, "important");
+    frame.style.setProperty("border-color", MUD, "important");
+    frame.style.setProperty("outline-color", MUD, "important");
+
+    const bust = el.querySelector(".rp-hotspot__bust");
+    if (bust) {
+      bust.style.setProperty("border", `3px solid ${MUD}`, "important");
+      bust.style.setProperty("border-color", MUD, "important");
+      bust.style.setProperty("outline", `2px solid ${MUD}`, "important");
+      bust.style.setProperty("outline-offset", "1px", "important");
+      bust.style.setProperty("border-radius", "20px 20px 3px 3px", "important");
+      bust.style.setProperty("box-shadow", "none", "important");
+      bust.style.setProperty("filter", "none", "important");
+    }
+  });
 }

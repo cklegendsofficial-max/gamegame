@@ -1,0 +1,29 @@
+{
+  "packId": "ux-rewrite-5",
+  "schemaVersion": 1,
+  "scoreReact": {
+    "buildCommit": "57bc4ae",
+    "overall": 7.5,
+    "gameplay": 7.6,
+    "pf": "Affinity toast never covers lamp primary; street dock one-lamp"
+  },
+  "affinityToast": {
+    "ttlMs": 1100,
+    "neverIntersect": ["evening-primary", "street-primary", ".rp-cta-lamp", ".rp-dock"],
+    "fallbackTopPx": 72,
+    "pointerEvents": "none"
+  },
+  "streetDock": {
+    "primaryTestId": "street-primary",
+    "secondaryTestId": "street-secondary",
+    "overflowTestId": "street-overflow",
+    "forbidEqualPills": ["check-in", "event", "quests", "practice"],
+    "lampClass": "rp-cta-lamp"
+  },
+  "acceptanceChecks": [
+    "toast_bbox_misses_evening_primary",
+    "toast_gone_by_1200ms",
+    "street_exactly_one_lamp_primary",
+    "street_no_four_equal_pills"
+  ]
+}
