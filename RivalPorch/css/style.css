@@ -3238,3 +3238,44 @@ html, body, #app, .app {
   transform: scale(1.1) !important;
   transform-origin: center 48% !important;
 }
+
+/* ===== R16d: pad readability only (no layout thrash) ===== */
+#screen-fight .rp-arena-unit .unit-name,
+#screen-fight .rp-arena-unit .rp-unit__name {
+  font-size: 0.62rem !important;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 3px #000, 0 0 1px #000;
+  color: var(--tea-cream, #F2E6D8);
+}
+#screen-fight .rp-arena-unit .rp-hp {
+  width: 58px;
+  height: 7px !important;
+  margin-top: 3px;
+  border: 1px solid rgba(0,0,0,0.45);
+  background: rgba(0,0,0,0.45);
+}
+#screen-fight .rp-arena-unit .hp-num {
+  font-size: 0.55rem !important;
+  font-weight: 700;
+  text-shadow: 0 1px 2px #000;
+}
+#screen-fight .rivalry-floater,
+#screen-fight .dmg-floater.rivalry-floater {
+  color: #FFD27A;
+  font-weight: 900;
+  text-shadow: 0 0 8px rgba(232,160,69,0.7), 0 1px 2px #000;
+}
+#screen-fight .rp-pad.rp-arena-pad::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  width: 36px;
+  height: 10px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(0,0,0,0.35) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
