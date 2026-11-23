@@ -242,18 +242,12 @@ h2,
 .screen-title {
   justify-content: flex-end;
   padding: 0;
-  background: var(--mud-night) center / cover no-repeat;
+  background: transparent;
   position: relative;
 }
 
 .screen-title::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(180deg, rgba(26, 22, 18, 0.15) 0%, rgba(26, 22, 18, 0.35) 40%, rgba(26, 22, 18, 0.92) 78%),
-    radial-gradient(ellipse at 30% 70%, rgba(232, 160, 69, 0.2), transparent 45%);
-  pointer-events: none;
+  content: none;
 }
 
 .title-panel {
@@ -1560,44 +1554,182 @@ h2,
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 42%;
+  object-position: center 55%;
   display: block;
-  /* Env PNGs are diorama-on-void — scale so clay fills the phone viewport */
-  transform: scale(1.42);
-  transform-origin: center 45%;
 }
 .rp-stage[data-stage="arena"] .rp-stage__img {
-  object-position: center 55%;
-  transform: scale(1.28);
-  transform-origin: center 55%;
+  object-fit: cover;
+  object-position: center 62%;
+}
+#screen-fight .rp-stage__vignette {
+  background:
+    linear-gradient(to top, rgba(26,22,18,0.35) 0%, transparent 26%),
+    linear-gradient(to bottom, rgba(26,22,18,0.35) 0%, transparent 16%);
 }
 .screen-title .rp-stage__img {
-  transform: scale(2.35);
-  transform-origin: center 42%;
+  object-fit: cover;
+  object-position: center 42%;
+  width: 100%;
+  height: 100%;
 }
 .screen-title .rp-brand { font-size: clamp(2.6rem, 11vw, 3.4rem); }
-.fight-stage-glass {
+.rp-stage { background: #1a1612; }
+.screen-title .rp-title-stack {
+  bottom: calc(var(--rp-dock-h) + 18px + var(--rp-safe-bottom));
+}
+#screen-title.screen {
+  padding: 0;
+  overflow: hidden;
+  min-height: 100dvh;
+}
+.fight-top {
+  margin: calc(6px + var(--rp-safe-top)) 12px 0;
   position: relative;
-  z-index: 3;
-  background: rgba(26,22,18,0.28);
-  border: 1px solid rgba(242,230,216,0.12);
+  z-index: 5;
+}
+#screen-fight.screen {
+  padding: 0;
+  overflow: hidden;
+  display: block;
+  min-height: 100dvh;
+  height: 100dvh;
+  position: relative;
+}
+#screen-fight .syn-fight-tip {
+  position: relative;
+  z-index: 5;
+  margin: 0 12px 0.25rem;
+}
+#screen-fight .fight-hud {
+  position: relative;
+  z-index: 5;
+  margin: 0 12px 0.25rem;
+}
+#screen-fight .synergy-pills,
+#screen-fight .fight-log {
+  position: relative;
+  z-index: 5;
+  margin: 0 12px 0.25rem;
+}
+#screen-fight .fight-actions {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 8px;
+  z-index: 8;
+  margin: 0;
+  padding: 8px;
   border-radius: 14px;
-  margin: 0 10px;
-  padding: 0.35rem 0.4rem 0.5rem;
+  background: rgba(26,22,18,0.72);
+  border: 1px solid rgba(232,160,69,0.35);
+  backdrop-filter: blur(8px);
+}
+/* Must beat `.screen:has(.rp-stage) > *:not(.rp-stage) { position:relative }` */
+#screen-fight .rp-arena {
+  position: absolute !important;
+  left: 0;
+  right: 0;
+  top: calc(var(--rp-safe-top) + 96px);
+  bottom: 64px;
+  z-index: 3;
+  margin: 0;
+  min-height: 48dvh;
+  height: auto;
+  border-radius: 0;
+  overflow: visible;
+  background: transparent;
+  pointer-events: none;
+}
+.rp-pads { position: absolute; inset: 0; pointer-events: none; }
+.rp-pad {
+  position: absolute;
+  left: var(--pad-x);
+  top: var(--pad-y);
+  transform: translate(-50%, -70%);
+  width: 76px;
+  pointer-events: none;
+  filter: drop-shadow(0 10px 14px rgba(0,0,0,0.45));
+}
+.rp-arena__vs {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  opacity: 0.7;
+  z-index: 2;
+}
+.rp-arena__label {
+  position: absolute;
+  left: 10px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  z-index: 2;
+  text-shadow: 0 1px 3px #000;
+}
+.rp-arena__label.enemy { top: 6px; color: #ff8f74; }
+.rp-arena__label.you { bottom: 6px; color: var(--neon-teal); }
+#screen-fight .unit-slot {
+  background: rgba(26,22,18,0.28);
+  border-width: 2px;
+  border-radius: 14px;
+  padding: 0.12rem;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.4);
   backdrop-filter: blur(2px);
 }
-.fight-top { margin: 0 12px; }
+#screen-fight .unit-slot img {
+  border-radius: 16px;
+  width: 58px;
+  height: 58px;
+  margin: 0 auto;
+  object-fit: cover;
+}
+#screen-fight .unit-slot.ally { border-color: var(--neon-teal); }
+#screen-fight .unit-slot.enemy { border-color: var(--neon-sign); }
+#screen-fight .unit-name { font-size: 0.55rem; }
+#screen-fight .hp-track { height: 6px; margin-top: 0.12rem; }
+#screen-fight .hp-num { font-size: 0.5rem; }
+.rp-arena.shake, .rp-arena.shake-medium, .rp-arena.shake-heavy { position: relative; }
+.rp-arena.porch-call-dim::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(26,22,18,0.4);
+  pointer-events: none;
+  z-index: 4;
+}
 .rp-stage[data-dim="night"] .rp-stage__img { filter: brightness(0.72) saturate(0.92); }
 .rp-stage__vignette {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(120% 70% at 50% 0%, transparent 40%, rgba(26,22,18,0.55) 100%),
-    linear-gradient(to top, rgba(26,22,18,0.72) 0%, transparent 28%),
-    linear-gradient(to bottom, rgba(26,22,18,0.45) 0%, transparent 18%);
+    linear-gradient(to top, rgba(26,22,18,0.55) 0%, transparent 32%),
+    linear-gradient(to bottom, rgba(26,22,18,0.2) 0%, transparent 14%);
   z-index: 1;
 }
-.screen:has(.rp-stage) > *:not(.rp-stage) { position: relative; z-index: 4; }
+.screen-title .rp-stage__vignette {
+  background: linear-gradient(to top, rgba(26,22,18,0.72) 0%, transparent 38%);
+}
+.screen:has(.rp-stage) > *:not(.rp-stage):not(.rp-arena) { position: relative; z-index: 4; }
+#screen-title .rp-title-stack {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: calc(var(--rp-dock-h) + 28px + var(--rp-safe-bottom));
+  z-index: 6;
+}
+#screen-title .rp-brand {
+  color: var(--tea-cream);
+  text-shadow: 0 2px 18px rgba(26,22,18,0.95), 0 0 2px rgba(26,22,18,0.9);
+}
+#screen-title .rp-dock--title {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  z-index: 6;
+}
 .rp-title-stack {
   position: absolute;
   left: 20px; right: 20px;
@@ -1793,6 +1925,16 @@ h2,
   background: rgba(26,22,18,0.45); pointer-events: none; z-index: 4;
 }
 .porch-call-row .btn { min-width: 6.5rem; }
+.quest-echo {
+  margin: 0.4rem 0 0.2rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 12px;
+  background: rgba(201,123,138,0.14);
+  border: 1px solid rgba(201,123,138,0.4);
+  font-size: 0.82rem;
+}
+.quest-echo strong { display: block; margin-bottom: 0.2rem; font-family: var(--font-display); }
+.quest-echo p { margin: 0 0 0.35rem; color: rgba(242,230,216,0.88); }
 .world-banner.street-float {
   bottom: calc(var(--rp-dock-h) + 52px); z-index: 2;
   pointer-events: none;
@@ -1800,3 +1942,315 @@ h2,
 .rp-hotspots { z-index: 3; }
 .rp-whisper { pointer-events: none; }
 .rp-whisper button { pointer-events: auto; }
+
+/* === visual-fix-1 === */
+/* Rival Porch — visual-fix-1
+   Paste after tokens from rival-porch-ui-css-patch.md (or merge into RivalPorch/css/style.css).
+   Contract: docs/rival-porch-ui-art-forward.md
+   Measured: meshy/previews env-street content ≈ y 39–70% of 512²; arena ≈ y 26–90%.
+*/
+
+/* ── A. Letterbox kill (square Meshy voids → portrait fill) ─────────────── */
+
+.rp-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--mud-night, #1A1612);
+}
+
+.rp-stage__img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  display: block;
+  object-fit: cover;
+  will-change: transform;
+}
+
+/* Street: content strip ~31% of square height — zoom past black void */
+.rp-stage[data-stage="street"] .rp-stage__img {
+  object-position: 47% 54%;
+  transform: translate(-50%, -50%) scale(3.25);
+  transform-origin: center center;
+}
+
+/* Arena: content ~64% height — milder zoom, keep footlights + pads */
+.rp-stage[data-stage="arena"] .rp-stage__img {
+  object-position: 47.5% 58%;
+  transform: translate(-50%, -50%) scale(1.85);
+  transform-origin: center center;
+}
+
+/* Overnight: same street crop, dimmed */
+.rp-stage[data-stage="street"][data-dim="night"] .rp-stage__img {
+  filter: brightness(0.72) saturate(0.92);
+}
+
+/* Soft mud wash only under HUD/dock — never opaque #1A1612 panels */
+.rp-stage__vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--mud-night, #1A1612) 42%, transparent) 0%,
+      transparent 14%
+    ),
+    linear-gradient(
+      to top,
+      color-mix(in srgb, var(--mud-night, #1A1612) 68%, transparent) 0%,
+      transparent 22%
+    );
+}
+
+/* Optional: if gold PNG fallbacks used instead of Meshy */
+.rp-stage[data-fallback="gold-street"] .rp-stage__img {
+  transform: translate(-50%, -50%) scale(1.35);
+  object-position: center 40%;
+}
+.rp-stage[data-fallback="gold-arena"] .rp-stage__img {
+  transform: translate(-50%, -50%) scale(1.4);
+  object-position: center 50%;
+}
+
+/* ── B. Fight pads (busts ON clay tiles — kill card walls) ───────────────── */
+
+.rp-screen--fight .rp-hud-top {
+  opacity: 0.7;
+}
+
+/* Kill page-title / rival banner chrome */
+.rp-screen--fight .rp-page-title,
+.rp-screen--fight .rp-fight-banner,
+.rp-screen--fight .rp-card-wall,
+.rp-screen--fight .rp-unit-card,
+.rp-arena-panel {
+  display: none !important;
+}
+
+.rp-arena {
+  position: absolute;
+  inset: calc(var(--rp-hud-h, 56px) + var(--rp-safe-top, 0px)) 0
+    calc(var(--rp-dock-h, 88px) + var(--rp-safe-bottom, 0px));
+  z-index: 3;
+  pointer-events: none;
+}
+
+.rp-arena > * {
+  pointer-events: auto;
+}
+
+/* Tiny score chips — not a scoreboard bar */
+.rp-arena__score {
+  position: absolute;
+  left: 50%;
+  top: 4px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 4;
+}
+.rp-arena__score .rp-chip {
+  font-size: 11px;
+  padding: 4px 8px;
+}
+
+.rp-unit {
+  position: absolute;
+  left: var(--pad-x);
+  top: var(--pad-y);
+  width: 68px;
+  transform: translate(-50%, -70%);
+  text-align: center;
+  z-index: 3;
+}
+
+.rp-unit img {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 16px;
+  display: block;
+  margin: 0 auto;
+  border: 2px solid var(--neon-teal, #2EC4B6);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--mud-night, #1A1612) 70%, transparent);
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 35%, transparent);
+}
+
+.rp-unit--enemy img {
+  border-color: var(--neon-sign, #FF6B4A);
+}
+
+.rp-hp {
+  position: relative;
+  margin: 3px auto 0;
+  width: 56px;
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 75%, transparent);
+  overflow: hidden;
+}
+.rp-hp > i {
+  display: block;
+  height: 100%;
+  background: var(--neon-teal, #2EC4B6);
+}
+.rp-unit--enemy .rp-hp > i {
+  background: var(--neon-sign, #FF6B4A);
+}
+.rp-hp > span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  margin-top: 2px;
+  font-size: 9px;
+  opacity: 0.8;
+  line-height: 1;
+}
+
+.rp-arena__vs {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  transform: translate(-50%, -50%);
+  font-family: var(--rp-font-display, "Fraunces", serif);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.rp-unit.is-hit img {
+  animation: rp-unit-squash 180ms ease-out;
+}
+@keyframes rp-unit-squash {
+  0% { transform: scale(1); }
+  40% { transform: scale(0.94, 1.06); }
+  100% { transform: scale(1); }
+}
+
+/* ── C. Chrome budget (menus = glass chips, not card walls) ─────────────── */
+
+.rp-hud-top {
+  min-height: var(--rp-hud-h, 56px);
+  max-height: calc(56px + var(--rp-safe-top, 0px) + 8px);
+}
+
+.rp-dock {
+  min-height: auto;
+  max-height: calc(var(--rp-dock-h, 88px) + var(--rp-safe-bottom, 0px));
+}
+
+/* Evening mid: one night title + progress + ≤1 line — kill bullet walls */
+.rp-mid {
+  max-width: 22rem;
+  padding: 12px 14px;
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 42%, transparent);
+  border: 1px solid var(--rp-glass-border, color-mix(in srgb, #F2E6D8 18%, transparent));
+  backdrop-filter: blur(10px);
+}
+.rp-mid .rp-mid__bullets,
+.rp-mid .rp-meta-row,
+.rp-evening-card__stats {
+  display: none !important;
+}
+.rp-mid__line {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.88rem;
+}
+
+/* Quest log must be sheet — never opaque full route */
+.rp-screen--quests:not(.rp-sheet),
+.rp-quests-page {
+  /* If integrator still mounts a quest route, force stage-visible sheet look */
+}
+.rp-sheet__panel {
+  max-height: 58vh;
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 82%, transparent);
+}
+.rp-quest {
+  background: transparent;
+  border-bottom: 1px solid var(--rp-glass-border, color-mix(in srgb, #F2E6D8 14%, transparent));
+  border-radius: 0;
+  padding: 10px 0;
+}
+.rp-quest:last-child {
+  border-bottom: 0;
+}
+.rp-quest__steps li {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+/* Title: brand + lede + one CTA — no void panel */
+.rp-screen--title .rp-title-stack {
+  bottom: calc(var(--rp-dock-h, 88px) + 20px + var(--rp-safe-bottom, 0px));
+}
+.rp-screen--title .rp-brand {
+  text-shadow:
+    0 2px 20px color-mix(in srgb, var(--mud-night, #1A1612) 85%, transparent),
+    0 0 40px color-mix(in srgb, var(--porch-lamp, #E8A045) 25%, transparent);
+}
+
+/* Skip / secondary as ghost chips, not second primary wall */
+.rp-btn--skip,
+.rp-screen--fight .rp-btn-skip {
+  position: absolute;
+  right: 12px;
+  top: calc(8px + var(--rp-safe-top, 0px));
+  z-index: 5;
+  background: var(--rp-glass, color-mix(in srgb, #1A1612 62%, transparent));
+  border: 1px solid var(--rp-glass-border, color-mix(in srgb, #F2E6D8 18%, transparent));
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--tea-cream, #F2E6D8);
+}
+
+/* === squad batch: ux + mechanics + story chrome === */
+.rp-adventure-beats {
+  list-style: none; margin: 0.35rem 0 0; padding: 0; display: grid; gap: 4px;
+}
+.rp-adventure-beats li {
+  font-size: 0.78rem; line-height: 1.3; opacity: 0.92;
+  padding: 0; border: 0; background: transparent;
+}
+.spine-strip { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.spine-chip {
+  font-size: 11px; padding: 4px 8px; border-radius: 999px;
+  background: rgba(26,22,18,0.55); border: 1px solid rgba(242,230,216,0.18);
+  color: var(--tea-cream, #F2E6D8); cursor: pointer;
+}
+.spine-chip.active { border-color: var(--porch-lamp, #E8A045); }
+.spine-chip.done { opacity: 0.7; }
+.porch-call-card {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+  min-width: 7.5rem; max-width: 10rem; text-align: left; padding: 8px 10px !important;
+  min-height: 48px;
+}
+.porch-call-card strong { font-size: 0.85rem; }
+.porch-call-card em { font-style: normal; font-size: 0.68rem; opacity: 0.88; line-height: 1.25; }
+.porch-call-chip {
+  font-size: 0.6rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; opacity: 0.9;
+}
+.porch-call-swing { font-size: 0.62rem; opacity: 0.75; }
+.porch-call-sub { margin: 0 0 0.25rem; font-size: 0.72rem; }
+.react-echo { border-color: rgba(232,160,69,0.45); }
+.hud-quest-next {
+  display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
+  max-width: 14rem;
+}
+#screen-fight .topbar h2 { font-size: 0.95rem; opacity: 0.7; }

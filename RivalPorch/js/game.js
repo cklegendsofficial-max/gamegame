@@ -11,6 +11,7 @@ import {
   playUiTap, startCrowdMurmur, stopCrowdMurmur,
 } from "./sfx.js";
 import * as Combat from "./combat.js";
+import * as Density from "./density.js";
 
 const DAY1_BUSTS = {
   n1: "assets/rival-porch/bust-n1-aunt-merve.png",
@@ -74,6 +75,8 @@ const state = {
   questPack: null,
   questTab: "active",
   combatPack: null,
+  densityPack: null,
+  uxPack: null,
   practiceMode: false,
 };
 
@@ -179,6 +182,24 @@ function isCupNight() {
   return days.includes(dayOfWeek());
 }
 
+function practiceCupRequired() {
+  // First evenings must teach Practice Cup — not skippable until done once
+  if (Density.practiceExitBlocked(state.densityPack, state.save)) return true;
+  return !isCupNight() && !state.save.storyFlags?.practice_cup_done;
+}
+
+function echoBannerHtml() {
+  const echo = Density.pickEcho(state.densityPack, state.save, state.questPack, "evening");
+  if (!echo) return "";
+  state.save.density = state.save.density || { microUsed: {}, echoShown: {} };
+  state.save.density.echoShown[echo.id] = state.save.dayIndex || 1;
+  return `<div class="quest-echo">
+    <strong>${loc(echo.headline)}</strong>
+    <p>${loc(echo.body)}</p>
+    <button class="rp-btn rp-btn--ghost" type="button" data-action="goto-street">${loc(echo.cta) || (state.locale === "tr" ? "Kapı çal" : "Knock")}</button>
+  </div>`;
+}
+
 function difficultyForWeek() {
   const w = weekNumber();
   const rows = state.ladder.botDifficulty || [];
@@ -249,20 +270,22 @@ function applyEffects(effects, neighborId) {
 function eveningStats() {
   const needVisits = state.depthMeta.eveningAgenda.requiredActions.find((a) => a.id === "visits")?.count || 3;
   const e = state.save.evening;
+  const cupRequired = isCupNight() || practiceCupRequired();
   return {
     needVisits,
     visits: e.visits.length,
     checkin: e.checkin,
     streetEvent: e.streetEvent,
     errand: e.errand,
-    cupRequired: isCupNight(),
+    secondBeat: !!e.secondBeat,
+    cupRequired,
     cupDone: e.cupDone,
     complete:
       e.checkin &&
       e.visits.length >= needVisits &&
       e.streetEvent &&
       e.errand &&
-      (!isCupNight() || e.cupDone),
+      (!cupRequired || e.cupDone),
   };
 }
 
@@ -285,10 +308,115 @@ function unfinishedQuestHeadline() {
   const main = actives.find((q) => q.type === "main") || actives[0];
   const e = state.save.quests.entries[main.id];
   const next = (main.objectives || []).find((o) => !Quests.objectiveDone(e, o));
-  const nextLabel = next ? loc(next.label) : loc(main.title);
+  const nextLabel = next ? loc(next.label) : (state.locale === "tr" ? "ödülü topla" : "claim reward");
+  const title = loc(main.title);
+  if (!nextLabel || nextLabel === title) {
+    return state.locale === "tr" ? `Yarım: ${title}` : `Unfinished: ${title}`;
+  }
   return state.locale === "tr"
-    ? `${loc(main.title)} — sırada: ${nextLabel}`
-    : `${loc(main.title)} — next: ${nextLabel}`;
+    ? `${title} — sırada: ${nextLabel}`
+    : `${title} — next: ${nextLabel}`;
+}
+
+
+function uxStr(key, fallback) {
+  const s = state.uxPack?.strings?.[key];
+  if (s) return loc(s);
+  return fallback;
+}
+
+function firstEveningBeats() {
+  const beats = state.uxPack?.firstEvening?.beats || [];
+  const flags = state.save.storyFlags || {};
+  const out = [];
+  for (const b of beats) {
+    let done = false;
+    if (b.flagDone) done = !!flags[b.flagDone];
+    if (b.alsoEvening === "checkin" && state.save.evening?.checkin) done = true;
+    if (b.flagsAll?.length) done = b.flagsAll.every((f) => flags[f]);
+    if (b.questReady && state.questPack) {
+      const e = state.save.quests?.entries?.[b.questReady];
+      const q = Quests.questDef(state.questPack, b.questReady);
+      if (e && (e.status === "done" || e.status === "completed")) done = true;
+      else if (e && q && Quests.questReadyToComplete(q, e)) done = false; // show claim beat
+      else done = true; // hide until claimable
+    }
+    if (!done) out.push(b);
+  }
+  return out.slice(0, 3);
+}
+
+function questHudWhisper() {
+  const tr = state.locale === "tr";
+  const flags = state.save.storyFlags || {};
+  const beats = state.uxPack?.firstEvening?.beats || [];
+  const byId = Object.fromEntries(beats.map((b) => [b.id, b]));
+  // claimable main?
+  if (state.questPack) {
+    const actives = Quests.activeQuests(state.questPack, state.save);
+    for (const q of actives.filter((x) => x.type === "main")) {
+      const e = state.save.quests.entries[q.id];
+      if (Quests.questReadyToComplete(q, e) && byId.fe_claim) return loc(byId.fe_claim.whisper);
+    }
+  }
+  if (state.save.dayIndex <= 1 && !flags.practice_cup_done && byId.fe_prova) return loc(byId.fe_prova.whisper);
+  for (const id of ["fe_steam", "fe_doors", "fe_kite", "fe_claim"]) {
+    const b = byId[id];
+    if (!b) continue;
+    if (b.flagDone && flags[b.flagDone]) continue;
+    if (b.alsoEvening === "checkin" && state.save.evening?.checkin) continue;
+    if (b.flagsAll?.every((f) => flags[f])) continue;
+    return loc(b.whisper);
+  }
+  const echo = Density.pickEcho(state.densityPack, state.save, state.questPack, "evening");
+  if (echo && (echo.priority || 0) >= 85) return loc(echo.headline);
+  return loc(state.uxPack?.questHud?.fallback) || (tr ? "Sokak nefes alıyor" : "The street is breathing");
+}
+
+function objectivePlayerLabel(obj) {
+  const map = state.uxPack?.objectiveLabels || {};
+  if (map[obj.id]) return loc(map[obj.id]);
+  let label = loc(obj.label);
+  // strip systems jargon
+  label = label.replace(/affinity\s*≥\s*\d+/gi, "").replace(/win optional/gi, "").replace(/\s{2,}/g, " ").trim();
+  return label || loc(obj.label);
+}
+
+
+function flagsMatchWhen(when = {}, save = {}) {
+  const flags = save.storyFlags || {};
+  if (when.flagsAll?.some((f) => !flags[f])) return false;
+  if (when.flagsNone?.some((f) => flags[f])) return false;
+  if (when.flagsAny?.length && !when.flagsAny.some((f) => flags[f])) return false;
+  return true;
+}
+
+function pickReactiveDialogue(slot = "evening") {
+  const schedules = state.stories?.dialogueSchedules || [];
+  const ranked = schedules
+    .filter((s) => (!s.slot || s.slot === slot) && flagsMatchWhen(s.when, state.save))
+    .sort((a, b) => (b.priority || 0) - (a.priority || 0));
+  const top = ranked[0];
+  if (!top) return null;
+  const id = top.dialogueTreeId || top.dialogueId || top.treeId;
+  const trees = state.stories?.dialogueTrees;
+  if (Array.isArray(trees)) return trees.find((t) => t.id === id) || null;
+  return trees?.[id] || null;
+}
+
+function reactiveDialogueBannerHtml() {
+  // Prefer density echo ≥85 over reactive offer
+  const echo = Density.pickEcho(state.densityPack, state.save, state.questPack, "evening");
+  if (echo && (echo.priority || 0) >= 85) return "";
+  const tree = pickReactiveDialogue("evening");
+  if (!tree) return "";
+  const root = (tree.nodes || []).find((n) => n.id === (tree.start || "root")) || (tree.nodes || [])[0];
+  const line = loc(root?.text) || loc(tree.title) || tree.id;
+  return `<div class="quest-echo react-echo">
+    <strong>${state.locale === "tr" ? "Sokak hatırlıyor" : "The street remembers"}</strong>
+    <p>${line}</p>
+    <button class="rp-btn rp-btn--ghost" type="button" data-action="open-reactive-dlg" data-id="${tree.id}">${state.locale === "tr" ? "Dinle" : "Listen"}</button>
+  </div>`;
 }
 
 function hudHtml() {
@@ -303,9 +431,9 @@ function hudHtml() {
         <span title="${currencyName("neon_thread")}">🧵 ${s.currencies.neon_thread||0} <em>${currencyName("neon_thread")}</em></span>
         <span title="${currencyName("clay_tokens")}">🧱 ${s.currencies.clay_tokens||0} <em>${currencyName("clay_tokens")}</em></span>
       </div>
-      <button class="hud-quest" type="button" data-action="open-quests" title="${qLine || (state.locale === "tr" ? "Görevler" : "Quests")}">
-        <span class="hud-quest-label">${state.locale === "tr" ? "Görev" : "Quest"}</span>
-        <span class="hud-quest-next">${qLine || (state.locale === "tr" ? "Defteri aç" : "Open log")}</span>
+      <button class="hud-quest" type="button" data-action="open-quests" title="${questHudWhisper()}">
+        <span class="hud-quest-label">${state.locale === "tr" ? "GÖREV" : "QUEST"}</span>
+        <span class="hud-quest-next">${questHudWhisper()}</span>
       </button>
     </div>`;
 }
@@ -495,8 +623,9 @@ function renderQuestLog() {
               .map((o) => {
                 const have = e?.progress?.[o.id] || 0;
                 const need = o.count || 1;
-                const ok = have >= need;
-                return `<li class="${ok ? "done" : ""}">${ok ? "✓" : "○"} ${loc(o.label)} <span class="agenda-hint">${have}/${need}</span></li>`;
+                const ok = have >= need || Quests.objectiveDone(e, o);
+                const frac = need > 1 ? ` <span class="agenda-hint">${have}/${need} ${state.locale === "tr" ? "kapı" : "doors"}</span>` : "";
+                return `<li class="${ok ? "done" : ""}">${ok ? "✓" : "○"} ${objectivePlayerLabel(o)}${ok ? "" : frac}</li>`;
               })
               .join("");
             const ready = Quests.questReadyToComplete(q, e);
@@ -626,6 +755,8 @@ function renderColdOpen() {
 function resolveColdOpen(cid) {
   ensureNeighborState("n3");
   ensureNeighborState("n4");
+  state.save.storyFlags = state.save.storyFlags || {};
+  state.save.storyFlags.first_evening_cup_available = true;
   const packs = {
     mediate: {
       aff: [["n3", 4], ["n4", 3]],
@@ -676,19 +807,34 @@ function resolveColdOpen(cid) {
 function renderOvernight(payoff) {
   const screen = document.getElementById("screen-overnight");
   const tr = state.locale === "tr";
-  const bits = (payoff?.lines || []).slice(0, 5).map((l) => `<li>${l}</li>`).join("") || `<li>${tr ? "Mahalle uyudu." : "The block slept."}</li>`;
-  const tomorrow = loc(dayHeadline());
-  const qPull = unfinishedQuestHeadline();
+  const teaser = Density.pickOvernightTeaser(state.densityPack, state.save, state.questPack);
+  const echo = Density.pickEcho(state.densityPack, state.save, state.questPack, "overnight_wake");
+  const whisper = questHudWhisper();
+  const teaserLines = (teaser?.lines || []).map((l) => loc(l)).filter(Boolean);
+  const bitsSrc = [
+    ...teaserLines.slice(0, 2),
+    ...(payoff?.lines || []).slice(0, 1),
+    echo ? loc(echo.body) : null,
+  ]
+    .filter(Boolean)
+    .slice(0, 3);
+  const bits = bitsSrc.map((l) => `<li>${l}</li>`).join("") || `<li>${tr ? "Mahalle uyudu." : "The block slept."}</li>`;
+  const tomorrow = teaser ? loc(teaser.title) : loc(dayHeadline());
+  const hook = teaser ? loc(teaser.tomorrowHook) : payoff?.tease || "";
+  const primaryLabel = tr ? `Yarım kalan: ${whisper}` : `Still open: ${whisper}`;
+  const primaryCta = whisper.includes("ödül") || whisper.toLowerCase().includes("reward") || whisper.toLowerCase().includes("tray")
+    ? "open-quests"
+    : "overnight-open-quest";
   screen.innerHTML = `
     ${stageLayer("street", true)}
     <div class="rp-overnight">
       <p class="rp-kicker">${tr ? "Gece geçti" : "Night passed"}</p>
       <h2 class="rp-night-title">${tomorrow}</h2>
-      ${qPull ? `<p class="overnight-quest-pull">◎ ${qPull}</p>` : ""}
+      <p class="overnight-quest-pull">◎ ${tr ? "Yarım kalan" : "Still open"}: ${whisper}</p>
       <ul class="rp-ticks">${bits}</ul>
-      <p class="evening-cup-tease">${payoff?.tease || ""}</p>
-      <button class="rp-btn rp-btn--primary" type="button" data-action="goto-evening">${tr ? "Yeni akşama gir" : "Enter the new evening"}</button>
-      <button class="rp-btn rp-btn--ghost" type="button" data-action="open-quests">${tr ? "Görev defteri" : "Quest log"}</button>
+      <p class="evening-cup-tease">${hook}</p>
+      <button class="rp-btn rp-btn--primary" type="button" data-action="${primaryCta}">${primaryLabel}</button>
+      <button class="rp-btn rp-btn--ghost" type="button" data-action="goto-evening">${tr ? "Yeni akşama gir" : "Enter the new evening"}</button>
     </div>`;
   showScreen("screen-overnight");
 }
@@ -709,7 +855,21 @@ function renderEvening() {
     { ok: st.streetEvent, label: t("street.event"), hint: state.locale === "tr" ? "günlük seçim" : "daily choice" },
     { ok: st.errand, label: errandLabel, hint: state.locale === "tr" ? "hediye / alışveriş" : "gift / purchase" },
   ];
-  if (st.cupRequired) items.push({ ok: st.cupDone, label: t("cup.season_night"), hint: "Cup" });
+  if (st.cupRequired) {
+    items.push({
+      ok: st.cupDone,
+      label: isCupNight() ? t("cup.season_night") : t("cup.practice"),
+      hint: practiceCupRequired() ? (state.locale === "tr" ? "zorunlu ders" : "required lesson") : "Cup",
+    });
+  }
+  // Optional second street beat densifies the evening once core agenda is nearly done
+  if (st.checkin && st.visits >= st.needVisits) {
+    items.push({
+      ok: st.secondBeat,
+      label: state.locale === "tr" ? "İkinci tur (opsiyonel+)" : "Second beat (optional+)",
+      hint: state.locale === "tr" ? "ek kapı / olay" : "extra door / event",
+    });
+  }
 
   const dayHooks = {
     1: {
@@ -807,46 +967,76 @@ function renderEvening() {
     : `<p class="street-hint">${state.locale === "tr" ? "Henüz ana görev yok — Görevler → Available." : "No main quest yet — Quests → Available."}</p>`;
 
   const doneN = items.filter((i) => i.ok).length;
-  const progPct = Math.round((doneN / Math.max(1, items.length)) * 100);
+  const nightOne = state.save.dayIndex <= 1;
+  const adventureBeats = nightOne ? firstEveningBeats() : [];
   const mainTitle = mainAgenda?.title || (state.locale === "tr" ? "Akşam omurgası" : "Evening spine");
-  const mainDone = mainAgenda
-    ? mainAgenda.objectives.filter((o) => o.done).length
-    : doneN;
-  const mainTotal = mainAgenda ? mainAgenda.objectives.length : items.length;
+  const beatMax = state.uxPack?.firstEvening?.beats?.length || 4;
+  const beatDone = beatMax - (firstEveningBeats().length || 0);
+  const mainDone = nightOne ? Math.max(0, beatDone) : (mainAgenda ? mainAgenda.objectives.filter((o) => o.done).length : doneN);
+  const mainTotal = nightOne ? beatMax : (mainAgenda ? mainAgenda.objectives.length : items.length);
   const faceId = mainAgenda?.quest?.neighbors?.[0] || unlockedNeighbors()[0]?.id || "n1";
+  const support = nightOne
+    ? uxStr("evening.nightOne.support", state.locale === "tr"
+        ? "Üç kapı hâlâ nefes alıyor. Cumartesi Kupası dinliyor."
+        : "Three doors still breathe. Saturday Cup is listening.")
+    : loc(hook);
+  const beatList = adventureBeats.length
+    ? `<ul class="rp-adventure-beats">${adventureBeats
+        .map((b) => `<li><strong>${loc(b.label)}</strong> — ${loc(b.line)}</li>`)
+        .join("")}</ul>`
+    : "";
+  const primaryCta = adventureBeats[0]?.cta === "goto-cup"
+    ? "goto-cup"
+    : adventureBeats[0]?.cta === "open-quests"
+      ? "open-quests"
+      : "goto-street";
+  const primaryLabel = primaryCta === "goto-cup"
+    ? (state.locale === "tr" ? "Prova maçı ★" : "Practice match ★")
+    : primaryCta === "open-quests"
+      ? (state.locale === "tr" ? "Ödülü al" : "Claim reward")
+      : uxStr("evening.cta.knock", state.locale === "tr" ? "Bir kapı çal" : "Knock a door");
+  const lockedCopy = uxStr(
+    "evening.locked",
+    state.locale === "tr" ? "Akşam bitmez — Cem Prova'da düdük çalıyor." : "Evening won't end — Cem's still whistling Practice."
+  );
 
   screen.innerHTML = `
     ${stageLayer("street")}
     ${hudHtml()}
     <div class="rp-mid">
-      <p class="rp-kicker">${state.locale === "tr" ? "Ana görev" : "Main"} · ${mainTitle}</p>
+      <p class="rp-kicker">${state.locale === "tr" ? "Ana" : "Main"} · ${mainTitle}</p>
       <h2 class="rp-night-title">${loc(dayHeadline())}</h2>
       <div class="rp-progress">
         <img src="${goldBust(faceId)}" alt="" width="40" height="40" onerror="this.src='${DAY1_BUSTS.n1}'" />
         <div class="rp-progress__bar" aria-valuenow="${mainDone}" aria-valuemax="${mainTotal}"><i style="width:${Math.round((mainDone / Math.max(1, mainTotal)) * 100)}%"></i></div>
-        <span>${mainDone}/${mainTotal}</span>
+        <span>${fillTemplate(uxStr("evening.progress.beats", state.locale === "tr" ? "Vuruş {n}/{max}" : "Beats {n}/{max}"), { n: mainDone, max: mainTotal })}</span>
       </div>
-      <p class="rp-mid__line">${loc(hook)}</p>
-      ${worldBits.length ? `<p class="world-consequence">${worldBits.map((l) => `◈ ${l}`).join(" · ")}</p>` : ""}
-      <div class="quest-strip">${questStrip}</div>
+      <p class="rp-mid__line">${support}</p>
+      ${beatList}
+      ${echoBannerHtml()}
       ${
         mainAgenda?.ready
-          ? `<button class="rp-btn rp-btn--primary" type="button" data-action="quest-complete" data-id="${mainAgenda.quest.id}">${state.locale === "tr" ? "Ana görev ödülünü topla" : "Claim main quest reward"}</button>`
+          ? `<button class="rp-btn rp-btn--primary" type="button" data-action="quest-complete" data-id="${mainAgenda.quest.id}">${state.locale === "tr" ? "Tepsideki ödülü aç" : "Open the tray reward"}</button>`
           : ""
       }
-      <p class="muted evening-meta">${cupCount} · ${fillTemplate(t("day.streak"), { n: state.save.checkinStreak })} · ritual ${doneN}/${items.length}</p>
+      <p class="muted evening-meta rp-meta-row">${cupCount}</p>
     </div>
     <footer class="rp-dock">
-      <button class="rp-btn rp-btn--primary" type="button" data-action="goto-street">${t("street.header")}</button>
+      <button class="rp-btn rp-btn--primary" type="button" data-action="${primaryCta}">${primaryLabel}</button>
       <button class="rp-btn" type="button" data-action="open-quests">${state.locale === "tr" ? "Görevler" : "Quests"}</button>
-      <button class="rp-btn" type="button" data-action="goto-cup">${isCupNight() ? t("cup.season_night") : t("cup.practice")}</button>
+      <button class="rp-btn ${st.cupRequired && !st.cupDone ? "rp-btn--primary" : ""}" type="button" data-action="goto-cup">${isCupNight() ? t("cup.season_night") : t("cup.practice")}${st.cupRequired && !st.cupDone ? " ★" : ""}</button>
     </footer>
     <div class="rp-dock-extra">
+      ${
+        st.checkin && st.visits >= st.needVisits && !st.secondBeat
+          ? `<button class="rp-btn rp-btn--ghost" type="button" data-action="second-beat">${state.locale === "tr" ? "İkinci tur +" : "Second beat +"}</button>`
+          : ""
+      }
       <button class="rp-btn rp-btn--ghost" type="button" data-action="open-shop">${t("shop.title")}</button>
       <button class="rp-btn rp-btn--ghost" type="button" data-action="open-story-log">${state.locale === "tr" ? "Hikâye" : "Journal"}</button>
       <button class="rp-btn rp-btn--ghost" type="button" data-action="end-evening" ${st.complete ? "" : "disabled"}>${t("evening.end")}</button>
     </div>
-    ${st.complete ? "" : `<p class="street-hint">${t("evening.locked")}</p>`}
+    ${st.complete ? "" : `<p class="street-hint">${lockedCopy}</p>`}
   `;
 }
 
@@ -1224,7 +1414,9 @@ function porchCheckin() {
 
 function openStreetEvent() {
   if (state.save.evening.streetEvent) return;
-  const ev = Story.pickDailyEvent(state.stories, state.save);
+  // Prefer density micro-event; fall back to story daily pool
+  const micro = Density.pickMicroEvent(state.densityPack, state.save, "street");
+  const ev = Density.microToStreetEvent(micro) || Story.pickDailyEvent(state.stories, state.save);
   state.streetEvent = ev;
   const screen = document.getElementById("screen-event");
   screen.innerHTML = `
@@ -1249,16 +1441,30 @@ function openStreetEvent() {
 function resolveEvent(cid) {
   const ev = state.streetEvent;
   const choice = (ev.choices || []).find((c) => c.id === cid);
-  const summary = Story.applyChoicePayload(state.save, state.stories, choice, null);
-  if (choice?.traitDeltas) {
-    const nid = (ev.tags || []).includes("neon") ? "n5" : "n1";
-    ensureNeighborState(nid);
-    for (const [k, v] of Object.entries(choice.traitDeltas)) {
-      state.save.traits[nid][k] = (state.save.traits[nid][k] || 0) + v;
+  let summary = null;
+  if (ev?._micro) {
+    // Apply micro-event payload directly
+    for (const row of choice?.affinity || []) bumpAffinity(row.id, (row.delta || 0) * 2);
+    if (choice?.rep) Story.bumpRep(state.save, choice.rep);
+    for (const f of choice?.setFlags || []) {
+      state.save.storyFlags = state.save.storyFlags || {};
+      state.save.storyFlags[f] = true;
     }
+    if (choice?.neighborId && choice?.affinityDelta) bumpAffinity(choice.neighborId, choice.affinityDelta * 2);
+    Density.markMicroUsed(state.save, ev.id);
+    summary = { flags: choice?.setFlags || [] };
+  } else {
+    summary = Story.applyChoicePayload(state.save, state.stories, choice, null);
+    if (choice?.traitDeltas) {
+      const nid = (ev.tags || []).includes("neon") ? "n5" : "n1";
+      ensureNeighborState(nid);
+      for (const [k, v] of Object.entries(choice.traitDeltas)) {
+        state.save.traits[nid][k] = (state.save.traits[nid][k] || 0) + v;
+      }
+    }
+    if (!state.save.seenDailyEvents.includes(ev.id)) state.save.seenDailyEvents.push(ev.id);
   }
   state.save.evening.streetEvent = true;
-  if (!state.save.seenDailyEvents.includes(ev.id)) state.save.seenDailyEvents.push(ev.id);
   Story.applyStoryUnlocks(state.stories, state.save);
   addPassXp(state.save, 0.25);
   if (!state.save.storyRecap) state.save.storyRecap = [];
@@ -1269,7 +1475,9 @@ function resolveEvent(cid) {
   state.save.storyRecap = state.save.storyRecap.slice(0, 24);
   emitQuestEvent({ type: "street_event", eventId: ev.id });
   saveNow();
-  const fb = Story.formatChoiceSummary(summary, state.locale, (nid) => loc(neighborById(nid)?.name));
+  const fb = Story.formatChoiceSummary
+    ? Story.formatChoiceSummary(summary, state.locale, (nid) => loc(neighborById(nid)?.name))
+    : "";
   const screen = document.getElementById("screen-event");
   screen.innerHTML = `
     ${hudHtml()}
@@ -1288,8 +1496,22 @@ function resolveEvent(cid) {
 
 function endEvening() {
   const st = eveningStats();
+  if (Density.practiceExitBlocked(state.densityPack, state.save) || (practiceCupRequired() && !st.cupDone)) {
+    const teach = Density.practiceTeach(state.densityPack);
+    toast(
+      loc(state.uxPack?.skipGates?.endEveningPractice) ||
+        loc(teach?.ui?.endEvening?.blockedCopy) ||
+        (state.locale === "tr" ? "Akşam bitmez — Cem Prova'da düdük çalıyor." : "Evening won't end — Cem's still whistling Practice.")
+    );
+    renderCupLobby();
+    showScreen("screen-cup");
+    return;
+  }
   if (!st.complete) {
-    toast(t("evening.locked"));
+    toast(
+      loc(state.uxPack?.skipGates?.endEveningSteam) ||
+        uxStr("evening.locked", state.locale === "tr" ? "Akşam bitmez — Cem Prova'da düdük çalıyor." : "Evening won't end — Cem's still whistling Practice.")
+    );
     return;
   }
   const overnight = state.stories.relationshipThresholds?.overnightIdle || { minDelta: 1, maxDelta: 3 };
@@ -1343,6 +1565,7 @@ function endEvening() {
     visits: [],
     streetEvent: false,
     errand: false,
+    secondBeat: false,
     cupDone: false,
     cupEveDone: false,
     complete: false,
@@ -1436,6 +1659,11 @@ function renderStoryLog() {
   const questBits = activeQ.length
     ? activeQ.map((q) => `<li>● ${loc(q.title)}</li>`).join("")
     : `<li class="muted">${state.locale === "tr" ? "Aktif görev yok" : "No active quests"}</li>`;
+  const spine = (state.questPack?.journalSpine || []).map((step) => {
+    const done = !!(state.save.storyFlags?.[step.completeFlag] || state.save.quests?.entries?.[step.questId]?.status === "done" || state.save.quests?.entries?.[step.questId]?.status === "completed");
+    const active = Quests.isAccepted?.(state.save, step.questId) || state.save.quests?.entries?.[step.questId]?.status === "active";
+    return `<button class="spine-chip ${done ? "done" : active ? "active" : ""}" type="button" data-action="open-quests">${done ? "✓ " : ""}${loc(step.label)}</button>`;
+  }).join("");
   screen.innerHTML = `
     ${hudHtml()}
     <div class="art-hero journal-hero" style="background-image:${stageBg(ART.streetHero, ART.streetHeroFallback)}">
@@ -1443,7 +1671,8 @@ function renderStoryLog() {
         <div class="topbar"><h2>${state.locale === "tr" ? "Hikâye defteri" : "Story journal"}</h2>
           <button class="btn btn-secondary" type="button" data-action="goto-evening">${t("common.back")}</button>
         </div>
-        <p class="evening-cup-tease">${state.locale === "tr" ? "Ark ilerlemesi · seçim izleri · görevler" : "Arc progress · choice marks · quests"}</p>
+        <p class="evening-cup-tease">${state.locale === "tr" ? "ANA GÖREV omurgası · ark izleri" : "MAIN QUEST spine · arc marks"}</p>
+        <div class="spine-strip">${spine || ""}</div>
       </div>
     </div>
     <h3 class="section-label">${state.locale === "tr" ? "Arklar" : "Arcs"}</h3>
@@ -1504,9 +1733,25 @@ function renderCupLobby() {
     syns.some((s) => s.id === teach.synergyId) ||
     state.save.storyFlags?.[`syn_taught_${teach.synergyId}`];
   const ready = state.cupPicks.length === state.pickCount && teachSynOk;
-  const synDesc = (s) => loc(s.rules?.description) || loc(s.name);
+  const pillMeta = state.combatPack?.synergyTeach?.synergyPillMeta || [];
+  const synDesc = (s) => {
+    const meta = pillMeta.find((m) => m.synergyId === s.id);
+    if (meta && state.combatPack?.synergyTeach?.lobbyPillTemplate) {
+      return fillTemplate(loc(state.combatPack.synergyTeach.lobbyPillTemplate), {
+        name: loc(s.name),
+        tags: (meta.tagPoolDisplay || s.tagsRequired || []).join("/"),
+        ruleOneLiner: loc(meta.ruleOneLiner),
+        firesWhen: loc(meta.firesWhen),
+      });
+    }
+    return loc(s.rules?.description) || loc(s.name);
+  };
   const preview = syns
-    .map((s) => `<span class="chip ${s.tagsRequired[0].toLowerCase()}" title="${synDesc(s)}">${loc(s.name)}</span>`)
+    .map((s) => {
+      const meta = pillMeta.find((m) => m.synergyId === s.id);
+      const tags = (meta?.tagPoolDisplay || s.tagsRequired || []).join("+");
+      return `<span class="chip ${String(s.tagsRequired[0] || "").toLowerCase()}" title="${synDesc(s)}">${loc(s.name)} · ${tags}</span>`;
+    })
     .join("") || `<span class="muted">${t("synergy.active")}: —</span>`;
   const synHint = syns.length
     ? syns.map(synDesc).join(" · ")
@@ -1766,15 +2011,16 @@ function pickEnemyLineup(allyIds) {
 function startFight() {
   if (state.fightTimer) clearInterval(state.fightTimer);
   const prac = state.practiceMode ? Combat.practiceSetup(state.combatPack) : null;
+  const lineup = prac ? Density.practiceLineup(prac, state.densityPack) : null;
   if (prac && !state.save.storyFlags?.practice_cup_done) {
-    // Scripted practice lineup: Orhan + Cem front, Merve back
+    // Scripted practice lineup (density pack overrides combat pack)
     const placement = Array(6).fill(null);
-    for (const row of prac.playerLineup || []) {
+    for (const row of lineup.playerLineup || []) {
       placement[Combat.cellToSlot(row.cell)] = row.neighborId;
     }
     state.placement = placement;
-    state.cupPicks = (prac.playerLineup || []).map((r) => r.neighborId);
-    state.enemyLineup = (prac.enemyLineup || []).map((r) => r.botId);
+    state.cupPicks = (lineup.playerLineup || []).map((r) => r.neighborId);
+    state.enemyLineup = (lineup.enemyLineup || []).map((r) => r.botId);
   }
   const allyIds = state.placement.filter(Boolean);
   const bot = state.content.botCupRoster;
@@ -1782,15 +2028,24 @@ function startFight() {
     .map((id, slot) => (id ? slot : null))
     .filter((s) => s != null);
   const allFront = placedSlots.length > 0 && placedSlots.every((s) => s < 3);
-  // Practice Cup bots fight harder; all-front placement gets punished harder
-  let mult = (state.botMult || 1) * (isCupNight() ? 1 : 1.18);
+  // Bot challenge pack: aggro + pressure curves
+  const curve = state.combatPack?.botAi?.pressureCurve || {};
+  const week = weekNumber();
+  const pressure =
+    (prac && curve.practiceCup) ||
+    (week <= 1 && curve.week1Ladder) ||
+    (week === 2 && curve.week2Ladder) ||
+    curve.week3Ladder ||
+    {};
+  const aggro = pressure.botAggro || state.combatPack?.botAi?.aggroDefault || 1.15;
+  let mult = (state.botMult || 1) * aggro * (pressure.botDamageDealtMult || 1);
   if (allFront) mult *= 1.28;
-  if (prac) mult *= 0.92; // teachable win bias
+  if (prac && pressure.winBiasRespectCombatPack !== false) mult *= 0.92;
   const enemyIds = state.enemyLineup?.length ? state.enemyLineup : pickEnemyLineup(allyIds);
   state.enemyLineup = enemyIds;
   // Match draft board: bots sit front/front/back (slots 0,1,3)
   const enemySlots = prac
-    ? (prac.enemyLineup || []).map((r) => Combat.cellToSlot(r.cell))
+    ? (lineup.enemyLineup || []).map((r) => Combat.cellToSlot(r.cell))
     : [0, 1, 3];
   const enemies = enemyIds.map((id, i) => makeBotFighter(bot.units.find((x) => x.id === id), enemySlots[i] ?? i, mult));
   // Preserve placement slots on fighters
@@ -1813,8 +2068,9 @@ function startFight() {
     allFront,
     propReady: true,
     practice: !!prac,
-    scripted: prac?.scriptedMoments ? [...prac.scriptedMoments] : [],
+    scripted: prac ? Density.mergedPracticeScript(prac, state.densityPack) : [],
     scriptedDone: new Set(),
+    cannotDismissPorch: false,
   };
   if (allFront) {
     battle.log.unshift(state.locale === "tr" ? "Bot: hep ön sıra cezası!" : "Bot: all-front punish!");
@@ -1834,8 +2090,12 @@ function resumeFightLoop(battle) {
   state.fightTimer = setInterval(() => {
     if (battle.finished || battle.paused) return;
     battle.elapsed = (performance.now() - startedAt) / 1000;
-    // Offer one player action mid-fight
-    if (!battle.actionOffered && battle.elapsed >= 2.4 && battle.allies.some((u) => u.alive) && battle.enemies.some((u) => u.alive)) {
+    // Porch-call: practice script owns timing; otherwise ~45% fight / ally ≤50% HP
+    const allyLow = battle.allies.some((u) => u.alive && u.hp / u.maxHp <= 0.5);
+    const timeGate = battle.practice
+      ? false
+      : battle.elapsed >= 12 || (battle.elapsed >= 8 && allyLow);
+    if (!battle.actionOffered && timeGate && battle.allies.some((u) => u.alive) && battle.enemies.some((u) => u.alive)) {
       battle.actionOffered = true;
       battle.paused = true;
       updateFightUI(battle);
@@ -1846,14 +2106,36 @@ function resumeFightLoop(battle) {
     while (combatAcc >= tickMs) {
       combatAcc -= tickMs;
       runScriptedMoments(battle);
+      if (battle.paused) break;
       combatTick(battle);
     }
     battle.floaters = (battle.floaters || []).filter((f) => battle.elapsed - f.t < 0.85);
     updateFightUI(battle);
-    if (battle.elapsed >= 75 || !battle.allies.some((u) => u.alive) || !battle.enemies.some((u) => u.alive)) {
+    const bothAlive = battle.allies.some((u) => u.alive) && battle.enemies.some((u) => u.alive);
+    const timeUp = battle.elapsed >= 75;
+    // Practice hard gate: don't finish until porch call resolved
+    if (battle.practice && !battle.actionUsed && (timeUp || !bothAlive)) {
+      if (!battle.actionOffered) {
+        battle.actionOffered = true;
+        battle.paused = true;
+        battle.cannotDismissPorch = true;
+        updateFightUI(battle);
+        showFightActions(battle);
+      }
+      return;
+    }
+    if (timeUp || !bothAlive) {
       endFight(battle);
     }
   }, uiMs);
+}
+
+function applyBeatFlags(beat) {
+  const flags = [...(beat.setsFlags || []), ...(beat.setsFlagsOnResolve || [])];
+  if (!flags.length) return;
+  state.save.storyFlags = state.save.storyFlags || {};
+  for (const f of flags) state.save.storyFlags[f] = true;
+  saveNow();
 }
 
 function runScriptedMoments(battle) {
@@ -1862,11 +2144,25 @@ function runScriptedMoments(battle) {
     if (battle.scriptedDone.has(beat.id)) continue;
     if (battle.elapsed < (beat.tSec || 0)) continue;
     battle.scriptedDone.add(beat.id);
-    if (beat.type === "coach_line" || beat.type === "coach_tip" || beat.type === "synergy_badge_pulse") {
+    if (beat.type === "gate_lock") {
+      battle.gateLocks = new Set(beat.locks || ["skip", "end_evening"]);
+      if (beat.lines) showSynProc(loc(beat.lines));
+    } else if (beat.type === "coach_line" || beat.type === "coach_tip" || beat.type === "synergy_badge_pulse") {
       if (beat.condition === "syn_tea_circle_not_active" && battle.allySyn.some((s) => s.id === "syn_tea_circle")) continue;
       showSynProc(loc(beat.lines));
       battle.log.unshift(loc(beat.lines));
       if (beat.cameraShakeId) stageShake(Combat.shakeClass(state.combatPack?.juiceHints, beat.cameraShakeId));
+      applyBeatFlags(beat);
+      if (beat.requireAck) {
+        battle.paused = true;
+        const bar = document.getElementById("fight-actions");
+        if (bar) {
+          const ack = loc(beat.ackLabel) || (state.locale === "tr" ? "Anladım — Rekabet" : "Got it — Rivalry");
+          bar.innerHTML = `<p class="fight-action-prompt">${loc(beat.lines) || ack}</p>
+            <div class="btn-row wrap"><button class="btn btn-ember" type="button" data-action="ack-rivalry">${ack}</button></div>`;
+          bar.hidden = false;
+        }
+      }
     } else if (beat.type === "forced_hit") {
       const u = battle.allies.find((a) => a.id === beat.targetNeighborId || a.mirrorOf === beat.targetNeighborId);
       if (u && u.alive) {
@@ -1882,12 +2178,26 @@ function runScriptedMoments(battle) {
         showSynProc(loc(beat.lines));
         battle.floaters.push({ side: u.side, slot: u.slot, dmg: 9, rivalry: true, t: battle.elapsed });
         stageShake("shake-medium");
+        state.save.storyFlags = state.save.storyFlags || {};
+        state.save.storyFlags.practice_cup_rivalry_pop_seen = true;
+        state.save.storyFlags.syn_taught_syn_rivalry = true;
+        applyBeatFlags(beat);
+        saveNow();
       }
     } else if (beat.type === "porch_call" && !battle.actionUsed) {
       battle.actionOffered = true;
       battle.paused = true;
+      battle.cannotDismissPorch = !!beat.cannotDismissWithoutPick;
+      battle.forcePorchIds = beat.forceOptionIds || null;
       updateFightUI(battle);
       showFightActions(battle);
+      // flags apply on resolve via applyPorchCall
+      battle._porchResolveFlags = beat.setsFlagsOnResolve || [];
+    } else if (beat.type === "finish_banner") {
+      applyBeatFlags(beat);
+      showSynProc(loc(beat.lines) || (state.locale === "tr" ? "Prova bitti" : "Practice clear"));
+    } else if (beat.type === "porch_call_resolve_fx") {
+      stageShake("shake-medium");
     }
   }
 }
@@ -1897,9 +2207,13 @@ function showFightActions(battle) {
   if (!bar) return;
   const tr = state.locale === "tr";
   const synIds = (battle.allySyn || []).map((s) => s.id);
-  const opts =
+  let opts =
     Combat.pickPorchCallOptions(state.combatPack, synIds, state.practiceMode) ||
     [];
+  if (battle.forcePorchIds?.length) {
+    const all = state.combatPack?.porchCalls?.options || [];
+    opts = battle.forcePorchIds.map((id) => all.find((o) => o.id === id) || opts.find((o) => o.id === id)).filter(Boolean);
+  }
   if (!opts.length) {
     // Legacy fallback
     const foes = battle.enemies.filter((u) => u.alive);
@@ -1914,22 +2228,37 @@ function showFightActions(battle) {
     return;
   }
   battle.porchCallOptions = opts;
-  const stage = document.querySelector("#screen-fight.active .fight-stage, #screen-fight.active .rp-stage");
+  const stage =
+    document.querySelector("#screen-fight.active .rp-arena") ||
+    document.querySelector("#screen-fight.active .fight-stage");
   if (stage) stage.classList.add("porch-call-dim");
+  const layout = state.combatPack?.porchCalls?.optionCardLayout || {};
+  const chips = layout.categoryChips || {};
+  const winUi = state.combatPack?.porchCalls?.window?.ui || {};
+  const title = loc(winUi.title) || (tr ? "Veranda Çağrısı — birini seç" : "Porch Call — pick one");
+  const subtitle = loc(winUi.subtitle) || (tr ? "Skor sallanır · güvenli / riskli / sinerji" : "Score swings · safe / swingy / synergy");
+  const card = (o) => {
+    const cat = o.category || "safe";
+    const chip = loc(chips[cat]) || cat;
+    const swing = o.hpSwingDisplay
+      ? (tr ? `≈ %${o.hpSwingDisplay.minPercent}–${o.hpSwingDisplay.maxPercent} takım HP` : `≈ ${o.hpSwingDisplay.minPercent}–${o.hpSwingDisplay.maxPercent}% team HP`)
+      : "";
+    return `<button class="porch-call-card btn ${cat === "safe" ? "btn-teal" : cat === "swingy" ? "btn-ember" : "btn-primary"}" type="button" data-action="porch-call" data-id="${o.id}">
+      <span class="porch-call-chip">${chip}</span>
+      <strong>${loc(o.label)}</strong>
+      <em>${loc(o.blurb)}</em>
+      ${swing ? `<span class="porch-call-swing">${swing}</span>` : ""}
+    </button>`;
+  };
   bar.innerHTML = `
-    <p class="fight-action-prompt">${tr ? "Porch hamlesi — birini seç" : "Porch call — pick one"}</p>
-    <div class="btn-row wrap porch-call-row">
-      ${opts
-        .map(
-          (o) =>
-            `<button class="btn ${o.category === "safe" ? "btn-teal" : o.category === "swingy" ? "btn-ember" : "btn-primary"}" type="button" data-action="porch-call" data-id="${o.id}" title="${loc(o.blurb)}">${loc(o.label)}</button>`
-        )
-        .join("")}
-    </div>`;
+    <p class="fight-action-prompt">${title}</p>
+    <p class="muted porch-call-sub">${subtitle}</p>
+    <div class="btn-row wrap porch-call-row">${opts.map(card).join("")}</div>`;
   bar.hidden = false;
-  // Timeout → default cheer
-  const pause = state.combatPack?.porchCalls?.window?.pauseSec || 2.2;
   clearTimeout(battle._porchTimeout);
+  // Practice teach: cannot dismiss without pick — no auto-timeout
+  if (battle.cannotDismissPorch) return;
+  const pause = state.combatPack?.porchCalls?.window?.pauseSec || 2.2;
   battle._porchTimeout = setTimeout(() => {
     if (battle.actionUsed || battle.finished) return;
     const defId = state.combatPack?.porchCalls?.window?.timeoutDefaultCallId || "call_cheer";
@@ -1946,15 +2275,32 @@ function applyPorchCall(callId) {
     (battle.porchCallOptions || []).find((o) => o.id === callId) ||
     state.combatPack?.porchCalls?.options?.find((o) => o.id === callId);
   if (!opt) return;
+  const beforeHp = battle.allies.reduce((s, u) => s + Math.max(0, u.hp), 0);
+  const beforeMax = battle.allies.reduce((s, u) => s + u.maxHp, 0) || 1;
   const label = Combat.applyPorchCallEffect(battle, opt, loc);
   battle.log.unshift(label);
-  toast(label);
+  const afterHp = battle.allies.reduce((s, u) => s + Math.max(0, u.hp), 0);
+  const deltaPct = Math.round(((afterHp - beforeHp) / beforeMax) * 100);
+  const deltaSigned = `${deltaPct >= 0 ? "+" : ""}${deltaPct}`;
+  const fb = state.combatPack?.porchCalls?.resolveFeedback;
+  const toastTpl = loc(fb?.toastTemplate) || (state.locale === "tr" ? "Çağrı: {label} · takım HP {deltaSigned}%" : "Call: {label} · team HP {deltaSigned}%");
+  toast(toastTpl.replace("{label}", loc(opt.label)).replace("{deltaSigned}", deltaSigned));
   if (opt.id === "call_tea_break" || opt.id === "call_oven_warm") playTeapotClink();
   showSynProc(label);
   stageShake(Combat.shakeClass(state.combatPack?.juiceHints, opt.cameraShakeId) || "shake-medium");
+  state.save.storyFlags = state.save.storyFlags || {};
+  state.save.storyFlags.porch_call_resolved = true;
+  if (state.practiceMode || practiceCupRequired()) {
+    state.save.storyFlags.practice_cup_porch_call_done = true;
+    for (const f of battle._porchResolveFlags || []) state.save.storyFlags[f] = true;
+    saveNow();
+  }
   battle.actionUsed = true;
   battle.paused = false;
-  const stage = document.querySelector("#screen-fight.active .fight-stage, #screen-fight.active .rp-stage");
+  battle.cannotDismissPorch = false;
+  const stage =
+    document.querySelector("#screen-fight.active .rp-arena") ||
+    document.querySelector("#screen-fight.active .fight-stage");
   if (stage) stage.classList.remove("porch-call-dim");
   hideFightActions();
   updateFightUI(battle);
@@ -1962,7 +2308,10 @@ function applyPorchCall(callId) {
 }
 
 function stageShake(cls = "shake") {
-  const stage = document.querySelector("#screen-fight.active .fight-stage") || document.querySelector("#screen-fight.active .rp-stage");
+  const stage =
+    document.querySelector("#screen-fight.active .rp-arena") ||
+    document.querySelector("#screen-fight.active .fight-stage") ||
+    document.querySelector("#screen-fight.active .rp-stage");
   if (!stage) return;
   stage.classList.remove("shake", "shake-medium", "shake-heavy");
   void stage.offsetWidth;
@@ -2147,7 +2496,9 @@ function combatTick(battle) {
 }
 
 function showSynProc(text) {
-  const stage = document.querySelector("#screen-fight.active .fight-stage");
+  const stage =
+    document.querySelector("#screen-fight.active .rp-arena") ||
+    document.querySelector("#screen-fight.active .fight-stage");
   if (!stage) return;
   let node = stage.querySelector(".syn-proc");
   if (!node) {
@@ -2213,29 +2564,24 @@ function renderFight(battle) {
   const coachBanner = battle.allySyn.length
     ? `<div class="syn-fight-tip">${battle.allySyn.map(teachLine).join(" · ")}</div>`
     : `<div class="syn-fight-tip soft">${tr ? "Sinerji yok — Cup'ta Tea/Rivalry/Neon eşleştir" : "No synergy — match Tea/Rivalry/Neon in Cup"}</div>`;
+  const canSkip = !Density.practiceSkipBlocked(state.densityPack, state.save) && !(state.practiceMode || practiceCupRequired());
   const screen = document.getElementById("screen-fight");
   screen.innerHTML = `
     ${stageLayer("arena")}
     ${hudHtml()}
     <div class="topbar fight-top"><h2>${t("fight.title")}</h2>
-      <button class="btn btn-secondary" type="button" data-action="skip-fight">${t("fight.skip")}</button>
+      ${canSkip ? `<button class="btn btn-secondary" type="button" data-action="skip-fight">${t("fight.skip")}</button>` : `<span class="chip rivalry">${tr ? "Prova — atlama yok" : "Practice — no skip"}</span>`}
     </div>
     ${coachBanner}
     <div class="fight-hud" style="margin-bottom:0.35rem">
       <span id="ally-hp-total" class="hud-ally"></span><span id="fight-timer">0.0s</span><span id="enemy-hp-total" class="hud-enemy"></span>
     </div>
-    <div class="fight-stage fight-stage-glass">
-      <div class="fight-side-label enemy-label">${tr ? "Rakip" : "Rival"}</div>
-      <div class="fight-lane-label">${tr ? "ön" : "front"}</div>
-      <div class="fight-row front" id="enemy-front"></div>
-      <div class="fight-lane-label muted">${tr ? "arka" : "back"}</div>
-      <div class="fight-row back" id="enemy-back"></div>
-      <div class="fight-vs">VS</div>
-      <div class="fight-lane-label">${tr ? "ön" : "front"}</div>
-      <div class="fight-row front" id="ally-front"></div>
-      <div class="fight-lane-label muted">${tr ? "arka" : "back"}</div>
-      <div class="fight-row back" id="ally-back"></div>
-      <div class="fight-side-label ally-label">${tr ? "Senin porch" : "Your porch"}</div>
+    <div class="rp-arena" aria-live="polite">
+      <div class="rp-arena__label enemy">${tr ? "Rakip" : "Rival"}</div>
+      <div class="rp-pads rp-pads--enemy" id="enemy-pads"></div>
+      <div class="rp-arena__vs">VS</div>
+      <div class="rp-pads rp-pads--you" id="ally-pads"></div>
+      <div class="rp-arena__label you">${tr ? "Senin porch" : "Your porch"}</div>
     </div>
     <div class="synergy-pills">${synPills}</div>
     <div class="fight-actions" id="fight-actions" hidden></div>
@@ -2259,44 +2605,82 @@ function unitCard(u, side, floaters = []) {
     })
     .join("");
   const face = goldBust(u.mirrorOf || u.id);
-  return `<div class="unit-slot ${side === "enemy" ? "enemy" : "ally"} ${u.alive ? "" : "dead"}" data-side="${side}" data-slot="${u.slot}">
+  return `<div class="unit-slot rp-unit ${side === "enemy" ? "enemy rp-unit--enemy" : "ally rp-unit--you"} ${u.alive ? "" : "dead"}" data-side="${side}" data-slot="${u.slot}">
     <div class="unit-name">${u.name}</div>
     <img src="${face}" alt="${u.name}" onerror="this.src='${DAY1_BUSTS.n1}'" />
-    <div class="hp-track"><div class="hp-fill" style="width:${pct}%"></div></div>
-    <div class="hp-num">${Math.max(0, Math.round(u.hp))}/${u.maxHp}</div>
+    <div class="hp-track rp-hp"><i style="width:${pct}%"></i><span class="hp-num">${Math.max(0, Math.round(u.hp))}/${u.maxHp}</span></div>
     ${floater}
   </div>`;
 }
 
-function updateFightUI(battle) {
-  const enemyFront = document.getElementById("enemy-front");
-  const enemyBack = document.getElementById("enemy-back");
-  const allyFront = document.getElementById("ally-front");
-  const allyBack = document.getElementById("ally-back");
-  if (!enemyFront || !allyFront) return;
-  const floaters = battle.floaters || [];
-  const split = (units, side) => {
-    const front = units.filter((u) => (u.slot ?? 0) < 3).sort((a, b) => a.slot - b.slot);
-    const back = units.filter((u) => (u.slot ?? 0) >= 3).sort((a, b) => a.slot - b.slot);
-    // If all were placed in one band, still show them (fallback)
-    if (!front.length && !back.length) return { front: units, back: [] };
-    if (!front.length) return { front: back.slice(0, Math.ceil(back.length / 2)), back: back.slice(Math.ceil(back.length / 2)) };
-    if (!back.length && units.length > 2) {
-      return { front: front.slice(0, 2), back: front.slice(2) };
-    }
-    return { front, back };
+function padPositions(side) {
+  // visual-fix-1 pad map (% of .rp-arena)
+  if (side === "enemy") {
+    return {
+      0: [28, 30],
+      1: [50, 28],
+      2: [72, 30],
+      3: [34, 22],
+      4: [66, 22],
+      5: [50, 22],
+    };
+  }
+  return {
+    0: [28, 64],
+    1: [50, 66],
+    2: [72, 64],
+    3: [34, 74],
+    4: [66, 74],
+    5: [50, 78],
   };
-  const e = split(battle.enemies, "enemy");
-  const a = split(battle.allies, "ally");
-  enemyFront.innerHTML = e.front.map((u) => unitCard(u, "enemy", floaters)).join("") || `<span class="muted">—</span>`;
-  enemyBack.innerHTML = e.back.map((u) => unitCard(u, "enemy", floaters)).join("") || `<span class="muted lane-empty">·</span>`;
-  allyFront.innerHTML = a.front.map((u) => unitCard(u, "ally", floaters)).join("") || `<span class="muted">—</span>`;
-  allyBack.innerHTML = a.back.map((u) => unitCard(u, "ally", floaters)).join("") || `<span class="muted lane-empty">·</span>`;
+}
+
+function updateFightUI(battle) {
+  const enemyPads = document.getElementById("enemy-pads");
+  const allyPads = document.getElementById("ally-pads");
+  // Legacy row fallback if old markup still mounted
+  const enemyFront = document.getElementById("enemy-front");
+  const allyFront = document.getElementById("ally-front");
+  const floaters = battle.floaters || [];
+
+  const renderPads = (el, units, side) => {
+    if (!el) return;
+    const map = padPositions(side);
+    el.innerHTML = units
+      .map((u) => {
+        const [x, y] = map[u.slot] || [50, side === "enemy" ? 28 : 68];
+        return `<div class="rp-pad" style="--pad-x:${x}%;--pad-y:${y}%">${unitCard(u, side, floaters)}</div>`;
+      })
+      .join("");
+  };
+
+  if (enemyPads && allyPads) {
+    renderPads(enemyPads, battle.enemies, "enemy");
+    renderPads(allyPads, battle.allies, "ally");
+  } else if (enemyFront && allyFront) {
+    const split = (units) => {
+      const front = units.filter((u) => (u.slot ?? 0) < 3).sort((a, b) => a.slot - b.slot);
+      const back = units.filter((u) => (u.slot ?? 0) >= 3).sort((a, b) => a.slot - b.slot);
+      return { front, back };
+    };
+    const e = split(battle.enemies);
+    const a = split(battle.allies);
+    enemyFront.innerHTML = e.front.map((u) => unitCard(u, "enemy", floaters)).join("") || `<span class="muted">—</span>`;
+    const enemyBack = document.getElementById("enemy-back");
+    const allyBack = document.getElementById("ally-back");
+    if (enemyBack) enemyBack.innerHTML = e.back.map((u) => unitCard(u, "enemy", floaters)).join("") || `<span class="muted">·</span>`;
+    allyFront.innerHTML = a.front.map((u) => unitCard(u, "ally", floaters)).join("") || `<span class="muted">—</span>`;
+    if (allyBack) allyBack.innerHTML = a.back.map((u) => unitCard(u, "ally", floaters)).join("") || `<span class="muted">·</span>`;
+  }
+
   const allyHp = battle.allies.reduce((s, u) => s + Math.max(0, u.hp), 0);
   const enemyHp = battle.enemies.reduce((s, u) => s + Math.max(0, u.hp), 0);
-  document.getElementById("ally-hp-total").textContent = `${state.locale === "tr" ? "Sen" : "You"} ${allyHp}`;
-  document.getElementById("enemy-hp-total").textContent = `Bot ${enemyHp}`;
-  document.getElementById("fight-timer").textContent = `${battle.elapsed.toFixed(1)}s`;
+  const allyEl = document.getElementById("ally-hp-total");
+  const enemyEl = document.getElementById("enemy-hp-total");
+  const timerEl = document.getElementById("fight-timer");
+  if (allyEl) allyEl.textContent = `${state.locale === "tr" ? "Sen" : "You"} ${allyHp}`;
+  if (enemyEl) enemyEl.textContent = `Bot ${enemyHp}`;
+  if (timerEl) timerEl.textContent = `${battle.elapsed.toFixed(1)}s`;
   const log = document.getElementById("fight-log");
   if (log) log.textContent = (battle.log || []).join(" · ");
 }
@@ -2349,16 +2733,26 @@ function endFight(battle) {
     season: isCupNight(),
   });
   state.save.cupHistory = state.save.cupHistory.slice(0, 20);
-  if (isCupNight()) state.save.evening.cupDone = true;
+  state.save.evening.cupDone = true;
   unlockNeighborsIfReady();
   emitQuestEvent({ type: "cup_finish", won });
   if (syn) emitQuestEvent({ type: "cup_synergy", synergy: syn.id || syn.name });
   saveNow();
   if (won) playWinSting();
-  if (state.practiceMode) {
+  if (state.practiceMode || battle.practice) {
     state.save.storyFlags = state.save.storyFlags || {};
-    state.save.storyFlags.practice_cup_done = true;
+    // Only clear practice gate after rivalry teach + porch call resolve
+    if (battle.actionUsed || state.save.storyFlags.practice_cup_porch_call_done) {
+      state.save.storyFlags.practice_cup_porch_call_done = true;
+    }
+    state.save.storyFlags.syn_taught_syn_rivalry = true;
     for (const s of battle.allySyn || []) state.save.storyFlags[`syn_taught_${s.id}`] = true;
+    if (state.save.storyFlags.practice_cup_porch_call_done && state.save.storyFlags.syn_taught_syn_rivalry) {
+      state.save.storyFlags.practice_cup_done = true;
+      state.save.storyFlags.first_evening_practice_cleared = true;
+      const teach = Density.practiceTeach(state.densityPack);
+      for (const f of teach?.flagGates?.setsFlagsOnComplete || []) state.save.storyFlags[f] = true;
+    }
     saveNow();
   }
   if (state.lastResult.porchCallComic) {
@@ -2370,13 +2764,81 @@ function endFight(battle) {
 }
 
 function skipFight() {
-  const battle = document.getElementById("screen-fight")?._battle;
+  if (Density.practiceSkipBlocked(state.densityPack, state.save) || state.practiceMode || practiceCupRequired()) {
+    const teach = Density.practiceTeach(state.densityPack);
+    const toastMsg = loc(teach?.flagGates?.softSkipAttempts?.onAttempt?.toast) ||
+      (state.locale === "tr" ? "Atlama yok. Rozeti gör, çağrıyı seç." : "No skip. See the badge, pick the call.");
+    toast(toastMsg);
+    state.save.storyFlags = state.save.storyFlags || {};
+    state.save.storyFlags.practice_soft_skip_blocked = true;
+    saveNow();
+    showSynProc(state.locale === "tr" ? "Rekabet rozeti" : "Rivalry badge");
+    return;
+  }
+  const battle = document.getElementById("screen-fight")?._battle || state.battle;
   if (!battle || battle.finished) return;
   for (let i = 0; i < 24 && !battle.finished; i++) {
     battle.elapsed += 2;
     combatTick(battle);
   }
   endFight(battle);
+}
+
+function doSecondStreetBeat() {
+  const st = eveningStats();
+  if (!st.checkin || st.visits < st.needVisits) {
+    toast(state.locale === "tr" ? "Önce demlik — Merve kapıda." : "Pot first — Merve's at the door.");
+    return;
+  }
+  if (state.save.evening.secondBeat) {
+    toast(state.locale === "tr" ? "İkinci tur alındı" : "Second beat already done");
+    return;
+  }
+  // Prefer evening-slot micro-event for density pull
+  const micro = Density.pickMicroEvent(state.densityPack, state.save, "evening")
+    || Density.pickMicroEvent(state.densityPack, state.save, "street");
+  if (micro && !state.save.evening.streetEvent) {
+    state.save.evening.secondBeat = true;
+    saveNow();
+    state.streetEvent = Density.microToStreetEvent(micro);
+    const ev = state.streetEvent;
+    const screen = document.getElementById("screen-event");
+    screen.innerHTML = `
+      ${hudHtml()}
+      <div class="topbar"><h2>${loc(ev.title)}</h2>
+        <button class="btn btn-secondary" type="button" data-action="goto-evening">${t("common.back")}</button>
+      </div>
+      <div class="dialog-box">
+        <p class="prompt">${loc(ev.prompt)}</p>
+        <div class="choice-stack">
+          ${(ev.choices || [])
+            .map((c) => `<button class="btn btn-secondary" type="button" data-action="event-choice" data-cid="${c.id}">${loc(c.label)}</button>`)
+            .join("")}
+        </div>
+      </div>`;
+    showScreen("screen-event");
+    return;
+  }
+  // Extra door knock + small rewards densify the evening
+  const candidates = unlockedNeighbors().filter((n) => !state.save.evening.visits.includes(n.id));
+  const pick = candidates[0] || unlockedNeighbors()[0];
+  if (pick) {
+    bumpAffinity(pick.id, 2);
+    if (!state.save.evening.visits.includes(pick.id)) state.save.evening.visits.push(pick.id);
+    emitQuestEvent({ type: "talk", neighborId: pick.id });
+  }
+  grant(state.save, { porch_coins: 4, neon_thread: 1 });
+  addPassXp(state.save, 0.35);
+  state.save.evening.secondBeat = true;
+  saveNow();
+  playKnock();
+  toast(
+    state.locale === "tr"
+      ? `İkinci tur · ${loc(pick?.name) || "mahalle"} +jeton`
+      : `Second beat · ${loc(pick?.name) || "block"} +coins`
+  );
+  renderEvening();
+  showScreen("screen-evening");
 }
 
 function renderComic() {
@@ -2960,6 +3422,13 @@ function onAction(action, target) {
     case "end-evening":
       endEvening();
       break;
+    case "second-beat":
+      doSecondStreetBeat();
+      break;
+    case "overnight-open-quest":
+      state.questTab = "active";
+      renderQuestLog();
+      break;
     case "toggle-pick":
       togglePick(target.dataset.id);
       break;
@@ -2991,6 +3460,42 @@ function onAction(action, target) {
     case "porch-call":
       applyPorchCall(target.dataset.id);
       break;
+    case "open-reactive-dlg": {
+      const id = target.dataset.id;
+      const trees = state.stories?.dialogueTrees;
+      const tree = Array.isArray(trees) ? trees.find((t) => t.id === id) : trees?.[id];
+      if (!tree) break;
+      state.save.storyFlags = state.save.storyFlags || {};
+      if (id.includes("kite_aftermath")) state.save.storyFlags.react_kite_aftermath_seen = true;
+      if (id.includes("bass_patience")) state.save.storyFlags.react_orhan_bass_patience_seen = true;
+      if (id.includes("peri_stay")) state.save.storyFlags.react_peri_stay_or_leave_seen = true;
+      if (id.includes("ledger_hears")) state.save.storyFlags.react_ledger_hears_neon_seen = true;
+      if (id.includes("finale_street")) state.save.storyFlags.react_finale_street_memory_seen = true;
+      state.dialogue = {
+        tree,
+        nodeId: tree.start || "root",
+        ctx: { kind: "reactive", neighborId: tree.speakerId || (tree.nodes || [])[0]?.speaker },
+        feedbackLog: [],
+      };
+      const node = Story.getNode(tree, state.dialogue.nodeId);
+      if (node) Story.applyNodeArrival(state.save, node);
+      saveNow();
+      renderDialogue();
+      showScreen("screen-story");
+      break;
+    }
+    case "ack-rivalry": {
+      const b = state.battle;
+      state.save.storyFlags = state.save.storyFlags || {};
+      state.save.storyFlags.syn_taught_syn_rivalry = true;
+      saveNow();
+      hideFightActions();
+      if (b) {
+        b.paused = false;
+        resumeFightLoop(b);
+      }
+      break;
+    }
     case "syn-show-me": {
       const teach = Combat.nextLobbyTeach(state.combatPack, state.save.storyFlags || {});
       const picks = teach?.autoPickFallback || ["n2", "n4", "n1"];
@@ -3040,7 +3545,7 @@ async function tryPullStorePacks() {
 
 async function boot() {
   try {
-    const [content, economy, stories, ladder, depthMeta, questPack, combatPack] = await Promise.all([
+    const [content, economy, stories, ladder, depthMeta, questPack, combatPack, densityPack, uxPack] = await Promise.all([
       fetch("data/content.json").then((r) => r.json()),
       fetch("data/economy.json").then((r) => r.json()),
       fetch("data/stories.json").then((r) => r.json()),
@@ -3048,6 +3553,8 @@ async function boot() {
       fetch("data/depth-meta.json").then((r) => r.json()),
       loadQuestPack(),
       fetch("data/combat-pack.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      fetch("data/session-density.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      fetch("data/ux-session-1.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
     ]);
     state.content = content;
     state.economy = economy;
@@ -3056,6 +3563,8 @@ async function boot() {
     state.depthMeta = depthMeta;
     state.questPack = questPack;
     state.combatPack = combatPack;
+    state.densityPack = densityPack;
+    state.uxPack = uxPack;
     if (combatPack) Combat.applySynergyPools(state.content, combatPack);
     // Merge economy uiStrings over content placeholders for shop/pass
     state.content.uiStrings = { ...state.content.uiStrings, ...economy.uiStrings };

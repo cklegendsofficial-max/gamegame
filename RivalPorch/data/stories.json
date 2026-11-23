@@ -473,7 +473,19 @@
           "setFlags": [
             "arc_kite_antenna_active",
             "arc_kite_antenna_beat1"
-          ]
+          ],
+          "worldConsequence": {
+            "id": "wc_kite_snag_visible",
+            "streetVisual": {
+              "tr": "Uçurtma antene dolanmış; Orhan gazeteyi kalkan tutar.",
+              "en": "Kite tangled on antenna; Orhan holds paper like a shield."
+            },
+            "npcIdle": {
+              "n4": "grumpy_shield",
+              "n3": "kite_stuck"
+            },
+            "questObjectiveId": "mq_antenna_o1"
+          }
         },
         {
           "id": "arc_kite_antenna_beat2",
@@ -488,7 +500,15 @@
           "dialogueTreeId": "dlg_kite_day2",
           "setFlags": [
             "arc_kite_antenna_beat2"
-          ]
+          ],
+          "worldConsequence": {
+            "id": "wc_leyla_map_chalk",
+            "streetVisual": {
+              "tr": "Çatıda tebeşir okları belirir.",
+              "en": "Chalk arrows appear on the roof."
+            },
+            "questObjectiveId": "mq_antenna_o2"
+          }
         },
         {
           "id": "arc_kite_antenna_beat3",
@@ -503,7 +523,15 @@
           "dialogueTreeId": "dlg_kite_day3",
           "setFlags": [
             "arc_kite_antenna_beat3"
-          ]
+          ],
+          "worldConsequence": {
+            "id": "wc_gossip_two_posters",
+            "streetVisual": {
+              "tr": "Sokağa iki çelişkili afiş asılır.",
+              "en": "Two conflicting posters go up on the street."
+            },
+            "questObjectiveId": "mq_antenna_o3"
+          }
         },
         {
           "id": "arc_kite_antenna_beat4",
@@ -518,7 +546,33 @@
           "dialogueTreeId": "dlg_kite_day4",
           "setFlags": [
             "arc_kite_antenna_complete"
-          ]
+          ],
+          "worldConsequence": {
+            "id": "wc_antenna_resolution_branch",
+            "streetVisual": {
+              "tr": "Çözüm günü: anten ya bayraklı ya daha yüksek uçuş izi.",
+              "en": "Resolution day: antenna either flagged or scarred by higher flight."
+            },
+            "branch": {
+              "peace": {
+                "id": "wc_antenna_flag_flies",
+                "streetVisual": {
+                  "tr": "Küçük ortak bayrak antende sallanır.",
+                  "en": "Tiny shared flag flutters on the antenna."
+                },
+                "cupLobby": "orhan_flag_skin_preview"
+              },
+              "chaos": {
+                "id": "wc_kite_higher_chaos",
+                "streetVisual": {
+                  "tr": "Uçurtma daha yüksekte; çamaşır ipleri titrer.",
+                  "en": "Kite flies higher; laundry lines shiver."
+                },
+                "cupLobby": "leyla_wind_mod_preview"
+              }
+            },
+            "questObjectiveId": "mq_antenna_o4"
+          }
         }
       ],
       "rewards": {
@@ -531,7 +585,8 @@
           "unlock_unit_mod_leyla_wind",
           "flag_kite_chaos_buff"
         ]
-      }
+      },
+      "questId": "mq_antenna_op"
     },
     {
       "id": "arc_volume_war",
@@ -559,7 +614,19 @@
           "setFlags": [
             "arc_volume_war_active",
             "arc_volume_war_beat1"
-          ]
+          ],
+          "worldConsequence": {
+            "id": "wc_bass_windows_rattle",
+            "streetVisual": {
+              "tr": "Gece pencereleri titreşir; mercan neon pulse.",
+              "en": "Night windows rattle; coral neon pulses."
+            },
+            "npcIdle": {
+              "n5": "dj_set_loud",
+              "n4": "light_on_angry"
+            },
+            "questObjectiveId": "mq_volume_o1"
+          }
         },
         {
           "id": "arc_volume_war_beat2",
@@ -574,7 +641,15 @@
           "dialogueTreeId": "dlg_volume_day2",
           "setFlags": [
             "arc_volume_war_beat2"
-          ]
+          ],
+          "worldConsequence": {
+            "id": "wc_headphones_note_door",
+            "streetVisual": {
+              "tr": "Peri kapısında gazete mürekkepli KULAKLIK notu.",
+              "en": "HEADPHONES note in newspaper ink on Peri's door."
+            },
+            "questObjectiveId": "mq_volume_o2"
+          }
         },
         {
           "id": "arc_volume_war_beat3",
@@ -589,7 +664,18 @@
           "dialogueTreeId": "dlg_volume_day3",
           "setFlags": [
             "arc_volume_war_beat3"
-          ]
+          ],
+          "worldConsequence": {
+            "id": "wc_night_bakery_glow",
+            "streetVisual": {
+              "tr": "Fırın gece közü yanar; Soft aura sokağa sızar.",
+              "en": "Bakery night ember glows; Soft aura leaks onto the street."
+            },
+            "npcIdle": {
+              "n6": "tray_night_route"
+            },
+            "questObjectiveId": "mq_volume_o3"
+          }
         },
         {
           "id": "arc_volume_war_beat4",
@@ -605,7 +691,15 @@
           "setFlags": [
             "arc_volume_war_beat4",
             "secret_peri_offer_tease"
-          ]
+          ],
+          "worldConsequence": {
+            "id": "wc_train_ticket_peek",
+            "streetVisual": {
+              "tr": "Kulaklık kutusundan tren bileti ucu görünür.",
+              "en": "Edge of a train ticket peeks from the headphone case."
+            },
+            "questObjectiveId": "mq_volume_o4"
+          }
         },
         {
           "id": "arc_volume_war_beat5",
@@ -620,7 +714,33 @@
           "dialogueTreeId": "dlg_volume_day5",
           "setFlags": [
             "arc_volume_war_complete"
-          ]
+          ],
+          "worldConsequence": {
+            "id": "wc_volume_resolution_branch",
+            "streetVisual": {
+              "tr": "Neon ya kısılır ya sertleşir — seçime göre.",
+              "en": "Neon either dims or hardens — by choice."
+            },
+            "branch": {
+              "accord": {
+                "id": "wc_quiet_neon_hours",
+                "streetVisual": {
+                  "tr": "Sessiz saat tabelası + kısık neon.",
+                  "en": "Quiet-hours sign + dim neon."
+                },
+                "cupLobby": "peri_quiet_set_preview"
+              },
+              "career": {
+                "id": "wc_peri_suitcase_porch",
+                "streetVisual": {
+                  "tr": "Peri verandasında yarım açık bavul.",
+                  "en": "Half-open suitcase on Peri's porch."
+                },
+                "cupLobby": "peri_club_aoe_preview"
+              }
+            },
+            "questObjectiveId": "mq_volume_o5"
+          }
         }
       ],
       "rewards": {
@@ -633,7 +753,8 @@
           "unlock_unit_mod_peri_club_aoe",
           "flag_peri_leaving_threat"
         ]
-      }
+      },
+      "questId": "mq_decibel_accord"
     },
     {
       "id": "arc_tea_ledger",
@@ -659,7 +780,15 @@
           "setFlags": [
             "arc_tea_ledger_active",
             "arc_tea_ledger_beat1"
-          ]
+          ],
+          "worldConsequence": {
+            "id": "wc_bakery_queue_split",
+            "streetVisual": {
+              "tr": "Poğaça kuyruğu ikiye ayrılır: Cup kadrosu vs sokak.",
+              "en": "Pastry queue splits: Cup roster vs whole street."
+            },
+            "questObjectiveId": "mq_ledger_o1"
+          }
         },
         {
           "id": "arc_tea_ledger_beat2",
@@ -674,7 +803,15 @@
           "dialogueTreeId": "dlg_tea_day2",
           "setFlags": [
             "arc_tea_ledger_beat2"
-          ]
+          ],
+          "worldConsequence": {
+            "id": "wc_teapot_ledger_silhouette",
+            "streetVisual": {
+              "tr": "Merve'nin demliğinin yanında defter silüeti.",
+              "en": "Ledger silhouette beside Merve's teapot."
+            },
+            "questObjectiveId": "mq_ledger_o2"
+          }
         },
         {
           "id": "arc_tea_ledger_beat3",
@@ -689,7 +826,15 @@
           "dialogueTreeId": "dlg_tea_day3",
           "setFlags": [
             "arc_tea_ledger_beat3"
-          ]
+          ],
+          "worldConsequence": {
+            "id": "wc_can_tray_shared",
+            "streetVisual": {
+              "tr": "Ortak tepsi standı verandalar arasında.",
+              "en": "Shared tray stand between porches."
+            },
+            "questObjectiveId": "mq_ledger_o3"
+          }
         },
         {
           "id": "arc_tea_ledger_beat4",
@@ -706,7 +851,16 @@
             "arc_tea_ledger_complete",
             "secret_merve_ledger_revealed",
             "secret_can_ledger_debt_revealed"
-          ]
+          ],
+          "worldConsequence": {
+            "id": "wc_tea_circle_street_heal",
+            "streetVisual": {
+              "tr": "Sokak boyunca yumuşak heal buharı (flavor).",
+              "en": "Soft heal steam along the street (flavor)."
+            },
+            "cupLobby": "tea_circle_story_synergy",
+            "questObjectiveId": "mq_ledger_o4"
+          }
         }
       ],
       "rewards": {
@@ -715,7 +869,8 @@
           "unlock_skin_merve_ledger_cozy",
           "flag_ledger_closed_kind"
         ]
-      }
+      },
+      "questId": "mq_ledger_tray"
     }
   ],
   "dialogueTrees": [
@@ -2491,6 +2646,674 @@
             "tr": "Hamur mayalandı. Siz de mayalanın.",
             "en": "Dough has risen. You rise too."
           },
+          "ends": true
+        }
+      ]
+    },
+    {
+      "id": "dlg_react_kite_aftermath",
+      "kind": "arc_reactive",
+      "title": {
+        "tr": "Bayrak mı, tebeşir mi?",
+        "en": "Flag or chalk?"
+      },
+      "start": "kra_root",
+      "reactsToFlagsAny": [
+        "flag_fence_and_kite",
+        "flag_kite_chaos_buff"
+      ],
+      "nodes": [
+        {
+          "id": "kra_root",
+          "speaker": "narrator",
+          "text": {
+            "tr": "Cup 2'den sonra çatı hâlâ konuşuyor. Sokak hangi sonu seçtiğini unutmadı.",
+            "en": "After Cup 2 the roof is still talking. The street didn't forget which ending you picked."
+          },
+          "choices": [
+            {
+              "id": "kra_peace_door",
+              "label": {
+                "tr": "Bayrağa bak (barış yolu)",
+                "en": "Check the flag (peace path)"
+              },
+              "next": "kra_peace",
+              "requiresFlags": [
+                "flag_fence_and_kite"
+              ]
+            },
+            {
+              "id": "kra_chaos_door",
+              "label": {
+                "tr": "Tebeşir oklarına bak (kaos yolu)",
+                "en": "Check the chalk arrows (chaos path)"
+              },
+              "next": "kra_chaos",
+              "requiresFlags": [
+                "flag_kite_chaos_buff"
+              ]
+            },
+            {
+              "id": "kra_ask_merve",
+              "label": {
+                "tr": "Merve'ye sor — hangisi doğru?",
+                "en": "Ask Merve — which version stuck?"
+              },
+              "next": "kra_merve",
+              "affinity": [
+                {
+                  "id": "n1",
+                  "delta": 1
+                }
+              ],
+              "rep": {
+                "rep_mediator": 1
+              }
+            }
+          ]
+        },
+        {
+          "id": "kra_peace",
+          "speaker": "n4",
+          "text": {
+            "tr": "Bayrak duruyor. Uçurtma alçaktan geçti bu sabah. …Kabul edilebilir.",
+            "en": "Flag's still up. Kite passed low this morning. …Acceptable."
+          },
+          "setFlags": [
+            "react_kite_aftermath_seen",
+            "react_kite_peace_ack"
+          ],
+          "ends": true
+        },
+        {
+          "id": "kra_chaos",
+          "speaker": "n3",
+          "text": {
+            "tr": "Yasak bölge yok artık! Orhan gazetesini daha sert katlıyor ama harita kazanıyor.",
+            "en": "No forbidden zone anymore! Orhan folds his paper harder — but the map is winning."
+          },
+          "setFlags": [
+            "react_kite_aftermath_seen",
+            "react_kite_chaos_ack"
+          ],
+          "ends": true
+        },
+        {
+          "id": "kra_merve",
+          "speaker": "n1",
+          "text": {
+            "tr": "İki afiş vardı. Sokak birini seçti — sen seçtirdin. Ben sadece demliği kaynattım.",
+            "en": "There were two posters. The street picked one — you made it pick. I just boiled the tea."
+          },
+          "setFlags": [
+            "react_kite_aftermath_seen"
+          ],
+          "ends": true
+        }
+      ]
+    },
+    {
+      "id": "dlg_react_orhan_bass_patience",
+      "kind": "arc_reactive",
+      "title": {
+        "tr": "Gazete ve bas",
+        "en": "Paper and bass"
+      },
+      "start": "obp_root",
+      "reactsToFlagsAny": [
+        "flag_fence_and_kite",
+        "flag_kite_chaos_buff"
+      ],
+      "crossArc": {
+        "from": "arc_kite_antenna",
+        "into": "arc_volume_war"
+      },
+      "nodes": [
+        {
+          "id": "obp_root",
+          "speaker": "n4",
+          "text": {
+            "tr": "01:12… yine. Anten meselesinden sonra kulaklarım daha mı açık, yoksa mahalle mi küstah?",
+            "en": "01:12… again. After the antenna business, are my ears sharper — or is the block bolder?"
+          },
+          "choices": [
+            {
+              "id": "obp_soft",
+              "label": {
+                "tr": "Bayrak vardı; biraz sabır (barış artçısı)",
+                "en": "There was a flag; give a little patience (peace aftershock)"
+              },
+              "next": "obp_soft_end",
+              "requiresFlags": [
+                "flag_fence_and_kite"
+              ],
+              "affinity": [
+                {
+                  "id": "n4",
+                  "delta": 2
+                },
+                {
+                  "id": "n5",
+                  "delta": 1
+                }
+              ],
+              "rep": {
+                "rep_mediator": 2
+              },
+              "setFlags": [
+                "orhan_bass_patience_soft"
+              ]
+            },
+            {
+              "id": "obp_hard",
+              "label": {
+                "tr": "Kaos seçildi; sınır net olsun",
+                "en": "Chaos was chosen; keep the boundary sharp"
+              },
+              "next": "obp_hard_end",
+              "requiresFlags": [
+                "flag_kite_chaos_buff"
+              ],
+              "affinity": [
+                {
+                  "id": "n4",
+                  "delta": 2
+                },
+                {
+                  "id": "n5",
+                  "delta": -1
+                }
+              ],
+              "rep": {
+                "rep_instigator": 1
+              },
+              "traitDeltas": {
+                "Grumpy": 1
+              },
+              "setFlags": [
+                "orhan_bass_patience_hard"
+              ]
+            },
+            {
+              "id": "obp_neutral",
+              "label": {
+                "tr": "Önce KULAKLIK notunu okuyalım",
+                "en": "Read the HEADPHONES note first"
+              },
+              "next": "obp_neutral_end",
+              "affinity": [
+                {
+                  "id": "n4",
+                  "delta": 1
+                }
+              ],
+              "rep": {
+                "rep_mediator": 1
+              },
+              "setFlags": [
+                "orhan_bass_patience_note"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "obp_soft_end",
+          "speaker": "n4",
+          "text": {
+            "tr": "Hım. Bayrak duruyorsa… bir gece daha dinlerim. Bir. Not yine yapışır.",
+            "en": "Hmph. If the flag holds… I'll listen one more night. One. The note still goes up."
+          },
+          "setFlags": [
+            "react_orhan_bass_seen"
+          ],
+          "ends": true
+        },
+        {
+          "id": "obp_hard_end",
+          "speaker": "n4",
+          "text": {
+            "tr": "Uçurtma serbestse bas da serbest sanmasınlar. KULAKLIK — büyük harf.",
+            "en": "If the kite went free, bass doesn't get free. HEADPHONES — all caps."
+          },
+          "setFlags": [
+            "react_orhan_bass_seen"
+          ],
+          "ends": true
+        },
+        {
+          "id": "obp_neutral_end",
+          "speaker": "n4",
+          "text": {
+            "tr": "Not kapıda. Okuyan okur. Okumayan… 01:12'yi tekrar yaşar.",
+            "en": "Note's on the door. Readers read. Non-readers… meet 01:12 again."
+          },
+          "setFlags": [
+            "react_orhan_bass_seen"
+          ],
+          "ends": true
+        }
+      ]
+    },
+    {
+      "id": "dlg_react_peri_stay_or_leave",
+      "kind": "arc_reactive",
+      "title": {
+        "tr": "Neon kaldı mı?",
+        "en": "Did the neon stay?"
+      },
+      "start": "psl_root",
+      "reactsToFlagsAny": [
+        "flag_peri_stay",
+        "flag_peri_leaving_threat"
+      ],
+      "nodes": [
+        {
+          "id": "psl_root",
+          "speaker": "n1",
+          "text": {
+            "tr": "Desibel dosyası kapandı… ama sokak hâlâ fısıldıyor. Peri kalıyor mu, bilet mi?",
+            "en": "Decibel file closed… but the street still whispers. Is Peri staying, or is it the ticket?"
+          },
+          "choices": [
+            {
+              "id": "psl_stay",
+              "label": {
+                "tr": "Sessiz neon — kaldı",
+                "en": "Quiet neon — she stayed"
+              },
+              "next": "psl_stay_end",
+              "requiresFlags": [
+                "flag_peri_stay"
+              ],
+              "affinity": [
+                {
+                  "id": "n5",
+                  "delta": 2
+                },
+                {
+                  "id": "n1",
+                  "delta": 1
+                }
+              ],
+              "rep": {
+                "rep_mediator": 2,
+                "rep_stage": 1
+              }
+            },
+            {
+              "id": "psl_leave",
+              "label": {
+                "tr": "Veda gerilimi — kariyer",
+                "en": "Leaving tension — career"
+              },
+              "next": "psl_leave_end",
+              "requiresFlags": [
+                "flag_peri_leaving_threat"
+              ],
+              "affinity": [
+                {
+                  "id": "n5",
+                  "delta": 1
+                },
+                {
+                  "id": "n4",
+                  "delta": 1
+                }
+              ],
+              "rep": {
+                "rep_stage": 2
+              }
+            },
+            {
+              "id": "psl_can",
+              "label": {
+                "tr": "Can'a sor — gece fırını ne diyor?",
+                "en": "Ask Can — what does the night bakery say?"
+              },
+              "next": "psl_can_end",
+              "affinity": [
+                {
+                  "id": "n6",
+                  "delta": 2
+                }
+              ],
+              "rep": {
+                "rep_oven": 2
+              }
+            }
+          ]
+        },
+        {
+          "id": "psl_stay_end",
+          "speaker": "n5",
+          "text": {
+            "tr": "Sessiz saatler yazılı. Cumartesi drop'u yine benim — ama kısık. Bu da bir sahne.",
+            "en": "Quiet hours are written down. Saturday drop is still mine — just lower. That's a stage too."
+          },
+          "setFlags": [
+            "react_peri_resolution_seen",
+            "react_peri_stay_ack"
+          ],
+          "ends": true
+        },
+        {
+          "id": "psl_leave_end",
+          "speaker": "n5",
+          "text": {
+            "tr": "Bilet taslağı duruyor. Belki yanar, belki yanmaz. Arenada AoE… vedaya benzer.",
+            "en": "Ticket draft stays. Maybe it burns, maybe not. Arena AoE… already sounds like goodbye."
+          },
+          "setFlags": [
+            "react_peri_resolution_seen",
+            "react_peri_leave_ack"
+          ],
+          "ends": true
+        },
+        {
+          "id": "psl_can_end",
+          "speaker": "n6",
+          "text": {
+            "tr": "Gece poğaçası iki kişiye de yeter. Kalırsa sıcak, giderse… son tepsiyi güzel yaparız.",
+            "en": "Night pastry feeds both stories. If she stays, warm; if she goes… we make the last tray beautiful."
+          },
+          "setFlags": [
+            "react_peri_resolution_seen"
+          ],
+          "ends": true
+        }
+      ]
+    },
+    {
+      "id": "dlg_react_ledger_hears_neon",
+      "kind": "arc_reactive",
+      "title": {
+        "tr": "Defter neon duyuyor",
+        "en": "Ledger hears neon"
+      },
+      "start": "lhn_root",
+      "reactsToFlagsAny": [
+        "flag_peri_stay",
+        "flag_peri_leaving_threat"
+      ],
+      "crossArc": {
+        "from": "arc_volume_war",
+        "into": "arc_tea_ledger"
+      },
+      "nodes": [
+        {
+          "id": "lhn_root",
+          "speaker": "n1",
+          "text": {
+            "tr": "Defteri açmadan önce… neonun hali sayfaya sızıyor. Kalım mı, veda mı — çayın tadı değişir.",
+            "en": "Before we open the ledger… neon leaks onto the page. Stay or farewell — it changes the tea."
+          },
+          "choices": [
+            {
+              "id": "lhn_stay_tea",
+              "label": {
+                "tr": "Kısık neon + ortak demlik",
+                "en": "Low neon + shared teapot"
+              },
+              "next": "lhn_stay_end",
+              "requiresFlags": [
+                "flag_peri_stay"
+              ],
+              "affinity": [
+                {
+                  "id": "n1",
+                  "delta": 2
+                },
+                {
+                  "id": "n5",
+                  "delta": 1
+                },
+                {
+                  "id": "n6",
+                  "delta": 1
+                }
+              ],
+              "rep": {
+                "rep_mediator": 2,
+                "rep_oven": 1
+              },
+              "setFlags": [
+                "ledger_neon_soft"
+              ]
+            },
+            {
+              "id": "lhn_leave_tea",
+              "label": {
+                "tr": "Son gece çayı — veda tadı",
+                "en": "Last-night tea — farewell taste"
+              },
+              "next": "lhn_leave_end",
+              "requiresFlags": [
+                "flag_peri_leaving_threat"
+              ],
+              "affinity": [
+                {
+                  "id": "n1",
+                  "delta": 1
+                },
+                {
+                  "id": "n6",
+                  "delta": 2
+                }
+              ],
+              "rep": {
+                "rep_oven": 2,
+                "rep_stage": 1
+              },
+              "setFlags": [
+                "ledger_neon_farewell"
+              ]
+            },
+            {
+              "id": "lhn_focus_tray",
+              "label": {
+                "tr": "Şimdi tepsi; neon sonra",
+                "en": "Tray first; neon later"
+              },
+              "next": "lhn_tray_end",
+              "affinity": [
+                {
+                  "id": "n6",
+                  "delta": 2
+                }
+              ],
+              "rep": {
+                "rep_oven": 2
+              }
+            }
+          ]
+        },
+        {
+          "id": "lhn_stay_end",
+          "speaker": "n6",
+          "text": {
+            "tr": "O zaman poğaça + sessiz drop aynı masada. Defter bunu 'iyilik' diye yazar.",
+            "en": "Then pastry + quiet drop share a table. The ledger will call that a favor."
+          },
+          "setFlags": [
+            "react_ledger_neon_seen"
+          ],
+          "ends": true
+        },
+        {
+          "id": "lhn_leave_end",
+          "speaker": "n1",
+          "text": {
+            "tr": "Veda tadı da zincirdir. Sayfa kapanmadan bir satır — 'Peri'ye gece çayı.'",
+            "en": "Farewell taste is still a chain. One line before the page closes — 'night tea for Peri.'"
+          },
+          "setFlags": [
+            "react_ledger_neon_seen"
+          ],
+          "ends": true
+        },
+        {
+          "id": "lhn_tray_end",
+          "speaker": "n6",
+          "text": {
+            "tr": "Tepsi bekler. Neon isterse sonra gelir — hamur önce.",
+            "en": "Tray waits. Neon can arrive later — dough first."
+          },
+          "setFlags": [
+            "react_ledger_neon_seen"
+          ],
+          "ends": true
+        }
+      ]
+    },
+    {
+      "id": "dlg_react_finale_street_memory",
+      "kind": "arc_reactive",
+      "title": {
+        "tr": "Sokak seni hatırlıyor",
+        "en": "The street remembers you"
+      },
+      "start": "fsm_root",
+      "reactsToFlagsAny": [
+        "flag_fence_and_kite",
+        "flag_kite_chaos_buff",
+        "flag_peri_stay",
+        "flag_peri_leaving_threat",
+        "flag_ledger_closed_kind",
+        "flag_ledger_private"
+      ],
+      "nodes": [
+        {
+          "id": "fsm_root",
+          "speaker": "narrator",
+          "text": {
+            "tr": "Cuma kulis. Final Cup yarın. Omurga tamamlanmak üzere — sokak hangi satırları sakladı?",
+            "en": "Friday backstage. Final Cup tomorrow. Spine almost locked — which lines did the street keep?"
+          },
+          "choices": [
+            {
+              "id": "fsm_a",
+              "label": {
+                "tr": "Anten satırını oku",
+                "en": "Read the antenna line"
+              },
+              "next": "fsm_antenna",
+              "rep": {
+                "rep_stage": 1
+              }
+            },
+            {
+              "id": "fsm_b",
+              "label": {
+                "tr": "Neon satırını oku",
+                "en": "Read the neon line"
+              },
+              "next": "fsm_neon",
+              "rep": {
+                "rep_stage": 1
+              }
+            },
+            {
+              "id": "fsm_c",
+              "label": {
+                "tr": "Defter satırını oku",
+                "en": "Read the ledger line"
+              },
+              "next": "fsm_ledger",
+              "rep": {
+                "rep_mediator": 1
+              }
+            }
+          ]
+        },
+        {
+          "id": "fsm_antenna",
+          "speaker": "n3",
+          "text": {
+            "tr": "Bayrak mı, meydan okuma bölgesi mi — ikisi de uçurtma. Yarın arenada rüzgâr konuşur.",
+            "en": "Flag or challenge zone — both are kite. Tomorrow the wind talks in the arena."
+          },
+          "requiresFlagsNone": [],
+          "branchLines": [
+            {
+              "ifFlag": "flag_fence_and_kite",
+              "speaker": "n4",
+              "text": {
+                "tr": "Bayrak antende. Alçaktan geçin — ben de kalkanı indiririm bir milimetre.",
+                "en": "Flag on the antenna. Pass low — I'll drop the shield one millimeter."
+              }
+            },
+            {
+              "ifFlag": "flag_kite_chaos_buff",
+              "speaker": "n3",
+              "text": {
+                "tr": "Harita serbest! Glass cannon yarın cam değil, rüzgâr olur.",
+                "en": "Map unrestricted! Tomorrow the glass cannon is wind, not glass."
+              }
+            }
+          ],
+          "setFlags": [
+            "react_finale_memory_antenna"
+          ],
+          "ends": true
+        },
+        {
+          "id": "fsm_neon",
+          "speaker": "n5",
+          "text": {
+            "tr": "Drop yarın. Kısık veya veda — ikisi de neon.",
+            "en": "Drop tomorrow. Quiet or farewell — both still neon."
+          },
+          "branchLines": [
+            {
+              "ifFlag": "flag_peri_stay",
+              "speaker": "n5",
+              "text": {
+                "tr": "Sessiz saatler duruyor. Arenada parlarım; sokakta kısarım. Anlaşma bu.",
+                "en": "Quiet hours hold. I bloom in the arena; I dim on the street. That's the deal."
+              }
+            },
+            {
+              "ifFlag": "flag_peri_leaving_threat",
+              "speaker": "n5",
+              "text": {
+                "tr": "Kulaklıklar veda gibi. Belki son şov — o yüzden AoE daha geniş.",
+                "en": "Headphones like goodbye. Maybe a last show — so the AoE runs wider."
+              }
+            }
+          ],
+          "setFlags": [
+            "react_finale_memory_neon"
+          ],
+          "ends": true
+        },
+        {
+          "id": "fsm_ledger",
+          "speaker": "n1",
+          "text": {
+            "tr": "Kırmızı satırlar. Borç değil — kim kime çay koydu, kim tepsi tuttu.",
+            "en": "Red lines. Not debt — who poured tea, who held the tray."
+          },
+          "branchLines": [
+            {
+              "ifFlag": "flag_ledger_closed_kind",
+              "speaker": "n6",
+              "text": {
+                "tr": "Cup heal'i sokakta poğaça. Aynı zincir. Yarın herkese yetmeye çalışırım — yine.",
+                "en": "Cup heal is street pastry. Same chain. Tomorrow I'll try to feed everyone — again."
+              }
+            },
+            {
+              "ifFlag": "flag_ledger_private",
+              "speaker": "n1",
+              "text": {
+                "tr": "Bazı sayfalar kapalı kaldı. İyi. Demlik yine bilir — ama bağırmaz.",
+                "en": "Some pages stayed closed. Good. The teapot still knows — it just won't shout."
+              }
+            }
+          ],
+          "setFlags": [
+            "react_finale_memory_ledger"
+          ],
           "ends": true
         }
       ]
@@ -4952,8 +5775,8 @@
           "en": "New Porch"
         },
         "focus": {
-          "tr": "Yeni verandadasın. Üç kapı çal, bir sır öğren, Cup’a hazırlan.",
-          "en": "You're the new porch. Knock three doors, learn one secret, prep for Cup."
+          "tr": "Tanışma; Arc A tohumu; öğretici Cup.",
+          "en": "Meet-cute; Arc A seed; tutorial Cup."
         },
         "arcSeeds": [
           "arc_kite_antenna_seed"
@@ -4976,6 +5799,12 @@
           "welcome",
           "checkin",
           "arc-seed"
+        ],
+        "questIds": [
+          "mq_welcome_porch",
+          "sq_tea_circle_gifts",
+          "sq_porch_lamp_decor",
+          "sq_cup_entry_flair"
         ]
       },
       {
@@ -4999,6 +5828,13 @@
         "unlockCandidates": [
           "unlock_unit_mod_leyla_wind",
           "unlock_skin_orhan_antenna_flag"
+        ],
+        "questIds": [
+          "mq_antenna_op",
+          "sq_cem_knee",
+          "sq_orhan_letters",
+          "sq_leyla_wind_map",
+          "sq_gossip_repair"
         ]
       },
       {
@@ -5022,6 +5858,12 @@
         "unlockCandidates": [
           "unlock_skin_peri_quiet_set",
           "unlock_unit_mod_peri_club_aoe"
+        ],
+        "questIds": [
+          "mq_decibel_accord",
+          "sq_night_bakery",
+          "sq_rival_ridge_scout",
+          "sq_peri_quiet_hours"
         ]
       },
       {
@@ -5042,7 +5884,82 @@
             "en": "Porch Cup Final — Lower Ridge"
           }
         },
-        "endingEval": true
+        "endingEval": true,
+        "questIds": [
+          "mq_ledger_tray",
+          "mq_season_finale"
+        ]
+      }
+    ],
+    "onboardingBeats": [
+      {
+        "id": "onboard_checkin",
+        "dayHint": 1,
+        "questObjectiveId": "mq_welcome_o1",
+        "dailyEventId": "de_01_tea_checkin",
+        "setFlags": [
+          "welcome_checkin_done"
+        ],
+        "worldConsequence": {
+          "id": "wc_welcome_teapot_steam",
+          "streetVisual": {
+            "tr": "Oyuncu verandasında ince çay buharı.",
+            "en": "Thin tea steam on the player porch."
+          }
+        }
+      },
+      {
+        "id": "onboard_meet_three",
+        "dayHint": 2,
+        "questObjectiveId": "mq_welcome_o2",
+        "track": {
+          "type": "affinityAny",
+          "count": 3,
+          "min": 10
+        },
+        "setFlags": [
+          "welcome_met_three"
+        ],
+        "worldConsequence": {
+          "id": "wc_welcome_three_doors_open",
+          "streetVisual": {
+            "tr": "Üç komşu kapısı aralık; selam animasyonu.",
+            "en": "Three neighbor doors ajar; greeting idle."
+          }
+        }
+      },
+      {
+        "id": "onboard_kite_seed",
+        "dayHint": 3,
+        "questObjectiveId": "mq_welcome_o3",
+        "dailyEventId": "de_11_kite_forecast",
+        "setFlags": [
+          "arc_kite_antenna_seed_resolved"
+        ],
+        "worldConsequence": {
+          "id": "wc_kite_string_on_antenna",
+          "streetVisual": {
+            "tr": "Antende ince uçurtma ipi asılı — Arc A tohumu.",
+            "en": "Thin kite string on the antenna — Arc A seed."
+          }
+        }
+      },
+      {
+        "id": "onboard_cup1",
+        "dayHint": 7,
+        "questObjectiveId": "mq_welcome_o4",
+        "cupId": "cup_w1",
+        "setFlags": [
+          "quest_welcome_complete",
+          "cup_w1_done"
+        ],
+        "worldConsequence": {
+          "id": "wc_cup1_gossip_board",
+          "streetVisual": {
+            "tr": "Bakkal camında ilk Cup skoru yazılır.",
+            "en": "First Cup score chalked on the corner-shop window."
+          }
+        }
       }
     ]
   },
@@ -5304,7 +6221,53 @@
       "secret_can_ledger_debt_revealed",
       "night_bakery_open",
       "can_helped",
-      "can_big_order"
+      "can_big_order",
+      "quest_welcome_active",
+      "quest_welcome_complete",
+      "welcome_checkin_done",
+      "welcome_met_three",
+      "arc_kite_antenna_seed_resolved",
+      "cup_w1_done",
+      "cup_w2_done",
+      "cup_w3_done",
+      "cup_w4_done",
+      "quest_antenna_active",
+      "quest_antenna_complete",
+      "arc_kite_antenna_soft_fail",
+      "quest_volume_active",
+      "quest_volume_complete",
+      "arc_volume_war_soft_fail",
+      "quest_ledger_active",
+      "quest_ledger_complete",
+      "arc_tea_ledger_soft_fail",
+      "quest_finale_active",
+      "quest_finale_complete",
+      "finale_eve_done",
+      "season1_ending_shown",
+      "cem_knee_hint",
+      "cem_gift_soft",
+      "cem_knee_exposed_harsh",
+      "orhan_fold_shared",
+      "leyla_map_partial",
+      "leyla_map_zone_set",
+      "secret_leyla_map",
+      "sq_leyla_map_complete",
+      "de_14_night_bakery_seen",
+      "night_pastry_delivered",
+      "sq_night_bakery_complete",
+      "sq_tea_circle_gifts_complete",
+      "decor_lamp_owned",
+      "sq_porch_lamp_complete",
+      "sq_cup_flair_complete",
+      "gossip_wrong_active",
+      "gossip_repaired",
+      "gossip_amplified",
+      "sq_gossip_repair_complete",
+      "rival_briefing",
+      "rival_synergy_seen",
+      "sq_rival_scout_complete",
+      "quiet_hours_negotiated",
+      "sq_quiet_hours_complete"
     ]
   },
   "meta": {
@@ -5318,7 +6281,120 @@
       "dailyEvents": 34,
       "endings": 7,
       "skins": 3,
-      "unitMods": 3
+      "unitMods": 3,
+      "mainQuests": 5,
+      "sideQuests": 10,
+      "worldConsequenceBeats": 17
+    },
+    "questDesign": "docs/rival-porch-quest-design.md",
+    "honestyReset": {
+      "targetDepth": "5/10",
+      "note": "Quest pack + visible street consequences; story never gated by spend"
     }
-  }
+  },
+  "questPack": "internal/rival-porch-quests.json",
+  "dialogueSchedules": [
+    {
+      "dialogueTreeId": "dlg_react_kite_aftermath",
+      "slot": "evening",
+      "priority": 82,
+      "when": {
+        "flagsAny": [
+          "flag_fence_and_kite",
+          "flag_kite_chaos_buff"
+        ],
+        "flagsAll": [
+          "arc_kite_antenna_complete"
+        ],
+        "flagsNone": [
+          "react_kite_aftermath_seen"
+        ],
+        "afterCup": "cup_w2"
+      },
+      "uiHint": "Offer once as evening talk after Antenna complete; before or early Volume week."
+    },
+    {
+      "dialogueTreeId": "dlg_react_orhan_bass_patience",
+      "slot": "evening",
+      "priority": 86,
+      "when": {
+        "flagsAny": [
+          "flag_fence_and_kite",
+          "flag_kite_chaos_buff"
+        ],
+        "flagsAll": [
+          "quest_volume_active",
+          "arc_volume_war_beat1"
+        ],
+        "flagsNone": [
+          "react_orhan_bass_seen",
+          "arc_volume_war_complete"
+        ]
+      },
+      "uiHint": "Inject after volume beat1 / with headphones note window — cross-arc tone shift."
+    },
+    {
+      "dialogueTreeId": "dlg_react_peri_stay_or_leave",
+      "slot": "street",
+      "priority": 84,
+      "when": {
+        "flagsAny": [
+          "flag_peri_stay",
+          "flag_peri_leaving_threat"
+        ],
+        "flagsAll": [
+          "arc_volume_war_complete"
+        ],
+        "flagsNone": [
+          "react_peri_resolution_seen"
+        ]
+      },
+      "uiHint": "Street talk day after Decibel resolves; makes Arc B visible before Ledger."
+    },
+    {
+      "dialogueTreeId": "dlg_react_ledger_hears_neon",
+      "slot": "evening",
+      "priority": 85,
+      "when": {
+        "flagsAny": [
+          "flag_peri_stay",
+          "flag_peri_leaving_threat"
+        ],
+        "flagsAll": [
+          "quest_ledger_active"
+        ],
+        "flagsNone": [
+          "react_ledger_neon_seen",
+          "arc_tea_ledger_complete"
+        ]
+      },
+      "uiHint": "Early Ledger week evening — Arc B bleeds into Arc C tea tone."
+    },
+    {
+      "dialogueTreeId": "dlg_react_finale_street_memory",
+      "slot": "evening",
+      "priority": 92,
+      "when": {
+        "flagsAny": [
+          "flag_fence_and_kite",
+          "flag_kite_chaos_buff",
+          "flag_peri_stay",
+          "flag_peri_leaving_threat",
+          "flag_ledger_closed_kind",
+          "flag_ledger_private"
+        ],
+        "flagsAll": [
+          "quest_finale_active"
+        ],
+        "flagsNone": [
+          "react_finale_memory_antenna",
+          "react_finale_memory_neon",
+          "react_finale_memory_ledger"
+        ]
+      },
+      "alsoLinksObjective": "mq_finale_o1",
+      "uiHint": "Friday backstage — prefer over generic dlg_cup_eve_generic when finale active."
+    }
+  ],
+  "storyForm1": "story-form-1"
 }
