@@ -321,8 +321,23 @@ function eveningPrimaryCta() {
       (day >= 3 && antennaDone) ||
       volumeAccepted ||
       !!qs.active?.mq_decibel_accord;
+    // Day10+ Ledger MAIN handoff (story PF)
+    if (day >= 10 || storyFlag("natural_ledger_street_wins")) {
+      if (!ledgerDone) {
+        return {
+          id: "sa_ledger",
+          action: "goto-street",
+          label: tr ? "Defter tepsisine bak" : "See Ledger tray",
+          support: tr ? "MAIN Defter — tepsi sokakta." : "MAIN Ledger — tray on the street.",
+          whisper: tr ? "Omurga 4/5 · Defter" : "Spine 4/5 · Ledger",
+          questId: "mq_ledger_tray",
+          acceptIfNeeded: true,
+          dataNext: "ledger",
+        };
+      }
+    }
     // ux-11/form17: Open Volume first; HEADPHONES after accept
-    if (volumeUnlocked && !volumeDone) {
+    if (volumeUnlocked && !volumeDone && day < 10) {
       if (!volumeAccepted) {
         return {
           id: "sa_volume_accept",
@@ -790,6 +805,19 @@ function questHudWhisper() {
   const flags = state.save.storyFlags || {};
   const beats = state.uxPack?.firstEvening?.beats || [];
   const byId = Object.fromEntries(beats.map((b) => [b.id, b]));
+  // ux-13/14: defer tray-reward whisper while Volume accept is live
+  const volumeAcceptLive =
+    document.body.dataset.eveningPanel === "volume-accept" ||
+    ((flags.cold_day2_yielded || flags.natural_volume_street || (state.save.dayIndex || 1) >= 7) &&
+      !flags.quest_volume_accepted &&
+      !flags.arc_volume_war_complete);
+  if (volumeAcceptLive) {
+    return tr ? "Omurga 3/5 · Desibel — aç, sonra KULAKLIK" : "Spine 3/5 · Volume — open, then HEADPHONES";
+  }
+  // Day10+ ledger handoff whisper
+  if ((state.save.dayIndex || 1) >= 10 || flags.natural_ledger_street_wins) {
+    return tr ? "Omurga 4/5 · Defter tepsi — MAIN Defter" : "Spine 4/5 · Ledger tray — MAIN Ledger";
+  }
   // claimable main?
   if (state.questPack) {
     const actives = Quests.activeQuests(state.questPack, state.save);
@@ -1473,7 +1501,21 @@ function headphonesPropHtml() {
   </div>`;
 }
 
+function storyForm19() {
+  return state.questPack?.storyForm19 || state.storyForm19 || null;
+}
+
+function cleanLedgerTrayHtml() {
+  const clean = storyForm19()?.cleanLedgerTrayWinner;
+  if (clean) {
+    return state.locale === "tr" && clean.htmlTr ? clean.htmlTr : clean.html || "";
+  }
+  return "";
+}
+
 function ledgerPropHtml() {
+  const clean = cleanLedgerTrayHtml();
+  if (clean) return clean;
   const packs = [
     ...(storyForm14()?.naturalStreetPropsHard || []),
     ...(storyForm13()?.naturalStreetPropsYield || []),
@@ -1484,9 +1526,33 @@ function ledgerPropHtml() {
     const html = state.locale === "tr" && led.htmlTr ? led.htmlTr : led.html || "";
     if (html) return html;
   }
-  return `<div class="rp-stage-prop rp-stage-prop--ledger-tray" data-testid="story-street-ledger-tray" data-arc="arc_tea_ledger" data-unlock="natural" aria-label="Ledger">
-    <span class="rp-stage-prop__tag">Ledger · tray</span>
+  return cleanLedgerTrayHtml() || `<div class="rp-stage-prop rp-stage-prop--ledger-tray rp-stage-prop--ledger-tray-winner" data-testid="story-street-ledger-tray" data-arc="arc_tea_ledger" data-unlock="natural" data-winner="ledger_natural" data-form="19" aria-label="Ledger & tray">
+    <span class="rp-stage-prop__tag">MAIN 4/5 · Ledger · tray</span>
   </div>`;
+}
+
+function syncLedgerWinsBodyClass() {
+  const day = state.save.dayIndex || 1;
+  const on = day >= 10 || storyFlag("natural_ledger_street_wins");
+  document.body.classList.toggle("rp-ledger-wins", on);
+  if (on) document.body.dataset.storyWinner = "ledger_natural";
+}
+
+function armRecommendTonightCandidate() {
+  const f = state.save.storyFlags || (state.save.storyFlags = {});
+  const rule = storyForm19()?.armRecommendTonightCandidate;
+  const lived = !!f.decibel_lived_beat_done;
+  // ensureLedgerTeaseOnLived: lived beat also seeds ledger tease so candidate can arm
+  if (lived && rule?.ensureLedgerTeaseOnLived?.setsFlags) {
+    for (const k of rule.ensureLedgerTeaseOnLived.setsFlags) f[k] = true;
+  }
+  const tease =
+    !!f.quest_ledger_tease ||
+    !!f.week2_decibel_ledger_seen ||
+    !!f.natural_ledger_street ||
+    !!f.natural_ledger_street_wins;
+  if (lived && tease) f.would_recommend_tonight_candidate = true;
+  return !!f.would_recommend_tonight_candidate;
 }
 
 function storyForm15() {
@@ -1519,26 +1585,32 @@ function purgeColdWorldResiduals() {
 }
 
 function week2DecibelLedgerPullHtml(screen) {
+  const day = state.save.dayIndex || 1;
+  // Day10+ ledger wins — don't stack HEADPHONES→LEDGER chips over bust rail
+  if (day >= 10 || storyFlag("natural_ledger_street_wins") || storyFlag("quest_ledger_complete")) return "";
   const pull = storyForm18()?.week2DecibelLedgerPull;
   if (!pull || !(pull.screens || []).includes(screen)) return "";
   if (!whenFlagsOk(pull.when || {})) return "";
   state.save.storyFlags = state.save.storyFlags || {};
   for (const f of pull.setsFlagsOnShow || []) state.save.storyFlags[f] = true;
-  const prop = state.locale === "tr" && pull.stageProp?.htmlTr ? pull.stageProp.htmlTr : pull.stageProp?.html || "";
+  // One dock-floor caption only — skip mid-stage LEDGER?/WEEK-2 chip stack (visual PF)
   const npc = pull.npcReactions?.[0];
   const npcHtml = npc
-    ? `<p class="rp-handoff-npc rp-yield-line" data-testid="${npc.testId}" data-caption-kind="volume"><strong>${loc(neighborById(npc.speakerId)?.name) || npc.neighbor || ""}</strong>: ${loc(npc.text)}</p>`
+    ? `<p class="rp-handoff-npc rp-yield-line rp-yield-caption" data-testid="${npc.testId}" data-caption-kind="volume" data-yield-caption="1"><strong>${loc(neighborById(npc.speakerId)?.name) || npc.neighbor || ""}</strong>: ${loc(npc.text)}</p>`
     : "";
-  const invite = pull.uniquePropReaction?.html || "";
-  return `${prop}${invite}${npcHtml}`;
+  return npcHtml;
 }
 
 function recommendTonightBarHtml() {
   const bar = storyForm18()?.cultRecommendTonightBar?.recommendTonight;
   if (!bar || !whenFlagsOk(bar.showWhen || {})) return "";
+  armRecommendTonightCandidate();
   const candidate = !!storyFlag("would_recommend_tonight_candidate");
-  const copy = candidate ? bar.copyWhenCandidate : bar.copyWhenClimbing;
-  return `<div class="rp-recommend-tonight-bar" data-testid="${bar.testId || "recommend-tonight-bar"}" data-candidate="${candidate}">${loc(copy)}</div>`;
+  const form19Copy = storyForm19()?.armRecommendTonightCandidate?.bar?.copy;
+  const copy = candidate
+    ? form19Copy || bar.copyWhenCandidate
+    : bar.copyWhenClimbing;
+  return `<div class="rp-recommend-tonight-bar" data-testid="${bar.testId || "recommend-tonight-bar"}" data-candidate="${candidate ? "true" : "false"}" data-cult-slot="under-rail">${loc(copy)}</div>`;
 }
 
 function armMech15DecibelLived() {
@@ -1571,6 +1643,8 @@ function armMech15DecibelLived() {
       f.peri_week2_ledger_pull = true;
     }
     f.week2_decibel_ledger_seen = true;
+    f.quest_ledger_tease = true;
+    armRecommendTonightCandidate();
     const snap = {
       beat: true,
       choice: pick,
@@ -1584,6 +1658,15 @@ function armMech15DecibelLived() {
     const chips = document.querySelector("[data-testid='decibel-lived-choice']");
     if (chips) chips.remove();
     saveNow();
+    // Live-update recommend bar — street was painted before lived/tease armed
+    const bar = document.querySelector("[data-testid='recommend-tonight-bar']");
+    if (bar && f.would_recommend_tonight_candidate) {
+      bar.setAttribute("data-candidate", "true");
+      const form19Copy = storyForm19()?.armRecommendTonightCandidate?.bar?.copy;
+      const climbBar = storyForm18()?.cultRecommendTonightBar?.recommendTonight;
+      const copy = form19Copy || climbBar?.copyWhenCandidate;
+      if (copy) bar.textContent = loc(copy);
+    }
   };
   prop.classList.add("rp-prop--decibel-cue");
   if (!document.querySelector("[data-testid='decibel-lived-choice']")) {
@@ -1659,19 +1742,27 @@ function pickUnifiedStoryWinner() {
     if (day >= 10) {
       state.save.storyFlags.natural_ledger_street = true;
       state.save.storyFlags.natural_ledger_street_wins = true;
+      state.save.storyFlags.quest_ledger_tease = true;
+      state.save.storyFlags.arc_tea_ledger_seed = true;
     }
   })();
   {
     const day = state.save.dayIndex || 1;
     const props = storyForm15()?.inlineStreetProps || [];
+    // Day10+: ALWAYS clean ledger tray winner — never fall through to headphones
     if (day >= 10) {
-      const led = props.find((p) => p.testId === "story-street-ledger-tray");
-      if (led) {
-        const html = state.locale === "tr" && led.htmlTr ? led.htmlTr : led.html;
-        if (html) return { id: "ledger_natural", html, npc: "", suppressBanner: true, suppressSpotlight: true };
+      const html = cleanLedgerTrayHtml() || ledgerPropHtml();
+      document.body.classList.add("rp-ledger-wins");
+      document.body.dataset.storyWinner = "ledger_natural";
+      if (html) {
+        state.save.storyFlags = state.save.storyFlags || {};
+        state.save.storyFlags.natural_ledger_street = true;
+        state.save.storyFlags.natural_ledger_street_wins = true;
+        state.save.storyFlags.quest_ledger_tease = true;
+        return { id: "ledger_natural", html, npc: "", suppressBanner: true, suppressSpotlight: true };
       }
     }
-    if (day >= 7 || (day >= 3 && storyFlag("cold_day2_yielded"))) {
+    if (day >= 7 && day < 10 || (day >= 3 && day < 10 && storyFlag("cold_day2_yielded"))) {
       const vol = props.find((p) => p.testId === "story-street-headphones-note");
       if (vol) {
         const html = state.locale === "tr" && vol.htmlTr ? vol.htmlTr : vol.html;
@@ -2091,6 +2182,16 @@ function spineCultChipHtml() {
   const day = state.save.dayIndex || 1;
   if (day < 2) return "";
   const tr = state.locale === "tr";
+  // form19: Day10+ MAIN 4/5 Ledger & Tray
+  if (day >= 10 || storyFlag("natural_ledger_street_wins")) {
+    const main = storyForm19()?.cleanLedgerTrayWinner?.mainBar;
+    const label = main
+      ? loc(main)
+      : tr
+        ? "MAIN 4/5 · Defter & Tepsi"
+        : "MAIN 4/5 · Ledger & Tray";
+    return `<p class="rp-spine-cult-chip" data-testid="spine-cult-chip">${label}</p>`;
+  }
   const upgrade = storyForm18()?.cultRecommendTonightBar?.spineCultUpgrade;
   if (
     upgrade &&
@@ -2312,7 +2413,6 @@ function renderEvening() {
       ? `<div class="rp-evening-volume-accept rp-evening-volume-accept--compact" data-testid="evening-volume-accept-cta" data-form="16">
            <button class="rp-btn rp-btn--primary rp-cta-primary" type="button" data-action="accept-volume" data-testid="evening-primary" data-primary="true" data-next-action="volume-accept">${openVolLabel}</button>
            <button class="rp-btn rp-btn--primary rp-cta-primary" type="button" data-action="accept-volume" data-testid="evening-open-volume" hidden aria-hidden="true">${openVolLabel}</button>
-           <button class="rp-evening-volume-accept__link" type="button" data-action="goto-street" data-testid="evening-see-headphones">${seeHpLabel}</button>
            <button class="rp-evening-volume-accept__link" type="button" data-action="goto-street" data-testid="evening-volume-see-headphones">${seeHpLabel}</button>
          </div>`
       : `<button class="rp-btn rp-btn--primary rp-cta-primary" type="button" data-action="${primaryAction}" data-testid="evening-primary" data-primary="true" data-next-action="${cta.dataNext || cta.id || "spine"}">${primaryLabel}</button>`;
@@ -2423,6 +2523,8 @@ function renderStreet() {
 
   applyDay2ColdRewrite();
   purgeColdWorldResiduals();
+  syncLedgerWinsBodyClass();
+  armRecommendTonightCandidate();
   const spine = unfinishedQuestHeadline();
   const worldBits = worldStreetLines();
   const needCheckin = !state.save.evening.checkin;

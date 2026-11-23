@@ -169,7 +169,7 @@
       "action": "accept-volume",
       "testIdPanel": "evening-volume-accept-cta",
       "testIdOpen": "evening-open-volume",
-      "testIdSee": "evening-see-headphones",
+      "testIdSee": "evening-volume-see-headphones",
       "forbidPrimaryIds": [
         "sa_headphones"
       ]
@@ -188,7 +188,7 @@
       "becomesPrimary": true
     },
     "seeHeadphonesBeforeAccept": {
-      "note": "evening-see-headphones may peek street but must NOT replace Open Volume as primary CTA",
+      "note": "evening-volume-see-headphones may peek street but must NOT replace Open Volume as primary CTA",
       "isSecondaryOnly": true
     },
     "dependsOnForm16": "form-16 queues evening CTA bypass; form17 forbids sa_headphones until accept"

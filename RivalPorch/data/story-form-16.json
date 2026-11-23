@@ -75,14 +75,14 @@
         "action": "accept-volume"
       },
       "street": {
-        "testId": "evening-see-headphones",
+        "testId": "evening-volume-see-headphones",
         "action": "goto-street"
       }
     }
   },
   "inlineEveningHtml": {
-    "en": "<div class=\"rp-evening-volume-accept\" data-testid=\"evening-volume-accept-cta\" data-form=\"16\">\n  <p class=\"rp-evening-volume-accept__h\">Antenna done → Decibel opens</p>\n  <p>MAIN 3/5. HEADPHONES note is on the street. Accept Volume or look outside.</p>\n  <div class=\"rp-evening-volume-accept__actions\">\n    <button class=\"rp-evening-volume-accept__cta\" type=\"button\" data-action=\"accept-volume\" data-testid=\"evening-open-volume\">Open Volume</button>\n    <button class=\"rp-btn rp-btn--ghost\" type=\"button\" data-action=\"goto-street\" data-testid=\"evening-see-headphones\">See HEADPHONES note</button>\n  </div>\n</div>",
-    "tr": "<div class=\"rp-evening-volume-accept\" data-testid=\"evening-volume-accept-cta\" data-form=\"16\">\n  <p class=\"rp-evening-volume-accept__h\">Anten bitti → Desibel açılıyor</p>\n  <p>MAIN 3/5. Sokakta KULAKLIK notu. Volume'u kabul et veya sokağa bak.</p>\n  <div class=\"rp-evening-volume-accept__actions\">\n    <button class=\"rp-evening-volume-accept__cta\" type=\"button\" data-action=\"accept-volume\" data-testid=\"evening-open-volume\">Volume'u aç</button>\n    <button class=\"rp-btn rp-btn--ghost\" type=\"button\" data-action=\"goto-street\" data-testid=\"evening-see-headphones\">KULAKLIK notuna bak</button>\n  </div>\n</div>"
+    "en": "<div class=\"rp-evening-volume-accept\" data-testid=\"evening-volume-accept-cta\" data-form=\"16\">\n  <p class=\"rp-evening-volume-accept__h\">Antenna done → Decibel opens</p>\n  <p>MAIN 3/5. HEADPHONES note is on the street. Accept Volume or look outside.</p>\n  <div class=\"rp-evening-volume-accept__actions\">\n    <button class=\"rp-evening-volume-accept__cta\" type=\"button\" data-action=\"accept-volume\" data-testid=\"evening-open-volume\">Open Volume</button>\n    <button class=\"rp-btn rp-btn--ghost\" type=\"button\" data-action=\"goto-street\" data-testid=\"evening-volume-see-headphones\">See HEADPHONES note</button>\n  </div>\n</div>",
+    "tr": "<div class=\"rp-evening-volume-accept\" data-testid=\"evening-volume-accept-cta\" data-form=\"16\">\n  <p class=\"rp-evening-volume-accept__h\">Anten bitti → Desibel açılıyor</p>\n  <p>MAIN 3/5. Sokakta KULAKLIK notu. Volume'u kabul et veya sokağa bak.</p>\n  <div class=\"rp-evening-volume-accept__actions\">\n    <button class=\"rp-evening-volume-accept__cta\" type=\"button\" data-action=\"accept-volume\" data-testid=\"evening-open-volume\">Volume'u aç</button>\n    <button class=\"rp-btn rp-btn--ghost\" type=\"button\" data-action=\"goto-street\" data-testid=\"evening-volume-see-headphones\">KULAKLIK notuna bak</button>\n  </div>\n</div>"
   },
   "antennaFailsafe": {
     "id": "form16_antenna_failsafe",
@@ -111,7 +111,7 @@
   "hotfixPatches": {
     "renderEveningVolAccept": {
       "replaceBlockMatching": "const volCta = storyForm13()?.eveningVolumeAcceptCta;",
-      "code": "\n  // HOTFIX form16: Volume evening CTA without storyForm13 pack / primaryAction gate\n  applyForm16AntennaFailsafe();\n  const dayF16 = state.save.dayIndex || 1;\n  if (dayF16 >= 7) {\n    state.save.storyFlags = state.save.storyFlags || {};\n    state.save.storyFlags.cold_day2_yielded = true;\n    state.save.storyFlags.natural_volume_street = true;\n  }\n  const volUnlocked =\n    dayF16 >= 7 ||\n    [\"cold_day2_yielded\", \"natural_volume_street\", \"natural_antenna_complete\", \"arc_kite_antenna_complete\", \"quest_antenna_complete\"].some(storyFlag);\n  const volAlready = [\"quest_volume_accepted\", \"arc_volume_war_complete\", \"volume_accept_dismissed\"].some(storyFlag);\n  const volCta = storyForm13()?.eveningVolumeAcceptCta || storyForm16()?.eveningVolumeAcceptFallback || null;\n  const showVolAccept = !soleEnd && volUnlocked && !volAlready;\n  const volAcceptHtml = showVolAccept\n    ? (volCta\n        ? `<div class=\"rp-evening-volume-accept\" data-testid=\"evening-volume-accept-cta\" data-form=\"16\">\n        <p class=\"rp-evening-volume-accept__h\">${loc(volCta.headline)}</p>\n        <p>${loc(volCta.body)}</p>\n        <div class=\"rp-evening-volume-accept__actions\">\n          <button class=\"rp-evening-volume-accept__cta\" type=\"button\" data-action=\"accept-volume\" data-testid=\"evening-open-volume\">${loc(volCta.ctaAccept)}</button>\n          <button class=\"rp-btn rp-btn--ghost\" type=\"button\" data-action=\"goto-street\" data-testid=\"evening-see-headphones\">${loc(volCta.ctaStreet)}</button>\n        </div>\n      </div>`\n        : (state.locale === \"tr\"\n            ? (storyForm16()?.inlineEveningHtml?.tr || \"\")\n            : (storyForm16()?.inlineEveningHtml?.en || \"\")))\n    : \"\";\n"
+      "code": "\n  // HOTFIX form16: Volume evening CTA without storyForm13 pack / primaryAction gate\n  applyForm16AntennaFailsafe();\n  const dayF16 = state.save.dayIndex || 1;\n  if (dayF16 >= 7) {\n    state.save.storyFlags = state.save.storyFlags || {};\n    state.save.storyFlags.cold_day2_yielded = true;\n    state.save.storyFlags.natural_volume_street = true;\n  }\n  const volUnlocked =\n    dayF16 >= 7 ||\n    [\"cold_day2_yielded\", \"natural_volume_street\", \"natural_antenna_complete\", \"arc_kite_antenna_complete\", \"quest_antenna_complete\"].some(storyFlag);\n  const volAlready = [\"quest_volume_accepted\", \"arc_volume_war_complete\", \"volume_accept_dismissed\"].some(storyFlag);\n  const volCta = storyForm13()?.eveningVolumeAcceptCta || storyForm16()?.eveningVolumeAcceptFallback || null;\n  const showVolAccept = !soleEnd && volUnlocked && !volAlready;\n  const volAcceptHtml = showVolAccept\n    ? (volCta\n        ? `<div class=\"rp-evening-volume-accept\" data-testid=\"evening-volume-accept-cta\" data-form=\"16\">\n        <p class=\"rp-evening-volume-accept__h\">${loc(volCta.headline)}</p>\n        <p>${loc(volCta.body)}</p>\n        <div class=\"rp-evening-volume-accept__actions\">\n          <button class=\"rp-evening-volume-accept__cta\" type=\"button\" data-action=\"accept-volume\" data-testid=\"evening-open-volume\">${loc(volCta.ctaAccept)}</button>\n          <button class=\"rp-btn rp-btn--ghost\" type=\"button\" data-action=\"goto-street\" data-testid=\"evening-volume-see-headphones\">${loc(volCta.ctaStreet)}</button>\n        </div>\n      </div>`\n        : (state.locale === \"tr\"\n            ? (storyForm16()?.inlineEveningHtml?.tr || \"\")\n            : (storyForm16()?.inlineEveningHtml?.en || \"\")))\n    : \"\";\n"
     }
   },
   "eveningVolumeAcceptFallback": {
@@ -165,7 +165,7 @@
     "assertEvening": [
       "evening-volume-accept-cta",
       "evening-open-volume",
-      "evening-see-headphones"
+      "evening-volume-see-headphones"
     ]
   },
   "newStoryFlags": [],

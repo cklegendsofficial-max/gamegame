@@ -1,0 +1,6 @@
+{
+  "packId": "ux-session-14",
+  "schemaVersion": 1,
+  "canonicalSeeHeadphonesTestId": "evening-volume-see-headphones",
+  "acceptanceChecks": ["exactly_one_see_headphones_while_volume_accept"]
+}

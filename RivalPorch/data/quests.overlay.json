@@ -6954,7 +6954,7 @@
         "tr": "KULAKLIK notuna bak",
         "en": "See HEADPHONES note",
         "action": "goStreet",
-        "testId": "evening-see-headphones"
+        "testId": "evening-volume-see-headphones"
       },
       "matchesOvernightSpine": true,
       "spineLine": {
@@ -7124,7 +7124,7 @@
       "testIds": [
         "evening-volume-accept-cta",
         "evening-open-volume",
-        "evening-see-headphones"
+        "evening-volume-see-headphones"
       ],
       "note": "If form13 CTA missing in merge, re-emit identical block from form13 JSON"
     },
@@ -7238,8 +7238,8 @@
         ]
       },
       "html": {
-        "en": "<section class=\"rp-evening-volume-accept\" data-testid=\"evening-volume-accept-cta\" data-form=\"15\">\n  <p class=\"rp-evening-volume-accept__h\">Antenna done → Decibel opens</p>\n  <p>MAIN 3/5. HEADPHONES note is on the street. Accept Volume or look outside.</p>\n  <div class=\"rp-evening-volume-accept__actions\">\n    <button class=\"rp-evening-volume-accept__cta\" type=\"button\" data-action=\"accept-volume-quest\" data-testid=\"evening-open-volume\">Open Volume</button>\n    <button class=\"rp-evening-volume-accept__cta rp-evening-volume-accept__cta--ghost\" type=\"button\" data-action=\"go-street\" data-testid=\"evening-see-headphones\">See HEADPHONES note</button>\n  </div>\n</section>",
-        "tr": "<section class=\"rp-evening-volume-accept\" data-testid=\"evening-volume-accept-cta\" data-form=\"15\">\n  <p class=\"rp-evening-volume-accept__h\">Anten bitti → Desibel açılıyor</p>\n  <p>MAIN 3/5. Sokakta KULAKLIK notu. Volume'u kabul et veya sokağa bak.</p>\n  <div class=\"rp-evening-volume-accept__actions\">\n    <button class=\"rp-evening-volume-accept__cta\" type=\"button\" data-action=\"accept-volume-quest\" data-testid=\"evening-open-volume\">Volume'u aç</button>\n    <button class=\"rp-evening-volume-accept__cta rp-evening-volume-accept__cta--ghost\" type=\"button\" data-action=\"go-street\" data-testid=\"evening-see-headphones\">KULAKLIK notuna bak</button>\n  </div>\n</section>"
+        "en": "<section class=\"rp-evening-volume-accept\" data-testid=\"evening-volume-accept-cta\" data-form=\"15\">\n  <p class=\"rp-evening-volume-accept__h\">Antenna done → Decibel opens</p>\n  <p>MAIN 3/5. HEADPHONES note is on the street. Accept Volume or look outside.</p>\n  <div class=\"rp-evening-volume-accept__actions\">\n    <button class=\"rp-evening-volume-accept__cta\" type=\"button\" data-action=\"accept-volume-quest\" data-testid=\"evening-open-volume\">Open Volume</button>\n    <button class=\"rp-evening-volume-accept__cta rp-evening-volume-accept__cta--ghost\" type=\"button\" data-action=\"go-street\" data-testid=\"evening-volume-see-headphones\">See HEADPHONES note</button>\n  </div>\n</section>",
+        "tr": "<section class=\"rp-evening-volume-accept\" data-testid=\"evening-volume-accept-cta\" data-form=\"15\">\n  <p class=\"rp-evening-volume-accept__h\">Anten bitti → Desibel açılıyor</p>\n  <p>MAIN 3/5. Sokakta KULAKLIK notu. Volume'u kabul et veya sokağa bak.</p>\n  <div class=\"rp-evening-volume-accept__actions\">\n    <button class=\"rp-evening-volume-accept__cta\" type=\"button\" data-action=\"accept-volume-quest\" data-testid=\"evening-open-volume\">Volume'u aç</button>\n    <button class=\"rp-evening-volume-accept__cta rp-evening-volume-accept__cta--ghost\" type=\"button\" data-action=\"go-street\" data-testid=\"evening-volume-see-headphones\">KULAKLIK notuna bak</button>\n  </div>\n</section>"
       },
       "antennaFailsafeOnEvening": {
         "note": "If day>=4 and still no antenna complete on cold path, set natural complete without flag inject from harness",
@@ -7329,7 +7329,7 @@
           "action": "accept-volume"
         },
         "street": {
-          "testId": "evening-see-headphones",
+          "testId": "evening-volume-see-headphones",
           "action": "goto-street"
         }
       }
@@ -7353,8 +7353,8 @@
       }
     },
     "inlineEveningHtml": {
-      "en": "<div class=\"rp-evening-volume-accept\" data-testid=\"evening-volume-accept-cta\" data-form=\"16\">\n  <p class=\"rp-evening-volume-accept__h\">Antenna done → Decibel opens</p>\n  <p>MAIN 3/5. HEADPHONES note is on the street. Accept Volume or look outside.</p>\n  <div class=\"rp-evening-volume-accept__actions\">\n    <button class=\"rp-evening-volume-accept__cta\" type=\"button\" data-action=\"accept-volume\" data-testid=\"evening-open-volume\">Open Volume</button>\n    <button class=\"rp-btn rp-btn--ghost\" type=\"button\" data-action=\"goto-street\" data-testid=\"evening-see-headphones\">See HEADPHONES note</button>\n  </div>\n</div>",
-      "tr": "<div class=\"rp-evening-volume-accept\" data-testid=\"evening-volume-accept-cta\" data-form=\"16\">\n  <p class=\"rp-evening-volume-accept__h\">Anten bitti → Desibel açılıyor</p>\n  <p>MAIN 3/5. Sokakta KULAKLIK notu. Volume'u kabul et veya sokağa bak.</p>\n  <div class=\"rp-evening-volume-accept__actions\">\n    <button class=\"rp-evening-volume-accept__cta\" type=\"button\" data-action=\"accept-volume\" data-testid=\"evening-open-volume\">Volume'u aç</button>\n    <button class=\"rp-btn rp-btn--ghost\" type=\"button\" data-action=\"goto-street\" data-testid=\"evening-see-headphones\">KULAKLIK notuna bak</button>\n  </div>\n</div>"
+      "en": "<div class=\"rp-evening-volume-accept\" data-testid=\"evening-volume-accept-cta\" data-form=\"16\">\n  <p class=\"rp-evening-volume-accept__h\">Antenna done → Decibel opens</p>\n  <p>MAIN 3/5. HEADPHONES note is on the street. Accept Volume or look outside.</p>\n  <div class=\"rp-evening-volume-accept__actions\">\n    <button class=\"rp-evening-volume-accept__cta\" type=\"button\" data-action=\"accept-volume\" data-testid=\"evening-open-volume\">Open Volume</button>\n    <button class=\"rp-btn rp-btn--ghost\" type=\"button\" data-action=\"goto-street\" data-testid=\"evening-volume-see-headphones\">See HEADPHONES note</button>\n  </div>\n</div>",
+      "tr": "<div class=\"rp-evening-volume-accept\" data-testid=\"evening-volume-accept-cta\" data-form=\"16\">\n  <p class=\"rp-evening-volume-accept__h\">Anten bitti → Desibel açılıyor</p>\n  <p>MAIN 3/5. Sokakta KULAKLIK notu. Volume'u kabul et veya sokağa bak.</p>\n  <div class=\"rp-evening-volume-accept__actions\">\n    <button class=\"rp-evening-volume-accept__cta\" type=\"button\" data-action=\"accept-volume\" data-testid=\"evening-open-volume\">Volume'u aç</button>\n    <button class=\"rp-btn rp-btn--ghost\" type=\"button\" data-action=\"goto-street\" data-testid=\"evening-volume-see-headphones\">KULAKLIK notuna bak</button>\n  </div>\n</div>"
     },
     "antennaFailsafe": {
       "id": "form16_antenna_failsafe",
@@ -7498,7 +7498,7 @@
         "action": "accept-volume",
         "testIdPanel": "evening-volume-accept-cta",
         "testIdOpen": "evening-open-volume",
-        "testIdSee": "evening-see-headphones",
+        "testIdSee": "evening-volume-see-headphones",
         "forbidPrimaryIds": [
           "sa_headphones"
         ]
@@ -7741,5 +7741,74 @@
       "auditorNote": "wouldRecommendTonight candidacy if all cats ≥8.5 and overall ≥9 — bar surfaces lived Week-2 pull proof"
     },
     "cssAppend": "\n/* story-form-18 — purge Shared string / String holds after yield */\nbody.rp-cold-yielded .rp-prop-overlay,\nbody.rp-cold-yielded .rp-prop-chip,\nbody.rp-cold-yielded .rp-prop-npc,\nbody.rp-cold-yielded .rp-wc-loud {\n  /* hide unless data-allow-after-yield */\n}\nbody.rp-cold-yielded .rp-prop-overlay[data-prop=\"prop_day2_mediate_string\"],\nbody.rp-cold-yielded .rp-prop-overlay[data-prop=\"prop_day2_instigate_high_kite\"],\nbody.rp-cold-yielded .rp-prop-overlay[data-prop=\"prop_day2_stage_chalk_cup\"],\nbody.rp-cold-yielded .rp-stage-prop--shared-string,\nbody.rp-cold-yielded [data-testid=\"story-day2-mediate-string\"],\nbody.rp-cold-yielded [data-testid=\"story-day2-orhan-line\"] {\n  display: none !important;\n}\n/* Week-2 Decibel→Ledger lived pull */\n.rp-stage-prop--decibel-ledger-pull {\n  left: 20%; right: 20%; top: 42%; z-index: 9;\n}\n.rp-dl-stack {\n  display: flex; align-items: center; justify-content: center; gap: 0.45rem;\n  padding: 0.45rem 0.65rem;\n  background: rgba(12,8,6,.88);\n  border: 1px solid rgba(232,180,120,.45);\n  border-radius: 8px;\n  color: #f2e6d8;\n  font: 700 12px/1.2 \"IBM Plex Mono\", ui-monospace, monospace;\n}\n.rp-dl-arrow { color: #e8b478; }\n.rp-stage-prop--ledger-invite {\n  left: 68%; top: 48%; width: 18%; z-index: 9;\n}\n.rp-invite-slip {\n  display: inline-block;\n  padding: 0.3rem 0.45rem;\n  background: #f4f0e4;\n  color: #1a120c;\n  border: 2px solid #1a120c;\n  transform: rotate(4deg);\n  font: 800 11px/1 \"IBM Plex Mono\", ui-monospace, monospace;\n  letter-spacing: 0.06em;\n}\n.rp-recommend-tonight-bar {\n  margin: 0.5rem 0;\n  padding: 0.45rem 0.7rem;\n  border-radius: 8px;\n  background: rgba(18,12,8,.9);\n  border: 1px solid rgba(126,184,212,.45);\n  color: #e8f0f8;\n  font-size: 12px;\n}\n.rp-recommend-tonight-bar[data-candidate=\"true\"] {\n  border-color: rgba(232,180,120,.65);\n  color: #f2e6d8;\n}\n"
+  },
+  "storyForm19": {
+    "packId": "story-form-19",
+    "formIndex": 19,
+    "cleanLedgerTrayWinner": {
+      "id": "day10_ledger_tray_winner",
+      "testId": "story-street-ledger-tray",
+      "winnerId": "ledger_natural",
+      "when": {
+        "dayIndexMin": 10,
+        "orFlagsAny": [
+          "natural_ledger_street_wins",
+          "natural_ledger_street"
+        ]
+      },
+      "html": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray rp-stage-prop--ledger-tray-winner\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" data-unlock=\"natural\" data-winner=\"ledger_natural\" data-form=\"19\" aria-label=\"Ledger & tray\">\n  <svg class=\"rp-ledger-svg\" viewBox=\"0 0 100 36\" aria-hidden=\"true\">\n    <ellipse cx=\"26\" cy=\"22\" rx=\"16\" ry=\"7\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"1.1\"/>\n    <path d=\"M38 18 Q42 12 46 18\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.9\"/>\n    <rect x=\"48\" y=\"6\" width=\"36\" height=\"22\" rx=\"2\" fill=\"rgba(20,14,10,.55)\" stroke=\"#e8c9a0\" stroke-width=\"1\"/>\n    <line x1=\"54\" y1=\"12\" x2=\"78\" y2=\"12\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n    <line x1=\"54\" y1=\"17\" x2=\"74\" y2=\"17\" stroke=\"#c45c3e\" stroke-width=\"0.8\"/>\n    <line x1=\"54\" y1=\"22\" x2=\"78\" y2=\"22\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">MAIN 4/5 · Ledger · tray</span>\n</div>",
+      "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray rp-stage-prop--ledger-tray-winner\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" data-unlock=\"natural\" data-winner=\"ledger_natural\" data-form=\"19\" aria-label=\"Defter ve tepsi\">\n  <svg class=\"rp-ledger-svg\" viewBox=\"0 0 100 36\" aria-hidden=\"true\">\n    <ellipse cx=\"26\" cy=\"22\" rx=\"16\" ry=\"7\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"1.1\"/>\n    <path d=\"M38 18 Q42 12 46 18\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.9\"/>\n    <rect x=\"48\" y=\"6\" width=\"36\" height=\"22\" rx=\"2\" fill=\"rgba(20,14,10,.55)\" stroke=\"#e8c9a0\" stroke-width=\"1\"/>\n    <line x1=\"54\" y1=\"12\" x2=\"78\" y2=\"12\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n    <line x1=\"54\" y1=\"17\" x2=\"74\" y2=\"17\" stroke=\"#c45c3e\" stroke-width=\"0.8\"/>\n    <line x1=\"54\" y1=\"22\" x2=\"78\" y2=\"22\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">MAIN 4/5 · Defter · tepsi</span>\n</div>",
+      "hideHeadphones": true,
+      "mainBar": {
+        "tr": "MAIN 4/5 · Defter & Tepsi",
+        "en": "MAIN 4/5 · Ledger & Tray",
+        "testId": "spine-cult-chip",
+        "mqId": "mq_ledger_tray"
+      },
+      "npcLine": {
+        "speakerId": "n1",
+        "text": {
+          "tr": "Tepsi ve defter kazandı — KULAKLIK yerini verdi.",
+          "en": "Tray and ledger won — HEADPHONES yielded."
+        },
+        "testId": "story-ledger-natural-npc"
+      }
+    },
+    "armRecommendTonightCandidate": {
+      "id": "arm_recommend_candidate_lived_ledger",
+      "armWhen": {
+        "flagsAll": [
+          "decibel_lived_beat_done",
+          "quest_ledger_tease"
+        ]
+      },
+      "alsoArmWhen": {
+        "flagsAll": [
+          "decibel_lived_beat_done",
+          "week2_decibel_ledger_seen"
+        ]
+      },
+      "setsFlag": "would_recommend_tonight_candidate",
+      "bar": {
+        "testId": "recommend-tonight-bar",
+        "dataCandidate": true,
+        "copy": {
+          "tr": "Bu gece tavsiye adayı — yaşayan Desibel + Defter tease.",
+          "en": "Tonight recommend candidate — lived Decibel + Ledger tease."
+        }
+      },
+      "auditorSeparate": {
+        "wouldRecommendTonight": "only if overall≥9 (and typically all cats≥8.5) — do not conflate with data-candidate arming"
+      },
+      "ensureLedgerTeaseOnLived": {
+        "note": "When decibel_lived_beat_done fires, also set quest_ledger_tease + arc_tea_ledger_seed if missing so candidate can arm",
+        "setsFlags": [
+          "quest_ledger_tease",
+          "arc_tea_ledger_seed",
+          "week2_decibel_ledger_seen"
+        ]
+      }
+    },
+    "cssAppend": "\n/* story-form-19 — Day10 ledger tray winner; headphones yields */\nbody.rp-ledger-wins .rp-stage-prop--headphones-note,\nbody.rp-ledger-wins [data-testid=\"story-street-headphones-note\"],\nbody[data-day-index=\"10\"] .rp-stage-prop--headphones-note,\nbody[data-day-index=\"11\"] .rp-stage-prop--headphones-note,\nbody[data-day-index=\"12\"] .rp-stage-prop--headphones-note {\n  display: none !important;\n}\n.rp-stage-prop--ledger-tray-winner {\n  left: 16%; width: 42%; top: 54%; height: 24%;\n  z-index: 10;\n  color: #e8c9a0;\n  animation: rp-ledger-win 1.8s ease-in-out infinite;\n}\n.rp-stage-prop--ledger-tray-winner .rp-stage-prop__tag {\n  font-size: 12px;\n  background: rgba(12,8,6,.92);\n  border: 1px solid rgba(232,180,120,.55);\n}\n.rp-ledger-svg { width: 100%; height: 100%; display: block; }\n@keyframes rp-ledger-win {\n  0%, 100% { filter: drop-shadow(0 0 0 rgba(232,180,120,0)); }\n  50% { filter: drop-shadow(0 0 8px rgba(232,180,120,.35)); }\n}\n.rp-recommend-tonight-bar[data-candidate=\"true\"] {\n  border-color: rgba(232,180,120,.75);\n  box-shadow: 0 0 0 1px rgba(232,180,120,.25);\n  font-weight: 600;\n}\n"
   }
 }
