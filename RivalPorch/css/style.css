@@ -6540,7 +6540,11 @@ body:not([data-audit-cold="1"]) [data-testid="practice-settle-wrap"] {
   align-items: center;
 }
 .rp-sig-whistle::after,
-.rp-sig-bass::after {
+.rp-sig-bass::after,
+.rp-sig-kite::after,
+.rp-sig-fence::after,
+.rp-sig-pour::after,
+.rp-sig-warm::after {
   content: "";
   position: absolute;
   inset: -4px;
@@ -6549,6 +6553,9 @@ body:not([data-audit-cold="1"]) [data-testid="practice-settle-wrap"] {
   pointer-events: none;
   animation: rp-lamp-breathe 1.2s ease-in-out 2;
 }
+.rp-sig-pour::after { border-color: #c4a574; }
+.rp-sig-kite::after { border-color: #7eb8c9; }
+.rp-sig-fence::after { border-color: #a67c52; }
 @keyframes rp-lamp-breathe {
   0%,100% { opacity: .35; }
   50% { opacity: 1; }
