@@ -68,7 +68,7 @@ export function pickPorchCallOptions(pack, allySynIds = [], practice = false) {
   if (!calls?.options?.length) return null;
   const rules = calls.selectionRules || {};
   const practiceForce =
-    (practice && (rules.practiceCupForceIds || ["call_focus_fire", "call_prop_assist", "call_chaos_kite"])) || null;
+    (practice && (rules.practiceCupForceIds || ["call_focus_neighbor", "call_prop_assist", "call_chaos_kite"])) || null;
   if (practiceForce?.length) {
     const forced = practiceForce
       .map((id) => calls.options.find((o) => o.id === id))

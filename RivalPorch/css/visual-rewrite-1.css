@@ -1,0 +1,535 @@
+/* Rival Porch — visual-REWRITE-1 (anti-slop)
+   Owner reject: GATE scores VOID. Not a patch on visual-fix-*.
+   Replace chrome stack with clay diorama identity.
+   Integrator: drop AFTER wiping generic UI tokens; prefer as new base sheet.
+*/
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   0. HARD BANS — fail CI if any match in computed styles / class soup
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.rp-app,
+.rp-screen,
+:root {
+  /* Ban purple / magenta / “AI” indigo */
+  --ban-purple: #7b61ff;
+  --ban-violet: #a855f7;
+  --ban-indigo: #6366f1;
+
+  /* Locked clay palette ONLY */
+  --mud-night: #1a1612;
+  --clay-earth: #4a3728;
+  --clay-mid: #7a5c45;
+  --porch-lamp: #e8a045;
+  --lamp-bloom: #f5c878;
+  --neon-teal: #2ec4b6;
+  --neon-sign: #ff6b4a;
+  --tea-cream: #f2e6d8;
+  --oven-ember: #c45c26;
+  --gossip-rose: #c97b8a;
+
+  --font-display: "Fraunces", "Source Serif 4", "Libre Baskerville", Georgia, serif;
+  --font-ui: "DM Sans", "Nunito Sans", "Avenir Next", sans-serif;
+
+  --chrome-top-max: 44px;
+  --chrome-dock-max: 72px;
+  --stage-min-cover: 0.72; /* ≥72% art */
+}
+
+/* Kill glow / blur / neon-purple class soup if present */
+.rp-glow,
+.rp-neon-glow,
+.rp-purple,
+.rp-gradient-hero,
+.glass-card,
+.stat-pill,
+.pill-row,
+.chip-cloud,
+.rp-badge-float,
+.rp-sparkle,
+.rp-particle-field {
+  display: none !important;
+}
+
+/* No rounded-full pills as primary chrome */
+.rp-chip,
+.rp-pill,
+[class*="rounded-full"].rp-hud-chip {
+  border-radius: 6px !important; /* clay bead, not pill */
+  box-shadow: none !important;
+  filter: none !important;
+  text-shadow: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   1. STAGE = THE PRODUCT (full-bleed diorama)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.rp-screen {
+  position: relative;
+  min-height: 100dvh;
+  background: var(--mud-night);
+  color: var(--tea-cream);
+  font-family: var(--font-ui);
+  overflow: hidden;
+}
+
+.rp-stage {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center 42% !important; /* street: porch lamps + courtyard */
+  pointer-events: none;
+}
+
+.rp-screen--fight .rp-stage,
+.rp-stage[data-stage="arena"] {
+  object-position: center 55% !important;
+}
+
+.rp-stage[data-wave="3"] {
+  /* wave3 heroes already framed — no letterbox zoom hacks */
+  transform: none;
+}
+
+/* Soft mud vignette ONLY under text bands — never a card wall */
+.rp-stage-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--mud-night) 55%, transparent) 0%,
+      transparent 18%, transparent 72%,
+      color-mix(in srgb, var(--mud-night) 70%, transparent) 100%);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   2. TITLE — brand-first (Rival Porch owns the first viewport)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.rp-screen--title .rp-brand {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  top: 18%;
+  z-index: 4;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2.6rem, 12vw, 3.4rem);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  color: var(--tea-cream);
+  text-shadow: 0 2px 0 color-mix(in srgb, var(--mud-night) 80%, transparent);
+}
+
+.rp-screen--title .rp-title-line {
+  margin-top: 10px;
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  font-weight: 500;
+  max-width: 18rem;
+  color: color-mix(in srgb, var(--tea-cream) 88%, var(--porch-lamp));
+}
+
+.rp-screen--title .rp-dock {
+  /* one CTA cluster only */
+  justify-content: stretch;
+}
+
+/* Ban secondary marketing blocks on title first viewport */
+.rp-screen--title .rp-stat-strip,
+.rp-screen--title .rp-schedule,
+.rp-screen--title .rp-promo,
+.rp-screen--title .rp-chip-cloud {
+  display: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   3. STREET — diorama with neighbors ON the stage (not a bust toolbar)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Kill horizontal “bust rail” chrome product */
+.rp-hotspots.rp-bust-rail,
+.rp-bust-rail,
+.rp-neighbor-rail {
+  /* REWRITE: become stage-anchored porch niches, not a top strip */
+  position: absolute !important;
+  inset: 0 !important;
+  top: 0 !important;
+  display: block !important;
+  z-index: 3 !important;
+  pointer-events: none;
+  background: none !important;
+  border: 0 !important;
+}
+
+.rp-hotspot {
+  position: absolute !important;
+  pointer-events: auto;
+  width: 64px !important;
+  height: 84px !important;
+  min-width: 56px !important;
+  min-height: 72px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 4px;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  filter: none !important;
+  padding: 0 !important;
+}
+
+/* Porch lamp ring — warm bead, NOT purple glow */
+.rp-hotspot.is-focus .rp-hotspot__bust,
+.rp-hotspot[aria-pressed="true"] .rp-hotspot__bust {
+  outline: 2px solid var(--porch-lamp);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--lamp-bloom) 40%, transparent);
+}
+
+.rp-hotspot__bust {
+  width: 56px !important;
+  height: 56px !important;
+  min-height: 48px !important;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center 28%;
+  background: var(--clay-earth);
+  border: 2px solid color-mix(in srgb, var(--porch-lamp) 55%, var(--clay-mid));
+}
+
+.rp-hotspot__name {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--tea-cream);
+  text-shadow: 0 1px 2px var(--mud-night);
+  max-width: 4.5rem;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Default porch niche positions (integrator maps to clay porches L→R) */
+.rp-hotspot[data-n="1"] { left: 6%;  top: 38%; }
+.rp-hotspot[data-n="2"] { left: 22%; top: 34%; }
+.rp-hotspot[data-n="3"] { left: 38%; top: 36%; }
+.rp-hotspot[data-n="4"] { left: 54%; top: 34%; }
+.rp-hotspot[data-n="5"] { left: 70%; top: 36%; }
+.rp-hotspot[data-n="6"] { left: 84%; top: 38%; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   4. CHROME BUDGET — strip the productivity form
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.rp-hud-top {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: calc(8px + var(--rp-safe-top, 0px));
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-height: var(--chrome-top-max);
+  min-height: 0;
+  padding: 6px 10px;
+  background: color-mix(in srgb, var(--mud-night) 48%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tea-cream) 12%, transparent);
+  border-radius: 8px; /* clay bead */
+  backdrop-filter: none; /* no glassmorphism soup */
+}
+
+.rp-hud-top .rp-day {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.rp-hud-top .rp-currencies {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+  font-size: 11px;
+}
+
+/* DELETE stacked mid bars from street/evening first viewport */
+.rp-screen--street .rp-quest-strip,
+.rp-screen--street .rp-main-bar,
+.rp-screen--street .rp-cult-bar,
+.rp-screen--street .rp-recommend-bar,
+.rp-screen--street .rp-hud-whisper,
+.rp-screen--street .rp-spine-chip,
+.rp-screen--street .rp-antenna-op-live-banner,
+.rp-screen--street .rp-week2-chip,
+.rp-screen--street .rp-ledger-chip,
+.rp-screen--street .rp-headphones-chip,
+.rp-screen--street .rp-stage-stack,
+.rp-screen--evening .rp-quest-strip:not(.rp-quest-whisper),
+.rp-screen--evening .rp-main-bar,
+.rp-screen--evening .rp-cult-bar {
+  display: none !important;
+}
+
+/* ONE whisper under HUD max — tea-cream, no teal “QUEST” banner product */
+.rp-quest-whisper {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: calc(52px + var(--rp-safe-top, 0px));
+  z-index: 4;
+  font-size: 12px;
+  line-height: 1.25;
+  max-height: 2.6em;
+  overflow: hidden;
+  color: var(--tea-cream);
+  opacity: 0.92;
+  pointer-events: none;
+}
+
+.rp-quest-whisper::before {
+  content: none; /* no QUEST badge */
+}
+
+/* ONE caption / NPC line — dock-adjacent only */
+.rp-street-line,
+.rp-yield-line,
+.rp-day2-line {
+  position: absolute !important;
+  left: 12px !important;
+  right: 12px !important;
+  top: auto !important;
+  bottom: calc(var(--chrome-dock-max) + 10px + var(--rp-safe-bottom, 0px)) !important;
+  z-index: 5 !important;
+  max-height: 40px !important;
+  padding: 8px 12px !important;
+  font-size: 12px !important;
+  line-height: 1.25 !important;
+  overflow: hidden !important;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--mud-night) 72%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--tea-cream) 16%, transparent);
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+/* Mid-stage consequence prop — ONE, below niches */
+.rp-stage-prop,
+[data-testid="story-street-headphones-note"],
+[data-testid="story-street-ledger-tray"],
+[data-testid^="story-day2-"] {
+  position: absolute !important;
+  left: 50% !important;
+  top: 58% !important;
+  transform: translateX(-50%) !important;
+  z-index: 2 !important;
+  max-width: min(56vw, 200px) !important;
+  min-height: 96px !important;
+  pointer-events: none;
+}
+
+.rp-stage-prop img,
+.rp-stage-prop svg,
+[data-testid="story-street-ledger-tray"] img {
+  display: block;
+  width: 160px;
+  height: 160px;
+  min-height: 96px;
+  object-fit: contain;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   5. DOCK — one primary clay CTA (not three equal pills)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.rp-dock {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 6;
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  max-height: var(--chrome-dock-max);
+  padding: 10px 12px calc(10px + var(--rp-safe-bottom, 0px));
+  background: color-mix(in srgb, var(--mud-night) 62%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--tea-cream) 10%, transparent);
+}
+
+.rp-dock .rp-btn {
+  flex: 1;
+  border-radius: 10px; /* bead, not pill */
+  border: 1px solid color-mix(in srgb, var(--tea-cream) 18%, transparent);
+  background: color-mix(in srgb, var(--clay-earth) 80%, transparent);
+  color: var(--tea-cream);
+  font-family: var(--font-ui);
+  font-weight: 650;
+  font-size: 14px;
+  box-shadow: none !important;
+  filter: none !important;
+  min-height: 44px;
+}
+
+.rp-dock .rp-btn--primary,
+.rp-dock [data-primary="true"] {
+  flex: 1.35;
+  background: var(--porch-lamp);
+  color: var(--mud-night);
+  border-color: color-mix(in srgb, var(--lamp-bloom) 50%, var(--porch-lamp));
+}
+
+/* Secondary actions collapse behind ··· — not equal chrome */
+.rp-dock .rp-btn--ghost {
+  flex: 0 0 44px;
+  max-width: 48px;
+  padding: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   6. EVENING — no agenda wall; mid ≤ 28vh over stage
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.rp-screen--evening .rp-mid,
+.rp-evening-card {
+  position: absolute !important;
+  left: 12px !important;
+  right: 12px !important;
+  top: auto !important;
+  bottom: calc(var(--chrome-dock-max) + 8px + var(--rp-safe-bottom, 0px)) !important;
+  max-height: min(28vh, 30%) !important;
+  overflow: auto !important;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--mud-night) 68%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--tea-cream) 14%, transparent);
+  box-shadow: none !important;
+  padding: 12px 14px !important;
+}
+
+.rp-screen--evening .rp-mid h2,
+.rp-evening-card h2 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  margin: 0 0 6px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   7. FIGHT — pad theater, thin HP, ≤3 floats, no card soup
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.rp-screen--fight .rp-unit {
+  position: absolute;
+  width: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.rp-screen--fight .rp-unit img {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--neon-teal);
+}
+
+.rp-screen--fight .rp-unit.is-enemy img {
+  border-color: var(--neon-sign);
+}
+
+.rp-screen--fight .rp-hp {
+  width: 52px;
+  height: 4px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--mud-night) 70%, transparent);
+  overflow: hidden;
+}
+
+.rp-screen--fight .rp-hp > i {
+  display: block;
+  height: 100%;
+  background: var(--porch-lamp);
+}
+
+.rp-float {
+  max-width: 5rem;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--tea-cream);
+  text-shadow: 0 1px 2px var(--mud-night);
+  filter: none !important;
+  box-shadow: none !important;
+}
+
+/* Comic: thick clay bead frames */
+.rp-comic-strip {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  padding: 8px;
+  border: 5px solid var(--clay-mid);
+  border-radius: 10px;
+  background: var(--mud-night);
+}
+
+.rp-comic-panel {
+  border: 4px solid var(--clay-earth);
+  border-radius: 6px;
+  overflow: hidden;
+  outline: 2px solid color-mix(in srgb, var(--porch-lamp) 35%, transparent);
+  outline-offset: -6px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   8. MOTION — presence, not sparkle soup (2–3 intentional)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes rp-lamp-breathe {
+  0%, 100% { outline-color: var(--porch-lamp); }
+  50% { outline-color: var(--lamp-bloom); }
+}
+
+@keyframes rp-stage-settle {
+  from { opacity: 0.6; transform: scale(1.04); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes rp-cta-nudge {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+.rp-stage {
+  animation: rp-stage-settle 480ms ease-out both;
+}
+
+.rp-hotspot.is-focus .rp-hotspot__bust {
+  animation: rp-lamp-breathe 2.4s ease-in-out infinite;
+}
+
+.rp-dock .rp-btn--primary {
+  animation: rp-cta-nudge 2.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rp-stage,
+  .rp-hotspot.is-focus .rp-hotspot__bust,
+  .rp-dock .rp-btn--primary {
+    animation: none !important;
+  }
+}

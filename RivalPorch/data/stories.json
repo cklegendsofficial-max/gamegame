@@ -12,10 +12,28 @@
       "clay-diorama"
     ],
     "bans": [
-      "generic-fantasy",
-      "stereotype",
+      "The Snag",
+      "01:12",
+      "Ledger & Tray",
+      "MAIN",
+      "Omurga",
+      "Talk about the night",
+      "the tangled line",
+      "Spine",
+      "the line still holds",
+      "check-in",
+      "child-romance",
       "epic-chosen-one",
-      "child-romance"
+      "generic-fantasy",
+      "handoff",
+      "lived beat",
+      "objective",
+      "quest complete",
+      "stereotype",
+      "feel the porch click",
+      "unlocks",
+      "knock on doors",
+      "leave a mark"
     ]
   },
   "world": {
@@ -25,8 +43,8 @@
       "en": "Lower Ridge"
     },
     "pitch": {
-      "tr": "Kil diorama bir sokak; verandalar yarı-kamusal sahne; Cumartesi Porch Cup minyatür tiyatro olur.",
-      "en": "A clay-diorama street; porches are half-public stages; Saturday Porch Cup becomes miniature theater."
+      "tr": "Karşı Sırt kil verandalarla skor tutar: çay, gürültü, iyilik. Sen yeni komşusun — bitmemiş kavgalarına çekilirsin.",
+      "en": "Lower Ridge keeps score with tea, noise, and favors. You’re the new neighbor drafted into unfinished fights."
     },
     "season1Atmosphere": {
       "tr": "İlkbahar geçişi: açık pencereler, uçurtma ipi, gece fırın kokusu, mercan neon bakkal.",
@@ -451,7 +469,7 @@
       "id": "arc_kite_antenna",
       "title": {
         "tr": "Anten Operasyonu",
-        "en": "Antenna Op"
+        "en": "The Snag"
       },
       "neighbors": [
         "n3",
@@ -592,7 +610,7 @@
       "id": "arc_volume_war",
       "title": {
         "tr": "Desibel Antlaşması",
-        "en": "Decibel Accord"
+        "en": "01:12"
       },
       "neighbors": [
         "n5",
@@ -1796,7 +1814,7 @@
           "speaker": "narrator",
           "text": {
             "tr": "Desibel Antlaşması masada. Neon mu, bilet mi?",
-            "en": "Decibel Accord on the table. Neon or ticket?"
+            "en": "01:12 on the table. Neon or ticket?"
           },
           "choices": [
             {
@@ -3323,7 +3341,7 @@
       "kind": "day2_cold_reactive",
       "title": {
         "tr": "Ortak ip",
-        "en": "Shared string"
+        "en": "the tangled line"
       },
       "start": "d2m_root",
       "reactsToFlagsAll": [
@@ -6045,7 +6063,7 @@
       "bodyByFlag": {
         "cold_open_mediate": {
           "tr": "Ortak ip comic'e sızdı — Arabulucu izi.",
-          "en": "Shared string leaked into the comic — Mediator mark."
+          "en": "the tangled line leaked into the comic — roof mark."
         },
         "cold_open_instigate": {
           "tr": "Yüksek uçuş comic'e sızdı — Kışkırtıcı izi.",

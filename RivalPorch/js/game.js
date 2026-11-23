@@ -14,6 +14,7 @@ import * as Combat from "./combat.js";
 import * as Density from "./density.js";
 import * as EndEvening from "./endEvening.js";
 import * as Ux4 from "./uxSession4Nuclear.js";
+import * as UxFirst from "./uxFirstSession.js";
 
 const DAY1_BUSTS = {
   n1: "assets/rival-porch/bust-n1-aunt-merve.png",
@@ -889,20 +890,22 @@ function reactiveDialogueBannerHtml() {
 function hudHtml() {
   const s = state.save;
   const dayLine = fillTemplate(t("day.label"), { day: s.dayIndex, week: weekNumber() });
-  const qLine = unfinishedQuestHeadline();
+  const first10 = UxFirst.first10Active(s);
+  const whisper = first10
+    ? (state.locale === "tr" ? "Çatıda bir ip var — iki kapıya dokun." : "There’s a line on the roof — tap two doors.")
+    : questHudWhisper();
+  const coins = first10
+    ? ""
+    : `<div class="meta-currencies rp-currencies">
+        <span title="${currencyName("porch_coins")}">${s.currencies.porch_coins||0}</span>
+      </div>`;
+  // Anti-slop: no QUEST teal strip / MAIN product chrome
   return `
-    <div class="meta-hud">
-      <div class="meta-day">${dayLine}</div>
-      <div class="meta-currencies">
-        <span title="${currencyName("porch_coins")}">🪙 ${s.currencies.porch_coins||0} <em>${currencyName("porch_coins")}</em></span>
-        <span title="${currencyName("neon_thread")}">🧵 ${s.currencies.neon_thread||0} <em>${currencyName("neon_thread")}</em></span>
-        <span title="${currencyName("clay_tokens")}">🧱 ${s.currencies.clay_tokens||0} <em>${currencyName("clay_tokens")}</em></span>
-      </div>
-      <button class="hud-quest" type="button" data-action="open-quests" title="${questHudWhisper()}">
-        <span class="hud-quest-label">${state.locale === "tr" ? "GÖREV" : "QUEST"}</span>
-        <span class="hud-quest-next">${questHudWhisper()}</span>
-      </button>
-    </div>`;
+    <header class="meta-hud rp-hud-top">
+      <div class="meta-day rp-day">${dayLine}</div>
+      ${coins}
+      <p class="rp-quest-whisper">${whisper}</p>
+    </header>`;
 }
 
 function synergyCoachHtml(pickedIds = []) {
@@ -1150,21 +1153,22 @@ function renderQuestLog() {
 function renderTitle() {
   const screen = document.getElementById("screen-title");
   screen.style.backgroundImage = "";
+  screen.classList.add("rp-screen", "rp-screen--title");
   const hasSave = state.save.dayIndex > 1 || state.save.evening.checkin || state.save.cupHistory.length;
-  const stake = state.locale === "tr"
-    ? "Bu akşam: üç kapı, bir seçim, bir sahne."
-    : "Tonight: three doors, one choice, one stage.";
+  const tr = state.locale === "tr";
+  const stake = tr ? "Kil mahallede gece kavgası." : "Clay-street night arguments.";
+  const cta = hasSave
+    ? (tr ? "Akşama dön" : "Back to tonight")
+    : (tr ? "Verandaya çık" : "Step onto the porch");
   screen.innerHTML = `
     ${stageLayer("street")}
-    <div class="rp-title-stack">
-      <button class="rp-chip rp-lang" type="button" data-action="toggle-lang" aria-label="Language">EN | TR · ${state.locale.toUpperCase()}</button>
-      <h1 class="rp-brand">${t("app.title")}</h1>
-      <p class="rp-lede">${stake}</p>
-    </div>
+    <div class="rp-stage-vignette" aria-hidden="true"></div>
+    <button class="rp-chip rp-lang" type="button" data-action="toggle-lang" aria-label="Language">${state.locale.toUpperCase()}</button>
+    <h1 class="rp-brand">Rival Porch</h1>
+    <p class="rp-title-line rp-lede">${stake}</p>
     <footer class="rp-dock rp-dock--title">
-      ${hasSave ? `<button class="rp-btn rp-btn--primary" type="button" data-action="continue-save">${t("common.continue_save")} — ${fillTemplate(t("day.label"), { day: state.save.dayIndex, week: weekNumber() })}</button>` : ""}
-      <button class="rp-btn rp-btn--primary" type="button" data-action="new-game">${hasSave ? t("common.new_game") : t("boot.tap_to_start")}</button>
-      <button class="rp-btn rp-btn--ghost" type="button" data-action="open-shop">${t("shop.title")}</button>
+      ${hasSave ? `<button class="rp-btn rp-btn--ghost" type="button" data-action="continue-save">${t("common.continue_save")}</button>` : ""}
+      <button class="rp-btn rp-btn--primary rp-cta-primary" type="button" data-action="new-game" data-primary="true">${cta}</button>
     </footer>`;
 }
 
@@ -1208,20 +1212,20 @@ function renderColdOpen() {
   screen.style.backgroundImage = stageBg(ART.streetHero, ART.streetHeroFallback);
   const tr = state.locale === "tr";
   screen.innerHTML = `
-    <div class="cold-open">
+    <div class="cold-open rp-screen--cold">
       <p class="cold-knock" id="cold-knock">${tr ? "…tak. tak. tak." : "…knock. knock. knock."}</p>
-      <h1 class="brand cold-brand cold-reveal" id="cold-brand" hidden>${t("app.title")}</h1>
+      <h1 class="brand cold-brand cold-reveal rp-brand" id="cold-brand" hidden>Rival Porch</h1>
       <div class="dialog-box cold-box cold-reveal" id="cold-box" hidden>
         <p class="prompt">${tr
-          ? "Kapıda Leyla — uçurtma ipi Orhan'ın antenine dolanmış. Karşı Sırt fenerleri yanıyor. Bu ilk seçimin mahalleyi şekillendirir."
-          : "Leyla at your door — kite string tangled in Orhan's antenna. Rival Ridge lanterns are already lit. This first choice shapes the block."}</p>
+          ? "Leyla: İpim onun demirinde. Kesersem çocuk gibi görünürüm. Orhan gazetesini kalkan gibi tutuyor."
+          : "Leyla: My line’s in his iron. If I cut it, I look like a kid. Orhan’s holding the paper like a shield."}</p>
         <div class="choice-stack">
-          <button class="btn btn-primary" type="button" data-action="cold-choice" data-cid="mediate">${tr ? "Arabulucu ol — birlikte çözün" : "Mediate — untangle together"}</button>
-          <button class="btn btn-ember" type="button" data-action="cold-choice" data-cid="instigate">${tr ? "Uçurtmayı savun — antene meydan oku" : "Defend the kite — dare the antenna"}</button>
-          <button class="btn btn-teal" type="button" data-action="cold-choice" data-cid="stage">${tr ? "Cup'a çevir — bu bir sahne" : "Make it Cup drama — stage it"}</button>
+          <button class="btn btn-primary rp-cta-primary" type="button" data-action="cold-choice" data-cid="mediate" data-primary="true">${tr ? "İki tarafı da dinle" : "Hear both roofs"}</button>
+          <button class="btn btn-ember" type="button" data-action="cold-choice" data-cid="instigate">${tr ? "İpi çek, mahalle baksın" : "Yank it. Let them watch."}</button>
+          <button class="btn btn-teal" type="button" data-action="cold-choice" data-cid="stage">${tr ? "Sahneye çevir, Cem düdüklesin" : "Make it a show. Cem has a whistle."}</button>
         </div>
       </div>
-      <p class="muted cold-hint cold-reveal" id="cold-hint" hidden>${tr ? "Sonra akşam gündemi açılır." : "Then the evening agenda opens."}</p>
+      <p class="muted cold-hint cold-reveal" id="cold-hint" hidden>${tr ? "Seçimin yarın sokakta kalır." : "Your choice stays on the street tomorrow."}</p>
     </div>`;
   showScreen("screen-cold");
   unlockAudio();
@@ -1244,6 +1248,7 @@ function resolveColdOpen(cid) {
   ensureNeighborState("n4");
   state.save.storyFlags = state.save.storyFlags || {};
   state.save.storyFlags.first_evening_cup_available = true;
+  state.save.storyFlags.first10_choice_done = true;
   const packs = {
     mediate: {
       aff: [["n3", 4], ["n4", 3]],
@@ -1634,10 +1639,11 @@ function recommendTonightBarHtml() {
   armRecommendTonightCandidate();
   const candidate = !!storyFlag("would_recommend_tonight_candidate");
   const form19Copy = storyForm19()?.armRecommendTonightCandidate?.bar?.copy;
-  const copy = candidate
-    ? form19Copy || bar.copyWhenCandidate
-    : bar.copyWhenClimbing;
-  return `<div class="rp-recommend-tonight-bar" data-testid="${bar.testId || "recommend-tonight-bar"}" data-candidate="${candidate ? "true" : "false"}" data-cult-slot="under-rail">${loc(copy)}</div>`;
+  // story-rewrite-1: cult voice, not scoreboard
+  const cultCopy = candidate
+    ? { tr: "Bu mahalle gece anlatılır.", en: "This street tells itself at night." }
+    : { tr: "Gece hâlâ konuşuyor — bir kapı daha.", en: "Night’s still talking — one more door." };
+  return `<div class="rp-recommend-tonight-bar" data-testid="${bar.testId || "recommend-tonight-bar"}" data-candidate="${candidate ? "true" : "false"}" data-cult-slot="under-rail">${loc(cultCopy)}</div>`;
 }
 
 function armMech15DecibelLived() {
@@ -2201,42 +2207,16 @@ function overnightSpineHook() {
     title: tr ? "Gece yazdı · Omurga devam" : "Night wrote · Spine continues",
     hook: tr
       ? "Sabah Anten Operasyonu — sonra Desibel, sonra Defter."
-      : "Morning: Antenna Op — then Volume, then Ledger.",
+      : "Morning: the snag first — then the night, then the book.",
   };
 }
 
 function spineCultChipHtml() {
+  // story-rewrite-1: situation strip — never MAIN/Spine product chrome
   const day = state.save.dayIndex || 1;
-  if (day < 2) return "";
-  const tr = state.locale === "tr";
-  // form19: Day10+ MAIN 4/5 Ledger & Tray
-  if (day >= 10 || storyFlag("natural_ledger_street_wins")) {
-    const main = storyForm19()?.cleanLedgerTrayWinner?.mainBar;
-    const label = main
-      ? loc(main)
-      : tr
-        ? "MAIN 4/5 · Defter & Tepsi"
-        : "MAIN 4/5 · Ledger & Tray";
-    return `<p class="rp-spine-cult-chip" data-testid="spine-cult-chip">${label}</p>`;
-  }
-  const upgrade = storyForm18()?.cultRecommendTonightBar?.spineCultUpgrade;
-  if (
-    upgrade &&
-    (storyFlag("quest_volume_accepted") || storyFlag("week2_decibel_ledger_seen")) &&
-    (upgrade.whenFlagsAny || []).some((f) => storyFlag(f))
-  ) {
-    return `<p class="rp-spine-cult-chip" data-testid="${upgrade.testId || "spine-cult-chip"}">${loc(upgrade.label)}</p>`;
-  }
-  let n = 1;
-  if (storyFlag("quest_antenna_complete") || storyFlag("arc_kite_antenna_complete")) n = 3;
-  else if (storyFlag("quest_antenna_active") || day >= 2) n = 2;
-  if (storyFlag("quest_volume_complete") || storyFlag("arc_volume_war_complete")) n = 4;
-  else if (storyFlag("quest_volume_active") || storyFlag("quest_volume_accepted")) n = 3;
-  if (storyFlag("quest_ledger_complete")) n = 5;
-  const label = tr
-    ? `Omurga ${n}/5 · Anten → Desibel → Defter`
-    : `Spine ${n}/5 · Antenna → Volume → Ledger`;
-  return `<p class="rp-spine-cult-chip" data-testid="spine-cult-chip">${label}</p>`;
+  if (day < 2 && !UxFirst.firstShareDone(state.save)) return "";
+  const label = UxFirst.situationStrip(day, state.save.storyFlags || {}, state.locale);
+  return `<p class="rp-situation-strip" data-testid="spine-cult-chip" data-situation="1">${label}</p>`;
 }
 
 function renderOvernight(payoff) {
@@ -2394,7 +2374,12 @@ function renderEvening() {
     dayF16 >= 7 ||
     ["cold_day2_yielded", "natural_volume_street", "natural_antenna_complete", "arc_kite_antenna_complete", "quest_antenna_complete"].some(storyFlag);
   const volAlready = ["quest_volume_accepted", "arc_volume_war_complete", "volume_accept_dismissed"].some(storyFlag);
-  const showVolAccept = !soleEnd && volUnlocked && !volAlready;
+  // ux-rewrite-1: Week-2 Volume chrome gated until first share + overnight
+  const showVolAccept =
+    !soleEnd &&
+    volUnlocked &&
+    !volAlready &&
+    UxFirst.week2ChromeAllowed(state.save);
   const echoOff = coldEchoSuppressed();
   if (showVolAccept) document.body.dataset.eveningPanel = "volume-accept";
   else delete document.body.dataset.eveningPanel;
@@ -2450,7 +2435,11 @@ function renderEvening() {
   // Purge Shared string / day2 stage / banners while yielded or Volume accept live
   purgeColdWorldResiduals();
   const stageEchoHtml = soleEnd || showVolAccept || echoOff ? "" : day2StreetStageHtml();
-  const bannerHtml = soleEnd || showVolAccept || echoOff ? "" : activeArcBeatBannerHtml();
+  // ux/story rewrite: no Antenna Op beat-product banner in first10
+  const bannerHtml =
+    soleEnd || showVolAccept || echoOff || UxFirst.first10Active(state.save)
+      ? ""
+      : activeArcBeatBannerHtml();
   const supportHtml = showVolAccept || soleEnd ? "" : (supportLine ? `<p class="rp-mid__line">${supportLine}</p>` : "");
   const cultHtml = soleEnd || showVolAccept ? "" : spineCultChipHtml();
   const recommendHtml = showVolAccept ? "" : recommendTonightBarHtml();
@@ -2511,6 +2500,7 @@ function day1EscapeChipHtml(endEnabled) {
 }
 
 function scrubBannedEscapeChrome() {
+  UxFirst.scrubProductionEscapeHatches(document);
   if (coldAuditActive()) return;
   document
     .querySelectorAll(
@@ -2524,13 +2514,14 @@ function renderStreet() {
   applyNaturalArcStreetUnlock();
   syncColdYieldBodyClass();
   // visual-fix-2 wave3 L-block hotspots
+  // visual-rewrite-1: porch niches mid diorama (not bust-rail toolbar)
   const HOT = {
-    n1: [18, 42],
-    n2: [32, 40],
-    n3: [46, 39],
-    n4: [58, 40],
-    n5: [70, 39],
-    n6: [82, 41],
+    n1: [14, 48],
+    n2: [30, 46],
+    n3: [46, 44],
+    n4: [58, 45],
+    n5: [72, 46],
+    n6: [86, 48],
   };
   // Always show ≥4 bust hotspots (visual-fix-3); prefer unlocked, pad with roster
   const roster = unlockedNeighbors().length
@@ -3394,7 +3385,7 @@ function renderCupLobby() {
       </div>`
     : state.practiceMode
       ? `<div class="syn-teach"><div class="btn-row">
-          <button class="btn btn-teal" type="button" data-action="syn-show-me">Show me</button>
+          <button class="btn btn-teal" type="button" data-action="syn-show-me">Settle it on the porch</button>
           <button class="btn btn-ember" type="button" data-action="practice-enter-now">${state.locale === "tr" ? "Hemen Prova" : "Enter Practice now"}</button>
         </div></div>`
       : "";
@@ -3418,7 +3409,7 @@ function renderCupLobby() {
     <p class="pick-status">${state.cupPicks.length}/${state.pickCount}${teach && !teachSynOk ? (state.locale === "tr" ? " · sinerji kur" : " · form synergy") : ""}</p>
     ${synergyCoachHtml(state.cupPicks)}
     <div class="btn-row">
-      <button class="btn btn-teal" type="button" data-action="syn-show-me" data-testid="show-me">${state.locale === "tr" ? "Göster" : "Show me"}</button>
+      <button class="btn btn-teal" type="button" data-action="syn-show-me" data-testid="show-me">${state.locale === "tr" ? "Verandada hallet" : "Settle it on the porch"}</button>
       <button class="btn btn-primary ${ready ? "rp-cta-pulse" : ""}" type="button" data-action="start-fight" data-testid="start-fight" id="btn-start-fight" ${ready ? "" : "disabled"} data-ready="${ready ? "1" : "0"}">${startLabel}</button>
       ${
         state.practiceMode && ready
@@ -3975,42 +3966,25 @@ function resumeFightLoop(battle) {
         if (u.alive && u.hp < 1) u.hp = 1;
       }
     }
-    // mechanics-fix-9: Porch Call II — arm dock ~2.5s after Call I, force open ~3.0s / elapsed≥5.5
-    if (
-      battle.practice &&
-      battle.actionUsed &&
-      !battle.secondCallUsed &&
-      !battle.callTwoArmed &&
-      battle.elapsed >= 5.0
-    ) {
-      battle.callTwoArmed = true;
-      updateFightUI(battle);
+    // mechanics-rewrite-1: ONE Porch Call only — no Call II / tempo insurance
+    battle.secondCallUsed = true;
+    battle.callTwoArmed = false;
+    // Phase chip: Opening → Your call → Close
+    const phaseEl = document.getElementById("fight-phase-chip");
+    if (phaseEl) {
+      const tr = state.locale === "tr";
+      if (!battle.actionUsed && battle.elapsed < 8) phaseEl.textContent = tr ? "Açılış" : "Opening";
+      else if (!battle.actionUsed || battle.actionOffered) phaseEl.textContent = tr ? "Senin çağrın" : "Your call";
+      else phaseEl.textContent = tr ? "Kapanış" : "Close";
     }
-    if (
-      battle.practice &&
-      battle.actionUsed &&
-      !battle.secondCallUsed &&
-      !battle.secondCallOffered &&
-      battle.elapsed >= 5.5 &&
-      battle.allies.some((u) => u.alive) &&
-      battle.enemies.some((u) => u.alive)
-    ) {
-      battle.secondCallOffered = true;
-      battle.paused = true;
-      updateFightUI(battle);
-      showSecondFightChoice(battle);
-      return;
+    // Soft signature FX pulses in opening
+    if (battle.elapsed > 1.2 && !battle._sigFx1) {
+      battle._sigFx1 = true;
+      document.querySelector(".rp-unit--you")?.classList.add("rp-sig-whistle");
     }
-    // Comic watchdog: after Call II open, never strand >8s without resolve
-    if (
-      battle.practice &&
-      battle.secondCallOffered &&
-      !battle.secondCallUsed &&
-      battle.secondCallOfferedAt != null &&
-      battle.elapsed - battle.secondCallOfferedAt > 8
-    ) {
-      applySecondFightChoice("focus", { auto: true });
-      return;
+    if (battle.elapsed > 2.8 && !battle._sigFx2) {
+      battle._sigFx2 = true;
+      document.querySelector(".rp-unit--enemy")?.classList.add("rp-sig-bass");
     }
     // Practice hard gate: don't finish until porch call resolved
     if (battle.practice && !battle.actionUsed && (timeUp || !bothAlive)) {
@@ -4020,16 +3994,6 @@ function resumeFightLoop(battle) {
         battle.cannotDismissPorch = true;
         updateFightUI(battle);
         showFightActions(battle);
-      }
-      return;
-    }
-    // After Call II, also require second call before KO finish (fix-9 path)
-    if (battle.practice && battle.actionUsed && !battle.secondCallUsed && (timeUp || !bothAlive)) {
-      if (!battle.secondCallOffered) {
-        battle.secondCallOffered = true;
-        battle.paused = true;
-        updateFightUI(battle);
-        showSecondFightChoice(battle);
       }
       return;
     }
@@ -4844,15 +4808,11 @@ function renderFight(battle) {
   screen.innerHTML = `
     ${stageLayer("arena")}
     ${hudHtml()}
-    <div class="topbar fight-top"><h2>${t("fight.title")}</h2>
-      ${canSkip ? `<button class="btn btn-secondary" type="button" data-action="skip-fight">${t("fight.skip")}</button>` : `<span class="chip rivalry">${tr ? "Prova — atlama yok" : "Practice — no skip"}</span>`}
+    <div class="topbar fight-top"><h2 data-testid="fight-phase-chip" id="fight-phase-chip">${tr ? "Açılış" : "Opening"}</h2>
+      ${canSkip ? `<button class="btn btn-secondary" type="button" data-action="skip-fight">${t("fight.skip")}</button>` : `<span class="chip rivalry">${tr ? "Prova" : "Practice"}</span>`}
     </div>
-    <p class="street-hint muted" data-testid="porch-tempo-label">${tr ? "Porch tempo — dokunarak yönlendir" : "Porch tempo — steer with taps"}</p>
+    <p class="street-hint muted" data-testid="porch-phase-hint">${tr ? "Prop’lar konuşur — bir Veranda Çağrısı" : "Props talk — one Porch Call"}</p>
     ${coachBanner}
-    <div class="tempo-steer-meter" data-testid="tempo-steer-meter" aria-label="${tr ? "Tempo senin" : "You're steering"}">
-      <span class="tempo-steer-meter__label">${tr ? "Tempo senin" : "You're steering"}</span>
-      <i id="tempo-steer-fill" class="tempo-steer-meter__fill" style="width:0%"></i>
-    </div>
     <div class="fight-hud" style="margin-bottom:0.35rem">
       <span id="ally-hp-total" class="hud-ally"></span><span id="fight-timer">0.0s</span><span id="enemy-hp-total" class="hud-enemy"></span>
       <span id="you-score" class="hud-you-score" data-testid="you-score">You 0</span>
@@ -4871,16 +4831,8 @@ function renderFight(battle) {
       <span class="muted" id="porch-call-ready-hint">${tr ? "Veranda Çağrısı hazır — bas" : "Porch Call ready — tap"}</span>
     </div>
     <div class="rp-between-dock" id="between-call-dock" data-testid="between-call-dock" hidden>
-      <button class="btn btn-teal" type="button" data-action="between-cheer-pulse" data-testid="between-cheer-pulse">${tr ? "Alkış" : "Cheer"}</button>
-      <button class="btn btn-ember rp-cta-pulse" type="button" data-action="tempo-pulse-hit" data-testid="tempo-pulse-dock" hidden>${tr ? "Tempo!" : "Tempo!"}</button>
-      <span class="muted">${tr ? "Hedef / Tut için pad'e dokun" : "Tap pads to Mark / Hold"}</span>
+      <span class="muted">${tr ? "Düşman pad’ine dokun — işaretle" : "Tap an enemy pad to Mark"}</span>
     </div>
-    <div class="tempo-chip-row" id="tempo-chip-row" data-testid="tempo-chip-row" hidden>
-      <button class="btn btn-ember" type="button" data-action="tempo-chip-push" data-testid="tempo-chip-push">${tr ? "Bastır" : "Push"}</button>
-      <button class="btn btn-secondary" type="button" data-action="tempo-chip-guard" data-testid="tempo-chip-guard">${tr ? "Koru" : "Guard"}</button>
-    </div>
-    <button class="tempo-pulse-pad" type="button" id="tempo-pulse-pad" data-action="tempo-pulse-hit" data-testid="tempo-pulse-pad" hidden aria-label="Tempo">${tr ? "Tempo!" : "Tempo!"}</button>
-    <p class="tempo-idle-hint muted" id="tempo-idle-hint" hidden data-testid="tempo-idle-hint">${tr ? "Dokun — tempo yavaşladı" : "Tap — tempo slowed"}</p>
     <div class="fight-actions" id="fight-actions" hidden></div>
     <p class="fight-log muted" id="fight-log"></p>`;
   screen._battle = battle;
@@ -5017,26 +4969,9 @@ function updateFightUI(battle) {
     );
     between.hidden = !showBetween;
   }
-  if (typeof syncTempoPulseUI === "function") syncTempoPulseUI(battle);
-  // mechanics-fix-9: Porch Call II dock
-  let dock2 = document.getElementById("porch-call-two-dock");
-  if (!dock2) {
-    const arena = document.querySelector("#screen-fight .rp-arena") || document.getElementById("screen-fight");
-    if (arena) {
-      dock2 = document.createElement("div");
-      dock2.id = "porch-call-two-dock";
-      dock2.className = "rp-call-dock";
-      dock2.hidden = true;
-      dock2.innerHTML = `<button class="btn btn-ember rp-cta-pulse" type="button" id="btn-porch-call-two" data-action="open-porch-call-two" data-testid="porch-call-two-ready">${state.locale === "tr" ? "Veranda Çağrısı II" : "Porch Call II"}</button>`;
-      const actions = document.getElementById("fight-actions");
-      if (actions) actions.parentNode.insertBefore(dock2, actions);
-      else arena.appendChild(dock2);
-    }
-  }
-  if (dock2) {
-    const show2 = !!(battle.callTwoArmed && !battle.secondCallUsed && !battle.finished && !battle.secondCallOffered);
-    dock2.hidden = !show2;
-  }
+  // mechanics-rewrite-1: never mount Call II / tempo SoT docks
+  document.getElementById("porch-call-two-dock")?.remove();
+  document.querySelectorAll("[data-testid='porch-call-two-ready'],[data-testid='tempo-chip-row'],[data-testid='tempo-pulse-pad']").forEach((el) => el.remove());
   scrubBannedEscapeChrome();
 }
 
@@ -5502,11 +5437,27 @@ function renderComic() {
           <figcaption class="rp-comic-panel__caption">${punch}</figcaption>
         </figure>
       </div>
-      ${r.rewardLine ? `<div class="rp-comic-rewards">${state.locale === "tr" ? "Ödül" : "Rewards"}: ${r.rewardLine}</div>` : ""}
+      ${(() => {
+        const coldLine = storyFlag("cold_open_mediate")
+          ? (state.locale === "tr" ? "Dün ipi birlikte çektik. Yarın hâlâ orada." : "Yesterday we pulled the same line. Tomorrow it’s still there.")
+          : storyFlag("cold_open_instigate")
+            ? (state.locale === "tr" ? "YASAK yazdı. Ben daha yükseğe uçururum." : "He wrote FORBIDDEN. I’ll fly it meaner.")
+            : (state.locale === "tr" ? "Üç daire çizdim. Mahalle prova sandı." : "I chalked three circles. The street thought it was rehearsal.");
+        return UxFirst.mountSharePorchMoment({
+          locale: state.locale,
+          summary: {
+            callId: r.porchCall || state.lastResult?.porchCall || "call_prop_assist",
+            callLabel: r.porchCall || "Call",
+            mvpProp: r.mvp,
+            mvpName: r.mvp,
+            synergyFired: r.synergy && r.synergy !== "Solo" ? r.synergy : "",
+          },
+          coldLine,
+        });
+      })()}
       <footer class="rp-dock rp-dock--comic btn-row">
-        <button class="btn btn-primary rp-btn" type="button" data-action="share-copy" data-comic-copy data-text="${encodeURIComponent(shareText)}">${t("comic.copy_text")}</button>
-        <button class="btn btn-teal rp-btn" type="button" data-action="share-export" data-comic-export>${t("comic.export_image")}</button>
-        <button class="btn btn-secondary rp-btn rp-btn--primary" type="button" data-action="goto-evening" data-comic-continue>${t("common.continue")}</button>
+        <button class="btn btn-ghost rp-btn" type="button" data-action="share-copy" data-comic-copy data-text="${encodeURIComponent(shareText)}">${t("comic.copy_text")}</button>
+        <button class="btn btn-secondary rp-btn" type="button" data-action="goto-evening" data-comic-continue>${state.locale === "tr" ? "Akşama dön" : "Back to evening"}</button>
       </footer>
     </section>`;
 }
@@ -6298,6 +6249,22 @@ function onAction(action, target) {
     case "share-export":
       exportShareImage();
       break;
+    case "share-porch-moment": {
+      UxFirst.markFirstShare(state.save);
+      document.body.classList.add("rp-after-share");
+      saveNow();
+      toast(state.locale === "tr" ? "Veranda paylaşıldı — mahalle duyar." : "Porch shared — the block will hear.");
+      try {
+        const text =
+          state.locale === "tr"
+            ? "Rival Porch — verandadan bir gece. Yarın ip hâlâ orada."
+            : "Rival Porch — a night from the porch. Tomorrow the line’s still there.";
+        if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text);
+      } catch { /* */ }
+      renderEvening();
+      showScreen("screen-evening");
+      break;
+    }
     default:
       break;
   }

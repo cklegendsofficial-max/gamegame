@@ -1,6 +1,6 @@
 {
-  "schemaVersion": 1,
-  "id": "rival-porch-combat-pack",
+  "schemaVersion": 2,
+  "id": "porch-kit-cup",
   "sliceId": "rival-porch-day1",
   "localeDefault": "tr",
   "designedFor": "cult-TFT-lite mobile Cup — synergy teach, Porch-call agency, juice, bot AI",
@@ -394,7 +394,8 @@
         "safe",
         "swingy",
         "synergy_leaning"
-      ]
+      ],
+      "timeoutSec": 5
     },
     "options": [
       {
@@ -427,11 +428,11 @@
         }
       },
       {
-        "id": "call_focus_fire",
+        "id": "call_focus_neighbor",
         "category": "swingy",
         "label": {
-          "tr": "Focus",
-          "en": "Focus"
+          "tr": "En sertine işaret et",
+          "en": "Point at the hardest hitter"
         },
         "blurb": {
           "tr": "En yüksek ATK düşmanı 6 sn işaretle.",
@@ -548,8 +549,8 @@
         "id": "call_chaos_kite",
         "category": "swingy",
         "label": {
-          "tr": "Swap",
-          "en": "Swap"
+          "tr": "Leyla — ipi kes",
+          "en": "Leyla — cut the line"
         },
         "blurb": {
           "tr": "İki müttefifi anında yer değiştir.",
@@ -636,8 +637,8 @@
         "category": "synergy_leaning",
         "lean": "syn_rivalry",
         "label": {
-          "tr": "Prop",
-          "en": "Prop"
+          "tr": "Öndeki prop’u fırlat",
+          "en": "Throw the front prop"
         },
         "blurb": {
           "tr": "Veranda prop'u savur — ön sıra 5 sn hasarı çeker + küçük ATK.",
@@ -2322,5 +2323,30 @@
   "mechanicsFix3": {
     "id": "mechanics-fix-3",
     "packNumber": 3
+  },
+  "phases": [
+    {
+      "id": "opening",
+      "untilSec": 8
+    },
+    {
+      "id": "call",
+      "trigger": "opening_end_or_ally_50"
+    },
+    {
+      "id": "close",
+      "untilSec": 70
+    }
+  ],
+  "porchCall": {
+    "version": 2,
+    "optionsShown": 3,
+    "timeoutSec": 5,
+    "defaultId": "call_prop_assist",
+    "options": [
+      "call_focus_neighbor",
+      "call_prop_assist",
+      "call_chaos_kite"
+    ]
   }
 }
