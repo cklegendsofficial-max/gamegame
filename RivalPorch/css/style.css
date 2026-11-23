@@ -5709,3 +5709,324 @@ body.rp-volume-accepted [data-testid="evening-headphones-street-job"] {
   pointer-events: auto;
 }
 
+/* ===== visual-fix-15 ===== */
+/* Rival Porch — visual-fix-15
+   4d40718 visual 8.6 — Day7 HEADPHONES/yield caption still across bust rail
+   (floatHits=0 geometry pass but screenshot dirty).
+   Acceptance: bust names free of any caption/yield line; one line under rail only.
+   Paste AFTER visual-fix-14.css.
+*/
+
+.rp-screen--street[data-story-winner="volume_natural"],
+.rp-screen--street[data-story-winner="ledger_natural"],
+.rp-screen--street.rp-cold-yielded,
+body.rp-cold-yielded .rp-screen--street,
+.rp-screen--street[data-day="7"],
+.rp-screen--street[data-day="8"],
+.rp-screen--street[data-day="9"],
+.rp-screen--street[data-day="10"],
+.rp-screen--street:has([data-testid="story-street-headphones-note"]),
+.rp-screen--street:has([data-testid="story-street-ledger-tray"]) {
+  --rp-bust-rail-top: calc(48px + var(--rp-safe-top, 0px));
+  --rp-bust-rail-bottom: calc(var(--rp-street-bust-band-top, 96px) + 100px);
+  --rp-yield-caption-bottom: calc(var(--rp-dock-h, 72px) + 12px + var(--rp-safe-bottom, 0px));
+  --rp-headphones-mid-top: max(38%, calc(var(--rp-bust-rail-bottom) + 16px));
+}
+
+/* ── A. HEADPHONES / Ledger props: mid-stage body, NEVER in rail ─────────── */
+
+.rp-screen--street [data-testid="story-street-headphones-note"],
+.rp-screen--street [data-testid="story-street-ledger-tray"],
+.rp-screen--street[data-story-winner="volume_natural"] .rp-stage-prop,
+.rp-screen--street[data-story-winner="ledger_natural"] .rp-stage-prop,
+body.rp-cold-yielded .rp-screen--street .rp-stage-prop {
+  position: absolute !important;
+  top: var(--rp-headphones-mid-top, 38%) !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: translateX(-50%) !important;
+  max-width: min(72vw, 240px) !important;
+  max-height: min(22vh, 160px) !important;
+  z-index: 5 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Prop-internal tags stay under the SVG, not above into faces */
+.rp-screen--street [data-testid="story-street-headphones-note"] .rp-stage-prop__tag,
+.rp-screen--street [data-testid="story-street-ledger-tray"] .rp-stage-prop__tag,
+.rp-screen--street [data-testid="story-street-headphones-note"] [class*="tag"],
+.rp-screen--street [data-testid="story-street-headphones-note"] [class*="label"],
+.rp-screen--street [data-testid="story-street-headphones-note"] [class*="caption"],
+.rp-screen--street [data-testid="story-street-ledger-tray"] [class*="tag"],
+.rp-screen--street [data-testid="story-street-ledger-tray"] [class*="label"],
+.rp-screen--street [data-testid="story-street-ledger-tray"] [class*="caption"] {
+  position: absolute !important;
+  top: calc(100% + 4px) !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  bottom: auto !important;
+  max-width: 12rem;
+  max-height: 28px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 10px !important;
+}
+
+/* ── B. ALL yield / HEADPHONES captions → fixed dock slot (escape rail) ─── */
+
+.rp-screen--street .rp-yield-line,
+.rp-screen--street .rp-street-caption,
+.rp-screen--street .rp-yield-caption,
+.rp-screen--street .rp-headphones-caption,
+.rp-screen--street .rp-volume-caption,
+.rp-screen--street .rp-ledger-caption,
+.rp-screen--street [data-testid="story-volume-line"],
+.rp-screen--street [data-testid="story-ledger-line"],
+.rp-screen--street [data-testid="headphones-caption"],
+.rp-screen--street [data-testid="yield-caption"],
+.rp-screen--street [data-yield-caption],
+.rp-screen--street [data-caption-kind="yield"],
+.rp-screen--street [data-caption-kind="headphones"],
+.rp-screen--street [data-caption-kind="volume"],
+.rp-screen--street [data-caption-kind="ledger"],
+body.rp-cold-yielded .rp-screen--street [class*="headphones"][class*="caption"],
+body.rp-cold-yielded .rp-screen--street [class*="yield"][class*="caption"],
+.rp-screen--street[data-story-winner="volume_natural"] .rp-hud-mid .rp-caption,
+.rp-screen--street[data-story-winner="ledger_natural"] .rp-hud-mid .rp-caption {
+  position: fixed !important;
+  left: 12px !important;
+  right: 12px !important;
+  top: auto !important;
+  bottom: var(--rp-yield-caption-bottom, calc(72px + 12px)) !important;
+  transform: none !important;
+  z-index: 6 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  max-height: 40px !important;
+  margin: 0 !important;
+  padding: 8px 12px !important;
+  font-size: 12px !important;
+  line-height: 1.25 !important;
+  overflow: hidden !important;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 78%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--tea-cream, #F2E6D8) 18%, transparent);
+  color: var(--tea-cream, #F2E6D8) !important;
+  pointer-events: none !important;
+  /* Must never paint inside bust rail on 390×844 */
+}
+
+/* Dedicated slot preferred */
+.rp-screen--street .rp-yield-caption-slot,
+.rp-screen--street [data-testid="yield-caption-slot"] {
+  position: absolute !important;
+  left: 12px !important;
+  right: 12px !important;
+  top: auto !important;
+  bottom: var(--rp-yield-caption-bottom) !important;
+  z-index: 6 !important;
+  max-height: 40px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.rp-screen--street .rp-yield-caption-slot > *,
+.rp-screen--street [data-testid="yield-caption-slot"] > * {
+  position: static !important;
+  transform: none !important;
+  bottom: auto !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+}
+
+/* Only ONE caption visible */
+.rp-screen--street .rp-yield-line ~ .rp-yield-line,
+.rp-screen--street .rp-street-caption ~ .rp-street-caption,
+.rp-screen--street .rp-yield-caption ~ .rp-yield-caption,
+.rp-screen--street [data-testid="story-volume-line"] ~ [data-testid="story-volume-line"],
+.rp-screen--street [data-testid="headphones-caption"] ~ [data-testid="headphones-caption"] {
+  display: none !important;
+}
+
+/* ── C. Kill Orhan / Shared-string residual captions on yielded street ───── */
+
+.rp-screen--street[data-story-winner="volume_natural"] [data-testid="story-day2-orhan-line"],
+.rp-screen--street[data-story-winner="ledger_natural"] [data-testid="story-day2-orhan-line"],
+body.rp-cold-yielded .rp-screen--street [data-testid="story-day2-orhan-line"],
+.rp-screen--street[data-day="7"] [data-testid="story-day2-orhan-line"],
+.rp-screen--street[data-day="10"] [data-testid="story-day2-orhan-line"],
+.rp-screen--street[data-story-winner="volume_natural"] [data-mediate-echo],
+.rp-screen--street[data-story-winner="ledger_natural"] [data-mediate-echo],
+body.rp-cold-yielded .rp-screen--street [data-mediate-echo],
+.rp-screen--street[data-story-winner="volume_natural"] .rp-shared-string-tag,
+.rp-screen--street[data-story-winner="ledger_natural"] .rp-shared-string-tag,
+body.rp-cold-yielded .rp-screen--street .rp-shared-string-tag,
+.rp-screen--street[data-story-winner="volume_natural"] [title="SHARED STRING"],
+.rp-screen--street[data-story-winner="ledger_natural"] [title="SHARED STRING"],
+.rp-screen--street[data-story-winner="volume_natural"] [data-testid="shared-string-tag"],
+.rp-screen--street[data-story-winner="ledger_natural"] [data-testid="shared-string-tag"],
+/* Mid-HUD Orhan millimeter whisper above Back */
+.rp-screen--street[data-story-winner="volume_natural"] .rp-hud-whisper,
+.rp-screen--street[data-story-winner="ledger_natural"] .rp-hud-whisper,
+body.rp-cold-yielded .rp-screen--street .rp-hud-whisper,
+.rp-screen--street[data-day="7"] .rp-mediate-echo,
+.rp-screen--street[data-day="7"] [data-float-kind="mediate"],
+.rp-screen--street[data-day="7"] [data-float-kind="string"] {
+  display: none !important;
+}
+
+/* ── D. Bust rail wins; captions never child of hotspots ─────────────────── */
+
+.rp-screen--street[data-day="7"] .rp-hotspots,
+.rp-screen--street[data-day="10"] .rp-hotspots,
+.rp-screen--street[data-story-winner="volume_natural"] .rp-hotspots,
+.rp-screen--street[data-story-winner="ledger_natural"] .rp-hotspots,
+body.rp-cold-yielded .rp-screen--street .rp-hotspots {
+  z-index: 8 !important;
+  isolation: isolate;
+}
+
+.rp-screen--street .rp-hotspots .rp-yield-line,
+.rp-screen--street .rp-hotspots .rp-street-caption,
+.rp-screen--street .rp-hotspots .rp-yield-caption,
+.rp-screen--street .rp-hotspots .rp-headphones-caption,
+.rp-screen--street .rp-hotspots [data-yield-caption],
+.rp-screen--street .rp-hotspots [data-testid="headphones-caption"],
+.rp-screen--street .rp-hotspot .rp-yield-line {
+  display: none !important;
+}
+
+.rp-screen--street[data-day="7"] .rp-hotspot__name,
+.rp-screen--street[data-day="10"] .rp-hotspot__name,
+.rp-screen--street[data-story-winner="volume_natural"] .rp-hotspot__name,
+.rp-screen--street[data-story-winner="ledger_natural"] .rp-hotspot__name {
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+
+/* ===== ux-session-13 — Volume accept mid ≤35vh ===== */
+.rp-mid { max-height: 35vh; overflow: hidden; }
+body[data-evening-panel="volume-accept"] .rp-mid {
+  max-height: 35vh;
+  padding-block: 0.5rem 0.65rem;
+  gap: 0.35rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+body[data-evening-panel="volume-accept"] .rp-mid .rp-night-title {
+  font-size: clamp(1rem, 3.8vw, 1.25rem);
+  line-height: 1.15;
+  margin: 0;
+}
+body[data-evening-panel="volume-accept"] .rp-mid .rp-mid__line,
+body[data-evening-panel="volume-accept"] .rp-spine-cult-chip { display: none; }
+body[data-evening-panel="volume-accept"] .rp-evening-volume-accept--compact {
+  display: flex; flex-direction: column; gap: 0.25rem;
+  padding: 0; background: transparent; border: 0; box-shadow: none; margin: 0;
+}
+body[data-evening-panel="volume-accept"] .rp-evening-volume-accept__link,
+body[data-evening-panel="volume-accept"] [data-testid="evening-see-headphones"],
+body[data-evening-panel="volume-accept"] [data-testid="evening-volume-see-headphones"] {
+  background: transparent; border: 0; padding: 0.15rem 0;
+  font-size: 0.85rem; text-decoration: underline; color: #f2e6d8;
+  align-self: flex-start; cursor: pointer;
+}
+body[data-evening-panel="volume-accept"] #btn-end-evening,
+body[data-evening-panel="volume-accept"] [data-testid="end-evening"] {
+  padding: 0.4rem 0.75rem; font-size: 0.9rem;
+}
+
+
+/* story-form-18 — purge Shared string / String holds after yield */
+body.rp-cold-yielded .rp-prop-overlay,
+body.rp-cold-yielded .rp-prop-chip,
+body.rp-cold-yielded .rp-prop-npc,
+body.rp-cold-yielded .rp-wc-loud {
+  /* hide unless data-allow-after-yield */
+}
+body.rp-cold-yielded .rp-prop-overlay[data-prop="prop_day2_mediate_string"],
+body.rp-cold-yielded .rp-prop-overlay[data-prop="prop_day2_instigate_high_kite"],
+body.rp-cold-yielded .rp-prop-overlay[data-prop="prop_day2_stage_chalk_cup"],
+body.rp-cold-yielded .rp-stage-prop--shared-string,
+body.rp-cold-yielded [data-testid="story-day2-mediate-string"],
+body.rp-cold-yielded [data-testid="story-day2-orhan-line"] {
+  display: none !important;
+}
+/* Week-2 Decibel→Ledger lived pull */
+.rp-stage-prop--decibel-ledger-pull {
+  left: 20%; right: 20%; top: 42%; z-index: 9;
+}
+.rp-dl-stack {
+  display: flex; align-items: center; justify-content: center; gap: 0.45rem;
+  padding: 0.45rem 0.65rem;
+  background: rgba(12,8,6,.88);
+  border: 1px solid rgba(232,180,120,.45);
+  border-radius: 8px;
+  color: #f2e6d8;
+  font: 700 12px/1.2 "IBM Plex Mono", ui-monospace, monospace;
+}
+.rp-dl-arrow { color: #e8b478; }
+.rp-stage-prop--ledger-invite {
+  left: 68%; top: 48%; width: 18%; z-index: 9;
+}
+.rp-invite-slip {
+  display: inline-block;
+  padding: 0.3rem 0.45rem;
+  background: #f4f0e4;
+  color: #1a120c;
+  border: 2px solid #1a120c;
+  transform: rotate(4deg);
+  font: 800 11px/1 "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.06em;
+}
+.rp-recommend-tonight-bar {
+  margin: 0.5rem 0;
+  padding: 0.45rem 0.7rem;
+  border-radius: 8px;
+  background: rgba(18,12,8,.9);
+  border: 1px solid rgba(126,184,212,.45);
+  color: #e8f0f8;
+  font-size: 12px;
+}
+.rp-recommend-tonight-bar[data-candidate="true"] {
+  border-color: rgba(232,180,120,.65);
+  color: #f2e6d8;
+}
+
+
+/* mechanics-fix-15 — Decibel lived prop; non-blocking */
+.rp-stage-prop--headphones-note.rp-prop--decibel-cue {
+  outline: 2px solid rgba(80, 220, 200, 0.55);
+  animation: rp-decibel-pulse 1.1s ease-in-out 2;
+}
+.rp-stage-prop--headphones-note.rp-prop--decibel-lived.is-reacting {
+  transform-origin: center;
+  animation: rp-decibel-shake 0.42s ease-out 1;
+}
+@keyframes rp-decibel-pulse {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.25); }
+}
+@keyframes rp-decibel-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px) rotate(-1deg); }
+  75% { transform: translateX(3px) rotate(1deg); }
+}
+[data-testid="decibel-lived-choice"] {
+  pointer-events: auto;
+  z-index: 4;
+}
+/* never cover End evening / Volume CTAs */
+[data-testid="decibel-lived-choice"] {
+  max-width: min(92vw, 320px);
+  margin: 0.35rem auto 0;
+}
+

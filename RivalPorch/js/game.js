@@ -447,6 +447,8 @@ function day2ColdBranch() {
 }
 
 function streetPropOverlayHtml(screen = "street") {
+  // story PF / form18-prep: never remount Shared string / Orhan residual after yield
+  if (coldEchoSuppressed()) return "";
   const overlays = state.questPack?.storyForm3?.streetPropOverlays || state.storyForm3?.streetPropOverlays || [];
   const day = state.save.dayIndex || 1;
   const hit = overlays
@@ -993,10 +995,19 @@ function emitQuestEvent(event) {
 }
 
 function worldStreetLines() {
+  const ban = storyForm18()?.purgeSharedStringResidual?.bannedResidualPhrases || [
+    "Shared string",
+    "String holds",
+    "millimeter",
+    "milimetre",
+    "Mediator night",
+    "ortak ip",
+  ];
   const list = Quests.activeWorldConsequences(state.save, state.questPack);
   return list
     .map((w) => loc(w.streetVisual))
     .filter(Boolean)
+    .filter((line) => !(coldEchoSuppressed() && ban.some((p) => line.toLowerCase().includes(String(p).toLowerCase()))))
     .slice(-3);
 }
 
@@ -1490,6 +1501,107 @@ function storyForm17() {
   return state.questPack?.storyForm17 || state.storyForm17 || null;
 }
 
+function storyForm18() {
+  return state.questPack?.storyForm18 || state.storyForm18 || null;
+}
+
+function purgeColdWorldResiduals() {
+  if (!coldEchoSuppressed()) return;
+  try {
+    const qs = Quests.ensureQuestSave(state.save);
+    const ban = storyForm18()?.purgeSharedStringResidual?.bannedWcIds || [
+      "wc_day2_mediate_shared_string",
+      "wc_day2_instigate_kite_dare",
+      "wc_day2_stage_cup_chalk",
+    ];
+    qs.worldActive = (qs.worldActive || []).filter((id) => !ban.includes(id));
+  } catch { /* */ }
+}
+
+function week2DecibelLedgerPullHtml(screen) {
+  const pull = storyForm18()?.week2DecibelLedgerPull;
+  if (!pull || !(pull.screens || []).includes(screen)) return "";
+  if (!whenFlagsOk(pull.when || {})) return "";
+  state.save.storyFlags = state.save.storyFlags || {};
+  for (const f of pull.setsFlagsOnShow || []) state.save.storyFlags[f] = true;
+  const prop = state.locale === "tr" && pull.stageProp?.htmlTr ? pull.stageProp.htmlTr : pull.stageProp?.html || "";
+  const npc = pull.npcReactions?.[0];
+  const npcHtml = npc
+    ? `<p class="rp-handoff-npc rp-yield-line" data-testid="${npc.testId}" data-caption-kind="volume"><strong>${loc(neighborById(npc.speakerId)?.name) || npc.neighbor || ""}</strong>: ${loc(npc.text)}</p>`
+    : "";
+  const invite = pull.uniquePropReaction?.html || "";
+  return `${prop}${invite}${npcHtml}`;
+}
+
+function recommendTonightBarHtml() {
+  const bar = storyForm18()?.cultRecommendTonightBar?.recommendTonight;
+  if (!bar || !whenFlagsOk(bar.showWhen || {})) return "";
+  const candidate = !!storyFlag("would_recommend_tonight_candidate");
+  const copy = candidate ? bar.copyWhenCandidate : bar.copyWhenClimbing;
+  return `<div class="rp-recommend-tonight-bar" data-testid="${bar.testId || "recommend-tonight-bar"}" data-candidate="${candidate}">${loc(copy)}</div>`;
+}
+
+function armMech15DecibelLived() {
+  const f = state.save.storyFlags || (state.save.storyFlags = {});
+  if (f.decibel_lived_beat_done) return;
+  const vol =
+    f.quest_volume_active ||
+    f.quest_volume_accepted ||
+    f.natural_volume_street ||
+    document.body.classList.contains("rp-cold-yielded");
+  const prop = document.querySelector(
+    "[data-testid='story-street-headphones-note'], .rp-stage-prop--headphones-note"
+  );
+  if (!vol || !prop) return;
+  const fire = (choice) => {
+    if (f.decibel_lived_beat_done) return;
+    f.decibel_lived_beat_done = true;
+    prop.classList.add("rp-prop--decibel-lived", "is-reacting");
+    prop.dataset.decibelLivedBeat = "1";
+    prop.dataset.decibelReaction = "headphones-bass";
+    prop.setAttribute("data-decibel-lived-beat", "1");
+    prop.setAttribute("data-testid", prop.getAttribute("data-testid") || "decibel-lived-prop");
+    const pick = choice || "peri_quiet";
+    if (pick === "orhan_volume") {
+      f.decibel_lived_orhan_volume = true;
+      f.orhan_week2_ledger_pull = true;
+    } else {
+      f.decibel_lived_peri_quiet = true;
+      f.secret_peri_offer_tease = true;
+      f.peri_week2_ledger_pull = true;
+    }
+    f.week2_decibel_ledger_seen = true;
+    const snap = {
+      beat: true,
+      choice: pick,
+      periQuiet: !!f.decibel_lived_peri_quiet,
+      orhanVolume: !!f.decibel_lived_orhan_volume,
+    };
+    try {
+      window.__RP_SMOKE__ = { ...(window.__RP_SMOKE__ || {}), decibelLived: snap };
+      localStorage.setItem("rp_smoke_decibel_lived", JSON.stringify(snap));
+    } catch { /* */ }
+    const chips = document.querySelector("[data-testid='decibel-lived-choice']");
+    if (chips) chips.remove();
+    saveNow();
+  };
+  prop.classList.add("rp-prop--decibel-cue");
+  if (!document.querySelector("[data-testid='decibel-lived-choice']")) {
+    const wrap = document.createElement("div");
+    wrap.dataset.testid = "decibel-lived-choice";
+    wrap.setAttribute("data-testid", "decibel-lived-choice");
+    wrap.innerHTML = `<button type="button" class="rp-btn rp-btn--ghost" data-decibel-pick="peri_quiet">${state.locale === "tr" ? "Peri için sessiz" : "Quiet cans for Peri"}</button>
+      <button type="button" class="rp-btn rp-btn--ghost" data-decibel-pick="orhan_volume">${state.locale === "tr" ? "Orhan kısar" : "Orhan turns it down"}</button>`;
+    wrap.addEventListener("click", (e) => {
+      const t = e.target?.closest?.("[data-decibel-pick]");
+      if (t) fire(t.getAttribute("data-decibel-pick"));
+    });
+    (document.querySelector(".rp-screen--street .rp-dock") || prop.parentElement || document.body).appendChild(wrap);
+  }
+  prop.addEventListener("click", () => fire(state._decibelChip || "peri_quiet"), { once: true });
+  setTimeout(() => fire("peri_quiet"), 4000);
+}
+
 function applyForm16AntennaFailsafe() {
   const day = state.save.dayIndex || 1;
   const f = state.save.storyFlags || (state.save.storyFlags = {});
@@ -1979,11 +2091,19 @@ function spineCultChipHtml() {
   const day = state.save.dayIndex || 1;
   if (day < 2) return "";
   const tr = state.locale === "tr";
+  const upgrade = storyForm18()?.cultRecommendTonightBar?.spineCultUpgrade;
+  if (
+    upgrade &&
+    (storyFlag("quest_volume_accepted") || storyFlag("week2_decibel_ledger_seen")) &&
+    (upgrade.whenFlagsAny || []).some((f) => storyFlag(f))
+  ) {
+    return `<p class="rp-spine-cult-chip" data-testid="${upgrade.testId || "spine-cult-chip"}">${loc(upgrade.label)}</p>`;
+  }
   let n = 1;
   if (storyFlag("quest_antenna_complete") || storyFlag("arc_kite_antenna_complete")) n = 3;
   else if (storyFlag("quest_antenna_active") || day >= 2) n = 2;
   if (storyFlag("quest_volume_complete") || storyFlag("arc_volume_war_complete")) n = 4;
-  else if (storyFlag("quest_volume_active")) n = 3;
+  else if (storyFlag("quest_volume_active") || storyFlag("quest_volume_accepted")) n = 3;
   if (storyFlag("quest_ledger_complete")) n = 5;
   const label = tr
     ? `Omurga ${n}/5 · Anten → Desibel → Defter`
@@ -2077,9 +2197,11 @@ function renderEvening() {
     tr: "Cumartesi yaklaşıyor. Bağları demle, formasyonu kur.",
     en: "Saturday closes in. Brew bonds, set the formation.",
   };
-  // story-form-2: prefer cold-path eveningBanner / eveningHook over generic carry
-  if (day2Branch?.eveningBanner) hook = day2Branch.eveningBanner;
-  else if (day2Branch?.eveningHook) hook = day2Branch.eveningHook;
+  // story-form-2/18: cold eveningBanner only before yield — never under Volume CTA
+  if (!coldEchoSuppressed()) {
+    if (day2Branch?.eveningBanner) hook = day2Branch.eveningBanner;
+    else if (day2Branch?.eveningHook) hook = day2Branch.eveningHook;
+  }
 
   const nightOne = state.save.dayIndex <= 1;
   const adventureBeats = nightOne ? firstEveningBeats() : [];
@@ -2132,7 +2254,7 @@ function renderEvening() {
   const supportLine = soleEnd
     ? (state.locale === "tr" ? "Prova bitti. Akşamı bırak — omurga gece yazar." : "Practice done. End evening — the spine writes overnight.").slice(0, 90)
     : (support || "").slice(0, state.uxPack7?.eveningHome?.maxSupportChars || 90);
-  // HOTFIX form16: Volume evening CTA without storyForm13 pack / primaryAction gate
+  // HOTFIX form16 + ux-13: compact Volume accept ≤35vh; defer tray reward
   applyForm16AntennaFailsafe();
   const dayF16 = state.save.dayIndex || 1;
   if (dayF16 >= 7) {
@@ -2144,24 +2266,14 @@ function renderEvening() {
     dayF16 >= 7 ||
     ["cold_day2_yielded", "natural_volume_street", "natural_antenna_complete", "arc_kite_antenna_complete", "quest_antenna_complete"].some(storyFlag);
   const volAlready = ["quest_volume_accepted", "arc_volume_war_complete", "volume_accept_dismissed"].some(storyFlag);
-  const volCta = storyForm13()?.eveningVolumeAcceptCta || storyForm16()?.eveningVolumeAcceptFallback || null;
   const showVolAccept = !soleEnd && volUnlocked && !volAlready;
-  const volAcceptHtml = showVolAccept
-    ? (volCta
-        ? `<div class="rp-evening-volume-accept" data-testid="evening-volume-accept-cta" data-form="16">
-        <p class="rp-evening-volume-accept__h">${loc(volCta.headline)}</p>
-        <p>${loc(volCta.body)}</p>
-        <div class="rp-evening-volume-accept__actions">
-          <button class="rp-evening-volume-accept__cta" type="button" data-action="accept-volume" data-testid="evening-open-volume">${loc(volCta.ctaAccept)}</button>
-          <button class="rp-btn rp-btn--ghost" type="button" data-action="goto-street" data-testid="evening-see-headphones">${loc(volCta.ctaStreet)}</button>
-        </div>
-      </div>`
-        : (state.locale === "tr"
-            ? (storyForm16()?.inlineEveningHtml?.tr || "")
-            : (storyForm16()?.inlineEveningHtml?.en || "")))
-    : "";
+  const echoOff = coldEchoSuppressed();
+  if (showVolAccept) document.body.dataset.eveningPanel = "volume-accept";
+  else delete document.body.dataset.eveningPanel;
+  if (echoOff) document.body.classList.add("rp-cold-yielded");
 
   syncVolumeAcceptBodyClass();
+  const trayDeferred = showVolAccept && !!mainAgenda?.ready;
   const overflowOpen = !!state.eveningOverflowOpen;
   const overflowSheet = overflowOpen
     ? `<div class="rp-overflow-sheet" data-testid="evening-overflow-sheet">
@@ -2169,6 +2281,11 @@ function renderEvening() {
         <button class="rp-btn rp-btn--ghost" type="button" data-action="open-story-log">${state.locale === "tr" ? "Günlük" : "Journal"}</button>
         <button class="rp-btn rp-btn--ghost" type="button" data-action="goto-street">${state.locale === "tr" ? "Sokak" : "Street"}</button>
         <button class="rp-btn rp-btn--ghost" type="button" data-action="open-shop">${state.locale === "tr" ? "Dükkan" : "Shop"}</button>
+        ${
+          trayDeferred
+            ? `<button class="rp-btn rp-btn--ghost" type="button" data-action="open-quests" data-testid="overflow-tray-reward">${state.locale === "tr" ? "Tepsi ödülü (sonra)" : "Tray reward (later)"}</button>`
+            : ""
+        }
       </div>`
     : "";
   const dockHtml = soleEnd
@@ -2186,31 +2303,45 @@ function renderEvening() {
         }
         ${day1EscapeChipHtml(endEnabled)}
       </footer>`;
-  // ux-12: spine primary and End evening are SEPARATE nodes — never reuse #btn-end-evening for spine
+  // ux-12/13: spine primary + End evening separate; Volume accept = compact primary (no tall card)
+  const openVolLabel = state.locale === "tr" ? "Desibel'i aç" : "Open Volume";
+  const seeHpLabel = state.locale === "tr" ? "KULAKLIK'ı gör" : "See HEADPHONES";
   const spinePrimaryHtml = soleEnd
     ? `<button id="btn-end-evening" class="rp-btn rp-btn--primary rp-end-evening rp-cta-primary" type="button" data-action="end-evening" data-testid="evening-primary" data-primary="true" data-next-action="end_evening" data-end-evening="1" data-end-enabled="true">${endLabel}</button>`
-    : `<button class="rp-btn rp-btn--primary rp-cta-primary" type="button" data-action="${primaryAction}" data-testid="evening-primary" data-primary="true" data-next-action="${cta.dataNext || cta.id || "spine"}">${primaryLabel}</button>`;
+    : showVolAccept
+      ? `<div class="rp-evening-volume-accept rp-evening-volume-accept--compact" data-testid="evening-volume-accept-cta" data-form="16">
+           <button class="rp-btn rp-btn--primary rp-cta-primary" type="button" data-action="accept-volume" data-testid="evening-primary" data-primary="true" data-next-action="volume-accept">${openVolLabel}</button>
+           <button class="rp-btn rp-btn--primary rp-cta-primary" type="button" data-action="accept-volume" data-testid="evening-open-volume" hidden aria-hidden="true">${openVolLabel}</button>
+           <button class="rp-evening-volume-accept__link" type="button" data-action="goto-street" data-testid="evening-see-headphones">${seeHpLabel}</button>
+           <button class="rp-evening-volume-accept__link" type="button" data-action="goto-street" data-testid="evening-volume-see-headphones">${seeHpLabel}</button>
+         </div>`
+      : `<button class="rp-btn rp-btn--primary rp-cta-primary" type="button" data-action="${primaryAction}" data-testid="evening-primary" data-primary="true" data-next-action="${cta.dataNext || cta.id || "spine"}">${primaryLabel}</button>`;
   const endSecondaryHtml =
     !soleEnd && endEnabled
       ? `<button id="btn-end-evening" class="rp-btn rp-btn--ghost rp-cta-secondary rp-end-evening" type="button" data-action="end-evening" data-testid="end-evening" data-end-evening="1" data-end-enabled="true">${endLabel}</button>`
-      : !soleEnd
-        ? ""
-        : "";
+      : "";
+  // Purge Shared string / day2 stage / banners while yielded or Volume accept live
+  purgeColdWorldResiduals();
+  const stageEchoHtml = soleEnd || showVolAccept || echoOff ? "" : day2StreetStageHtml();
+  const bannerHtml = soleEnd || showVolAccept || echoOff ? "" : activeArcBeatBannerHtml();
+  const supportHtml = showVolAccept || soleEnd ? "" : (supportLine ? `<p class="rp-mid__line">${supportLine}</p>` : "");
+  const cultHtml = soleEnd || showVolAccept ? "" : spineCultChipHtml();
+  const recommendHtml = showVolAccept ? "" : recommendTonightBarHtml();
   screen.innerHTML = `
     ${stageLayer("street")}
     ${hudHtml()}
     ${streetPropOverlayHtml("evening")}
-    ${soleEnd ? "" : day2StreetStageHtml()}
-    ${soleEnd ? "" : activeArcBeatBannerHtml()}
+    ${stageEchoHtml}
+    ${bannerHtml}
     <div class="rp-mid rp-evening-card rp-evening-card--thin" data-testid="evening-mid">
       <h2 class="rp-night-title">${loc(dayHeadline())}</h2>
-      ${soleEnd ? "" : spineCultChipHtml()}
-      ${supportLine ? `<p class="rp-mid__line">${supportLine}</p>` : ""}
-      ${volAcceptHtml}
+      ${cultHtml}
+      ${recommendHtml}
+      ${supportHtml}
       ${spinePrimaryHtml}
       ${endSecondaryHtml}
       ${
-        !soleEnd && mainAgenda?.ready
+        !soleEnd && mainAgenda?.ready && !showVolAccept
           ? `<button class="rp-btn" type="button" data-action="quest-complete" data-id="${mainAgenda.quest.id}">${state.locale === "tr" ? "Tepsideki ödülü aç" : "Open the tray reward"}</button>`
           : ""
       }
@@ -2229,6 +2360,13 @@ function renderEvening() {
     if (endBtn && (endEnabled || soleEnd)) {
       endBtn.dataset.action = "end-evening";
       endBtn.setAttribute("data-action", "end-evening");
+    }
+    // ux-13: stamp midVh for smoke / auditor
+    const mid = document.querySelector("#screen-evening .rp-mid, [data-testid='evening-mid']");
+    if (mid) {
+      const vh = mid.getBoundingClientRect().height / Math.max(1, window.innerHeight);
+      mid.dataset.midVh = vh.toFixed(3);
+      document.documentElement.dataset.eveningMidVh = vh.toFixed(3);
     }
   });
 }
@@ -2284,6 +2422,7 @@ function renderStreet() {
   }).join("");
 
   applyDay2ColdRewrite();
+  purgeColdWorldResiduals();
   const spine = unfinishedQuestHeadline();
   const worldBits = worldStreetLines();
   const needCheckin = !state.save.evening.checkin;
@@ -2338,6 +2477,8 @@ function renderStreet() {
     ${coldWins || oneSignal ? "" : (worldBits.length ? `<div class="world-banner street-float rp-wc-loud">${worldBits.map((l) => `<span>◈ ${l}</span>`).join("")}</div>` : "")}
     ${day2Line}
     ${yieldNpc}
+    ${week2DecibelLedgerPullHtml("street")}
+    ${recommendTonightBarHtml()}
     ${!echoOff && !coldWins && npcWhisper && !oneSignal ? `<div class="rp-npc-remember"><span>${npcWhisper}</span></div>` : ""}
     ${!coldWins && !oneSignal && spine ? `<div class="rp-whisper"><span>◎ ${spine}</span></div>` : ""}
     <footer class="rp-dock">
@@ -2346,6 +2487,7 @@ function renderStreet() {
       <button class="rp-btn" type="button" data-action="open-quests">${state.locale === "tr" ? "Görevler" : "Quests"}</button>
       ${!storyFlag("practice_cup_done") ? `<button class="rp-btn" type="button" data-action="goto-cup">${state.locale === "tr" ? "Prova ★" : "Practice ★"}</button>` : ""}
     </footer>`;
+  requestAnimationFrame(() => armMech15DecibelLived());
 }
 
 
@@ -5740,10 +5882,20 @@ function onAction(action, target) {
       break;
     case "accept-volume": {
       state.save.storyFlags = state.save.storyFlags || {};
-      for (const f of ["quest_volume_accepted", "quest_volume_active", "arc_volume_war_seed", "natural_volume_street", "cold_day2_yielded"]) {
+      for (const f of [
+        "quest_volume_accepted",
+        "quest_volume_active",
+        "arc_volume_war_seed",
+        "natural_volume_street",
+        "cold_day2_yielded",
+        "quest_ledger_tease",
+        "arc_tea_ledger_seed",
+      ]) {
         state.save.storyFlags[f] = true;
       }
       try { Quests.acceptQuest(state.save, state.questPack, "mq_decibel_accord"); } catch { /* */ }
+      delete document.body.dataset.eveningPanel;
+      purgeColdWorldResiduals();
       saveNow();
       toast(state.locale === "tr" ? "Desibel açıldı" : "Volume opened");
       renderStreet();

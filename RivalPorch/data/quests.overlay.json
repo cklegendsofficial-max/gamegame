@@ -7554,5 +7554,192 @@
         }
       }
     ]
+  },
+  "storyForm18": {
+    "packId": "story-form-18",
+    "formIndex": 18,
+    "purgeSharedStringResidual": {
+      "id": "purge_string_holds_after_yield",
+      "bugSources": [
+        "storyForm3.streetPropOverlays → streetPropOverlayHtml (evening+street+overnight) — no coldEchoSuppressed check; paints label Shared string + npc 'String holds…'",
+        "day2Branch.eveningBanner / eveningHook still preferred in renderEvening after yield",
+        "worldActive wc_day2_mediate_shared_string streetVisual '◈ Shared string — mediation on the block'"
+      ],
+      "bannedResidualPhrases": [
+        "Shared string",
+        "String holds",
+        "shared string",
+        "Ortak ip",
+        "İpi birlikte",
+        "milimetre",
+        "millimeter",
+        "Mediator night",
+        "Arabulucu gecesi",
+        "one shared string",
+        "ortak ip"
+      ],
+      "bannedTestIds": [
+        "story-day2-orhan-line",
+        "story-day2-mediate-string",
+        "story-day2-orhan-forbidden"
+      ],
+      "bannedWcIds": [
+        "wc_day2_mediate_shared_string",
+        "wc_day2_instigate_kite_dare",
+        "wc_day2_stage_cup_chalk"
+      ],
+      "overlayWhenOverride": {
+        "prop_day2_mediate_string": {
+          "dayIndexMin": 2,
+          "dayIndexMax": 6,
+          "flagsAll": [
+            "cold_open_mediate"
+          ],
+          "flagsNone": [
+            "cold_day2_yielded",
+            "natural_volume_street"
+          ]
+        },
+        "prop_day2_instigate_high_kite": {
+          "dayIndexMin": 2,
+          "dayIndexMax": 6,
+          "flagsAll": [
+            "cold_open_instigate"
+          ],
+          "flagsNone": [
+            "cold_day2_yielded",
+            "natural_volume_street"
+          ]
+        },
+        "prop_day2_stage_chalk_cup": {
+          "dayIndexMin": 2,
+          "dayIndexMax": 6,
+          "flagsAll": [
+            "cold_open_stage"
+          ],
+          "flagsNone": [
+            "cold_day2_yielded",
+            "natural_volume_street"
+          ]
+        }
+      },
+      "onYieldPurgeWorldActive": true,
+      "acceptance": "coldEchoSuppressed: zero Shared string labels and zero Orhan millimeter / String holds lines on evening or street"
+    },
+    "week2DecibelLedgerPull": {
+      "id": "week2_decibel_to_ledger_lived",
+      "when": {
+        "flagsAny": [
+          "quest_volume_accepted",
+          "quest_volume_active"
+        ],
+        "flagsNone": [
+          "arc_tea_ledger_complete",
+          "quest_ledger_complete"
+        ],
+        "dayIndexMin": 7
+      },
+      "screens": [
+        "street",
+        "evening"
+      ],
+      "stageProp": {
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--decibel-ledger-pull\" data-testid=\"story-street-decibel-ledger-pull\" data-arc=\"arc_volume_to_ledger\" aria-label=\"Decibel to Ledger pull\">\n  <div class=\"rp-dl-stack\">\n    <span class=\"rp-dl-note\">HEADPHONES</span>\n    <span class=\"rp-dl-arrow\">→</span>\n    <span class=\"rp-dl-tray\">tray+ledger</span>\n  </div>\n  <span class=\"rp-stage-prop__tag\">Week-2 · Decibel→Ledger</span>\n</div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--decibel-ledger-pull\" data-testid=\"story-street-decibel-ledger-pull\" data-arc=\"arc_volume_to_ledger\" aria-label=\"Desibel → Defter çekişi\">\n  <div class=\"rp-dl-stack\">\n    <span class=\"rp-dl-note\">KULAKLIK</span>\n    <span class=\"rp-dl-arrow\">→</span>\n    <span class=\"rp-dl-tray\">tepsi+defter</span>\n  </div>\n  <span class=\"rp-stage-prop__tag\">Hafta-2 · Desibel→Defter</span>\n</div>",
+        "testId": "story-street-decibel-ledger-pull"
+      },
+      "npcReactions": [
+        {
+          "speakerId": "n5",
+          "neighbor": "Peri",
+          "text": {
+            "tr": "KULAKLIK duruyor — ama defter masası yanıyor. Bu hafta Defter.",
+            "en": "HEADPHONES stays — but the ledger table is lit. This week is Ledger."
+          },
+          "setsFlags": [
+            "peri_week2_ledger_pull",
+            "week2_decibel_ledger_seen"
+          ],
+          "testId": "story-week2-peri-ledger"
+        },
+        {
+          "speakerId": "n4",
+          "neighbor": "Orhan",
+          "text": {
+            "tr": "İp yok. Bas da değil. Hesap vakti — Neon duyuyor.",
+            "en": "No string. Not bass either. Accounts time — Neon hears it."
+          },
+          "setsFlags": [
+            "orhan_week2_ledger_pull",
+            "week2_decibel_ledger_seen"
+          ],
+          "testId": "story-week2-orhan-ledger",
+          "note": "Orhan state changes OFF mediate string — proves residual purge + new pull"
+        }
+      ],
+      "uniquePropReaction": {
+        "id": "prop_peri_door_ledger_invite",
+        "description": "Peri door gains small ledger-invite slip beside HEADPHONES note",
+        "testId": "story-street-peri-ledger-invite",
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--ledger-invite\" data-testid=\"story-street-peri-ledger-invite\"><span class=\"rp-invite-slip\">LEDGER?</span></div>"
+      },
+      "setsFlagsOnShow": [
+        "week2_decibel_ledger_seen",
+        "quest_ledger_tease",
+        "arc_tea_ledger_seed",
+        "natural_ledger_street"
+      ],
+      "cta": {
+        "tr": "Defter omurgasına bak",
+        "en": "See Ledger spine",
+        "action": "teaseLedgerQuest",
+        "testId": "week2-ledger-pull-cta"
+      }
+    },
+    "cultRecommendTonightBar": {
+      "id": "cult_recommend_tonight_bar",
+      "testId": "cult-recommend-tonight-bar",
+      "screens": [
+        "evening",
+        "street"
+      ],
+      "spineCultUpgrade": {
+        "whenFlagsAny": [
+          "quest_volume_accepted",
+          "week2_decibel_ledger_seen"
+        ],
+        "label": {
+          "tr": "Omurga 3→4/5 · Desibel → Defter (yaşıyor)",
+          "en": "Spine 3→4/5 · Decibel → Ledger (lived)"
+        },
+        "testId": "spine-cult-chip"
+      },
+      "recommendTonight": {
+        "testId": "recommend-tonight-bar",
+        "candidacyRule": {
+          "allCategoryMin": 8.5,
+          "overallMin": 9.0,
+          "flagWhenMet": "would_recommend_tonight_candidate"
+        },
+        "copyWhenCandidate": {
+          "tr": "Bu gece tavsiye adayı — Desibel→Defter çekişi sokakta.",
+          "en": "Tonight recommend candidate — Decibel→Ledger pull is on the street."
+        },
+        "copyWhenClimbing": {
+          "tr": "Kült bar: Defter çekişi açıldı. Skor 9'a yürüsün.",
+          "en": "Cult bar: Ledger pull is live. Walk the score to 9."
+        },
+        "showWhen": {
+          "flagsAny": [
+            "quest_volume_accepted",
+            "week2_decibel_ledger_seen",
+            "natural_volume_street"
+          ],
+          "dayIndexMin": 7
+        }
+      },
+      "auditorNote": "wouldRecommendTonight candidacy if all cats ≥8.5 and overall ≥9 — bar surfaces lived Week-2 pull proof"
+    },
+    "cssAppend": "\n/* story-form-18 — purge Shared string / String holds after yield */\nbody.rp-cold-yielded .rp-prop-overlay,\nbody.rp-cold-yielded .rp-prop-chip,\nbody.rp-cold-yielded .rp-prop-npc,\nbody.rp-cold-yielded .rp-wc-loud {\n  /* hide unless data-allow-after-yield */\n}\nbody.rp-cold-yielded .rp-prop-overlay[data-prop=\"prop_day2_mediate_string\"],\nbody.rp-cold-yielded .rp-prop-overlay[data-prop=\"prop_day2_instigate_high_kite\"],\nbody.rp-cold-yielded .rp-prop-overlay[data-prop=\"prop_day2_stage_chalk_cup\"],\nbody.rp-cold-yielded .rp-stage-prop--shared-string,\nbody.rp-cold-yielded [data-testid=\"story-day2-mediate-string\"],\nbody.rp-cold-yielded [data-testid=\"story-day2-orhan-line\"] {\n  display: none !important;\n}\n/* Week-2 Decibel→Ledger lived pull */\n.rp-stage-prop--decibel-ledger-pull {\n  left: 20%; right: 20%; top: 42%; z-index: 9;\n}\n.rp-dl-stack {\n  display: flex; align-items: center; justify-content: center; gap: 0.45rem;\n  padding: 0.45rem 0.65rem;\n  background: rgba(12,8,6,.88);\n  border: 1px solid rgba(232,180,120,.45);\n  border-radius: 8px;\n  color: #f2e6d8;\n  font: 700 12px/1.2 \"IBM Plex Mono\", ui-monospace, monospace;\n}\n.rp-dl-arrow { color: #e8b478; }\n.rp-stage-prop--ledger-invite {\n  left: 68%; top: 48%; width: 18%; z-index: 9;\n}\n.rp-invite-slip {\n  display: inline-block;\n  padding: 0.3rem 0.45rem;\n  background: #f4f0e4;\n  color: #1a120c;\n  border: 2px solid #1a120c;\n  transform: rotate(4deg);\n  font: 800 11px/1 \"IBM Plex Mono\", ui-monospace, monospace;\n  letter-spacing: 0.06em;\n}\n.rp-recommend-tonight-bar {\n  margin: 0.5rem 0;\n  padding: 0.45rem 0.7rem;\n  border-radius: 8px;\n  background: rgba(18,12,8,.9);\n  border: 1px solid rgba(126,184,212,.45);\n  color: #e8f0f8;\n  font-size: 12px;\n}\n.rp-recommend-tonight-bar[data-candidate=\"true\"] {\n  border-color: rgba(232,180,120,.65);\n  color: #f2e6d8;\n}\n"
   }
 }
