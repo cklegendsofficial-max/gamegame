@@ -39,7 +39,7 @@ const ART = {
   arenaStageFallback: "assets/rival-porch/meshy/env-arena-stage.png",
   busts: { ...MESHY_BUSTS },
   meshyBusts: { ...MESHY_BUSTS },
-  goldBusts: { ...DAY1_BUSTS },
+  goldBusts: { ...MESHY_BUSTS }, // wave3 closed — no pre-wave3 gold flash
   meshyRoot: "assets/rival-porch/meshy/",
   props: {
     demlik: "assets/rival-porch/meshy/wave3/props/prop-hero-demlik.png",
@@ -1177,7 +1177,7 @@ function renderEvening() {
       <p class="rp-kicker">${state.locale === "tr" ? "Ana" : "Main"} · ${mainTitle}</p>
       <h2 class="rp-night-title">${loc(dayHeadline())}</h2>
       <div class="rp-progress">
-        <img src="${goldBust(faceId)}" alt="" width="40" height="40" onerror="this.src='${DAY1_BUSTS.n1}'" />
+        <img src="${goldBust(faceId)}" alt="" width="40" height="40" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" />
         <div class="rp-progress__bar" aria-valuenow="${mainDone}" aria-valuemax="${mainTotal}"><i style="width:${Math.round((mainDone / Math.max(1, mainTotal)) * 100)}%"></i></div>
         <span>${fillTemplate(uxStr("evening.progress.beats", state.locale === "tr" ? "Vuruş {n}/{max}" : "Beats {n}/{max}"), { n: mainDone, max: mainTotal })}</span>
       </div>
@@ -1223,7 +1223,7 @@ function renderStreet() {
     const avail = !done;
     const xy = HOT[n.id] || [50, 48];
     return `<button class="rp-hotspot ${done ? "visited" : ""} ${avail ? "is-available" : ""}" style="--x:${xy[0]}%;--y:${xy[1]}%" type="button" data-action="open-neighbor" data-id="${n.id}" aria-label="${loc(n.name)}">
-        <img class="rp-hotspot__bust" src="${goldBust(n.id)}" alt="" width="56" height="56" onerror="this.src='${DAY1_BUSTS.n1}'" />
+        <img class="rp-hotspot__bust" src="${goldBust(n.id)}" alt="" width="56" height="56" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" />
         <span class="rp-hotspot__glow" aria-hidden="true"></span>
         <span class="rp-hotspot__name">${loc(n.name)}${done ? " ✓" : ""}</span>
       </button>`;
@@ -1298,7 +1298,7 @@ function renderNeighbor(id) {
       <button class="btn btn-secondary" type="button" data-action="goto-street">${t("common.back")}</button>
     </div>
     <div class="neighbor-hero">
-      <div class="bust-frame frame-${state.save.equipped?.comic_frame || "frame_chalk_grid"}"><img src="${bust(id)}" alt="${loc(n.name)}" onerror="this.src='${DAY1_BUSTS.n1}'" /></div>
+      <div class="bust-frame frame-${state.save.equipped?.comic_frame || "frame_chalk_grid"}"><img src="${bust(id)}" alt="${loc(n.name)}" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" /></div>
       <div class="neighbor-meta">
         <h2>${loc(n.name)}</h2>
         <p class="meta-line"><strong>${t("neighbor.trait")}:</strong> ${n.trait}</p>
@@ -1375,7 +1375,7 @@ function renderDialogue() {
         <button class="btn btn-secondary" type="button" data-action="open-neighbor" data-id="${ctx.neighborId}">${t("common.back")}</button>
       </div>
       <div class="neighbor-hero compact">
-        <div class="bust-frame"><img src="${bust(sid)}" alt="" onerror="this.src='${DAY1_BUSTS.n1}'" /></div>
+        <div class="bust-frame"><img src="${bust(sid)}" alt="" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" /></div>
         <div><h2>${loc(speaker?.name) || ""}</h2><p class="muted">${ctx.beat ? loc(ctx.beat.prompt) : ""}</p></div>
       </div>
       <div class="dialog-box"><p class="prompt">${loc(node.text)}</p>
@@ -1392,7 +1392,7 @@ function renderDialogue() {
       <button class="btn btn-secondary" type="button" data-action="open-neighbor" data-id="${ctx.neighborId}">${t("common.back")}</button>
     </div>
     <div class="neighbor-hero compact">
-      <div class="bust-frame"><img src="${bust(sid)}" alt="" onerror="this.src='${DAY1_BUSTS.n1}'" /></div>
+      <div class="bust-frame"><img src="${bust(sid)}" alt="" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" /></div>
       <div><h2>${loc(speaker?.name) || ""}</h2><p class="muted">${ctx.beat ? loc(ctx.beat.prompt) : ""}</p></div>
     </div>
     <div class="dialog-box"><p class="prompt">${loc(node.text)}</p>
@@ -1926,7 +1926,7 @@ function renderCupLobby() {
       const tag = n.synergyTag || "";
       const dim = spotlight.size && !spotlight.has(n.id) && !selected;
       return `<button class="pick-card ${selected ? "selected" : ""} ${spotlight.has(n.id) ? "spotlight" : ""} ${dim ? "dimmed" : ""}" type="button" data-action="toggle-pick" data-id="${n.id}">
-        <img src="${src}" alt="" onerror="this.src='${DAY1_BUSTS.n1}'" />
+        <img src="${src}" alt="" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" />
         <div class="name">${loc(n.name)}</div>
         <div class="muted pick-meta">${n.role} · <span class="chip ${String(tag).toLowerCase()}">${tag}</span></div>
       </button>`;
@@ -2054,7 +2054,7 @@ function renderDraft() {
       const lane = idx < 3 ? (tr ? "ön" : "F") : (tr ? "arka" : "B");
       const src = pid ? goldBust(pid) : "";
       const filled = pid
-        ? `<img src="${src}" alt="" onerror="this.src='${DAY1_BUSTS.n1}'" />`
+        ? `<img src="${src}" alt="" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" />`
         : `<span class="cell-lane">${lane}</span>`;
       return `<button class="cell ${pid ? "filled" : ""} ${idx < 3 ? "lane-front" : "lane-back"}" type="button" data-action="place-cell" data-idx="${idx}">${filled}</button>`;
     })
@@ -2070,7 +2070,7 @@ function renderDraft() {
       const unit = bot.units.find((u) => u.id === botId);
       const mid = unit.mirrorOf;
       const src = goldBust(mid);
-      return `<div class="cell enemy filled ${idx < 3 ? "lane-front" : "lane-back"}"><img src="${src}" alt="" onerror="this.src='${DAY1_BUSTS.n1}'" /></div>`;
+      return `<div class="cell enemy filled ${idx < 3 ? "lane-front" : "lane-back"}"><img src="${src}" alt="" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" /></div>`;
     })
     .join("");
   const bench = state.cupPicks
@@ -2080,7 +2080,7 @@ function renderDraft() {
       const tag = neighborById(id)?.synergyTag || "";
       const src = goldBust(id);
       return `<button class="bench-unit ${placed ? "placed" : ""} ${state.selectedBench === id ? "selected" : ""}" type="button" data-action="select-bench" data-id="${id}" ${placed ? "disabled" : ""}>
-        <img src="${src}" alt="" onerror="this.src='${DAY1_BUSTS.n1}'" /><span class="bench-role">${role} · ${tag}</span></button>`;
+        <img src="${src}" alt="" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" /><span class="bench-role">${role} · ${tag}</span></button>`;
     })
     .join("");
   const placedCount = state.placement.filter(Boolean).length;
@@ -2918,7 +2918,7 @@ function unitCard(u, side, floaters = []) {
   const ember = u._rivalryCrossed ? " is-rivalry-ember" : "";
   return `<div class="unit-slot rp-unit rp-arena-unit ${side === "enemy" ? "enemy rp-unit--enemy" : "ally rp-unit--you"} ${u.alive ? "" : "dead"}${ember}" data-side="${side}" data-slot="${u.slot}">
     <div class="unit-name rp-unit__name">${u.name}</div>
-    <img src="${face}" alt="${u.name}" onerror="this.src='${DAY1_BUSTS.n1}'" />
+    <img src="${face}" alt="${u.name}" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" />
     <div class="hp-track rp-hp"><i style="width:${pct}%"></i><span class="hp-num">${Math.max(0, Math.round(u.hp))}/${u.maxHp}</span></div>
     ${floater}
   </div>`;
@@ -3165,7 +3165,7 @@ function renderComic() {
     .map((p, i) => {
       const imgId = r.team[i % Math.max(1, r.team.length)];
       return `<article class="comic-panel" style="animation-delay:${i * 0.08}s">
-        <img src="${bust(imgId)}" alt="" onerror="this.src='${DAY1_BUSTS.n1}'" />
+        <img src="${bust(imgId)}" alt="" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" />
         <p>${fillTemplate(loc(p.textTemplate || p.text), vars)}</p>
       </article>`;
     })
