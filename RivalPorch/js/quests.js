@@ -108,6 +108,7 @@ export function normalizeQuestPack(raw) {
     storyForm17: raw.storyForm17 || null,
     storyForm18: raw.storyForm18 || null,
     storyForm19: raw.storyForm19 || null,
+    storyForm20: raw.storyForm20 || null,
     storyForm11: raw.storyForm11 || null,
   };
 }
@@ -138,6 +139,7 @@ export function mergeQuestPacks(stub, overlay) {
       storyForm17: b.storyForm17 || a.storyForm17,
       storyForm18: b.storyForm18 || a.storyForm18,
       storyForm19: b.storyForm19 || a.storyForm19,
+      storyForm20: b.storyForm20 || a.storyForm20,
       storyForm11: b.storyForm11 || a.storyForm11,
       journalSpine: b.journalSpine || a.journalSpine,
     };
@@ -165,6 +167,7 @@ export function mergeQuestPacks(stub, overlay) {
       storyForm17: b.storyForm17 || a.storyForm17,
       storyForm18: b.storyForm18 || a.storyForm18,
       storyForm19: b.storyForm19 || a.storyForm19,
+      storyForm20: b.storyForm20 || a.storyForm20,
     storyForm11: b.storyForm11 || a.storyForm11,
     journalSpine: b.journalSpine || a.journalSpine,
   };

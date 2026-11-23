@@ -1468,11 +1468,37 @@ function volumeStreetBeatPropLive() {
   return props.find((p) => whenFlagsOk(p.when || {})) || null;
 }
 
+function storyForm20() {
+  return state.questPack?.storyForm20 || state.storyForm20 || null;
+}
+
+function oneMainChipActive() {
+  const day = state.save.dayIndex || 1;
+  if (day >= 10) return true;
+  if (["natural_ledger_street_wins", "natural_ledger_street"].some(storyFlag)) return true;
+  try {
+    if (pickUnifiedStoryWinner()?.id === "ledger_natural") return true;
+  } catch { /* */ }
+  return false;
+}
+
 function mqStreetChipHtml() {
-  const chips = storyForm11()?.mqStreetChips || [];
-  const hit = chips.find((c) => whenFlagsOk(c.when || {}));
+  // story-20 optional: Day10 / ledger wins → spine-cult owns single MAIN 4/5
+  if (oneMainChipActive()) {
+    document.body.classList.add("rp-one-main-chip");
+    return "";
+  }
+  const chips = storyForm20()?.mqStreetChipsOverride || storyForm11()?.mqStreetChips || [];
+  const ordered = [...chips].sort((a, b) => (b.stepRank || 0) - (a.stepRank || 0));
+  const hit = ordered.find((c) => whenFlagsOk(c.when || {}));
   if (!hit) return "";
   return `<button class="rp-mq-street-chip" type="button" data-testid="${hit.testId || "mq-street-chip"}" data-action="open-quests">${loc(hit.chip)}</button>`;
+}
+
+function day10MainChipHtml() {
+  if (!oneMainChipActive()) return "";
+  document.body.classList.add("rp-one-main-chip");
+  return spineCultChipHtml();
 }
 
 function syncColdYieldBodyClass() {
@@ -1535,6 +1561,7 @@ function syncLedgerWinsBodyClass() {
   const day = state.save.dayIndex || 1;
   const on = day >= 10 || storyFlag("natural_ledger_street_wins");
   document.body.classList.toggle("rp-ledger-wins", on);
+  document.body.classList.toggle("rp-one-main-chip", oneMainChipActive());
   if (on) document.body.dataset.storyWinner = "ledger_natural";
 }
 
@@ -2573,6 +2600,7 @@ function renderStreet() {
     ${streetPropOverlayHtml("street")}
     ${bannerHtml}
     ${spotHtml}
+    ${day10MainChipHtml()}
     ${mqStreetChipHtml()}
     <button class="rp-chip rp-back" type="button" data-action="goto-evening">${t("common.back")}</button>
     <div class="rp-hotspots" role="list" data-testid="${coldWins || oneSignal ? "street-layer-cold-wins" : "street-hotspots"}">${spots}</div>

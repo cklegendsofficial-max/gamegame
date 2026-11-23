@@ -7810,5 +7810,149 @@
       }
     },
     "cssAppend": "\n/* story-form-19 — Day10 ledger tray winner; headphones yields */\nbody.rp-ledger-wins .rp-stage-prop--headphones-note,\nbody.rp-ledger-wins [data-testid=\"story-street-headphones-note\"],\nbody[data-day-index=\"10\"] .rp-stage-prop--headphones-note,\nbody[data-day-index=\"11\"] .rp-stage-prop--headphones-note,\nbody[data-day-index=\"12\"] .rp-stage-prop--headphones-note {\n  display: none !important;\n}\n.rp-stage-prop--ledger-tray-winner {\n  left: 16%; width: 42%; top: 54%; height: 24%;\n  z-index: 10;\n  color: #e8c9a0;\n  animation: rp-ledger-win 1.8s ease-in-out infinite;\n}\n.rp-stage-prop--ledger-tray-winner .rp-stage-prop__tag {\n  font-size: 12px;\n  background: rgba(12,8,6,.92);\n  border: 1px solid rgba(232,180,120,.55);\n}\n.rp-ledger-svg { width: 100%; height: 100%; display: block; }\n@keyframes rp-ledger-win {\n  0%, 100% { filter: drop-shadow(0 0 0 rgba(232,180,120,0)); }\n  50% { filter: drop-shadow(0 0 8px rgba(232,180,120,.35)); }\n}\n.rp-recommend-tonight-bar[data-candidate=\"true\"] {\n  border-color: rgba(232,180,120,.75);\n  box-shadow: 0 0 0 1px rgba(232,180,120,.25);\n  font-weight: 600;\n}\n"
+  },
+  "storyForm20": {
+    "packId": "story-form-20",
+    "formIndex": 20,
+    "optional": true,
+    "oneMainChipDay10": {
+      "id": "kill_dual_main_day10",
+      "bug": "spineCultChipHtml returns MAIN 4/5 Ledger on day≥10 while mqStreetChipHtml still hits mq_street_volume (MAIN 3/5 Decibel) because flagsNone lacks ledger wins and chips.find returns volume before ledger.",
+      "policy": {
+        "when": {
+          "dayIndexMin": 10,
+          "orFlagsAny": [
+            "natural_ledger_street_wins",
+            "natural_ledger_street",
+            "quest_ledger_tease",
+            "week2_decibel_ledger_seen"
+          ],
+          "orWinnerIn": [
+            "ledger_natural"
+          ]
+        },
+        "singleChip": {
+          "prefer": "spine-cult-chip",
+          "label": {
+            "tr": "MAIN 4/5 · Defter & Tepsi",
+            "en": "MAIN 4/5 · Ledger & Tray"
+          },
+          "testId": "spine-cult-chip",
+          "suppressTestIds": [
+            "mq-street-chip-volume",
+            "mq-street-chip-antenna",
+            "mq-street-chip"
+          ]
+        },
+        "mqStreetChipHtml": "return '' when oneMainChipActive() — spine cult owns Day10",
+        "volumeChipWhenOverride": {
+          "flagsAny": [
+            "quest_volume_active",
+            "street_av_handoff_seen",
+            "arc_volume_war_seed"
+          ],
+          "flagsNone": [
+            "arc_volume_war_complete",
+            "street_vl_handoff_seen",
+            "natural_ledger_street_wins",
+            "natural_ledger_street",
+            "quest_ledger_tease"
+          ],
+          "dayIndexMax": 9
+        },
+        "ledgerChipWhenOverride": {
+          "flagsAny": [
+            "quest_ledger_active",
+            "street_vl_handoff_seen",
+            "arc_tea_ledger_seed",
+            "natural_ledger_street",
+            "natural_ledger_street_wins",
+            "quest_ledger_tease"
+          ],
+          "flagsNone": [
+            "arc_tea_ledger_complete"
+          ],
+          "dayIndexMin": 10
+        }
+      }
+    },
+    "mqStreetChipsOverride": [
+      {
+        "id": "mq_street_antenna",
+        "stepRank": 2,
+        "testId": "mq-street-chip-antenna",
+        "chip": {
+          "tr": "MAIN 2/5 · Anten Operasyonu",
+          "en": "MAIN 2/5 · Antenna Op"
+        },
+        "when": {
+          "dayIndexMax": 9,
+          "flagsAny": [
+            "quest_antenna_active",
+            "arc_kite_antenna_beat1"
+          ],
+          "flagsNone": [
+            "arc_kite_antenna_complete",
+            "street_av_handoff_seen",
+            "natural_ledger_street_wins"
+          ]
+        }
+      },
+      {
+        "id": "mq_street_volume",
+        "stepRank": 3,
+        "testId": "mq-street-chip-volume",
+        "chip": {
+          "tr": "MAIN 3/5 · Desibel Antlaşması",
+          "en": "MAIN 3/5 · Decibel Accord"
+        },
+        "when": {
+          "dayIndexMax": 9,
+          "flagsAny": [
+            "quest_volume_active",
+            "street_av_handoff_seen",
+            "arc_volume_war_seed"
+          ],
+          "flagsNone": [
+            "arc_volume_war_complete",
+            "street_vl_handoff_seen",
+            "natural_ledger_street_wins",
+            "natural_ledger_street",
+            "quest_ledger_tease"
+          ]
+        }
+      },
+      {
+        "id": "mq_street_ledger",
+        "stepRank": 4,
+        "testId": "mq-street-chip-ledger",
+        "chip": {
+          "tr": "MAIN 4/5 · Defter & Tepsi",
+          "en": "MAIN 4/5 · Ledger & Tray"
+        },
+        "when": {
+          "dayIndexMin": 10,
+          "flagsAny": [
+            "quest_ledger_active",
+            "street_vl_handoff_seen",
+            "arc_tea_ledger_seed",
+            "natural_ledger_street",
+            "natural_ledger_street_wins",
+            "quest_ledger_tease"
+          ],
+          "flagsNone": [
+            "arc_tea_ledger_complete"
+          ]
+        },
+        "note": "Normally unused on Day10 — spine-cult-chip is the single MAIN; override exists if spine suppressed"
+      }
+    ],
+    "screenshotTallTray": {
+      "id": "taller_ledger_tray",
+      "extends": "story-form-19.cleanLedgerTrayWinner",
+      "cssBoost": true,
+      "note": "Soft gap: tray testid present but not screenshot-tall — enlarge winner tray"
+    },
+    "cssAppend": "\n/* story-form-20 — one MAIN chip on Day10; taller ledger tray */\nbody.rp-ledger-wins .rp-mq-street-chip,\nbody.rp-one-main-chip .rp-mq-street-chip,\nbody[data-day-index=\"10\"] .rp-mq-street-chip,\nbody[data-day-index=\"11\"] .rp-mq-street-chip,\nbody[data-day-index=\"12\"] .rp-mq-street-chip,\nbody.rp-ledger-wins [data-testid=\"mq-street-chip-volume\"],\nbody.rp-ledger-wins [data-testid=\"mq-street-chip-antenna\"] {\n  display: none !important;\n}\nbody.rp-one-main-chip .rp-spine-cult-chip,\nbody.rp-ledger-wins .rp-spine-cult-chip {\n  display: block;\n}\n/* taller tray for screenshot read */\nbody.rp-ledger-wins .rp-stage-prop--ledger-tray,\nbody.rp-ledger-wins .rp-stage-prop--ledger-tray-winner {\n  left: 12%;\n  width: 52%;\n  top: 48%;\n  height: 32%;\n  z-index: 10;\n}\nbody.rp-ledger-wins .rp-stage-prop--ledger-tray-winner .rp-stage-prop__tag {\n  font-size: 13px;\n  padding: 0.3rem 0.55rem;\n}\n"
   }
 }
