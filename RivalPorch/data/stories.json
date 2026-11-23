@@ -2643,8 +2643,8 @@
           "id": "e_merve",
           "speaker": "n1",
           "text": {
-            "tr": "Karşı Sırt'ın tankı önde dururmuş. Ben uydurmadım… belki.",
-            "en": "Rival Ridge leads with their tank. I didn't invent that… maybe."
+            "tr": "Karşı Sırt'ın çit nöbeti önde dururmuş. Ben uydurmadım… belki.",
+            "en": "Rival Ridge leads with their fence sit. I didn't invent that… maybe."
           },
           "ends": true
         },
@@ -3018,8 +3018,8 @@
           "id": "psl_leave_end",
           "speaker": "n5",
           "text": {
-            "tr": "Bilet taslağı duruyor. Belki yanar, belki yanmaz. Arenada AoE… vedaya benzer.",
-            "en": "Ticket draft stays. Maybe it burns, maybe not. Arena AoE… already sounds like goodbye."
+            "tr": "Bilet taslağı duruyor. Belki yanar, belki yanmaz. Verandada bas… vedaya benzer.",
+            "en": "Ticket draft stays. Maybe it burns, maybe not. porch bass… already sounds like goodbye."
           },
           "setFlags": [
             "react_peri_resolution_seen",
@@ -3264,8 +3264,8 @@
               "ifFlag": "flag_kite_chaos_buff",
               "speaker": "n3",
               "text": {
-                "tr": "Harita serbest! Glass cannon yarın cam değil, rüzgâr olur.",
-                "en": "Map unrestricted! Tomorrow the glass cannon is wind, not glass."
+                "tr": "Harita serbest! kite line yarın cam değil, rüzgâr olur.",
+                "en": "Map unrestricted! Tomorrow the kite line is wind, not glass."
               }
             }
           ],
@@ -3294,8 +3294,8 @@
               "ifFlag": "flag_peri_leaving_threat",
               "speaker": "n5",
               "text": {
-                "tr": "Kulaklıklar veda gibi. Belki son şov — o yüzden AoE daha geniş.",
-                "en": "Headphones like goodbye. Maybe a last show — so the AoE runs wider."
+                "tr": "Kulaklıklar veda gibi. Belki son şov — o yüzden bass daha geniş.",
+                "en": "Headphones like goodbye. Maybe a last show — so the bass runs wider."
               }
             }
           ],
@@ -6380,8 +6380,8 @@
         ]
       },
       "summary": {
-        "tr": "Peri gider; Cup AoE boşluğu kalır. Bittersweet veda seti.",
-        "en": "Peri leaves; Cup AoE gap remains. A bittersweet farewell set."
+        "tr": "Peri gider; Cup bass boşluğu kalır. Bittersweet veda seti.",
+        "en": "Peri leaves; Cup bass gap remains. A bittersweet farewell set."
       }
     },
     {
@@ -6465,8 +6465,8 @@
         "type": "unit_mod",
         "neighborId": "n5",
         "label": {
-          "tr": "Kulüp AoE",
-          "en": "Club AoE"
+          "tr": "Kulüp bass",
+          "en": "Bass set"
         },
         "requiresFlags": [
           "unlock_unit_mod_peri_club_aoe"

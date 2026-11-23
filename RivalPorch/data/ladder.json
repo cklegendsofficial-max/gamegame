@@ -2,113 +2,275 @@
   "schemaVersion": 1,
   "sliceId": "rival-porch-cup-ladder",
   "season": {
-    "name": { "tr": "Kil Sezonu 1", "en": "Clay Season 1" },
+    "name": {
+      "tr": "Kil Sezonu 1",
+      "en": "Clay Season 1"
+    },
     "weeks": 8,
     "daysPerWeek": 7
   },
   "unlockSchedule": [
-    { "id": "n1", "unlockDay": 1 },
-    { "id": "n2", "unlockDay": 1 },
-    { "id": "n3", "unlockDay": 1 },
-    { "id": "n4", "unlockDay": 1 },
-    { "id": "n5", "unlockDay": 1 },
-    { "id": "n6", "unlockDay": 1 },
-    { "id": "n7", "unlockDay": 5, "requiresWins": 1 },
-    { "id": "n8", "unlockDay": 8, "requiresWins": 2 },
-    { "id": "n9", "unlockDay": 12, "requiresWins": 3 },
-    { "id": "n10", "unlockDay": 16, "requiresWins": 4 },
-    { "id": "n11", "unlockDay": 20, "requiresWins": 5 },
-    { "id": "n12", "unlockDay": 24, "requiresWins": 6 }
+    {
+      "id": "n1",
+      "unlockDay": 1
+    },
+    {
+      "id": "n2",
+      "unlockDay": 1
+    },
+    {
+      "id": "n3",
+      "unlockDay": 1
+    },
+    {
+      "id": "n4",
+      "unlockDay": 1
+    },
+    {
+      "id": "n5",
+      "unlockDay": 1
+    },
+    {
+      "id": "n6",
+      "unlockDay": 1
+    },
+    {
+      "id": "n7",
+      "unlockDay": 5,
+      "requiresWins": 1
+    },
+    {
+      "id": "n8",
+      "unlockDay": 8,
+      "requiresWins": 2
+    },
+    {
+      "id": "n9",
+      "unlockDay": 12,
+      "requiresWins": 3
+    },
+    {
+      "id": "n10",
+      "unlockDay": 16,
+      "requiresWins": 4
+    },
+    {
+      "id": "n11",
+      "unlockDay": 20,
+      "requiresWins": 5
+    },
+    {
+      "id": "n12",
+      "unlockDay": 24,
+      "requiresWins": 6
+    }
   ],
   "rosterExpansion": {
     "maxUnits": 12,
     "cupPickCountByWeek": [
-      { "weekMax": 2, "picks": 3 },
-      { "weekMax": 4, "picks": 3 },
-      { "weekMax": 6, "picks": 4 },
-      { "weekMax": 8, "picks": 4 }
+      {
+        "weekMax": 2,
+        "picks": 3
+      },
+      {
+        "weekMax": 4,
+        "picks": 3
+      },
+      {
+        "weekMax": 6,
+        "picks": 4
+      },
+      {
+        "weekMax": 8,
+        "picks": 4
+      }
     ]
   },
   "botDifficulty": [
-    { "weekMax": 1, "statMult": 0.9, "ai": "mirror_soft" },
-    { "weekMax": 3, "statMult": 1.0, "ai": "mirror" },
-    { "weekMax": 5, "statMult": 1.12, "ai": "counter_synergy" },
-    { "weekMax": 8, "statMult": 1.25, "ai": "pressure" }
+    {
+      "weekMax": 1,
+      "statMult": 0.9,
+      "ai": "mirror_soft"
+    },
+    {
+      "weekMax": 3,
+      "statMult": 1.0,
+      "ai": "mirror"
+    },
+    {
+      "weekMax": 5,
+      "statMult": 1.12,
+      "ai": "counter_synergy"
+    },
+    {
+      "weekMax": 8,
+      "statMult": 1.25,
+      "ai": "pressure"
+    }
   ],
   "extraNeighbors": [
     {
       "id": "n7",
-      "name": { "tr": "Terzi Ayla", "en": "Tailor Ayla" },
+      "name": {
+        "tr": "Terzi Ayla",
+        "en": "Tailor Ayla"
+      },
       "trait": "Craft",
       "role": "Shield weaver",
       "synergyTag": "Fence",
-      "prop": { "id": "prop_makas", "label": { "tr": "Makas", "en": "Scissors" } },
+      "prop": {
+        "id": "prop_makas",
+        "label": {
+          "tr": "Makas",
+          "en": "Scissors"
+        }
+      },
       "bustAssetHint": "bust_tailor_ayla",
       "meshyHook": "art/meshy/busts/bust-n7-tailor-ayla.png",
-      "stats": { "hp": 120, "atk": 10, "def": 14, "spd": 8 }
+      "stats": {
+        "hp": 120,
+        "atk": 10,
+        "def": 14,
+        "spd": 8
+      }
     },
     {
       "id": "n8",
-      "name": { "tr": "Postacı Efe", "en": "Postman Efe" },
+      "name": {
+        "tr": "Postacı Efe",
+        "en": "Postman Efe"
+      },
       "trait": "Gossip",
       "role": "Tempo runner",
       "synergyTag": "Tea",
-      "prop": { "id": "prop_posta", "label": { "tr": "Posta çantası", "en": "Mail bag" } },
+      "prop": {
+        "id": "prop_posta",
+        "label": {
+          "tr": "Posta çantası",
+          "en": "Mail bag"
+        }
+      },
       "bustAssetHint": "bust_postman_efe",
       "meshyHook": "art/meshy/busts/bust-n8-postman-efe.png",
-      "stats": { "hp": 85, "atk": 12, "def": 6, "spd": 16 }
+      "stats": {
+        "hp": 85,
+        "atk": 12,
+        "def": 6,
+        "spd": 16
+      }
     },
     {
       "id": "n9",
-      "name": { "tr": "Bekçi Rıza", "en": "Watchman Riza" },
+      "name": {
+        "tr": "Bekçi Rıza",
+        "en": "Watchman Riza"
+      },
       "trait": "Grumpy",
-      "role": "Night tank",
+      "role": "Fence night",
       "synergyTag": "Neon",
-      "prop": { "id": "prop_fener", "label": { "tr": "Fener", "en": "Lantern" } },
+      "prop": {
+        "id": "prop_fener",
+        "label": {
+          "tr": "Fener",
+          "en": "Lantern"
+        }
+      },
       "bustAssetHint": "bust_watchman_riza",
       "meshyHook": "art/meshy/busts/bust-n9-watchman-riza.png",
-      "stats": { "hp": 150, "atk": 9, "def": 18, "spd": 5 }
+      "stats": {
+        "hp": 150,
+        "atk": 9,
+        "def": 18,
+        "spd": 5
+      }
     },
     {
       "id": "n10",
-      "name": { "tr": "Öğrenci Lara", "en": "Student Lara" },
+      "name": {
+        "tr": "Öğrenci Lara",
+        "en": "Student Lara"
+      },
       "trait": "Chaos",
       "role": "Burst mage",
       "synergyTag": "Chaos",
-      "prop": { "id": "prop_defter", "label": { "tr": "Defter", "en": "Notebook" } },
+      "prop": {
+        "id": "prop_defter",
+        "label": {
+          "tr": "Defter",
+          "en": "Notebook"
+        }
+      },
       "bustAssetHint": "bust_student_lara",
       "meshyHook": "art/meshy/busts/bust-n10-student-lara.png",
-      "stats": { "hp": 68, "atk": 20, "def": 3, "spd": 13 }
+      "stats": {
+        "hp": 68,
+        "atk": 20,
+        "def": 3,
+        "spd": 13
+      }
     },
     {
       "id": "n11",
-      "name": { "tr": "Tamirci Barış", "en": "Fixer Baris" },
+      "name": {
+        "tr": "Tamirci Barış",
+        "en": "Fixer Baris"
+      },
       "trait": "Rival",
-      "role": "Bruiser tech",
+      "role": "Whistle tech",
       "synergyTag": "Rivalry",
-      "prop": { "id": "prop_anahtar", "label": { "tr": "İngiliz anahtarı", "en": "Wrench" } },
+      "prop": {
+        "id": "prop_anahtar",
+        "label": {
+          "tr": "İngiliz anahtarı",
+          "en": "Wrench"
+        }
+      },
       "bustAssetHint": "bust_fixer_baris",
       "meshyHook": "art/meshy/busts/bust-n11-fixer-baris.png",
-      "stats": { "hp": 125, "atk": 16, "def": 10, "spd": 8 }
+      "stats": {
+        "hp": 125,
+        "atk": 16,
+        "def": 10,
+        "spd": 8
+      }
     },
     {
       "id": "n12",
-      "name": { "tr": "Çiçekçi Nil", "en": "Florist Nil" },
+      "name": {
+        "tr": "Çiçekçi Nil",
+        "en": "Florist Nil"
+      },
       "trait": "Soft",
-      "role": "Healer bloom",
+      "role": "Tray bloom",
       "synergyTag": "Oven",
-      "prop": { "id": "prop_buket", "label": { "tr": "Buket", "en": "Bouquet" } },
+      "prop": {
+        "id": "prop_buket",
+        "label": {
+          "tr": "Buket",
+          "en": "Bouquet"
+        }
+      },
       "bustAssetHint": "bust_florist_nil",
       "meshyHook": "art/meshy/busts/bust-n12-florist-nil.png",
-      "stats": { "hp": 105, "atk": 8, "def": 9, "spd": 9 }
+      "stats": {
+        "hp": 105,
+        "atk": 8,
+        "def": 9,
+        "spd": 9
+      }
     }
   ],
   "synergyGrowth": [
     {
       "id": "syn_fence_line",
       "unlockWeek": 3,
-      "name": { "tr": "Çit Hattı", "en": "Fence Line" },
-      "tagsRequired": ["Fence"],
+      "name": {
+        "tr": "Çit Hattı",
+        "en": "Fence Line"
+      },
+      "tagsRequired": [
+        "Fence"
+      ],
       "minCount": 2,
       "rules": {
         "type": "team_def_buff",
@@ -122,8 +284,13 @@
     {
       "id": "syn_oven_warmth",
       "unlockWeek": 4,
-      "name": { "tr": "Fırın Sıcağı", "en": "Oven Warmth" },
-      "tagsRequired": ["Oven"],
+      "name": {
+        "tr": "Fırın Sıcağı",
+        "en": "Oven Warmth"
+      },
+      "tagsRequired": [
+        "Oven"
+      ],
       "minCount": 2,
       "rules": {
         "type": "periodic_heal_aura",
@@ -138,8 +305,13 @@
     {
       "id": "syn_chaos_spark",
       "unlockWeek": 5,
-      "name": { "tr": "Kaos Kıvılcımı", "en": "Chaos Spark" },
-      "tagsRequired": ["Chaos"],
+      "name": {
+        "tr": "Kaos Kıvılcımı",
+        "en": "Chaos Spark"
+      },
+      "tagsRequired": [
+        "Chaos"
+      ],
       "minCount": 2,
       "rules": {
         "type": "crit_chance",

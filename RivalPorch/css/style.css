@@ -6564,3 +6564,17 @@ body:not([data-audit-cold="1"]) [data-testid="practice-settle-wrap"] {
 body:not(.rp-after-share) .rp-recommend-tonight-bar {
   display: none !important;
 }
+
+.rp-sig-pip {
+  position: absolute;
+  top: 0.2rem;
+  right: 0.25rem;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--porch-lamp, #e8a045);
+  box-shadow: 0 0 0 2px rgba(26,22,18,.55);
+  z-index: 3;
+  animation: rp-lamp-breathe 1s ease-in-out infinite;
+}
+.rp-pad { position: relative; }

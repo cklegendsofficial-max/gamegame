@@ -4955,7 +4955,9 @@ function updateFightUI(battle) {
       .map((u) => {
         const [x, y] = map[u.slot] || [50, side === "enemy" ? 28 : 68];
         const lane = (u.slot ?? 0) < 3 ? "is-front" : "is-back";
-        return `<div class="rp-pad rp-arena-pad is-occupied ${lane}" style="--pad-x:${x}%;--pad-y:${y}%">${unitCard(u, side, floaters)}</div>`;
+        const ready = side === "ally" && u.kit?.signature && (u.sigCd || 0) <= 0.05;
+        const pip = ready ? `<span class="rp-sig-pip" data-testid="sig-ready-pip" title="prop ready"></span>` : "";
+        return `<div class="rp-pad rp-arena-pad is-occupied ${lane}" style="--pad-x:${x}%;--pad-y:${y}%" data-id="${u.neighborId || u.id || ""}">${pip}${unitCard(u, side, floaters)}</div>`;
       })
       .join("");
   };

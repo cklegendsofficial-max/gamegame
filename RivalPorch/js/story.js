@@ -370,7 +370,7 @@ const FREE_PORCH = {
         choices: [
           {
             id: "c2",
-            label: { tr: "Orhan tank", en: "Orhan tank" },
+            label: { tr: "Orhan fence", en: "Orhan fence" },
             next: "c_end",
             affinity: [{ id: "n4", delta: 2 }, { id: "n2", delta: 1 }],
             rep: { rep_stage: 2 },
@@ -378,7 +378,7 @@ const FREE_PORCH = {
           },
           {
             id: "c3",
-            label: { tr: "Leyla baskın", en: "Leyla burst" },
+            label: { tr: "Leyla uçurtma", en: "Leyla kite" },
             next: "c_end",
             affinity: [{ id: "n3", delta: 2 }],
             rep: { rep_instigator: 1 },
@@ -703,7 +703,7 @@ const FOLLOWUP_FLAG_BEATS = {
       a: { tr: "Sol kanat sıkı", en: "Pin the left wing", next: "a1" },
       b: { tr: "Can'ı koru yine", en: "Guard Can again", next: "b1" },
       a1: { tr: "Sol kilit. Kim destekler?", en: "Left locked. Who supports?", },
-      a2: { tr: "Orhan tank", en: "Orhan tank", flag: "free_n2_d2_left" },
+      a2: { tr: "Orhan fence", en: "Orhan fence", flag: "free_n2_d2_left" },
       a3: { tr: "Ben önde", en: "I go front", flag: "free_n2_d2_mid" },
       b1: { tr: "Can korunacak. Sen nereye?", en: "Can stays safe. Where do you go?", },
       b2: { tr: "Orta saha", en: "Midfield", flag: "free_n2_d2_mid" },
