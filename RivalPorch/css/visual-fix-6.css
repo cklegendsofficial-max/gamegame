@@ -1,0 +1,192 @@
+/* Rival Porch — visual-fix-6
+   b2cd05e visual 7.4 — evening mid-card still dominates; "See the stage" apology.
+   User: mid-card ≤35vh. Auditor: first-viewport text card ≤30%.
+   Play ON the clay stage — card is a whisper, not a wall.
+   Paste AFTER visual-fix-3/5. Supersedes fix-3 evening 40vh rules.
+*/
+
+.rp-screen--evening {
+  --rp-evening-mid-max: min(35vh, 30%); /* both caps */
+  --rp-dock-h: 72px;
+}
+
+/* ── Mid-card: bottom glass chip, hard height cap ───────────────────────── */
+
+.rp-screen--evening .rp-mid,
+.rp-screen--evening .rp-evening-card,
+.rp-screen--evening .evening-card,
+.rp-screen--evening .rp-spine-card {
+  position: absolute !important;
+  left: 12px !important;
+  right: 12px !important;
+  top: auto !important; /* kill top-anchored slab from audit-r18 */
+  bottom: calc(var(--rp-dock-h) + 10px + var(--rp-safe-bottom, 0px)) !important;
+  margin: 0 auto !important;
+  max-height: var(--rp-evening-mid-max) !important;
+  height: auto !important;
+  max-width: 24rem;
+  padding: 8px 12px !important;
+  overflow: hidden !important;
+  box-sizing: border-box;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 46%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--tea-cream, #F2E6D8) 16%, transparent);
+  backdrop-filter: blur(8px);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  pointer-events: auto;
+}
+
+.rp-screen--evening .rp-kicker,
+.rp-screen--evening .rp-mid .eyebrow {
+  margin: 0 !important;
+  font-size: 10px !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gossip-rose, #C97B8A);
+  flex: 0 0 auto;
+}
+
+.rp-screen--evening .rp-night-title,
+.rp-screen--evening .rp-mid h2 {
+  margin: 0 !important;
+  font-family: var(--rp-font-display, "Fraunces", serif);
+  font-size: clamp(1.05rem, 4.2vw, 1.25rem) !important;
+  line-height: 1.1 !important;
+  font-weight: 650;
+  flex: 0 0 auto;
+}
+
+.rp-screen--evening .rp-progress {
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  gap: 6px;
+  align-items: center;
+  margin: 0 !important;
+  flex: 0 0 auto;
+}
+.rp-screen--evening .rp-progress img {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center 22%;
+}
+.rp-screen--evening .rp-progress__bar {
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tea-cream, #F2E6D8) 15%, transparent);
+  overflow: hidden;
+}
+.rp-screen--evening .rp-progress__bar > i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--porch-lamp, #E8A045), var(--lamp-bloom, #F5C878));
+}
+
+.rp-screen--evening .rp-mid__line {
+  margin: 0 !important;
+  font-size: 0.8rem !important;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: color-mix(in srgb, var(--tea-cream, #F2E6D8) 82%, transparent);
+  flex: 0 1 auto;
+  min-height: 0;
+}
+
+/* Kill nested apology / world-rewrite callouts that blow the cap */
+.rp-screen--evening .rp-mid .rp-callout,
+.rp-screen--evening .rp-mid .rp-stage-nudge,
+.rp-screen--evening .rp-mid .rp-world-changed,
+.rp-screen--evening .rp-see-stage,
+.rp-screen--evening .rp-mid a[href="#stage"],
+.rp-screen--evening .rp-mid__bullets,
+.rp-screen--evening .rp-meta-row,
+.rp-screen--evening .rp-agenda-list,
+.rp-screen--evening .rp-evening-card__stats,
+.rp-screen--evening .rp-mid .callout,
+.rp-screen--evening .rp-mid .nested-card {
+  display: none !important;
+}
+
+/* Any extra paragraphs beyond the first lede */
+.rp-screen--evening .rp-mid > p:nth-of-type(n + 3),
+.rp-screen--evening .rp-evening-card > p:nth-of-type(n + 3) {
+  display: none !important;
+}
+
+/* ── Play on clay: stage is the hero of first viewport ──────────────────── */
+
+.rp-screen--evening .rp-stage {
+  z-index: 0;
+}
+.rp-screen--evening .rp-stage[data-wave="3"][data-stage="street"] .rp-stage__img {
+  object-fit: cover;
+  object-position: center 36%;
+  transform: scale(1.12);
+  transform-origin: center 36%;
+  filter: brightness(0.95) saturate(1.02); /* less smother */
+}
+
+.rp-screen--evening .rp-stage__vignette {
+  background:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--mud-night, #1A1612) 35%, transparent) 0%,
+      transparent 12%
+    ),
+    linear-gradient(
+      to top,
+      color-mix(in srgb, var(--mud-night, #1A1612) 55%, transparent) 0%,
+      transparent 28%
+    ) !important;
+}
+
+/* HUD thin — don't steal clay */
+.rp-screen--evening .rp-hud-top {
+  z-index: 4;
+  max-height: 48px;
+  background: transparent !important;
+  pointer-events: none;
+}
+.rp-screen--evening .rp-hud-top > * {
+  pointer-events: auto;
+}
+.rp-screen--evening .rp-hud-quest,
+.rp-screen--evening .rp-quest-banner {
+  max-height: 32px;
+  padding: 5px 10px !important;
+  font-size: 11px !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-radius: 999px;
+}
+
+/* Dock = play controls on the stage */
+.rp-screen--evening .rp-dock {
+  z-index: 6;
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--mud-night, #1A1612) 72%, transparent),
+    transparent
+  ) !important;
+}
+.rp-screen--evening .rp-dock .rp-btn--primary {
+  background: var(--porch-lamp, #E8A045);
+  color: var(--mud-night, #1A1612);
+}
+
+/* Affinity toast: dock margin only */
+.rp-screen--evening .rp-affinity-toast {
+  bottom: calc(var(--rp-dock-h) + 8px + var(--rp-safe-bottom, 0px));
+  top: auto !important;
+  z-index: 6;
+  font-size: 11px;
+  padding: 5px 9px;
+}

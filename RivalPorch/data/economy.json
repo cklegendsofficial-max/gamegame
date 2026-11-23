@@ -1,0 +1,364 @@
+{
+  "schemaVersion": 1,
+  "economyId": "rival-porch-soft-launch-v1",
+  "product": "Rival Porch",
+  "docs": "docs/rival-porch-monetization.md",
+  "principles": {
+    "adsDefault": "off",
+    "payToWin": false,
+    "f2pClearsStory": true,
+    "hardCurrencyBuys": ["cosmetics_only"],
+    "hardCurrencyNeverBuys": [
+      "units",
+      "traits",
+      "synergies",
+      "combat_stats",
+      "story_gates",
+      "cup_power",
+      "energy"
+    ]
+  },
+  "currencies": [
+    {
+      "id": "porch_coins",
+      "nameKey": "shop.currency.coins",
+      "name": { "tr": "Veranda Jetonu", "en": "Porch Coins" },
+      "type": "soft",
+      "premium": false
+    },
+    {
+      "id": "neon_thread",
+      "nameKey": "shop.currency.thread",
+      "name": { "tr": "Neon İplik", "en": "Neon Thread" },
+      "type": "soft_rare",
+      "premium": false
+    },
+    {
+      "id": "clay_tokens",
+      "nameKey": "shop.currency.tokens",
+      "name": { "tr": "Kil Jeton", "en": "Clay Tokens" },
+      "type": "hard",
+      "premium": true,
+      "earnFromGameplay": false
+    }
+  ],
+  "earnRates": {
+    "daily": {
+      "porch_checkin": { "porch_coins": 20, "neon_thread": 0, "oncePerDay": true },
+      "talk": { "porch_coins": 8, "neon_thread": 0, "maxCoinAwardsPerDay": 2 },
+      "drama_resolve": {
+        "porch_coins": 30,
+        "neon_thread": 1,
+        "neonThreadOnlyFirstDramaPerDay": true
+      },
+      "overnight_idle_claim": { "porch_coins": 5, "neon_thread": 0 },
+      "expectedGrossNoCup": { "porch_coins": 71, "neon_thread": 1 }
+    },
+    "cup": {
+      "entryCost": { "porch_coins": 0, "neon_thread": 0, "clay_tokens": 0 },
+      "win": { "porch_coins": 120, "neon_thread": 5 },
+      "loss": { "porch_coins": 50, "neon_thread": 2 },
+      "shareComicFirstPerCup": { "porch_coins": 25, "neon_thread": 1 },
+      "synergySpotlight": { "porch_coins": 15, "neon_thread": 0 }
+    },
+    "weeklyF2pEnvelopeWin": {
+      "porch_coins_gross": 655,
+      "neon_thread_gross": 13,
+      "notes": "7× daily ~71 + cup win 120 + share 25 + synergy 15"
+    }
+  },
+  "sinks": [
+    {
+      "id": "gift_base",
+      "category": "relationship_gifts",
+      "cost": { "porch_coins": { "min": 15, "max": 40 } },
+      "effect": "affinity_only",
+      "extendsSession": true
+    },
+    {
+      "id": "gift_wrap",
+      "category": "relationship_gifts",
+      "cost": { "porch_coins": 10, "clay_tokens": 5 },
+      "costMode": "either",
+      "effect": "cosmetic_wrap_same_affinity",
+      "extendsSession": true
+    },
+    {
+      "id": "decoration_goal_slot",
+      "category": "decoration_goals",
+      "slots": ["lamp", "planter", "awning", "sign"],
+      "typicalCostPerSlot": { "porch_coins": 150, "or_neon_thread": 3 },
+      "extendsSession": true,
+      "sessionHook": "one_more_decor_before_logout"
+    },
+    {
+      "id": "cup_entry_flair",
+      "category": "cup_entry_cosmetics",
+      "optional": true,
+      "requiredForEntry": false,
+      "cost": { "porch_coins": 40, "or_neon_thread": 1 },
+      "effect": "lobby_vfx_sfx_only",
+      "extendsSession": true
+    },
+    {
+      "id": "comic_frame_craft",
+      "category": "share_surface",
+      "cost": { "porch_coins": 100, "or_neon_thread": 3 },
+      "effect": "unlock_frame_before_share",
+      "extendsSession": true
+    }
+  ],
+  "seasonPass": {
+    "id": "porch_week_pass_s1",
+    "nameKey": "pass.title",
+    "name": { "tr": "Porch Haftası Pass", "en": "Porch Week Pass" },
+    "durationDays": 30,
+    "tracks": ["free", "paid"],
+    "xp": {
+      "targetLevels": 30,
+      "f2pPace": "about_1_level_per_day",
+      "sources": ["daily_loop", "cup"],
+      "xpBoostersForSale": false
+    },
+    "storyWeekMap": [
+      { "days": [1, 7], "beat": "meet_the_block", "theme": "warm_lamp_tea" },
+      { "days": [8, 14], "beat": "rivalries_heat", "theme": "coach_cem_arc" },
+      { "days": [15, 21], "beat": "neon_nights", "theme": "dj_peri_arc" },
+      { "days": [22, 28], "beat": "festival_cup_prep", "theme": "baker_orhan" },
+      { "days": [29, 30], "beat": "street_finale", "theme": "shareable_frame" }
+    ],
+    "rewards": [
+      { "level": 1, "free": { "type": "currency", "currency": "porch_coins", "amount": 50 }, "paid": { "type": "porch_skin_tint", "itemId": "tint_warm_lamp" } },
+      { "level": 2, "free": { "type": "gift_wrap", "itemId": "wrap_clay_ribbon" }, "paid": { "type": "emote", "itemId": "emote_wave_porch" } },
+      { "level": 3, "free": { "type": "currency", "currency": "neon_thread", "amount": 1 }, "paid": { "type": "currency", "currency": "porch_coins", "amount": 80 } },
+      { "level": 4, "free": { "type": "unit_pose", "itemId": "pose_merve_cheer" }, "paid": { "type": "comic_frame", "itemId": "frame_tea_cup_rim" } },
+      { "level": 5, "free": { "type": "currency", "currency": "porch_coins", "amount": 40 }, "paid": { "type": "decor", "itemId": "decor_demlik_shelf" } },
+      { "level": 6, "free": { "type": "emote", "itemId": "emote_sip_tea" }, "paid": { "type": "currency", "currency": "neon_thread", "amount": 2 } },
+      { "level": 7, "free": { "type": "story_badge", "itemId": "badge_week1" }, "paid": { "type": "porch_skin", "itemId": "skin_soft_dawn" } },
+      { "level": 8, "free": { "type": "currency", "currency": "porch_coins", "amount": 60 }, "paid": { "type": "unit_pose", "itemId": "pose_cem_whistle_blast" } },
+      { "level": 9, "free": { "type": "currency", "currency": "neon_thread", "amount": 1 }, "paid": { "type": "emote", "itemId": "emote_rival_nod" } },
+      { "level": 10, "free": { "type": "comic_frame", "itemId": "frame_chalk_grid" }, "paid": { "type": "currency", "currency": "porch_coins", "amount": 100 } },
+      { "level": 11, "free": { "type": "gift_wrap", "itemId": "wrap_protein_bar" }, "paid": { "type": "decor", "itemId": "decor_rivalry_stripe" } },
+      { "level": 12, "free": { "type": "currency", "currency": "porch_coins", "amount": 40 }, "paid": { "type": "currency", "currency": "neon_thread", "amount": 3 } },
+      { "level": 13, "free": { "type": "unit_pose", "itemId": "pose_leyla_kite_peak" }, "paid": { "type": "comic_frame", "itemId": "frame_chaos_splash" } },
+      { "level": 14, "free": { "type": "story_badge", "itemId": "badge_week2" }, "paid": { "type": "porch_skin", "itemId": "skin_coach_drill_rail" } },
+      { "level": 15, "free": { "type": "currency", "currency": "porch_coins", "amount": 80 }, "paid": { "type": "decor", "itemId": "decor_neon_sign_sparkle" } },
+      { "level": 16, "free": { "type": "currency", "currency": "neon_thread", "amount": 2 }, "paid": { "type": "unit_pose", "itemId": "pose_peri_headphone_drop" } },
+      { "level": 17, "free": { "type": "emote", "itemId": "emote_nightowl_blink" }, "paid": { "type": "comic_frame", "itemId": "frame_neon_panel" } },
+      { "level": 18, "free": { "type": "currency", "currency": "porch_coins", "amount": 50 }, "paid": { "type": "currency", "currency": "porch_coins", "amount": 120 } },
+      { "level": 19, "free": { "type": "gift_wrap", "itemId": "wrap_neon_bow" }, "paid": { "type": "emote", "itemId": "emote_bass_drop" } },
+      { "level": 20, "free": { "type": "comic_frame", "itemId": "frame_mud_night" }, "paid": { "type": "currency", "currency": "neon_thread", "amount": 4 } },
+      { "level": 21, "free": { "type": "story_badge", "itemId": "badge_week3" }, "paid": { "type": "porch_skin", "itemId": "skin_neon_thread" } },
+      { "level": 22, "free": { "type": "currency", "currency": "porch_coins", "amount": 70 }, "paid": { "type": "unit_pose", "itemId": "pose_orhan_gazette_wall" } },
+      { "level": 23, "free": { "type": "currency", "currency": "neon_thread", "amount": 1 }, "paid": { "type": "emote", "itemId": "emote_grumpy_shrug" } },
+      { "level": 24, "free": { "type": "decor", "itemId": "decor_porch_stool" }, "paid": { "type": "comic_frame", "itemId": "frame_fence_line" } },
+      { "level": 25, "free": { "type": "currency", "currency": "porch_coins", "amount": 60 }, "paid": { "type": "unit_pose", "itemId": "pose_can_tray_flourish" } },
+      { "level": 26, "free": { "type": "emote", "itemId": "emote_fresh_loaf" }, "paid": { "type": "currency", "currency": "neon_thread", "amount": 5 } },
+      { "level": 27, "free": { "type": "gift_wrap", "itemId": "wrap_oven_paper" }, "paid": { "type": "comic_frame", "itemId": "frame_ember_glow" } },
+      { "level": 28, "free": { "type": "story_badge", "itemId": "badge_week4" }, "paid": { "type": "porch_skin", "itemId": "skin_festival" } },
+      { "level": 29, "free": { "type": "bundle", "items": [{ "currency": "porch_coins", "amount": 100 }, { "currency": "neon_thread", "amount": 2 }] }, "paid": { "type": "vanity_title", "itemId": "title_block_legend" } },
+      { "level": 30, "free": { "type": "comic_frame", "itemId": "frame_street_recap" }, "paid": { "type": "bundle", "items": [{ "type": "porch_skin", "itemId": "skin_rival_marquee" }, { "type": "emote", "itemId": "emote_cup_crown" }] } }
+    ]
+  },
+  "shopCatalog": {
+    "porch_skins": [
+      {
+        "id": "skin_warm_lamp",
+        "name": { "tr": "Sıcak Lamba", "en": "Warm Lamp" },
+        "prices": [{ "currency": "porch_coins", "amount": 400 }],
+        "rarity": "common",
+        "power": false
+      },
+      {
+        "id": "skin_soft_dawn",
+        "name": { "tr": "Yumuşak Şafak", "en": "Soft Dawn Awning" },
+        "prices": [
+          { "currency": "neon_thread", "amount": 6 },
+          { "currency": "clay_tokens", "amount": 40 }
+        ],
+        "rarity": "rare",
+        "power": false,
+        "alsoFromPass": "paid:7"
+      },
+      {
+        "id": "skin_coach_drill_rail",
+        "name": { "tr": "Antrenör Rayı", "en": "Coach's Drill Rail" },
+        "prices": [
+          { "currency": "neon_thread", "amount": 8 },
+          { "currency": "clay_tokens", "amount": 50 }
+        ],
+        "rarity": "rare",
+        "power": false,
+        "alsoFromPass": "paid:14"
+      },
+      {
+        "id": "skin_neon_thread",
+        "name": { "tr": "Neon İplik Tente", "en": "Neon Thread Awning" },
+        "prices": [
+          { "currency": "neon_thread", "amount": 12 },
+          { "currency": "clay_tokens", "amount": 60 }
+        ],
+        "rarity": "epic",
+        "power": false,
+        "alsoFromPass": "paid:21"
+      },
+      {
+        "id": "skin_festival",
+        "name": { "tr": "Festival Flama", "en": "Festival Bunting" },
+        "prices": [
+          { "currency": "neon_thread", "amount": 15 },
+          { "currency": "clay_tokens", "amount": 80 }
+        ],
+        "rarity": "epic",
+        "power": false,
+        "alsoFromPass": "paid:28"
+      },
+      {
+        "id": "skin_rival_marquee",
+        "name": { "tr": "Rakip Tabela", "en": "Rival Marquee" },
+        "prices": [{ "currency": "clay_tokens", "amount": 120 }],
+        "rarity": "legendary",
+        "power": false,
+        "alsoFromPass": "paid:30",
+        "iapSkuHint": "iap.skin_warm.name_alt_marquee"
+      },
+      {
+        "id": "skin_warm_lamp_deluxe",
+        "name": { "tr": "Sıcak Lamba Deluxe", "en": "Warm Lamp Deluxe" },
+        "prices": [{ "currency": "clay_tokens", "amount": 90 }],
+        "rarity": "rare",
+        "power": false,
+        "iapDirect": "iap_skin_warm_deluxe"
+      }
+    ],
+    "unit_poses": [
+      { "id": "pose_merve_cheer", "neighborId": "n1", "name": { "tr": "Merve — Alkış", "en": "Merve — Cheer" }, "prices": [{ "currency": "porch_coins", "amount": 80 }, { "currency": "neon_thread", "amount": 2 }, { "currency": "clay_tokens", "amount": 25 }], "power": false },
+      { "id": "pose_cem_whistle_blast", "neighborId": "n2", "name": { "tr": "Cem — Düdük", "en": "Cem — Whistle Blast" }, "prices": [{ "currency": "porch_coins", "amount": 80 }, { "currency": "neon_thread", "amount": 2 }, { "currency": "clay_tokens", "amount": 25 }], "power": false },
+      { "id": "pose_leyla_kite_peak", "neighborId": "n3", "name": { "tr": "Leyla — Uçurtma Zirve", "en": "Leyla — Kite Peak" }, "prices": [{ "currency": "porch_coins", "amount": 80 }, { "currency": "neon_thread", "amount": 2 }, { "currency": "clay_tokens", "amount": 25 }], "power": false },
+      { "id": "pose_orhan_gazette_wall", "neighborId": "n4", "name": { "tr": "Orhan — Gazete Duvar", "en": "Orhan — Gazette Wall" }, "prices": [{ "currency": "porch_coins", "amount": 80 }, { "currency": "neon_thread", "amount": 2 }, { "currency": "clay_tokens", "amount": 25 }], "power": false },
+      { "id": "pose_peri_headphone_drop", "neighborId": "n5", "name": { "tr": "Peri — Kulaklık Drop", "en": "Peri — Headphone Drop" }, "prices": [{ "currency": "porch_coins", "amount": 80 }, { "currency": "neon_thread", "amount": 2 }, { "currency": "clay_tokens", "amount": 25 }], "power": false },
+      { "id": "pose_can_tray_flourish", "neighborId": "n6", "name": { "tr": "Can — Tepsi Flourish", "en": "Can — Tray Flourish" }, "prices": [{ "currency": "porch_coins", "amount": 80 }, { "currency": "neon_thread", "amount": 2 }, { "currency": "clay_tokens", "amount": 25 }], "power": false }
+    ],
+    "comic_frames": [
+      { "id": "frame_tea_cup_rim", "name": { "tr": "Çay Fincanı", "en": "Tea Cup Rim" }, "prices": [{ "currency": "porch_coins", "amount": 100 }, { "currency": "neon_thread", "amount": 3 }, { "currency": "clay_tokens", "amount": 30 }], "power": false },
+      { "id": "frame_chalk_grid", "name": { "tr": "Tebeşir Izgara", "en": "Chalk Grid" }, "prices": [{ "currency": "porch_coins", "amount": 100 }, { "currency": "neon_thread", "amount": 3 }, { "currency": "clay_tokens", "amount": 30 }], "power": false },
+      { "id": "frame_chaos_splash", "name": { "tr": "Kaos Sıçrama", "en": "Chaos Splash" }, "prices": [{ "currency": "porch_coins", "amount": 100 }, { "currency": "neon_thread", "amount": 3 }, { "currency": "clay_tokens", "amount": 30 }], "power": false },
+      { "id": "frame_neon_panel", "name": { "tr": "Neon Panel", "en": "Neon Panel" }, "prices": [{ "currency": "porch_coins", "amount": 100 }, { "currency": "neon_thread", "amount": 3 }, { "currency": "clay_tokens", "amount": 30 }], "power": false },
+      { "id": "frame_mud_night", "name": { "tr": "Çamur Gece", "en": "Mud Night" }, "prices": [{ "currency": "porch_coins", "amount": 100 }, { "currency": "neon_thread", "amount": 3 }, { "currency": "clay_tokens", "amount": 30 }], "power": false },
+      { "id": "frame_fence_line", "name": { "tr": "Çit Çizgisi", "en": "Fence Line" }, "prices": [{ "currency": "porch_coins", "amount": 100 }, { "currency": "neon_thread", "amount": 3 }, { "currency": "clay_tokens", "amount": 30 }], "power": false },
+      { "id": "frame_ember_glow", "name": { "tr": "Köz Parıltı", "en": "Ember Glow" }, "prices": [{ "currency": "porch_coins", "amount": 100 }, { "currency": "neon_thread", "amount": 3 }, { "currency": "clay_tokens", "amount": 30 }], "power": false },
+      { "id": "frame_street_recap", "name": { "tr": "Sokak Özeti", "en": "Street Recap" }, "prices": [], "power": false, "alsoFromPass": "free:30" }
+    ],
+    "emotes": [
+      { "id": "emote_wave_porch", "name": { "tr": "Verandadan El Salla", "en": "Wave from Porch" }, "prices": [{ "currency": "porch_coins", "amount": 50 }, { "currency": "clay_tokens", "amount": 15 }], "power": false },
+      { "id": "emote_sip_tea", "name": { "tr": "Çay Yudumla", "en": "Sip Tea" }, "prices": [{ "currency": "porch_coins", "amount": 50 }, { "currency": "clay_tokens", "amount": 15 }], "power": false },
+      { "id": "emote_rival_nod", "name": { "tr": "Rakip Baş", "en": "Rival Nod" }, "prices": [{ "currency": "porch_coins", "amount": 50 }, { "currency": "clay_tokens", "amount": 15 }], "power": false },
+      { "id": "emote_nightowl_blink", "name": { "tr": "Gece Kuşu Göz", "en": "Night Owl Blink" }, "prices": [{ "currency": "porch_coins", "amount": 50 }, { "currency": "clay_tokens", "amount": 15 }], "power": false },
+      { "id": "emote_bass_drop", "name": { "tr": "Bass Drop", "en": "Bass Drop" }, "prices": [{ "currency": "porch_coins", "amount": 50 }, { "currency": "clay_tokens", "amount": 15 }], "power": false },
+      { "id": "emote_grumpy_shrug", "name": { "tr": "Huysuz Omuz", "en": "Grumpy Shrug" }, "prices": [{ "currency": "porch_coins", "amount": 50 }, { "currency": "clay_tokens", "amount": 15 }], "power": false },
+      { "id": "emote_fresh_loaf", "name": { "tr": "Taze Somun", "en": "Fresh Loaf" }, "prices": [{ "currency": "porch_coins", "amount": 50 }, { "currency": "clay_tokens", "amount": 15 }], "power": false },
+      { "id": "emote_cup_crown", "name": { "tr": "Kupa Tacı", "en": "Cup Crown" }, "prices": [{ "currency": "clay_tokens", "amount": 25 }], "power": false, "alsoFromPass": "paid:30" }
+    ]
+  },
+  "iaps": {
+    "recommendedFirst3": [
+      {
+        "priority": 1,
+        "sku": "iap_porch_week_pass",
+        "nameKey": "iap.pass.name",
+        "name": { "tr": "Porch Haftası Pass", "en": "Porch Week Pass" },
+        "priceBandUsd": 4.99,
+        "grants": ["season_pass_paid_track"]
+      },
+      {
+        "priority": 2,
+        "sku": "iap_clay_tokens_mini",
+        "nameKey": "iap.tokens_mini.name",
+        "name": { "tr": "Kil Jeton — Mini (80)", "en": "Clay Tokens — Mini (80)" },
+        "priceBandUsd": 1.99,
+        "grants": [{ "currency": "clay_tokens", "amount": 80 }]
+      },
+      {
+        "priority": 3,
+        "sku": "iap_skin_warm_deluxe",
+        "nameKey": "iap.skin_warm.name",
+        "name": { "tr": "Veranda Skin: Sıcak Lamba Deluxe", "en": "Porch Skin: Warm Lamp Deluxe" },
+        "priceBandUsd": 2.99,
+        "grants": [{ "itemId": "skin_warm_lamp_deluxe" }]
+      }
+    ],
+    "holdUntilValidated": [
+      "iap_clay_tokens_vault",
+      "iap_skin_rival_marquee_direct"
+    ]
+  },
+  "fairness": {
+    "f2pClearsStory": true,
+    "cupParity": "same_draft_pool_synergies_bot_curves",
+    "cosmeticsNeverChangeCombat": true,
+    "dailySoftEarnCaps": true,
+    "noTraitXpForSale": true,
+    "spenderFantasy": "porch_looks_legendary",
+    "notSpenderFantasy": "cem_hits_harder"
+  },
+  "kpis": {
+    "day7": {
+      "d7_retention_pct": { "targetMin": 25, "targetMax": 35 },
+      "median_daily_session_min": { "targetMin": 5, "targetMax": 8 },
+      "soft_coin_sink_ratio_pct": { "targetMin": 60, "targetMax": 80 },
+      "gift_actions_per_dau": { "targetMin": 1.2 },
+      "cup_enter_rate_eligible_pct": { "targetMin": 60 },
+      "comic_share_rate_of_cup_pct": { "targetMin": 15 },
+      "iap_conversion_pct": { "targetMin": 1, "targetMax": 3 },
+      "pay_to_progress_sentiment_critical": { "targetMax": 0 }
+    },
+    "day30": {
+      "d30_retention_pct": { "targetMin": 10, "targetMax": 15 },
+      "pass_attach_of_payers_pct": { "targetMin": 40 },
+      "f2p_claim_free_pass_30_of_retained_pct": { "targetMin": 50 },
+      "cosmetic_equip_diversity_skins_in_top_shares": { "targetMin": 3 },
+      "ads_remain_off": true
+    }
+  },
+  "uiStrings": {
+    "shop.title": { "tr": "Dükkan", "en": "Shop" },
+    "shop.subtitle": { "tr": "Mahalleni giydir — gücü değil.", "en": "Dress the block — never the power." },
+    "shop.tab.skins": { "tr": "Veranda", "en": "Porch" },
+    "shop.tab.poses": { "tr": "Pozlar", "en": "Poses" },
+    "shop.tab.frames": { "tr": "Çizgi çerçeve", "en": "Comic frames" },
+    "shop.tab.emotes": { "tr": "İfadeler", "en": "Emotes" },
+    "shop.tab.pass": { "tr": "Porch Haftası", "en": "Porch Week" },
+    "shop.currency.coins": { "tr": "Veranda Jetonu", "en": "Porch Coins" },
+    "shop.currency.thread": { "tr": "Neon İplik", "en": "Neon Thread" },
+    "shop.currency.tokens": { "tr": "Kil Jeton", "en": "Clay Tokens" },
+    "shop.owned": { "tr": "Sahipsin", "en": "Owned" },
+    "shop.buy": { "tr": "Al", "en": "Buy" },
+    "shop.claim": { "tr": "Topla", "en": "Claim" },
+    "shop.equip": { "tr": "Tak", "en": "Equip" },
+    "shop.preview": { "tr": "Önizle", "en": "Preview" },
+    "shop.fairness_badge": { "tr": "Kazanmak için değil, görünmek için", "en": "For looks, not wins" },
+    "shop.empty_soon": { "tr": "Veranda skinleri yakında dolacak", "en": "More porch skins soon" },
+    "shop.ads_off": { "tr": "Reklam kapalı — mahalle sakin", "en": "Ads off — the street stays calm" },
+    "pass.title": { "tr": "Porch Haftası Pass", "en": "Porch Week Pass" },
+    "pass.free": { "tr": "Ücretsiz yol", "en": "Free track" },
+    "pass.paid": { "tr": "Kil yol", "en": "Clay track" },
+    "pass.unlock_cta": { "tr": "Kil yolu aç", "en": "Unlock Clay track" },
+    "pass.xp_hint": { "tr": "Günlük porch + Cup = 1 ödül", "en": "Daily porch + Cup ≈ 1 reward" },
+    "pass.story_sync": { "tr": "Ödüller hikâye haftana kilitli", "en": "Rewards map to your story week" },
+    "iap.pass.name": { "tr": "Porch Haftası Pass", "en": "Porch Week Pass" },
+    "iap.tokens_mini.name": { "tr": "Kil Jeton — Mini (80)", "en": "Clay Tokens — Mini (80)" },
+    "iap.skin_warm.name": { "tr": "Veranda Skin: Sıcak Lamba Deluxe", "en": "Porch Skin: Warm Lamp Deluxe" },
+    "iap.disclaimer": { "tr": "Kozmetik satın alımı savaş gücünü değiştirmez.", "en": "Cosmetic purchases do not change combat power." },
+    "iap.story_clear": { "tr": "Hikâyenin tamamı ücretsiz tamamlanır.", "en": "The full story is clearable for free." },
+    "goal.decor.title": { "tr": "Veranda hedefi", "en": "Porch goal" },
+    "goal.decor.progress": { "tr": "{n}/4 dekor", "en": "{n}/4 décor" },
+    "gift.wrap.hint": { "tr": "Aynı sevgi, daha şık paket", "en": "Same affection, prettier wrap" },
+    "cup.flair.optional": { "tr": "Giriş süsü (isteğe bağlı)", "en": "Entry flair (optional)" },
+    "cup.flair.free_ok": { "tr": "Süslü olmasa da Cup'a girebilirsin", "en": "You can enter the Cup without flair" }
+  },
+  "meta": {
+    "sourceGdd": "docs/rival-porch-gdd-slice.md",
+    "sourceAso": "docs/rival-porch-aso-share-kit.md",
+    "notes": "Drop-in economy for gameplay worker. All catalog power flags must remain false. Replace shop placeholders in rival-porch-content.json uiStrings when wiring shop screens."
+  }
+}

@@ -1,0 +1,252 @@
+{
+  "schemaVersion": 1,
+  "id": "mechanics-fix-11",
+  "packNumber": 11,
+  "squad": "mechanics",
+  "shippedAt": "2026-11-23T13:05:00Z",
+  "noPrPush": true,
+  "extends": [
+    "internal/squads/mechanics-fix-9.json",
+    "internal/squads/mechanics-fix-10.json"
+  ],
+  "mergeMode": "deepMergeIntoCombatPack",
+  "wirePathHint": "RivalPorch/js/combat.js Call II teach + agency gate; keep fix-9 softlock path",
+  "scoreRef": {
+    "file": "internal/rival-porch-score-latest.json",
+    "buildCommit": "f6801b6",
+    "mechanicsScore": 8.5,
+    "overall": 8.4,
+    "note": "8.5 mechanics is checkpoint — overall target ≥9.0; do not stand down",
+    "priorityFixTitles": [
+      "Call II mastery before soft-timeout auto",
+      "Shrink Auto Fight share of Practice clock"
+    ]
+  },
+  "scoreGapsAddressed": [
+    "Call II auto-resolve can bypass player mastery",
+    "Auto Fight still dominates match time",
+    "Between-call tempo still secondary to Auto"
+  ],
+  "keepSoftlockProof": {
+    "from": "mechanics-fix-9",
+    "rules": [
+      "Call II soft-timeout still reaches comic",
+      "Never strand on modal",
+      "No Unstuck mid-fight",
+      "practice_second_call_done always set (player OR auto)"
+    ]
+  },
+  "targets": [
+    "callTwoMasteryBeforeAuto",
+    "shrinkAutoFightShare",
+    "agencyActionQuota"
+  ],
+
+  "acceptance": {
+    "callTwoMastery": "Dock pulses ≥2s with score-preview before auto; ≥70% Practice runs record player-initiated Call II (not practice_call_two_auto) in smoke cohort.",
+    "shrinkAuto": "Practice requires ≥3 player agency actions before finish; Auto damage share ≤50% of total in smoke metric.",
+    "softlock": "Idle Call II path still reaches screen-comic (fix-9 intact)."
+  },
+
+  "callTwoMasteryBeforeAuto": {
+    "problem": "Auto-resolve fixes softlock but idle players never learn Call II",
+    "teachSequence": {
+      "armDock": {
+        "tSecFromCallOneResolve": 2.0,
+        "testId": "porch-call-two-ready",
+        "pulseMsMin": 2000,
+        "pulseUntilOpenOrAuto": true,
+        "label": { "tr": "Veranda Çağrısı II — bas!", "en": "Porch Call II — tap!" },
+        "coach": {
+          "tr": "İkinci çağrı hazır — sen bas, skor önizlemesi var.",
+          "en": "Second call ready — you tap; score preview shown."
+        }
+      },
+      "scorePreview": {
+        "showOnDockAndModal": true,
+        "beforeAutoMs": 2000,
+        "lines": {
+          "call_focus_fire": {
+            "tr": "Focus ≈ +10 You",
+            "en": "Focus ≈ +10 You"
+          },
+          "call_prop_assist": {
+            "tr": "Prop ≈ +9 You",
+            "en": "Prop ≈ +9 You"
+          },
+          "call_chaos_kite": {
+            "tr": "Swap ≈ +8 You",
+            "en": "Swap ≈ +8 You"
+          }
+        },
+        "testId": "call-two-score-preview"
+      },
+      "forceModal": {
+        "tSecFromCallOneResolve": 3.0,
+        "modalTestId": "porch-call-modal-2"
+      }
+    },
+    "rewardEarlyPick": {
+      "ifPlayerInitiated": {
+        "flag": "practice_call_two_player",
+        "notFlag": "practice_call_two_auto",
+        "bonusYouScore": 4,
+        "toast": {
+          "tr": "Erken Çağrı II — mastery +{bonus}",
+          "en": "Early Call II — mastery +{bonus}"
+        },
+        "sfxId": "sfx_whistle_sharp"
+      },
+      "ifAuto": {
+        "flag": "practice_call_two_auto",
+        "toast": {
+          "tr": "Çağrı II otomatik — sonraki Cup'ta sen bas",
+          "en": "Call II auto — tap it yourself next Cup"
+        },
+        "noMasteryBonus": true
+      }
+    },
+    "softTimeout": {
+      "sec": 7,
+      "was": 6,
+      "note": "Slightly longer window so ≥2s preview + teach lands before auto; still softlock-proof",
+      "onTimeout": {
+        "action": "auto_pick_focus_with_toast",
+        "setsFlags": ["practice_second_call_done", "practice_call_two_auto"],
+        "stillComic": true
+      }
+    },
+    "smokeCohortTarget": {
+      "playerInitiatedRate": 0.7,
+      "metric": "count(practice_call_two_player) / count(practice_runs)",
+      "assertFlagPlayer": "practice_call_two_player",
+      "assertFlagAuto": "practice_call_two_auto"
+    }
+  },
+
+  "shrinkAutoFightShare": {
+    "problem": "Call I + Call II + between exist, but match still feels spectated; Auto damage share too high",
+    "hardenFix10": true,
+    "agencyQuota": {
+      "minPlayerAgencyActionsBeforeFinish": 3,
+      "countsAsAgency": [
+        "porch_call_one_pick",
+        "porch_call_two_pick_player_or_auto",
+        "mark_tap",
+        "cheer_tap",
+        "hold_tap",
+        "tempo_pulse_hit",
+        "tempo_chip_push",
+        "tempo_chip_guard"
+      ],
+      "note": "Call I + Call II + ≥1 between-call/tempo = 3 minimum; encourage more via idle-slow",
+      "ifUnderQuotaNearFinish": {
+        "action": "force_tempo_pulse_and_chip_prompt",
+        "doNotSoftlock": true,
+        "autoInjectOneTempoHitIfStillIdleAfterSec": 2.5,
+        "setsFlags": ["practice_agency_quota_backfill"],
+        "stillReachComic": true
+      }
+    },
+    "autoDamageCap": {
+      "metric": "autoDamageDealt / totalDamageDealt",
+      "maxShare": 0.5,
+      "enforcement": {
+        "playerAgencyDamageBonusPercent": 0.15,
+        "when": "on Mark/Cheer/Hold/Tempo/Call resolve",
+        "idleAutoDamageMult": 0.7,
+        "whenIdleSec": 2.0,
+        "note": "Steer damage up, idle auto down — push auto share ≤50% without freezing"
+      },
+      "smokeAssert": "autoDamageShare <= 0.5"
+    },
+    "timescale": {
+      "extendsFix10": true,
+      "idleSlow": 0.45,
+      "was": 0.55,
+      "idleAfterSec": 2.0,
+      "recentTapBoost": 1.05,
+      "modalPause": 0
+    },
+    "tempoPulse": {
+      "intervalSec": 1.8,
+      "was": 2.2,
+      "youScoreBonusOnHit": 4
+    }
+  },
+
+  "agencyActionQuota": {
+    "finishGate": {
+      "require": [
+        "practice_cup_porch_call_done",
+        "practice_second_call_done",
+        "agencyActionCount >= 3"
+      ],
+      "softlockProof": {
+        "ifAgencyStuck": "backfill one tempo hit + allow finish",
+        "maxWaitSecAfterCallTwo": 10,
+        "thenComic": true
+      }
+    },
+    "telemetry": {
+      "log": [
+        "agencyActionCount",
+        "autoDamageShare",
+        "practice_call_two_player",
+        "practice_call_two_auto"
+      ]
+    }
+  },
+
+  "uiStringsPatch": {
+    "fight.call_two_preview": {
+      "tr": "Çağrı II — skor önizlemesi",
+      "en": "Call II — score preview"
+    },
+    "fight.call_two_early": {
+      "tr": "Erken Çağrı II — mastery!",
+      "en": "Early Call II — mastery!"
+    },
+    "fight.call_two_auto_teach": {
+      "tr": "Çağrı II otomatik — sonraki Cup'ta sen bas",
+      "en": "Call II auto — tap it yourself next Cup"
+    },
+    "fight.agency_steer": {
+      "tr": "3 dokunuş — tempo senin",
+      "en": "3 taps — you're steering"
+    }
+  },
+
+  "acceptanceChecks": [
+    "Call II dock pulses ≥2s with score-preview before auto",
+    "Player pick sets practice_call_two_player + mastery bonus; auto sets practice_call_two_auto",
+    "Smoke cohort target ≥70% player-initiated Call II",
+    "≥3 agency actions before finish (with soft backfill, never softlock)",
+    "autoDamageShare ≤ 0.5 in smoke metric",
+    "Idle Call II still → comic (fix-9 softlock-proof retained)"
+  ],
+
+  "integrator": {
+    "owner": "code owner on cursor/rival-porch-slice-31f7",
+    "steps": [
+      "Call II: show score-preview on dock ≥2s; reward player pick; lengthen soft-timeout to ~7s; keep auto→comic.",
+      "Track practice_call_two_player vs practice_call_two_auto.",
+      "Harden fix-10: pulse 1.8s, idleSlow 0.45, agency damage bias, idle auto mult 0.7.",
+      "Finish requires agencyActionCount≥3 with non-blocking backfill — never block comic.",
+      "Smoke metrics: autoDamageShare≤0.5; player Call II rate; softlock probe still comics.",
+      "No PR from this squad."
+    ],
+    "priority": "wire now — climb past 8.5 toward overall ≥9.0"
+  },
+
+  "meta": {
+    "expectedMechanicsLift": "8.5 → toward 9.0 with deliberate Call II + Auto share ≤50%",
+    "standDown": false,
+    "overallTarget": 9.0,
+    "nextPackIfStillLow": "mechanics-fix-12 — ladder deliberate-call audit + placement skill",
+    "compat": {
+      "dependsOn": ["mechanics-fix-9", "mechanics-fix-10"],
+      "flags": ["practice_call_two_player", "practice_call_two_auto", "practice_second_call_done"]
+    }
+  }
+}

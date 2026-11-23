@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 1,
+  "id": "mechanics-fix-15",
+  "packNumber": 15,
+  "squad": "mechanics",
+  "shippedAt": "2026-11-23T13:52:00Z",
+  "noPrPush": true,
+  "extends": [
+    "internal/squads/mechanics-fix-14.json"
+  ],
+  "mergeMode": "deepMergeIntoCombatPack",
+  "wirePathHint": "RivalPorch/js — street prop HEADPHONES → non-blocking Decibel lived beat → Peri/Orhan unit state; never gate evening/comic",
+  "scoreRef": {
+    "file": "internal/rival-porch-score-latest.json",
+    "buildCommit": "4d40718",
+    "mechanicsScore": 9.0,
+    "overall": 8.8,
+    "priorityFixTitle": "Week-2 Decibel→Ledger lived pull (cult bar) — mechanics support",
+    "note": "Mechanics category already 9.0 with no open mech PFs. This pack is optional cult-loop support only — do NOT touch softlock-proof Call/tempo paths."
+  },
+  "scoreGapsAddressed": [
+    "Long-arc cult pull after Decibel still thin (story PF — combat lived reaction)",
+    "Not yet cult / recommend-tonight (gameplay gap — Decibel prop juice + unit state)"
+  ],
+  "keepSoftlockProof": true,
+  "doNotRegress": [
+    "Call I @ ~2.4s + Call II soft-timeout 6s",
+    "Rivalry ack merged into Call resolve",
+    "raw autoDamageShare primary",
+    "Practice → draft → screen-fight path",
+    "tempo chips non-blocking"
+  ],
+  "targets": ["decibelLivedCombatHook"],
+
+  "acceptance": {
+    "auditor": "After Open Volume / volume_natural, one street HEADPHONES interaction fires a unique Decibel prop reaction and changes Peri (n5) and/or Orhan (n4) combat state for the next Cup — without stalling evening, street, or comic.",
+    "smoke": [
+      "data-decibel-lived-beat=1 after headphones prop tap post-volume-accept",
+      "flags.decibel_lived_peri_quiet OR flags.decibel_lived_orhan_volume",
+      "evening End / Open Volume / comic still reachable with zero extra modal ack",
+      "Practice Call soft-timeouts unchanged"
+    ]
+  },
+
+  "decibelLivedCombatHook": {
+    "purpose": "Give Week-2 Decibel a lived mechanical beat (cult bar) without inventing a softlock",
+    "when": {
+      "anyOf": [
+        "storyFlag('quest_volume_active')",
+        "storyFlag('quest_volume_accepted')",
+        "storyFlag('natural_volume_street')",
+        "pickUnifiedStoryWinner()?.id === 'volume_natural'",
+        "document.body.classList.contains('rp-cold-yielded') && dayIndex >= 7 && dayIndex < 10"
+      ],
+      "and": "street has [data-testid=story-street-headphones-note] OR .rp-stage-prop--headphones-note"
+    },
+    "trigger": {
+      "id": "decibel_headphones_tap",
+      "testId": "decibel-lived-prop",
+      "source": "tap/click on HEADPHONES note prop (or first street focus after Open Volume if autoCue)",
+      "autoCueOnce": {
+        "enabled": true,
+        "delayMs": 900,
+        "onlyIf": "!storyFlag('decibel_lived_beat_done')",
+        "behavior": "Pulse prop + soft coach chip; do NOT auto-resolve state change until tap OR 4s soft-fallback"
+      },
+      "softFallbackMs": 4000,
+      "softFallbackPick": "peri_quiet",
+      "note": "Soft-fallback ensures cold auditor path still gets the lived beat without requiring a click — but never blocks navigation"
+    },
+    "propReaction": {
+      "oncePerSession": true,
+      "flagDone": "decibel_lived_beat_done",
+      "dom": {
+        "prop": {
+          "addClass": ["rp-prop--decibel-lived", "is-reacting"],
+          "dataAttrs": {
+            "data-decibel-lived-beat": "1",
+            "data-decibel-reaction": "headphones-bass"
+          },
+          "testIdStamp": "decibel-lived-prop"
+        },
+        "float": {
+          "text": { "en": "Bass sticks — Peri hears it", "tr": "Bas yapışır — Peri duyar" },
+          "durationMs": 1400,
+          "anchor": "headphones-note",
+          "nonBlocking": true
+        },
+        "shake": { "target": "headphones-note", "once": true, "ms": 420 }
+      },
+      "sfxHint": "sfx_headphones_bass_tap"
+    },
+    "unitStateChange": {
+      "chooseOneOrBoth": {
+        "mode": "player_micro_choice_optional",
+        "ui": {
+          "testId": "decibel-lived-choice",
+          "layout": "two ghost chips under prop — NEVER modal, NEVER pause evening",
+          "timeoutMs": 3500,
+          "default": "peri_quiet",
+          "options": [
+            {
+              "id": "peri_quiet",
+              "label": { "en": "Quiet cans for Peri", "tr": "Peri için sessiz kulaklık" },
+              "setsFlags": ["decibel_lived_peri_quiet", "secret_peri_offer_tease"],
+              "affinity": { "n5": 6 },
+              "nextCupMods": [
+                {
+                  "unitId": "n5",
+                  "modId": "mod_peri_quiet_set_preview",
+                  "synergyHint": "syn_neon_night",
+                  "effect": { "dodgeBonusFirst8s": 0.05, "juiceHint": "Quiet neon — early dodge tick" }
+                }
+              ]
+            },
+            {
+              "id": "orhan_volume",
+              "label": { "en": "Orhan turns it down", "tr": "Orhan sesi kısar" },
+              "setsFlags": ["decibel_lived_orhan_volume"],
+              "affinity": { "n4": 4, "n5": 2 },
+              "nextCupMods": [
+                {
+                  "unitId": "n4",
+                  "modId": "mod_orhan_volume_yield",
+                  "synergyHint": "syn_rivalry",
+                  "effect": { "rivalryThresholdDelta": -0.05, "juiceHint": "Softer threshold — Rivalry pops sooner" }
+                }
+              ]
+            }
+          ]
+        },
+        "note": "Chips are non-blocking; street/evening CTAs stay clickable. Soft-timeout applies peri_quiet."
+      },
+      "persist": {
+        "state.save.storyFlags": "merge choice flags",
+        "state.save.cupModsPending": "array of nextCupMods",
+        "window.__RP_SMOKE__.decibelLived": {
+          "beat": true,
+          "choice": "peri_quiet|orhan_volume",
+          "periQuiet": "!!flag decibel_lived_peri_quiet",
+          "orhanVolume": "!!flag decibel_lived_orhan_volume"
+        },
+        "localStorage.rp_smoke_decibel_lived": "same"
+      }
+    },
+    "nextCupApply": {
+      "when": "enterScreenFight || startPracticeCup",
+      "applyPendingMods": true,
+      "clearAfterApply": true,
+      "comicTag": {
+        "en": "Decibel carried into Cup",
+        "tr": "Desibel Kupaya taşındı",
+        "onlyIf": "mods applied this fight"
+      }
+    },
+    "hardRules": {
+      "neverModal": true,
+      "neverPauseAutoFight": true,
+      "neverBlockEndEvening": true,
+      "neverBlockOpenVolume": true,
+      "neverRequireFightToAdvanceVolume": true,
+      "neverTouchCallSoftTimeouts": true,
+      "onceOnly": "decibel_lived_beat_done"
+    }
+  },
+
+  "integratorSketch": {
+    "pseudo": "\nfunction mech15DecibelLived() {\n  const f = state.save.storyFlags || (state.save.storyFlags = {});\n  if (f.decibel_lived_beat_done) return;\n  const vol = f.quest_volume_active || f.quest_volume_accepted || f.natural_volume_street\n    || document.body.classList.contains('rp-cold-yielded');\n  const prop = document.querySelector('[data-testid=story-street-headphones-note], .rp-stage-prop--headphones-note');\n  if (!vol || !prop) return;\n\n  const fire = (choice) => {\n    if (f.decibel_lived_beat_done) return;\n    f.decibel_lived_beat_done = true;\n    prop.classList.add('rp-prop--decibel-lived', 'is-reacting');\n    prop.dataset.decibelLivedBeat = '1';\n    prop.dataset.decibelReaction = 'headphones-bass';\n    prop.setAttribute('data-testid', prop.getAttribute('data-testid') || 'decibel-lived-prop');\n    spawnFloat?.({ text: 'Bass sticks — Peri hears it', ms: 1400, anchor: prop });\n    shakeOnce?.(prop, 420);\n    const pick = choice || 'peri_quiet';\n    if (pick === 'orhan_volume') {\n      f.decibel_lived_orhan_volume = true;\n      bumpAffinity?.('n4', 4); bumpAffinity?.('n5', 2);\n      queueCupMod?.({ unitId: 'n4', modId: 'mod_orhan_volume_yield' });\n    } else {\n      f.decibel_lived_peri_quiet = true;\n      f.secret_peri_offer_tease = true;\n      bumpAffinity?.('n5', 6);\n      queueCupMod?.({ unitId: 'n5', modId: 'mod_peri_quiet_set_preview' });\n    }\n    window.__RP_SMOKE__ = Object.assign(window.__RP_SMOKE__ || {}, {\n      decibelLived: { beat: true, choice: pick, periQuiet: !!f.decibel_lived_peri_quiet, orhanVolume: !!f.decibel_lived_orhan_volume }\n    });\n    try { localStorage.setItem('rp_smoke_decibel_lived', JSON.stringify(window.__RP_SMOKE__.decibelLived)); } catch {}\n    hideChips?.();\n  };\n\n  // coach pulse — non-blocking\n  prop.classList.add('rp-prop--decibel-cue');\n  showGhostChips?.({\n    testId: 'decibel-lived-choice',\n    options: [\n      { id: 'peri_quiet', label: 'Quiet cans for Peri' },\n      { id: 'orhan_volume', label: 'Orhan turns it down' }\n    ],\n    onPick: fire,\n    timeoutMs: 3500,\n    defaultId: 'peri_quiet'\n  });\n  prop.addEventListener('click', () => fire(state._decibelChip || 'peri_quiet'), { once: true });\n  setTimeout(() => fire('peri_quiet'), 4000); // soft-fallback — never stalls street\n}\n\n// Call from renderStreet AFTER volume_natural / Open Volume path. Do NOT call from fight tick.\n"
+  },
+
+  "cssAppend": "\n/* mechanics-fix-15 — Decibel lived prop; non-blocking */\n.rp-stage-prop--headphones-note.rp-prop--decibel-cue {\n  outline: 2px solid rgba(80, 220, 200, 0.55);\n  animation: rp-decibel-pulse 1.1s ease-in-out 2;\n}\n.rp-stage-prop--headphones-note.rp-prop--decibel-lived.is-reacting {\n  transform-origin: center;\n  animation: rp-decibel-shake 0.42s ease-out 1;\n}\n@keyframes rp-decibel-pulse {\n  0%, 100% { filter: brightness(1); }\n  50% { filter: brightness(1.25); }\n}\n@keyframes rp-decibel-shake {\n  0%, 100% { transform: translateX(0); }\n  25% { transform: translateX(-3px) rotate(-1deg); }\n  75% { transform: translateX(3px) rotate(1deg); }\n}\n[data-testid=\"decibel-lived-choice\"] {\n  pointer-events: auto;\n  z-index: 4;\n}\n/* never cover End evening / Volume CTAs */\n[data-testid=\"decibel-lived-choice\"] {\n  max-width: min(92vw, 320px);\n  margin: 0.35rem auto 0;\n}\n"
+}

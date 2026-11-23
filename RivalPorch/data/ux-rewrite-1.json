@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "packId": "ux-rewrite-1",
+  "desireLoop": "Knock → take a side → prove it on the porch Cup → share the gossip panel → leave wanting tomorrow’s echo.",
+  "first10": {
+    "gateWeek2Until": "first_share_done",
+    "midMaxVh": 0.28,
+    "stageMinCover": 0.65,
+    "onePrimary": true
+  },
+  "killSelectors": [
+    "[data-testid=skip-to-morning]",
+    "[data-testid=unstuck]",
+    ".rp-unstuck",
+    "[data-testid=practice-settle]",
+    ".agenda-list",
+    ".beat-list",
+    ".ritual",
+    "[data-testid=tray-reward]",
+    "[data-testid=evening-volume-accept-cta]",
+    ".rp-quest-strip",
+    ".rp-main-bar",
+    ".rp-cult-bar",
+    ".rp-week2-chip"
+  ],
+  "shareMoment": {
+    "testId": "share-porch-moment",
+    "cta": { "tr": "Verandayı paylaş", "en": "Share the porch" }
+  },
+  "copy": {
+    "titleLine": {
+      "tr": "Kil mahallede gece kavgası.",
+      "en": "Clay-street night arguments."
+    },
+    "titleCta": { "tr": "Verandaya çık", "en": "Step onto the porch" },
+    "preCup": { "tr": "Verandada hallet", "en": "Settle it on the porch" },
+    "overnightTease": {
+      "tr": "Yarın hâlâ konuşuyor olacaklar.",
+      "en": "Tomorrow they’ll still be talking."
+    }
+  }
+}

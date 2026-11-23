@@ -1,0 +1,118 @@
+/* Rival Porch — visual-fix-17 (optional polish after GATE 9.0)
+   e5b256c visual 9.0 — Day10 story-street-ledger-tray in DOM but height≈0.
+   Make tray screenshot-tall (getBoundingClientRect.height ≥ 96).
+   Paste AFTER visual-fix-16.css.
+*/
+
+.rp-screen--street[data-story-winner="ledger_natural"],
+.rp-screen--street[data-day="10"],
+.rp-screen--street.rp-ledger-wins,
+body.rp-ledger-wins .rp-screen--street {
+  --rp-ledger-tray-min-h: 112px;
+  --rp-ledger-tray-min-w: 140px;
+  --rp-ledger-tray-top: max(42%, calc(var(--rp-street-bust-band-top, 96px) + 112px));
+}
+
+/* ── A. Ledger tray root: explicit box (kill height=0 soft-miss) ─────────── */
+
+.rp-screen--street [data-testid="story-street-ledger-tray"],
+.rp-screen--street[data-story-winner="ledger_natural"] [data-testid="story-street-ledger-tray"],
+.rp-screen--street[data-day="10"] [data-testid="story-street-ledger-tray"],
+.rp-screen--street.rp-ledger-wins [data-testid="story-street-ledger-tray"],
+.rp-screen--street .rp-ledger-tray,
+.rp-screen--street [data-winner="ledger_natural"] {
+  position: absolute !important;
+  top: var(--rp-ledger-tray-top, 42%) !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: translateX(-50%) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  width: min(72vw, 220px) !important;
+  min-width: var(--rp-ledger-tray-min-w, 140px) !important;
+  height: auto !important;
+  min-height: var(--rp-ledger-tray-min-h, 112px) !important;
+  max-width: min(72vw, 240px) !important;
+  max-height: min(28vh, 180px) !important;
+  /* Override fix-16 overflow:hidden collapse when children were absolute/empty */
+  overflow: visible !important;
+  clip-path: none !important;
+  contain: none !important;
+  z-index: 5 !important;
+  pointer-events: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  box-sizing: border-box !important;
+}
+
+/* ── B. In-flow art — never absolute-only (that was the h=0 trap) ─────────── */
+
+.rp-screen--street [data-testid="story-street-ledger-tray"] > img,
+.rp-screen--street [data-testid="story-street-ledger-tray"] > svg,
+.rp-screen--street [data-testid="story-street-ledger-tray"] .rp-ledger-tray__art,
+.rp-screen--street .rp-ledger-tray > img,
+.rp-screen--street .rp-ledger-tray > svg {
+  position: relative !important;
+  display: block !important;
+  width: min(70vw, 200px) !important;
+  min-width: 120px !important;
+  height: auto !important;
+  min-height: 96px !important;
+  max-height: 160px !important;
+  object-fit: contain !important;
+  object-position: center bottom !important;
+  flex: 0 0 auto !important;
+  background: transparent !important;
+}
+
+/* SVG without intrinsic size */
+.rp-screen--street [data-testid="story-street-ledger-tray"] svg {
+  width: min(70vw, 200px) !important;
+  height: 112px !important;
+  min-height: 96px !important;
+  overflow: visible !important;
+}
+
+/* Prefer Meshy tepsi (tray) hero when integrator swaps src */
+.rp-screen--street [data-testid="story-street-ledger-tray"] img[src*="tepsi"],
+.rp-screen--street [data-testid="story-street-ledger-tray"] img[src*="tray"],
+.rp-screen--street [data-testid="story-street-ledger-tray"] img.rp-prop-hero {
+  width: 168px !important;
+  height: 168px !important;
+  min-height: 120px !important;
+  object-fit: contain !important;
+}
+
+/* Tag under art, not collapsing the flex row */
+.rp-screen--street [data-testid="story-street-ledger-tray"] > .rp-stage-prop__tag,
+.rp-screen--street [data-testid="story-street-ledger-tray"] > .rp-ledger-tray__tag {
+  position: relative !important;
+  top: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  transform: none !important;
+  margin-top: 6px !important;
+  max-width: 11rem;
+  max-height: 28px;
+  font-size: 10px !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── C. Keep headphones yielded on Day10 ─────────────────────────────────── */
+
+.rp-screen--street[data-story-winner="ledger_natural"] [data-testid="story-street-headphones-note"],
+.rp-screen--street[data-day="10"] [data-testid="story-street-headphones-note"],
+.rp-screen--street.rp-ledger-wins [data-testid="story-street-headphones-note"] {
+  display: none !important;
+}
+
+/* Bust rail stays clear — tray below band only */
+.rp-screen--street[data-day="10"] .rp-hotspots,
+.rp-screen--street[data-story-winner="ledger_natural"] .rp-hotspots {
+  z-index: 8 !important;
+}

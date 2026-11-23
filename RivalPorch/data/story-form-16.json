@@ -1,0 +1,183 @@
+{
+  "schemaVersion": 1,
+  "packId": "story-form-16",
+  "kind": "story-quest-form",
+  "formIndex": 16,
+  "localeDefault": "tr",
+  "hotfix": true,
+  "purpose": "HOTFIX evening Volume accept CTA: live game gates evening-volume-accept-cta on storyForm13 pack + primaryAction===accept-volume — day≥7 / yield path never shows Open Volume. Decouple CTA from that gate; inline HTML; antenna failsafe.",
+  "audit": {
+    "playedAtScoreStill": "2026-11-23T13:20:00Z",
+    "storyScore": 8.2,
+    "form15StreetYield": "integrated in game.js (isColdDay2 day≥7 false; headphonesPropHtml hard fallback)",
+    "remainingHole": {
+      "file": "RivalPorch/js/game.js renderEvening",
+      "bug": "showVolAccept requires storyForm13()?.eveningVolumeAcceptCta AND (primaryAction==='accept-volume'||cta.id==='sa_volume_accept')",
+      "effect": "PF2 Antenna→Volume evening CTA still fails even when street headphones works"
+    }
+  },
+  "addressesScore": {
+    "overall": 8.5,
+    "storyScore": 8.2,
+    "priorityFixes": [
+      "Yield cold_day2_prop… (form15 likely covers street — keep)",
+      "Natural Antenna complete → Volume accept on evening spine (THIS PACK)"
+    ]
+  },
+  "sourcePacks": [
+    "internal/squads/story-form-13.json",
+    "internal/squads/story-form-15.json"
+  ],
+  "integrator": {
+    "owner": "code owner on cursor/rival-porch-slice-31f7",
+    "noPrFromThisPackAuthor": true,
+    "mergeMode": "surgical-hotfix",
+    "wire": [
+      "Replace showVolAccept / volAcceptHtml block in renderEvening with form16 snippet (bypass primaryAction gate)",
+      "Call applyForm16AntennaFailsafe() at start of renderEvening",
+      "Keep data-action=accept-volume (handler already exists)",
+      "Append cssAppend if form15 CSS missing",
+      "Expose state.storyForm16 / questPack.storyForm16"
+    ],
+    "doNot": [
+      "Require cta.id === sa_volume_accept to show evening Volume panel",
+      "Require storyForm13 eveningVolumeAcceptCta object to be loaded"
+    ]
+  },
+  "eveningVolumeAcceptBypass": {
+    "id": "evening_volume_accept_f16",
+    "testId": "evening-volume-accept-cta",
+    "showWhenAny": [
+      {
+        "dayIndexMin": 7
+      },
+      {
+        "flagsAny": [
+          "cold_day2_yielded",
+          "natural_volume_street",
+          "natural_antenna_complete",
+          "arc_kite_antenna_complete",
+          "quest_antenna_complete"
+        ]
+      }
+    ],
+    "hideWhenAny": [
+      "quest_volume_accepted",
+      "arc_volume_war_complete",
+      "volume_accept_dismissed"
+    ],
+    "ignorePrimaryActionGate": true,
+    "ignoreSoleEndGateOptional": false,
+    "note": "Still respect soleEnd (End evening only) if that UX lock is active — but do NOT require sa_volume_accept primary",
+    "buttons": {
+      "accept": {
+        "testId": "evening-open-volume",
+        "action": "accept-volume"
+      },
+      "street": {
+        "testId": "evening-volume-see-headphones",
+        "action": "goto-street"
+      }
+    }
+  },
+  "inlineEveningHtml": {
+    "en": "<div class=\"rp-evening-volume-accept\" data-testid=\"evening-volume-accept-cta\" data-form=\"16\">\n  <p class=\"rp-evening-volume-accept__h\">Antenna done → Decibel opens</p>\n  <p>MAIN 3/5. HEADPHONES note is on the street. Accept Volume or look outside.</p>\n  <div class=\"rp-evening-volume-accept__actions\">\n    <button class=\"rp-evening-volume-accept__cta\" type=\"button\" data-action=\"accept-volume\" data-testid=\"evening-open-volume\">Open Volume</button>\n    <button class=\"rp-btn rp-btn--ghost\" type=\"button\" data-action=\"goto-street\" data-testid=\"evening-volume-see-headphones\">See HEADPHONES note</button>\n  </div>\n</div>",
+    "tr": "<div class=\"rp-evening-volume-accept\" data-testid=\"evening-volume-accept-cta\" data-form=\"16\">\n  <p class=\"rp-evening-volume-accept__h\">Anten bitti → Desibel açılıyor</p>\n  <p>MAIN 3/5. Sokakta KULAKLIK notu. Volume'u kabul et veya sokağa bak.</p>\n  <div class=\"rp-evening-volume-accept__actions\">\n    <button class=\"rp-evening-volume-accept__cta\" type=\"button\" data-action=\"accept-volume\" data-testid=\"evening-open-volume\">Volume'u aç</button>\n    <button class=\"rp-btn rp-btn--ghost\" type=\"button\" data-action=\"goto-street\" data-testid=\"evening-volume-see-headphones\">KULAKLIK notuna bak</button>\n  </div>\n</div>"
+  },
+  "antennaFailsafe": {
+    "id": "form16_antenna_failsafe",
+    "when": {
+      "dayIndexMin": 4,
+      "flagsAny": [
+        "cold_open_mediate",
+        "cold_open_instigate",
+        "cold_open_stage"
+      ],
+      "flagsNone": [
+        "arc_kite_antenna_complete",
+        "natural_antenna_complete"
+      ]
+    },
+    "setsFlags": [
+      "natural_antenna_complete",
+      "arc_kite_antenna_complete",
+      "quest_antenna_complete",
+      "arc_kite_antenna_beat4",
+      "cold_day2_yielded",
+      "natural_volume_street"
+    ],
+    "callSite": "renderEvening start + overnight"
+  },
+  "hotfixPatches": {
+    "renderEveningVolAccept": {
+      "replaceBlockMatching": "const volCta = storyForm13()?.eveningVolumeAcceptCta;",
+      "code": "\n  // HOTFIX form16: Volume evening CTA without storyForm13 pack / primaryAction gate\n  applyForm16AntennaFailsafe();\n  const dayF16 = state.save.dayIndex || 1;\n  if (dayF16 >= 7) {\n    state.save.storyFlags = state.save.storyFlags || {};\n    state.save.storyFlags.cold_day2_yielded = true;\n    state.save.storyFlags.natural_volume_street = true;\n  }\n  const volUnlocked =\n    dayF16 >= 7 ||\n    [\"cold_day2_yielded\", \"natural_volume_street\", \"natural_antenna_complete\", \"arc_kite_antenna_complete\", \"quest_antenna_complete\"].some(storyFlag);\n  const volAlready = [\"quest_volume_accepted\", \"arc_volume_war_complete\", \"volume_accept_dismissed\"].some(storyFlag);\n  const volCta = storyForm13()?.eveningVolumeAcceptCta || storyForm16()?.eveningVolumeAcceptFallback || null;\n  const showVolAccept = !soleEnd && volUnlocked && !volAlready;\n  const volAcceptHtml = showVolAccept\n    ? (volCta\n        ? `<div class=\"rp-evening-volume-accept\" data-testid=\"evening-volume-accept-cta\" data-form=\"16\">\n        <p class=\"rp-evening-volume-accept__h\">${loc(volCta.headline)}</p>\n        <p>${loc(volCta.body)}</p>\n        <div class=\"rp-evening-volume-accept__actions\">\n          <button class=\"rp-evening-volume-accept__cta\" type=\"button\" data-action=\"accept-volume\" data-testid=\"evening-open-volume\">${loc(volCta.ctaAccept)}</button>\n          <button class=\"rp-btn rp-btn--ghost\" type=\"button\" data-action=\"goto-street\" data-testid=\"evening-volume-see-headphones\">${loc(volCta.ctaStreet)}</button>\n        </div>\n      </div>`\n        : (state.locale === \"tr\"\n            ? (storyForm16()?.inlineEveningHtml?.tr || \"\")\n            : (storyForm16()?.inlineEveningHtml?.en || \"\")))\n    : \"\";\n"
+    }
+  },
+  "eveningVolumeAcceptFallback": {
+    "headline": {
+      "tr": "Anten bitti → Desibel açılıyor",
+      "en": "Antenna done → Decibel opens"
+    },
+    "body": {
+      "tr": "MAIN 3/5. Sokakta KULAKLIK notu. Volume'u kabul et veya sokağa bak.",
+      "en": "MAIN 3/5. HEADPHONES note is on the street. Accept Volume or look outside."
+    },
+    "ctaAccept": {
+      "tr": "Volume'u aç",
+      "en": "Open Volume"
+    },
+    "ctaStreet": {
+      "tr": "KULAKLIK notuna bak",
+      "en": "See HEADPHONES note"
+    }
+  },
+  "integratorSnippet": {
+    "language": "js",
+    "pseudo": "\nfunction storyForm16() {\n  return state.questPack?.storyForm16 || state.storyForm16 || null;\n}\n\nfunction applyForm16AntennaFailsafe() {\n  const day = state.save.dayIndex || 1;\n  const f = state.save.storyFlags || (state.save.storyFlags = {});\n  if (day < 4) return;\n  if (![\"cold_open_mediate\",\"cold_open_instigate\",\"cold_open_stage\"].some(storyFlag)) return;\n  if (f.arc_kite_antenna_complete || f.natural_antenna_complete) return;\n  for (const k of [\n    \"natural_antenna_complete\",\"arc_kite_antenna_complete\",\"quest_antenna_complete\",\n    \"arc_kite_antenna_beat4\",\"cold_day2_yielded\",\"natural_volume_street\"\n  ]) f[k] = true;\n}\n"
+  },
+  "cssAppend": "\n/* story-form-16 — ensure evening Volume CTA readable */\n.rp-evening-volume-accept {\n  margin: 0.75rem 0;\n  padding: 0.75rem 0.9rem;\n  background: rgba(14,10,8,.9);\n  border: 1px solid rgba(232,180,120,.5);\n  border-radius: 10px;\n  color: #f2e6d8;\n}\n.rp-evening-volume-accept__h { font-weight: 700; margin: 0 0 0.35rem; }\n.rp-evening-volume-accept__actions { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.55rem; }\n.rp-evening-volume-accept__cta {\n  padding: 0.4rem 0.7rem; border-radius: 8px; border: 1px solid #e8b478;\n  background: #e8b478; color: #1a120c; font-weight: 700; font-size: 13px;\n}\n",
+  "acceptanceChecks": [
+    {
+      "id": "evening_cta_day7",
+      "desc": "Cold mediate overnight to day≥7 → evening shows evening-volume-accept-cta + evening-open-volume without sa_volume_accept primary and without flag inject."
+    },
+    {
+      "id": "evening_cta_no_form13",
+      "desc": "CTA still paints if storyForm13() is null — uses inlineEveningHtml / eveningVolumeAcceptFallback."
+    },
+    {
+      "id": "antenna_failsafe_day4",
+      "desc": "Cold path day≥4 evening: natural_antenna_complete set; Volume CTA eligible."
+    },
+    {
+      "id": "street_still_headphones",
+      "desc": "Form15 street yield unchanged: day≥7 story-street-headphones-note."
+    }
+  ],
+  "playtestScript": [
+    "Mediate → overnight to day7 → evening: assert evening-volume-accept-cta",
+    "Click evening-open-volume → quest_volume_accepted; toast Volume opened",
+    "Street still has headphones-note"
+  ],
+  "smokeProve": {
+    "noFlagInject": true,
+    "assertEvening": [
+      "evening-volume-accept-cta",
+      "evening-open-volume",
+      "evening-volume-see-headphones"
+    ]
+  },
+  "newStoryFlags": [],
+  "meta": {
+    "squad": "story-quest",
+    "formIndex": 16,
+    "hotfix": true,
+    "shipTrigger": "timer story still 8.2; form15 street OK; evening Volume CTA still gated",
+    "nextPackWhen": "story category < 8.5",
+    "dependsOnForms": [
+      15
+    ],
+    "implementationNote": "Bypass primaryAction===accept-volume gate; inline evening CTA."
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "packId": "ux-session-11",
+  "schemaVersion": 1,
+  "scoreReact": {
+    "buildCommit": "c980762",
+    "overall": 8.5,
+    "gameplay": 8.6,
+    "gap": "Antenna stuck; Volume accept / HEADPHONES never evening primary"
+  },
+  "alignsStoryPack": "story-form-12",
+  "volumeQuestId": "mq_decibel_accord",
+  "headphonesTestId": "story-street-headphones-note",
+  "volumeUnlock": {
+    "antennaDoneAny": [
+      "arc_kite_antenna_complete",
+      "quest_antenna_complete",
+      "arc_kite_antenna_beat4",
+      "flag_fence_and_kite",
+      "flag_kite_chaos_buff"
+    ],
+    "orDayIndexMin": 7,
+    "orAntennaDoneAndDayMin": 3
+  },
+  "eveningModes": {
+    "sole_end": "day1_post_practice_pre_overnight",
+    "spine_one": "day2_plus_or_after_first_overnight"
+  },
+  "priority": [
+    "volume_accept_or_headphones",
+    "finish_antenna",
+    "ledger",
+    "end_evening"
+  ],
+  "acceptanceChecks": [
+    "day2plus_not_stuck_sole_end_when_volume_unlocked",
+    "antenna_done_or_day7_primary_is_volume_or_headphones",
+    "exactly_one_evening_primary",
+    "headphones_focus_or_peri_when_volume_primary",
+    "overnight_names_volume_when_unlocked"
+  ]
+}

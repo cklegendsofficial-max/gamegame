@@ -1,0 +1,298 @@
+{
+  "schemaVersion": 1,
+  "id": "mechanics-fix-4",
+  "packNumber": 4,
+  "squad": "mechanics",
+  "shippedAt": "2026-11-23T12:02:00Z",
+  "noPrPush": true,
+  "severity": "critical",
+  "extends": [
+    "internal/rival-porch-combat-pack.json",
+    "internal/squads/mechanics-fix-1.json",
+    "internal/squads/mechanics-fix-2.json",
+    "internal/squads/mechanics-fix-3.json"
+  ],
+  "mergeMode": "deepMergeIntoCombatPack",
+  "wirePathHint": "RivalPorch/js/combat.js + data/combat-pack.json; ALSO apply drop-in js snippet in mechanics-fix-4.md",
+  "scoreRef": {
+    "file": "internal/rival-porch-score-latest.json",
+    "buildCommit": "bb8b0f7",
+    "mechanicsScore": 5.5,
+    "overall": 6.3,
+    "priorityFixTitle": "Fix Practice pick→draft→fight gate"
+  },
+  "scoreGapsAddressed": [
+    "Cannot enter fight from Practice lobby reliably",
+    "Pick/selection desync (highlight vs 3/3 gate)",
+    "goto-draft stays disabled / start-fight never lands on screen-fight",
+    "Toast says tap Start but only Show me visible",
+    "Counter 2/3 while 3 cards highlighted"
+  ],
+  "targets": [
+    "pickSourceOfTruth",
+    "ctaMorphShowMeToStart",
+    "forceEnterScreenFight",
+    "gotoDraftUnlock",
+    "padMountOnEnter"
+  ],
+
+  "bugEvidence": {
+    "auditScreens": [
+      "media/rival-porch/screens/playtest/audit-r17/09-cup.png",
+      "media/rival-porch/screens/playtest/audit-r17/10-picks.png",
+      "media/rival-porch/screens/playtest/audit-r17/11-draft.png"
+    ],
+    "observed": [
+      "3 orange-border cards (Cem/Leyla/Orhan) but footer counter 2/3",
+      "Rivalry 2/2 active while gate still blocked",
+      "Coach toast: 'Roster set — tap Start' but primary button still labeled Show me",
+      "No start-fight control reachable → never screen-fight"
+    ]
+  },
+
+  "acceptance": {
+    "auditor": "Select any valid 3 neighbors → Start enabled → draft → auto-place → fight with porch-call+focus visible within 3 taps; assert active screen id === screen-fight.",
+    "coordinator": "cold Practice lands screen-fight with units on pads.",
+    "playwrightAssert": {
+      "activeScreenId": "screen-fight",
+      "padUnitCount": 6,
+      "withinTapsFromShowMeOrThreePicks": 3
+    }
+  },
+
+  "pickSourceOfTruth": {
+    "problem": "Highlight DOM and pick[] / 3/3 gate desync (2/3 with 3 borders)",
+    "canonical": "state.cup.picks = array of neighborId length 0..3",
+    "rules": [
+      "On card toggle: mutate state.cup.picks first, then paint borders from picks — never the reverse.",
+      "Never derive enablement from CSS .is-selected count alone.",
+      "Footer counter MUST read state.cup.picks.length + '/3'.",
+      "If DOM .is-selected count !== picks.length, run reconcileFromDomOrState() preferring state; if state empty and DOM has 3, adopt DOM ids into state."
+    ],
+    "reconcile": {
+      "id": "reconcileCupPicks",
+      "when": [
+        "after_any_pick_click",
+        "after_show_me",
+        "before_enable_check",
+        "before_goto_draft",
+        "before_start_fight",
+        "on_raf_while_screen_cup"
+      ],
+      "fn": "if (domSelectedIds.length === 3 && state.cup.picks.length < 3) state.cup.picks = domSelectedIds.slice(0,3); syncBordersFromState(); recomputeSynergyFooter();"
+    },
+    "maxPicks": 3,
+    "practiceValidAnyThree": true,
+    "practicePreferRivalryButDoNotBlockFight": true,
+    "note": "Auditor acceptance: any valid 3 neighbors enables Start — do NOT hard-require Rivalry to enter fight (teach can still spotlight Rivalry)."
+  },
+
+  "ctaMorphShowMeToStart": {
+    "problem": "Toast says tap Start; only Show me button rendered — Start never appears",
+    "controls": {
+      "showMe": {
+        "testIds": ["show-me", "btn-show-me", "practice-show-me"],
+        "label": { "tr": "Göster", "en": "Show me" }
+      },
+      "startFight": {
+        "testIds": ["start-fight", "btn-start-fight", "cup-start"],
+        "labelLocked": {
+          "tr": "3 komşu seç",
+          "en": "Pick 3 neighbors"
+        },
+        "labelReady": {
+          "tr": "Start — arena",
+          "en": "Start — arena"
+        }
+      },
+      "gotoDraft": {
+        "testIds": ["goto-draft", "btn-goto-draft"],
+        "optionalIfStartSkipsDraft": true
+      }
+    },
+    "renderRules": [
+      "ALWAYS render start-fight in Practice cup lobby (disabled until ready).",
+      "Show me may sit beside Start; never replace Start entirely.",
+      "When ready (picks.length===3 OR showMeApplied): enable start-fight, pulse it, morph primary CTA emphasis to Start.",
+      "After Show me click: set picks to [n2,n4,n1] (or existing autoPickFallback), showMeApplied=true, enable start-fight same tick, optional auto-click start after 0ms if coldPathForceEnter true."
+    ],
+    "primaryCtaPriorityWhenReady": "start-fight"
+  },
+
+  "showMeMustUnlock": {
+    "onClick": [
+      "state.cup.picks = autoPickFallback || ['n2','n4','n1']",
+      "state.cup.showMeApplied = true",
+      "state.cup.placement = defaultPracticePads(state.cup.picks)",
+      "reconcileCupPicks()",
+      "recomputeSynergyFooter()",
+      "enableControl('start-fight')",
+      "enableControl('goto-draft')",
+      "setCoachLine('Roster set — tap Start')",
+      "if (coldPath.autoEnterFightAfterShowMe) enterScreenFight()"
+    ],
+    "autoPickFallback": ["n2", "n4", "n1"],
+    "neverLeaveOnlyShowMeVisible": true,
+    "setsFlags": ["practice_show_me_applied", "practice_draft_ready"]
+  },
+
+  "gotoDraftUnlock": {
+    "enableWhen": "state.cup.picks.length === 3",
+    "onEnable": "removeAttribute('disabled'); setAttribute('aria-disabled','false')",
+    "onClick": [
+      "reconcileCupPicks()",
+      "if (picks.length < 3) return",
+      "autoPlaceByRole(picks)",
+      "navigate('screen-draft') OR skip straight if startSkipsDraft",
+      "enableControl('start-fight')"
+    ],
+    "practiceDefault": {
+      "startSkipsDraft": true,
+      "note": "Cold path: Start may jump pick lobby → screen-fight with auto-place; draft screen optional."
+    }
+  },
+
+  "forceEnterScreenFight": {
+    "fnId": "enterScreenFight",
+    "mustSetActiveScreenId": "screen-fight",
+    "steps": [
+      "reconcileCupPicks()",
+      "if (picks.length < 3) { picks = showMeApplied ? autoPickFallback : picks; }",
+      "if (picks.length < 3) { picks = firstThreeNeighborIds(); }",
+      "placement = placement || defaultPracticePads(picks)",
+      "enemyLineup = practiceCup.enemyLineup",
+      "mountUnitsOnPads(placement, enemyLineup)",
+      "navigateOrSetScreen('screen-fight')",
+      "assert document.querySelector('[data-screen=\"screen-fight\"], #screen-fight, .screen-fight')",
+      "startCombatLoop + practice scriptedMoments",
+      "setsFlags: practice_fight_entered"
+    ],
+    "startFightOnClick": "ALWAYS call enterScreenFight(); NEVER no-op; NEVER stay on cup lobby",
+    "ifNavigateFails": {
+      "fallback": "forceShowScreenFightDom()",
+      "hide": ["screen-cup", "screen-draft", "cup-lobby"],
+      "show": ["screen-fight"]
+    },
+    "coldPath": {
+      "autoEnterFightAfterShowMe": false,
+      "autoEnterFightAfterShowMeIfStillOnLobbyMs": 500,
+      "antiStallMs": 4000,
+      "onAntiStall": "enterScreenFight()"
+    }
+  },
+
+  "padMountOnEnter": {
+    "requireBeforeCombatTicks": true,
+    "playerPads": [
+      { "neighborIdFromPicks": 0, "padId": "p_front_left" },
+      { "neighborIdFromPicks": 1, "padId": "p_front_right" },
+      { "neighborIdFromPicks": 2, "padId": "p_back_mid" }
+    ],
+    "enemyPads": [
+      { "botId": "bot_n3", "padId": "e_front_left" },
+      { "botId": "bot_n5", "padId": "e_front_right" },
+      { "botId": "bot_n6", "padId": "e_back_mid" }
+    ],
+    "roleAwareOptional": true,
+    "css": {
+      "arena": ".rp-arena",
+      "pad": ".rp-arena-pad",
+      "unit": ".rp-arena-unit"
+    },
+    "assert": "querySelectorAll('.rp-arena-unit').length >= 6 OR (playerUnits + enemyUnits === 6)"
+  },
+
+  "enablementMatrix": {
+    "start-fight.enabled": "picks.length === 3 OR showMeApplied === true",
+    "goto-draft.enabled": "picks.length === 3 OR showMeApplied === true",
+    "doNotRequire": [
+      "footerSynced perfect",
+      "Rivalry active",
+      "coach ack",
+      "placement screen visited"
+    ],
+    "overridesFix2BlockStart": true,
+    "overridesFix3RivalryGateForFightEntry": true,
+    "note": "Teach Rivalry in-fight; do not gate screen-fight on synergy form for cold path reliability."
+  },
+
+  "porchCallOnFight": {
+    "ensureScriptedPracticeCall": true,
+    "forceAtTSec": 18.0,
+    "forceOptionIds": ["call_cheer", "call_focus_fire", "call_tea_break"],
+    "focusFireMustBeVisible": true,
+    "setsFlagsOnResolve": ["practice_cup_porch_call_done"]
+  },
+
+  "uiStringsPatch": {
+    "practice.cta_start": { "tr": "Start — arena", "en": "Start — arena" },
+    "practice.cta_show_me": { "tr": "Göster", "en": "Show me" },
+    "practice.pick_counter": { "tr": "{n}/3", "en": "{n}/3" },
+    "practice.roster_ready": {
+      "tr": "Kadro hazır — Start'a bas",
+      "en": "Roster set — tap Start"
+    },
+    "practice.entering_fight": {
+      "tr": "Arenaya giriliyor…",
+      "en": "Entering arena…"
+    }
+  },
+
+  "integratorPatchContract": {
+    "filesLikely": ["js/combat.js", "js/cup.js", "js/app.js", "js/screens.js"],
+    "requiredExportsOrFns": [
+      "reconcileCupPicks",
+      "enterScreenFight",
+      "defaultPracticePads"
+    ],
+    "smokeTest": [
+      "cold clear storage",
+      "open Practice",
+      "click Show me",
+      "assert start-fight enabled",
+      "click start-fight",
+      "assert activeScreenId === 'screen-fight'",
+      "assert pad units === 6",
+      "wait for porch-call OR t>=18"
+    ],
+    "failIf": [
+      "after Show me only Show me button remains and Start absent",
+      "picks.length !== highlighted count",
+      "start-fight click leaves screen-cup"
+    ]
+  },
+
+  "acceptanceChecks": [
+    "active screen id === screen-fight after Start (or Show me→Start) in cold Practice",
+    "units on arena pads (6 total) when fight starts",
+    "Show me unlocks Start same tick (Start control present + enabled)",
+    "pick counter === state.cup.picks.length (no 2/3 with 3 borders)",
+    "any 3 neighbors enable Start (Rivalry preferred, not required to enter)",
+    "porch-call + focus option visible during Practice fight"
+  ],
+
+  "integrator": {
+    "owner": "code owner on cursor/rival-porch-slice-31f7",
+    "steps": [
+      "CRITICAL: Render start-fight always in Practice lobby; Show me must not replace it.",
+      "Wire Show me → picks+place+enable Start same tick (see showMeMustUnlock).",
+      "start-fight onclick → enterScreenFight() setting screen id screen-fight; mount pads; never no-op.",
+      "Fix pick SoT: state.cup.picks drives borders + counter; reconcile before every enable check.",
+      "Remove Rivalry-required gate for fight entry (teach in-fight instead).",
+      "Paste JS sketch from mechanics-fix-4.md if needed.",
+      "Playwright smoke before claiming R16-style green.",
+      "No PR from this squad."
+    ],
+    "priority": "P0 — wire before any other combat polish; mechanics 5.5 until screen-fight lands"
+  },
+
+  "meta": {
+    "expectedMechanicsLift": "5.5 → 7+ once cold path hits screen-fight; then fix-2 pad/proc juice can score",
+    "nextPackIfStillLow": "mechanics-fix-5 — Rivalry proc on pads + closer bots once fight entry proven",
+    "compat": {
+      "screenIdFight": "screen-fight",
+      "testIds": ["show-me", "start-fight", "goto-draft"],
+      "autoPickFallback": ["n2", "n4", "n1"]
+    }
+  }
+}

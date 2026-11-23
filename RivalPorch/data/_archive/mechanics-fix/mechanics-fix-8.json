@@ -1,0 +1,275 @@
+{
+  "schemaVersion": 1,
+  "id": "mechanics-fix-8",
+  "packNumber": 8,
+  "squad": "mechanics",
+  "shippedAt": "2026-11-23T12:31:00Z",
+  "noPrPush": true,
+  "extends": [
+    "internal/rival-porch-combat-pack.json",
+    "internal/squads/mechanics-fix-6.json",
+    "internal/squads/mechanics-fix-7.json"
+  ],
+  "mergeMode": "deepMergeIntoCombatPack",
+  "wirePathHint": "RivalPorch/js/combat.js fight loop + between-call agency layer",
+  "scoreRef": {
+    "file": "internal/rival-porch-score-latest.json",
+    "buildCommit": "2828d35",
+    "mechanicsScore": 7.8,
+    "overall": 7.8,
+    "requestedBy": "coordinator — after mech-7: cut Auto Fight carry; more agency between Calls"
+  },
+  "scoreGapsAddressed": [
+    "Auto Fight still carries most of the match",
+    "Auto Fight still carries most of the match between Calls",
+    "Ladder deliberate-call untested"
+  ],
+  "targets": [
+    "cutAutoFightCarry",
+    "betweenCallAgency",
+    "semiAutoPulse",
+    "manualFocusTap",
+    "ladderDeliberateCall"
+  ],
+
+  "acceptance": {
+    "coordinator": "Cut Auto Fight carry; more player agency between Calls (not just auto resolve).",
+    "playtest": "Between Call #1 and Call #2 (and after Call #2 until KO), player makes ≥2 tap actions that change targeting/tempo/score — fight is not pure spectator sim."
+  },
+
+  "cutAutoFightCarry": {
+    "problem": "Even with two Calls, Auto Fight resolves the bulk of the match — mastery unread",
+    "renameUi": {
+      "from": { "tr": "Auto Fight", "en": "Auto Fight" },
+      "to": { "tr": "Porch tempo", "en": "Porch tempo" },
+      "note": "Stop promising full auto; tempo is assisted, not hands-off."
+    },
+    "practiceLabel": {
+      "tr": "Tempo — dokunarak yönlendir",
+      "en": "Tempo — steer with taps"
+    },
+    "autoTickRules": {
+      "baseTimescale": 0.85,
+      "pauseOnPlayerAgencyWindows": true,
+      "neverResolveWithoutBetweenCallActionsInPractice": true,
+      "minPlayerActionsBeforeFinish": 2,
+      "playerActionTypes": [
+        "porch_call_pick",
+        "second_decision_pick",
+        "focus_tap",
+        "cheer_pulse",
+        "hold_lane"
+      ]
+    },
+    "finishGate": {
+      "practice": {
+        "requireFlagsAnyTwoOf": [
+          "practice_cup_porch_call_done",
+          "practice_second_decision_done",
+          "practice_between_focus_tap",
+          "practice_between_cheer_pulse",
+          "practice_between_hold_lane"
+        ],
+        "ifMissing": {
+          "action": "force_between_agency_prompt",
+          "doNotFinishYet": true
+        }
+      }
+    }
+  },
+
+  "betweenCallAgency": {
+    "window": {
+      "afterFirstCallResolve": true,
+      "beforeSecondDecision": true,
+      "afterSecondDecisionUntilKo": true,
+      "excludeWhileModalOpen": true
+    },
+    "actions": [
+      {
+        "id": "focus_tap",
+        "testId": "between-focus-tap",
+        "type": "tap_enemy_pad",
+        "label": { "tr": "Hedef", "en": "Mark" },
+        "hint": {
+          "tr": "Düşman pad'ine dokun — 3 sn odak",
+          "en": "Tap an enemy pad — focus 3s"
+        },
+        "effect": {
+          "type": "mark_enemy_focus",
+          "durationSec": 3,
+          "damageTakenBonusPercent": 0.12,
+          "teamHpSwingHintPercent": 0.06
+        },
+        "cooldownSec": 4,
+        "setsFlags": ["practice_between_focus_tap"],
+        "showFloat": true,
+        "vfxId": "vfx_call_focus"
+      },
+      {
+        "id": "cheer_pulse",
+        "testId": "between-cheer-pulse",
+        "type": "dock_button",
+        "label": { "tr": "Alkış", "en": "Cheer" },
+        "dock": "fight_bottom_left",
+        "minTapTargetPx": 48,
+        "effect": {
+          "type": "ally_atk_buff",
+          "durationSec": 2.5,
+          "atkBonusPercent": 0.1,
+          "teamHpSwingHintPercent": 0.05
+        },
+        "cooldownSec": 5,
+        "maxUsesPerFight": 2,
+        "setsFlags": ["practice_between_cheer_pulse"],
+        "vfxId": "vfx_call_cheer",
+        "cameraShakeId": "shake_light"
+      },
+      {
+        "id": "hold_lane",
+        "testId": "between-hold-lane",
+        "type": "tap_ally_front_pad",
+        "label": { "tr": "Tut", "en": "Hold" },
+        "hint": {
+          "tr": "Ön pad — 3 sn hasarı üstüne çek",
+          "en": "Front pad — taunt damage 3s"
+        },
+        "effect": {
+          "type": "front_ally_taunt",
+          "durationSec": 3,
+          "damageRedirectPercent": 0.25,
+          "teamHpSwingHintPercent": 0.05
+        },
+        "cooldownSec": 5,
+        "setsFlags": ["practice_between_hold_lane"],
+        "vfxId": "vfx_call_whistle"
+      }
+    ],
+    "coachChips": {
+      "onceEach": true,
+      "placement": "bottom_third",
+      "durationMs": 1600,
+      "lines": {
+        "focus_tap": {
+          "tr": "Pad'e dokun — hedef senin",
+          "en": "Tap a pad — you pick the target"
+        },
+        "cheer_pulse": {
+          "tr": "Alkış — kısa tempo buff",
+          "en": "Cheer — short tempo buff"
+        },
+        "hold_lane": {
+          "tr": "Ön sırayı tut",
+          "en": "Hold the front"
+        }
+      }
+    },
+    "mustNotBeModalOnly": true,
+    "availableDuringAutoTicks": true
+  },
+
+  "semiAutoPulse": {
+    "id": "tempo_pulse",
+    "description": "Every ~3.5s a soft beat invites a tap; missing it continues auto weakly; hitting it adds readable juice",
+    "intervalSec": 3.5,
+    "ui": {
+      "pulseOnRandomValidPad": true,
+      "pulseMs": 900,
+      "testId": "tempo-pulse-pad"
+    },
+    "onHit": {
+      "effect": "small_damage_or_heal_matching_pad_side",
+      "allyPad": { "healPercentMaxHp": 0.04 },
+      "enemyPad": { "damageBonusPercent": 0.08 },
+      "float": true,
+      "setsFlags": ["practice_tempo_pulse_hit"]
+    },
+    "onMiss": {
+      "continueAuto": true,
+      "noPenaltyBeyondMissedSwing": true
+    },
+    "practiceMinHitsBeforeFinish": 1,
+    "disableWhilePorchModalOpen": true
+  },
+
+  "manualFocusTap": {
+    "alwaysOnDuringFight": true,
+    "enemyPadsHighlightOnHoverOrPress": true,
+    "conflictsWithActiveFocusCall": "refresh_duration",
+    "thumbSafe": true
+  },
+
+  "ladderDeliberateCall": {
+    "enable": true,
+    "armDock": "porch-call-ready",
+    "betweenCallAgencyAlsoOnLadder": true,
+    "note": "Score gap: ladder deliberate-call untested — enable same between-call taps + Call! dock on ladder Cups."
+  },
+
+  "practiceTimelineIntegration": {
+    "withFix7": [
+      "Call #1 (deliberate)",
+      "between-call agency window (focus/cheer/hold + tempo pulses)",
+      "Call #2 / second decision",
+      "between-call agency until KO",
+      "comic"
+    ],
+    "doNot": [
+      "run pure auto from t=0 to KO with only two modal interrupts",
+      "label UI Auto Fight"
+    ]
+  },
+
+  "uiStringsPatch": {
+    "fight.mode_tempo": { "tr": "Porch tempo", "en": "Porch tempo" },
+    "fight.steer_hint": {
+      "tr": "Dokun: hedef · alkış · tut",
+      "en": "Tap: mark · cheer · hold"
+    },
+    "fight.tempo_pulse": {
+      "tr": "Tempo nabzı — dokun!",
+      "en": "Tempo pulse — tap!"
+    },
+    "fight.between_agency": {
+      "tr": "Çağrılar arası senin",
+      "en": "Between calls — you're steering"
+    }
+  },
+
+  "acceptanceChecks": [
+    "UI does not say Auto Fight as primary mode (Porch tempo / steer copy)",
+    "Between Call #1 and #2 player can Mark/Cheer/Hold with visible effect",
+    "≥1 tempo-pulse hit OR ≥2 between-call actions before Practice finish",
+    "Fight cannot feel like pure spectator for >6s continuous without a tap opportunity",
+    "Ladder Cups expose Call! dock + between-call taps"
+  ],
+
+  "integrator": {
+    "owner": "code owner on cursor/rival-porch-slice-31f7",
+    "steps": [
+      "Rename Auto Fight → Porch tempo; add steer hint dock.",
+      "Wire enemy-pad Mark, Cheer dock, ally-front Hold with cooldowns + flags.",
+      "Add tempo-pulse every ~3.5s on a pad; reward tap with float.",
+      "Pause agency UI only while Call/second-decision modals open.",
+      "Practice finish requires between-call actions (see finishGate) in addition to fix-7 flags.",
+      "Enable same layer on ladder Cups.",
+      "Smoke: Call→Mark pad→Cheer→Second move→Hold→comic; score moves on between taps.",
+      "No PR from this squad."
+    ],
+    "priority": "wire after fix-7 — cuts spectator carry between Calls"
+  },
+
+  "meta": {
+    "expectedMechanicsLift": "7.8 → toward ≥8.5 by making the match player-steered, not auto-carried",
+    "nextPackIfStillLow": "mechanics-fix-9 — placement skill expression + closer bot races",
+    "compat": {
+      "dependsOn": ["mechanics-fix-6", "mechanics-fix-7"],
+      "testIds": [
+        "between-focus-tap",
+        "between-cheer-pulse",
+        "between-hold-lane",
+        "tempo-pulse-pad"
+      ]
+    }
+  }
+}

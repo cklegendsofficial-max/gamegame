@@ -1,0 +1,265 @@
+{
+  "schemaVersion": 1,
+  "id": "mechanics-fix-6",
+  "packNumber": 6,
+  "squad": "mechanics",
+  "shippedAt": "2026-11-23T12:16:30Z",
+  "noPrPush": true,
+  "extends": [
+    "internal/rival-porch-combat-pack.json",
+    "internal/squads/mechanics-fix-5.json"
+  ],
+  "mergeMode": "deepMergeIntoCombatPack",
+  "wirePathHint": "RivalPorch/js/combat.js porch-call + practice script; demote settle soft-clear",
+  "scoreRef": {
+    "file": "internal/rival-porch-score-latest.json",
+    "buildCommit": "b2cd05e",
+    "mechanicsScore": 7.1,
+    "overall": 7.2,
+    "priorityFixTitle": "Make porch-call a real mid-fight choice, not a 2.4s interrupt"
+  },
+  "scoreGapsAddressed": [
+    "Porch-call is a timed interrupt, not a readable decision loop",
+    "Settle path bypasses the fight the teach promises",
+    "Pick→Start still brittle without Show me / Enter now",
+    "No lasting skill expression beyond one call"
+  ],
+  "targets": [
+    "deliberatePorchCall",
+    "playerTriggeredCall",
+    "meaningfulPause",
+    "visibleScoreDelta",
+    "noSilentAutoPastModal",
+    "demotePracticeSettle"
+  ],
+
+  "acceptance": {
+    "auditor": "Player must pick a porch-call before resolve continues; call changes score/state visibly; no silent auto-win past the modal.",
+    "coordinator": "porch-call as deliberate mid-fight choice (player-triggered or meaningful pause), not only timed interrupt."
+  },
+
+  "deliberatePorchCall": {
+    "design": {
+      "tr": "Çağrı zamanlı pop-up değil — oyuncu seçer veya anlamlı pause'ta karar verir; skor görünür değişir.",
+      "en": "Call is not a timed popup — player chooses or decides in a meaningful pause; score changes visibly."
+    },
+    "modes": {
+      "practice": "meaningful_pause_then_require_pick",
+      "ladder": "player_triggered_or_threshold_pause"
+    },
+    "practiceFlow": {
+      "id": "prac_deliberate_call",
+      "phases": [
+        {
+          "id": "arm_call",
+          "tSec": 2.0,
+          "type": "porch_call_armed",
+          "ui": {
+            "dockButton": {
+              "testId": "porch-call-ready",
+              "label": { "tr": "Veranda Çağrısı hazır", "en": "Porch Call ready" },
+              "pulse": true,
+              "minTapTargetPx": 52
+            },
+            "coach": {
+              "tr": "Çağrı hazır — sen bas, maç beklemez… aslında bekler.",
+              "en": "Call ready — you tap it; the match waits."
+            }
+          },
+          "setsFlags": ["practice_porch_call_armed"]
+        },
+        {
+          "id": "meaningful_pause",
+          "tSec": 2.4,
+          "type": "porch_call_pause_gate",
+          "pauseAutoTicks": true,
+          "timescale": 0,
+          "showModalIfNotOpenedByPlayer": true,
+          "cannotDismissWithoutPick": true,
+          "timeoutDefaultCallId": null,
+          "timeoutSec": null,
+          "note": "NO silent default — fight stays paused until Focus/Prop/Swap picked. Fix-5 timeoutDefault removed for Practice."
+        },
+        {
+          "id": "resolve_and_show_delta",
+          "type": "porch_call_resolve_with_scoreboard",
+          "showTeamHpDeltaToast": true,
+          "showScoreDeltaBanner": true,
+          "holdPauseMsAfterPick": 900,
+          "thenResumeAuto": true,
+          "setsFlags": ["practice_cup_porch_call_done", "porch_call_resolved"]
+        }
+      ],
+      "forceOptionIds": ["call_focus_fire", "call_prop_assist", "call_chaos_kite"],
+      "labels": {
+        "focus": { "tr": "Focus", "en": "Focus" },
+        "prop": { "tr": "Prop", "en": "Prop" },
+        "swap": { "tr": "Swap", "en": "Swap" }
+      }
+    },
+    "overridesFix5": {
+      "timeoutDefaultCallId": null,
+      "cannotAutoPickOnTimeout": true,
+      "playerMustTapOption": true,
+      "autoFightMustNotResumeUntilPick": true
+    }
+  },
+
+  "playerTriggeredCall": {
+    "ladderAndPractice": {
+      "armWhenAny": [
+        "fight_time_percent_gte_0.35",
+        "first_ally_hp_percent_lte_0.55",
+        "practice_scripted_arm"
+      ],
+      "dockCta": {
+        "testId": "porch-call-ready",
+        "visibleWhenArmed": true,
+        "onClick": "open_porch_call_modal",
+        "labelArmed": { "tr": "Çağrı!", "en": "Call!" },
+        "labelUsed": { "tr": "Çağrı kullanıldı", "en": "Call used" }
+      },
+      "oncePerFight": true,
+      "ifPlayerNeverOpens": {
+        "practice": "force_modal_at_meaningful_pause_still_require_pick",
+        "ladder": "soft_nudge_at_0.5_then_force_modal_at_0.55_still_require_pick"
+      }
+    },
+    "focusTargetOptionalSecondTap": {
+      "whenCallId": "call_focus_fire",
+      "allowTapEnemyPadToConfirmFocus": true,
+      "defaultIfNoTapSec": 1.2,
+      "testId": "focus-target-pad"
+    }
+  },
+
+  "meaningfulPause": {
+    "rules": [
+      "On modal open: combat ticks paused; HP bars freeze; Auto Fight label may stay but timescale=0.",
+      "Dim stage + lamp rim + letterbox; options Focus/Prop/Swap with blurb + HP swing + prop icon.",
+      "Primary instruction: 'Pick one — fight waits'.",
+      "Resume ONLY after option resolve FX completes.",
+      "No timeout auto-cheer in Practice; ladder may soft-timeout after 8s to Focus with explicit 'auto Focus' toast (never silent)."
+    ],
+    "practiceTimeout": null,
+    "ladderSoftTimeoutSec": 8,
+    "ladderSoftTimeoutCallId": "call_focus_fire",
+    "ladderSoftTimeoutToast": {
+      "tr": "Süre doldu — Focus otomatik.",
+      "en": "Time's up — Focus auto-picked."
+    }
+  },
+
+  "visibleScoreDelta": {
+    "onResolve": {
+      "measureWindowSec": 3,
+      "toastMs": 1800,
+      "toastTemplate": {
+        "tr": "{label}: takım HP {deltaSigned}% · skor {scoreBefore}→{scoreAfter}",
+        "en": "{label}: team HP {deltaSigned}% · score {scoreBefore}→{scoreAfter}"
+      },
+      "bannerOnScoreboard": true,
+      "minVisibleSwingPercent": 6,
+      "ifSwingBelowMin": {
+        "boost": "apply_practice_visible_bias",
+        "atkOrHealBump": 0.06,
+        "note": "Teach readability — swing must be feelable in Practice"
+      }
+    },
+    "effectStrengthPractice": {
+      "call_focus_fire": { "damageTakenBonusPercent": 0.25, "durationSec": 7 },
+      "call_prop_assist": {
+        "damageRedirectPercent": 0.35,
+        "atkBonusPercent": 0.1,
+        "durationSec": 6
+      },
+      "call_chaos_kite": { "teamHpSwingHintPercent": 0.18 }
+    },
+    "comicMustIncludeCall": true
+  },
+
+  "noSilentAutoPastModal": {
+    "forbidden": [
+      "resolve fight while porch modal open",
+      "timeoutDefaultCallId without toast in Practice",
+      "practice-settle marking practice_cup_done without fight+call",
+      "Skip past armed call"
+    ],
+    "assert": [
+      "practice_cup_porch_call_done requires player option click (or ladder soft-timeout toast)",
+      "practice_cup_done requires screen-fight entered + call resolved + finish banner"
+    ]
+  },
+
+  "demotePracticeSettle": {
+    "problem": "practice-settle soft-clear marks practice_cup_done without a fight — trains skipping Cup",
+    "production": {
+      "hideSettleCta": true,
+      "settleDebugOnly": true,
+      "queryParam": "?debugSettle=1",
+      "doNotSetPracticeDoneOnSettle": true
+    },
+    "day1EndEveningRequires": [
+      "practice_fight_entered",
+      "practice_cup_porch_call_done",
+      "practice_cup_done"
+    ],
+    "note": "UX/gameplay own End-evening discoverability; mechanics pack removes settle bypass of fight teach."
+  },
+
+  "pickStartHardenCarryForward": {
+    "fromFix4And5": true,
+    "anyThreeEnablesStart": true,
+    "showMeUnlocksStart": true,
+    "noForceEnableHack": true
+  },
+
+  "uiStringsPatch": {
+    "fight.porch_call_ready": {
+      "tr": "Veranda Çağrısı hazır — bas",
+      "en": "Porch Call ready — tap"
+    },
+    "fight.porch_call_waits": {
+      "tr": "Birini seç — maç bekliyor",
+      "en": "Pick one — the match waits"
+    },
+    "fight.porch_call_delta": {
+      "tr": "{label}: HP {deltaSigned}% · skor {scoreBefore}→{scoreAfter}",
+      "en": "{label}: HP {deltaSigned}% · score {scoreBefore}→{scoreAfter}"
+    },
+    "practice.settle_hidden": {
+      "tr": "Settle yalnızca debug",
+      "en": "Settle is debug-only"
+    }
+  },
+
+  "acceptanceChecks": [
+    "Practice: call arms ~2.0s with dock CTA; pause at 2.4s; modal requires Focus/Prop/Swap tap",
+    "No silent auto-pick / auto-win past modal in Practice",
+    "After pick: visible score/HP delta toast before auto resumes",
+    "practice-settle does not set practice_cup_done in production UI",
+    "Player-triggered Call! dock works when armed (practice + ladder)"
+  ],
+
+  "integrator": {
+    "owner": "code owner on cursor/rival-porch-slice-31f7",
+    "steps": [
+      "Replace fix-5 timeoutDefault with require-pick pause (Practice).",
+      "Add porch-call-ready dock; open modal on tap; force modal at pause if unused.",
+      "On resolve: scoreboard delta toast; keep paused 900ms; then resume.",
+      "Hide/demote practice-settle soft-clear from production Day1 UI.",
+      "Smoke: Start→fight→Call ready→pick Focus→delta visible→fight continues→comic.",
+      "No PR from this squad."
+    ],
+    "priority": "wire next — auditor PriorityFix on b2cd05e"
+  },
+
+  "meta": {
+    "expectedMechanicsLift": "7.1 → toward ≥8.5 once call is a real decision with visible swing",
+    "nextPackIfStillLow": "mechanics-fix-7 — second call window / position micro-choice / Tea practice",
+    "compat": {
+      "optionIds": ["call_focus_fire", "call_prop_assist", "call_chaos_kite"],
+      "testIds": ["porch-call-ready", "porch-call-modal", "porch-call-focus", "porch-call-prop", "porch-call-swap"]
+    }
+  }
+}

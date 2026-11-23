@@ -1,0 +1,25 @@
+{
+  "packId": "ux-session-13",
+  "schemaVersion": 1,
+  "scoreReact": {
+    "buildCommit": "4d40718",
+    "overall": 8.8,
+    "gameplay": 8.9,
+    "evidence": { "day7EveningMidVh": 0.36 }
+  },
+  "volumeAcceptMid": {
+    "maxVh": 0.35,
+    "panelDataAttr": "volume-accept",
+    "testidAccept": "evening-volume-accept-cta",
+    "testidSeeHeadphones": "evening-volume-see-headphones",
+    "seeHeadphonesAsTextLink": true,
+    "suppressSupportInMid": true,
+    "keepEndEveningSecondary": true
+  },
+  "deferTrayReward": {
+    "while": "volume-accept-live",
+    "hideFrom": ["mid", "dock-peers", "hud-whisper-claim"],
+    "overflowTestId": "overflow-tray-reward",
+    "restoreAfter": "quest_volume_active"
+  }
+}

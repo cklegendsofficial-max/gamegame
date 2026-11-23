@@ -1,0 +1,313 @@
+{
+  "schemaVersion": 1,
+  "packId": "story-form-9",
+  "kind": "story-quest-form",
+  "formIndex": 9,
+  "localeDefault": "tr",
+  "purpose": "Cold-choice Day2 consequence carries without spotlight; Antenna/Volume/Ledger get physical street stage props (not journal-only).",
+  "addressesScore": {
+    "scoreLatestPath": "internal/rival-porch-score-latest.json",
+    "storyScore": 8.4,
+    "playedAt": "2026-11-23T12:50:00Z",
+    "overall": 8.1,
+    "gaps": [
+      "Day2 consequence buried under Antenna/spotlight stack",
+      "Antenna Op beat CTA competes with street prop readability",
+      "Long-arc pull still thin after Day2 beat",
+      "Instigate/stage props stronger in testIds than in clean stage read"
+    ],
+    "alignsVisualFix": "Day2 street: one layer wins (prop vs Antenna vs spotlight)",
+    "userAsk": "cold-choice consequence without spotlight; deepen Antenna/Volume/Ledger on street not only journal"
+  },
+  "sourcePacks": [
+    "internal/squads/story-form-5.json",
+    "internal/squads/story-form-6.json",
+    "internal/squads/story-form-7.json",
+    "internal/squads/story-form-8.json"
+  ],
+  "integrator": {
+    "owner": "code owner on cursor/rival-porch-slice-31f7",
+    "noPrFromThisPackAuthor": true,
+    "mergeMode": "patch-overlay",
+    "wire": [
+      "Merge storyForm9; normalizeQuestPack exposes storyForm9",
+      "day2EnterSpotlightHtml: DEFAULT OFF when any cold_open_* && dayIndex>=2 (form9.streetLayerPriority.suppressSpotlightWhenColdProp)",
+      "renderStreet layer order: stageLayer → day2StreetStageHtml (cold SVG) → streetArcStagePropsHtml → hotspots → ONE line (npc bubble OR compact arc chip) → dock. Defer full Antenna banner until spotlight dismissed OR collapse to chip",
+      "When cold Day2 prop present: do not show rp-arc-beat-banner full strip; use streetArcCompactChip instead",
+      "Inject streetArcStageProps for active Antenna/Volume/Ledger beats (physical diorama props)",
+      "Append cssAppend — larger cold props, z-index hierarchy, clean stage read for instigate/stage",
+      "Align with visual squad one-layer-wins acceptance"
+    ],
+    "doNot": [
+      "Stack spotlight + Antenna banner + cold prop on first Day2 street paint",
+      "Require spotlight ack to show cold SVG",
+      "Leave Arc B/C street presence journal-only"
+    ]
+  },
+  "principles": {
+    "storyNeverGatedBySpend": true,
+    "oneLayerWinsOnDay2Street": true,
+    "coldPropNeverNeedsSpotlight": true,
+    "longArcsHaveStreetPropsNotJustJournal": true,
+    "cleanStageReadOverTestIdOnly": true
+  },
+  "streetLayerPriority": {
+    "id": "day2_one_layer_wins",
+    "when": {
+      "dayIndexMin": 2,
+      "flagsAny": [
+        "cold_open_mediate",
+        "cold_open_instigate",
+        "cold_open_stage"
+      ]
+    },
+    "order": [
+      "stageArt",
+      "coldChoiceSvgProp",
+      "hotspotWithSingleNpcBubble",
+      "compactArcChipOptional",
+      "dock"
+    ],
+    "suppressSpotlightWhenColdProp": true,
+    "deferFullArcBannerWhenColdProp": true,
+    "maxNpcBubbles": 1,
+    "acceptance": "Prop + one NPC line readable without overlap",
+    "testId": "street-layer-cold-wins"
+  },
+  "spotlightPolicy": {
+    "id": "spotlight_optional_chrome",
+    "defaultWhenColdDay2": "hidden",
+    "showOnlyIf": {
+      "flagsNone": [
+        "day2_prop_ack",
+        "day2_mediate_spotlight_ack",
+        "day2_instigate_spotlight_ack",
+        "day2_stage_spotlight_ack"
+      ],
+      "andUserOptIn": false,
+      "note": "Do not auto-show. Cold SVG must already be visible."
+    },
+    "forceHideFlag": "hide_day2_spotlight",
+    "setsOnStreetEnter": [
+      "hide_day2_spotlight"
+    ]
+  },
+  "streetArcStageProps": [
+    {
+      "id": "street_prop_antenna_snag",
+      "arcId": "arc_kite_antenna",
+      "when": {
+        "flagsAny": [
+          "quest_antenna_active",
+          "arc_kite_antenna_beat1"
+        ],
+        "flagsNone": [
+          "arc_kite_antenna_beat4",
+          "flag_fence_and_kite",
+          "flag_kite_chaos_buff",
+          "arc_kite_antenna_complete"
+        ]
+      },
+      "preferBeats": [
+        "arc_kite_antenna_beat1",
+        "arc_kite_antenna_beat2"
+      ],
+      "screens": [
+        "street"
+      ],
+      "html": "<div class=\"rp-stage-prop rp-stage-prop--antenna-snag\" data-testid=\"story-street-antenna-snag\" data-arc=\"arc_kite_antenna\" aria-label=\"Snagged kite\">\n  <svg class=\"rp-snag-svg\" viewBox=\"0 0 100 40\" preserveAspectRatio=\"none\" aria-hidden=\"true\">\n    <line x1=\"55\" y1=\"8\" x2=\"55\" y2=\"36\" stroke=\"#8a7a68\" stroke-width=\"0.9\"/>\n    <path d=\"M 40 12 Q 48 6 55 10 Q 62 16 70 10\" fill=\"none\" stroke=\"#c45c3e\" stroke-width=\"0.85\"/>\n    <path d=\"M 70 10 L 78 4 L 74 14 Z\" fill=\"#c45c3e\" stroke=\"#f2e6d8\" stroke-width=\"0.4\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Antenna Op · snag</span>\n</div>",
+      "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--antenna-snag\" data-testid=\"story-street-antenna-snag\" data-arc=\"arc_kite_antenna\" aria-label=\"Takılan uçurtma\">\n  <svg class=\"rp-snag-svg\" viewBox=\"0 0 100 40\" preserveAspectRatio=\"none\" aria-hidden=\"true\">\n    <line x1=\"55\" y1=\"8\" x2=\"55\" y2=\"36\" stroke=\"#8a7a68\" stroke-width=\"0.9\"/>\n    <path d=\"M 40 12 Q 48 6 55 10 Q 62 16 70 10\" fill=\"none\" stroke=\"#c45c3e\" stroke-width=\"0.85\"/>\n    <path d=\"M 70 10 L 78 4 L 74 14 Z\" fill=\"#c45c3e\" stroke=\"#f2e6d8\" stroke-width=\"0.4\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Anten · takılma</span>\n</div>",
+      "testId": "story-street-antenna-snag",
+      "npcLine": {
+        "speakerId": "n4",
+        "text": {
+          "tr": "Antenim oyuncak değil — ip hâlâ orada.",
+          "en": "My antenna is not a toy — the line is still there."
+        }
+      },
+      "priority": 80,
+      "note": "Skip if Day2 cold instigate/mediate kite SVG would double-draw — cold prop wins (priority < cold 100)"
+    },
+    {
+      "id": "street_prop_volume_headphones",
+      "arcId": "arc_volume_war",
+      "when": {
+        "flagsAny": [
+          "quest_volume_active",
+          "arc_volume_war_beat2",
+          "arc_volume_war_beat1"
+        ],
+        "flagsNone": [
+          "arc_volume_war_complete",
+          "flag_peri_stay",
+          "flag_peri_leaving_threat"
+        ]
+      },
+      "screens": [
+        "street"
+      ],
+      "html": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-headphones-note\" data-arc=\"arc_volume_war\" aria-label=\"HEADPHONES note\">\n  <div class=\"rp-note-door\">\n    <span class=\"rp-note-caps\">HEADPHONES</span>\n  </div>\n  <span class=\"rp-stage-prop__tag\">Decibel · note</span>\n</div>",
+      "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-headphones-note\" data-arc=\"arc_volume_war\" aria-label=\"KULAKLIK notu\">\n  <div class=\"rp-note-door\">\n    <span class=\"rp-note-caps\">KULAKLIK</span>\n  </div>\n  <span class=\"rp-stage-prop__tag\">Desibel · not</span>\n</div>",
+      "testId": "story-street-headphones-note",
+      "npcLine": {
+        "speakerId": "n5",
+        "text": {
+          "tr": "Kapıdaki not büyük harf. Gece hâlâ müzakere.",
+          "en": "The door note is block capitals. Night is still a negotiation."
+        }
+      },
+      "priority": 85
+    },
+    {
+      "id": "street_prop_ledger_tray",
+      "arcId": "arc_tea_ledger",
+      "when": {
+        "flagsAny": [
+          "quest_ledger_active",
+          "arc_tea_ledger_beat1",
+          "arc_tea_ledger_beat2"
+        ],
+        "flagsNone": [
+          "arc_tea_ledger_complete",
+          "flag_ledger_closed_kind",
+          "flag_ledger_private"
+        ]
+      },
+      "screens": [
+        "street"
+      ],
+      "html": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" aria-label=\"Ledger & tray\">\n  <svg class=\"rp-ledger-svg\" viewBox=\"0 0 80 28\" aria-hidden=\"true\">\n    <ellipse cx=\"22\" cy=\"16\" rx=\"14\" ry=\"6\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/>\n    <rect x=\"42\" y=\"6\" width=\"22\" height=\"16\" rx=\"1.5\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n    <line x1=\"46\" y1=\"10\" x2=\"60\" y2=\"10\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"14\" x2=\"58\" y2=\"14\" stroke=\"#c45c3e\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"18\" x2=\"60\" y2=\"18\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Ledger · tray</span>\n</div>",
+      "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" aria-label=\"Defter ve tepsi\">\n  <svg class=\"rp-ledger-svg\" viewBox=\"0 0 80 28\" aria-hidden=\"true\">\n    <ellipse cx=\"22\" cy=\"16\" rx=\"14\" ry=\"6\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/>\n    <rect x=\"42\" y=\"6\" width=\"22\" height=\"16\" rx=\"1.5\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n    <line x1=\"46\" y1=\"10\" x2=\"60\" y2=\"10\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"14\" x2=\"58\" y2=\"14\" stroke=\"#c45c3e\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"18\" x2=\"60\" y2=\"18\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Defter · tepsi</span>\n</div>",
+      "testId": "story-street-ledger-tray",
+      "npcLine": {
+        "speakerId": "n1",
+        "text": {
+          "tr": "Tepsi ve defter aynı masada — sokak görsün.",
+          "en": "Tray and ledger on one table — let the street see."
+        }
+      },
+      "priority": 84
+    }
+  ],
+  "streetArcCompactChip": {
+    "id": "arc_chip_instead_of_banner",
+    "whenColdPropPresent": true,
+    "replaceFullBanner": true,
+    "template": {
+      "tr": "◎ {arcShort}: {beatShort}",
+      "en": "◎ {arcShort}: {beatShort}"
+    },
+    "arcShort": {
+      "arc_kite_antenna": {
+        "tr": "Anten",
+        "en": "Antenna"
+      },
+      "arc_volume_war": {
+        "tr": "Desibel",
+        "en": "Decibel"
+      },
+      "arc_tea_ledger": {
+        "tr": "Defter",
+        "en": "Ledger"
+      }
+    },
+    "testId": "street-arc-compact-chip",
+    "cssClass": "rp-arc-chip"
+  },
+  "coldPropStageReadBoost": {
+    "id": "cleaner_instigate_stage_read",
+    "purpose": "Instigate/stage props read on clean stage, not only testIds",
+    "cssBoost": true,
+    "rules": [
+      "Increase .rp-stage-prop--kite-high / --chalk-cup / --shared-string size and contrast",
+      "Tag label always visible with solid scrim",
+      "FORBIDDEN ZONE chalk larger, high-contrast",
+      "Single NPC bubble only (Orhan or Cem) — no dual bubble stack on first paint"
+    ]
+  },
+  "cssAppend": "\n/* story-form-9 — one layer wins; arc street props; no spotlight dependency */\n.rp-stage-prop { z-index: 8; }\n.rp-day2-spotlight { display: none !important; } /* cold Day2: chrome off by default via class on body */\nbody.rp-cold-day2 .rp-day2-spotlight { display: none !important; }\nbody.rp-cold-day2 .rp-arc-beat-banner { display: none; }\nbody.rp-cold-day2 .rp-arc-chip { display: inline-flex; }\n\n.rp-arc-chip {\n  display: none;\n  position: absolute;\n  left: 50%;\n  bottom: 5.5rem;\n  transform: translateX(-50%);\n  z-index: 7;\n  padding: 0.35rem 0.65rem;\n  border-radius: 999px;\n  background: rgba(18,12,8,.82);\n  color: #f2e6d8;\n  font-size: 12px;\n  border: 1px solid rgba(232,180,120,.4);\n  max-width: 90%;\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n\n/* Larger cold props — clean stage read */\n.rp-stage-prop--shared-string { left: 10%; right: 22%; top: 24%; height: 26%; }\n.rp-stage-prop--kite-high { left: 36%; right: 4%; top: 6%; height: 42%; }\n.rp-stage-prop--chalk-cup { left: 22%; right: 22%; top: 54%; height: 22%; color: #e8f0f8; }\n.rp-door-chalk {\n  font-size: 12px !important;\n  padding: 0.35rem 0.5rem !important;\n  background: rgba(20,12,8,.9) !important;\n  border: 1px solid #f2e6d8 !important;\n}\n.rp-stage-prop__tag {\n  font-size: 12px !important;\n  padding: 0.25rem 0.5rem !important;\n  background: rgba(12,8,6,.88) !important;\n}\n\n/* Long-arc street props */\n.rp-stage-prop--antenna-snag { left: 40%; right: 15%; top: 16%; height: 28%; color: #f0d2a8; z-index: 7; }\n.rp-snag-svg { width: 100%; height: 100%; display: block; }\n.rp-stage-prop--headphones-note { left: 62%; width: 28%; top: 34%; height: auto; z-index: 7; }\n.rp-note-door {\n  background: #f4f0e4;\n  color: #1a120c;\n  padding: 0.55rem 0.65rem;\n  transform: rotate(-3deg);\n  box-shadow: 0 4px 12px rgba(0,0,0,.45);\n  border: 2px solid #1a120c;\n}\n.rp-note-caps { font: 800 13px/1.1 \"IBM Plex Mono\", ui-monospace, monospace; letter-spacing: 0.08em; }\n.rp-stage-prop--ledger-tray { left: 18%; width: 36%; top: 60%; height: 18%; z-index: 7; color: #e8c9a0; }\n.rp-ledger-svg { width: 100%; height: 100%; display: block; }\n\n/* One bubble max readability */\n.rp-hotspot__bubble { z-index: 9; max-width: 11rem; }\nbody.rp-cold-day2 .rp-hotspot--mediate-leyla .rp-hotspot__bubble,\nbody.rp-cold-day2 .rp-hotspot--instigate-leyla .rp-hotspot__bubble,\nbody.rp-cold-day2 .rp-hotspot--stage-leyla .rp-hotspot__bubble { display: none; }\n",
+  "integratorSnippet": {
+    "language": "js",
+    "comment": "One layer wins on Day2 street; arc street props; spotlight off",
+    "pseudo": "\nfunction storyForm9() {\n  return state.questPack?.storyForm9 || state.storyForm9 || null;\n}\n\nfunction isColdDay2() {\n  const day = state.save.dayIndex || 1;\n  return day >= 2 && [\"cold_open_mediate\",\"cold_open_instigate\",\"cold_open_stage\"].some((f) => storyFlag(f));\n}\n\nfunction applyStreetLayerPolicy() {\n  const on = isColdDay2() && (storyForm9()?.streetLayerPriority?.suppressSpotlightWhenColdProp !== false);\n  document.body.classList.toggle(\"rp-cold-day2\", on);\n  if (on) state.save.storyFlags.hide_day2_spotlight = true;\n}\n\nfunction day2EnterSpotlightHtml(screen) {\n  if (isColdDay2() && storyForm9()?.spotlightPolicy?.defaultWhenColdDay2 === \"hidden\") return \"\";\n  if (storyFlag(\"hide_day2_spotlight\")) return \"\";\n  // ...existing form5 spotlight...\n}\n\nfunction streetArcStagePropsHtml() {\n  const props = storyForm9()?.streetArcStageProps || [];\n  const day = state.save.dayIndex || 1;\n  // If cold Day2 prop showing, only allow arc props with priority — or skip antenna snag to avoid double kite\n  const coldShowing = isColdDay2();\n  const hit = props\n    .filter((p) => (p.screens||[\"street\"]).includes(\"street\"))\n    .filter((p) => whenFlagsOk(p.when||{}))\n    .filter((p) => !(coldShowing && p.arcId === \"arc_kite_antenna\")) // cold kite/string wins\n    .sort((a,b) => (b.priority||0)-(a.priority||0))[0];\n  if (!hit) return \"\";\n  return (state.locale===\"tr\" && hit.htmlTr) ? hit.htmlTr : hit.html;\n}\n\nfunction streetArcCompactChipHtml() {\n  if (!isColdDay2() || !storyForm9()?.streetLayerPriority?.deferFullArcBannerWhenColdProp) return \"\";\n  // build chip from live beat short title — no full banner\n  const live = /* reuse form7/8 live beat */ null;\n  ...\n}\n\n// renderStreet:\n// applyStreetLayerPolicy();\n// stageLayer → day2StreetStageHtml → streetArcStagePropsHtml → hotspots\n// if coldDay2: skip antennaOpLiveBannerHtml full; maybe compact chip\n// else: activeArcBeatBannerHtml\n"
+  },
+  "acceptanceChecks": [
+    {
+      "id": "cold_without_spotlight",
+      "desc": "Day2 mediate/instigate/stage: cold SVG+primary NPC bubble visible; .rp-day2-spotlight absent; body.rp-cold-day2 on."
+    },
+    {
+      "id": "one_layer_wins",
+      "desc": "No overlap of full Antenna banner + spotlight + cold prop. Prop + one NPC line readable."
+    },
+    {
+      "id": "antenna_street_prop",
+      "desc": "While Antenna Op active (pre-resolution) and NOT cold Day2 kite conflict: story-street-antenna-snag on street stage."
+    },
+    {
+      "id": "volume_street_prop",
+      "desc": "While Decibel active: story-street-headphones-note physical note on street (not journal-only)."
+    },
+    {
+      "id": "ledger_street_prop",
+      "desc": "While Ledger active: story-street-ledger-tray on street stage."
+    },
+    {
+      "id": "instigate_stage_clean_read",
+      "desc": "Instigate kite + FORBIDDEN ZONE / stage chalk Cup readable on clean screenshot without relying on testId query alone."
+    }
+  ],
+  "playtestScript": [
+    "Mediate → overnight → Day2 street: assert cold string SVG, NO spotlight modal, NO full Antenna banner stack",
+    "Instigate path: kite SVG + chalk readable in screenshot",
+    "Advance to Volume week: HEADPHONES note prop on street",
+    "Ledger week: tray+ledger SVG on street",
+    "Antenna week without cold conflict: snag SVG on street"
+  ],
+  "echoFollowUpsAppend": [
+    {
+      "id": "echo_form9_street_not_journal",
+      "priority": 96,
+      "when": {
+        "flagsAny": [
+          "quest_volume_active",
+          "quest_ledger_active",
+          "quest_antenna_active"
+        ],
+        "slots": [
+          "street",
+          "evening"
+        ]
+      },
+      "speakerId": "narrator",
+      "headline": {
+        "tr": "Ark sahnede — sadece defterde değil",
+        "en": "Arc on the stage — not only in the journal"
+      },
+      "body": {
+        "tr": "Sokakta fiziksel prop var: takılan uçurtma / KULAKLIK notu / tepsi-defter.",
+        "en": "Physical prop on the street: snagged kite / HEADPHONES note / tray-ledger."
+      },
+      "cta": {
+        "tr": "Sokağa bak",
+        "en": "Look at the street"
+      }
+    }
+  ],
+  "newStoryFlags": [
+    "hide_day2_spotlight"
+  ],
+  "meta": {
+    "squad": "story-quest",
+    "formIndex": 9,
+    "shipTrigger": "score story 8.4 — cold without spotlight; deepen arcs on street toward 8.5+",
+    "nextPackWhen": "story category < 8.5",
+    "dependsOnForms": [
+      5,
+      6,
+      7,
+      8
+    ],
+    "implementationNote": "Layer policy + street arc SVG props. Coordinates with visual one-layer-wins fix."
+  }
+}

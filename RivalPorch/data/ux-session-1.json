@@ -1,0 +1,158 @@
+{
+  "packId": "ux-session-1",
+  "schemaVersion": 1,
+  "firstEvening": {
+    "beats": [
+      {
+        "id": "fe_steam",
+        "flagDone": "welcome_checkin_done",
+        "alsoEvening": "checkin",
+        "label": {
+          "tr": "Buhar önce",
+          "en": "Steam first"
+        },
+        "line": {
+          "tr": "Sabah demliği bekliyor — önce buhar, sonra kapılar.",
+          "en": "Morning pot's waiting — steam first, then doors."
+        },
+        "whisper": {
+          "tr": "Merve'nin demliği…",
+          "en": "Steam on Merve's pot…"
+        },
+        "cta": "goto-street"
+      },
+      {
+        "id": "fe_doors",
+        "flagDone": "welcome_met_three",
+        "label": {
+          "tr": "Üç aralık kapı",
+          "en": "Three ajar doors"
+        },
+        "line": {
+          "tr": "Üç komşu kapısı aralık; selam sokağı ısıtır.",
+          "en": "Three neighbor doors ajar; a hello warms the block."
+        },
+        "whisper": {
+          "tr": "Üç kapı hâlâ aralık",
+          "en": "Three doors still ajar"
+        },
+        "cta": "goto-street"
+      },
+      {
+        "id": "fe_kite",
+        "flagDone": "arc_kite_antenna_seed_resolved",
+        "label": {
+          "tr": "Antendeki ip",
+          "en": "String on the antenna"
+        },
+        "line": {
+          "tr": "İnce uçurtma ipi antene dolanmış — bir sır uyanıyor.",
+          "en": "Thin kite string wound on the antenna — a secret waking."
+        },
+        "whisper": {
+          "tr": "Antendeki ince ip",
+          "en": "Thin string on the antenna"
+        },
+        "cta": "goto-street"
+      },
+      {
+        "id": "fe_prova",
+        "flagsAll": [
+          "practice_cup_done",
+          "syn_taught_syn_rivalry"
+        ],
+        "label": {
+          "tr": "Cem'in düdüğü",
+          "en": "Cem's whistle"
+        },
+        "line": {
+          "tr": "Cem'in düdüğü iki sokak öteden; Prova atlanmaz.",
+          "en": "Cem's whistle two doors down; Practice doesn't skip."
+        },
+        "whisper": {
+          "tr": "Cem Prova'da bekliyor",
+          "en": "Cem waits in Practice"
+        },
+        "cta": "goto-cup"
+      },
+      {
+        "id": "fe_claim",
+        "questReady": "mq_welcome_porch",
+        "label": {
+          "tr": "Ödül masada",
+          "en": "Reward on the tray"
+        },
+        "line": {
+          "tr": "Yeni Veranda bitti — tepsideki ödülü unutma.",
+          "en": "New Porch is done — don't leave the tray reward."
+        },
+        "whisper": {
+          "tr": "Ödül tepside — al",
+          "en": "Reward on the tray — claim"
+        },
+        "cta": "open-quests"
+      }
+    ]
+  },
+  "questHud": {
+    "fallback": {
+      "tr": "Sokak nefes alıyor",
+      "en": "The street is breathing"
+    }
+  },
+  "objectiveLabels": {
+    "mq_welcome_o1": {
+      "tr": "Sabah demliğini paylaş",
+      "en": "Share the morning pot"
+    },
+    "mq_welcome_o2": {
+      "tr": "Üç kapıyı ısıt",
+      "en": "Warm three doors"
+    },
+    "mq_welcome_o3": {
+      "tr": "Antendeki sırrı çöz",
+      "en": "Untangle the antenna secret"
+    },
+    "mq_welcome_o4": {
+      "tr": "İlk Kupayı oyna",
+      "en": "Play the first Cup"
+    }
+  },
+  "skipGates": {
+    "endEveningPractice": {
+      "tr": "Akşam bitmez — Cem Prova'da düdük çalıyor.",
+      "en": "Evening won't end — Cem's still whistling Practice."
+    },
+    "endEveningSteam": {
+      "tr": "Önce demlik — Merve kapıda.",
+      "en": "Pot first — Merve's at the door."
+    },
+    "practiceSkip": {
+      "tr": "Atlama yok. Rozeti gör, çağrıyı seç.",
+      "en": "No skip. See the badge, pick the call."
+    },
+    "leaveFight": {
+      "tr": "Bu prova yarım kalmaz — Rekabeti bir kez gör.",
+      "en": "Practice doesn't leave half-done — see Rivalry once."
+    },
+    "finishAgendaKill": true
+  },
+  "strings": {
+    "evening.nightOne.support": {
+      "tr": "Üç kapı hâlâ nefes alıyor. Cumartesi Kupası dinliyor.",
+      "en": "Three doors still breathe. Saturday Cup is listening."
+    },
+    "evening.cta.knock": {
+      "tr": "Bir kapı çal",
+      "en": "Knock a door"
+    },
+    "evening.progress.beats": {
+      "tr": "Vuruş {n}/{max}",
+      "en": "Beats {n}/{max}"
+    },
+    "evening.locked": {
+      "tr": "Akşam bitmez — Cem Prova'da düdük çalıyor.",
+      "en": "Evening won't end — Cem's still whistling Practice."
+    }
+  }
+}

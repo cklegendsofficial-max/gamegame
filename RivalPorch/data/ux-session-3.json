@@ -1,0 +1,80 @@
+{
+  "packId": "ux-session-3",
+  "schemaVersion": 1,
+  "scoreReact": {
+    "buildCommit": "bb8b0f7",
+    "gameplay": 6.0,
+    "gap": "endEnabled false after Practice path; overnight forced"
+  },
+  "endEvening": {
+    "predicate": "practice_cup_done && syn_taught_syn_rivalry",
+    "requiresFlagsAll": [
+      "practice_cup_done",
+      "syn_taught_syn_rivalry"
+    ],
+    "forbiddenExtraRequires": [
+      "agendaComplete",
+      "ritualDone",
+      "giftErrandDone",
+      "welcome_checkin_done",
+      "welcome_met_three",
+      "streetEventDone",
+      "practice_cup_porch_call_done",
+      "comicSeen"
+    ],
+    "deriveEveryPaint": true,
+    "testid": "end-evening",
+    "datasetKey": "endEnabled"
+  },
+  "markPracticeCleared": {
+    "setsFlags": [
+      "practice_cup_done",
+      "syn_taught_syn_rivalry",
+      "first_evening_practice_cleared"
+    ],
+    "reasons": [
+      "fight_finish",
+      "comic_dismiss",
+      "rivalry_ack",
+      "audit_settle",
+      "show_me_settle"
+    ]
+  },
+  "coldAuditForcePath": {
+    "debugFree": true,
+    "noConsole": true,
+    "urlFlag": "coldAudit=1",
+    "htmlDataAttr": "data-audit-cold=1",
+    "settleTestId": "practice-settle",
+    "confirmTestId": "practice-settle-confirm",
+    "setsReason": "audit_settle",
+    "thenNav": "evening",
+    "assert": "end-evening[data-end-enabled=true]"
+  },
+  "copy": {
+    "settle": {
+      "tr": "Cem: Prova yeter \u2014 ak\u015fam\u0131 b\u0131rak",
+      "en": "Cem: Practice is enough \u2014 settle evening"
+    },
+    "settleConfirmTitle": {
+      "tr": "D\u00fcd\u00fck bitsin mi?",
+      "en": "Whistle down?"
+    },
+    "settleConfirmBody": {
+      "tr": "Provay\u0131 \u00f6\u011fretti say\u0131l\u0131r; Ak\u015fam\u0131 b\u0131rak a\u00e7\u0131l\u0131r.",
+      "en": "Marks Practice taught and unlocks End evening."
+    },
+    "blocked": {
+      "tr": "Ak\u015fam bitmez \u2014 Cem Prova'da d\u00fcd\u00fck \u00e7al\u0131yor.",
+      "en": "Evening won't end \u2014 Cem's still whistling Practice."
+    }
+  },
+  "acceptanceChecks": [
+    "endEnabled_true_iff_two_flags",
+    "settle_sets_both_flags_without_console",
+    "coldAudit_url_shows_settle",
+    "first_evening_paint_after_settle_data_end_enabled_true",
+    "overnight_reachable_day1_via_settle",
+    "agenda_not_in_predicate"
+  ]
+}

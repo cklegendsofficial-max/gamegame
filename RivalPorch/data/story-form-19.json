@@ -1,0 +1,196 @@
+{
+  "schemaVersion": 1,
+  "packId": "story-form-19",
+  "kind": "story-quest-form",
+  "formIndex": 19,
+  "localeDefault": "tr",
+  "purpose": "Day10 ledger_natural paints clean ledger tray winner; arm recommend-tonight candidate after lived beat + ledger tease.",
+  "addressesScore": {
+    "scoreLatestPath": "internal/rival-porch-score-latest.json",
+    "overall": 8.9,
+    "storyScore": 8.8,
+    "playedAt": "2026-11-23T13:58:00Z",
+    "gaps": [
+      "would_recommend_tonight_candidate never arms",
+      "Day10 ledger winner without clean ledger tray prop",
+      "MAIN bar lags Week-2 Ledger handoff"
+    ],
+    "priorityFixes": [
+      {
+        "title": "Day10 ledger_natural paints clean ledger tray winner",
+        "acceptance": "Day10 cold street: story-street-ledger-tray visible, headphones note gone or yielded, MAIN reflects Ledger handoff."
+      },
+      {
+        "title": "Arm recommend-tonight candidate after lived beat + ledger tease",
+        "acceptance": "After decibel_lived_beat_done + quest_ledger_tease: recommend bar data-candidate=true with candidate copy; auditor may set wouldRecommendTonight only with overall≥9."
+      }
+    ]
+  },
+  "sourcePacks": [
+    "internal/squads/story-form-15.json",
+    "internal/squads/story-form-18.json"
+  ],
+  "integrator": {
+    "owner": "code owner on cursor/rival-porch-slice-31f7",
+    "noPrFromThisPackAuthor": true,
+    "mergeMode": "patch-overlay",
+    "wire": [
+      "Merge storyForm19",
+      "Replace ledgerPropHtml fallback with form19.cleanLedgerTrayHtml (SVG winner)",
+      "pickUnifiedStoryWinner day≥10: return ledger_natural with clean tray HTML; do NOT co-paint headphones",
+      "body.rp-ledger-wins on day≥10 — CSS hides headphones note",
+      "spineCultChipHtml: day≥10 or natural_ledger_street_wins → MAIN 4/5 Ledger label",
+      "armRecommendTonightCandidate(): if decibel_lived_beat_done && quest_ledger_tease → set would_recommend_tonight_candidate",
+      "Call arm on street/evening render and after armMech15DecibelLived fire + week2 pull show",
+      "recommendTonightBarHtml: data-candidate from that flag (climbing vs candidate copy)",
+      "Do NOT require overall≥9 to arm data-candidate — auditor wouldRecommendTonight stays overall≥9 only"
+    ],
+    "doNot": [
+      "Leave tag-only ledgerPropHtml fallback as Day10 winner visual",
+      "Gate data-candidate=true on overall≥9",
+      "Keep headphones as co-primary on Day10 ledger_natural"
+    ]
+  },
+  "principles": {
+    "storyNeverGatedBySpend": true,
+    "day10LedgerTrayWinsVisually": true,
+    "headphonesYieldsToLedgerDay10": true,
+    "recommendCandidateArmsOnLivedPlusTease": true,
+    "auditorRecommendTonightNeedsOverall9": true
+  },
+  "cleanLedgerTrayWinner": {
+    "id": "day10_ledger_tray_winner",
+    "testId": "story-street-ledger-tray",
+    "winnerId": "ledger_natural",
+    "when": {
+      "dayIndexMin": 10,
+      "orFlagsAny": [
+        "natural_ledger_street_wins",
+        "natural_ledger_street"
+      ]
+    },
+    "html": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray rp-stage-prop--ledger-tray-winner\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" data-unlock=\"natural\" data-winner=\"ledger_natural\" data-form=\"19\" aria-label=\"Ledger & tray\">\n  <svg class=\"rp-ledger-svg\" viewBox=\"0 0 100 36\" aria-hidden=\"true\">\n    <ellipse cx=\"26\" cy=\"22\" rx=\"16\" ry=\"7\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"1.1\"/>\n    <path d=\"M38 18 Q42 12 46 18\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.9\"/>\n    <rect x=\"48\" y=\"6\" width=\"36\" height=\"22\" rx=\"2\" fill=\"rgba(20,14,10,.55)\" stroke=\"#e8c9a0\" stroke-width=\"1\"/>\n    <line x1=\"54\" y1=\"12\" x2=\"78\" y2=\"12\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n    <line x1=\"54\" y1=\"17\" x2=\"74\" y2=\"17\" stroke=\"#c45c3e\" stroke-width=\"0.8\"/>\n    <line x1=\"54\" y1=\"22\" x2=\"78\" y2=\"22\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">MAIN 4/5 · Ledger · tray</span>\n</div>",
+    "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray rp-stage-prop--ledger-tray-winner\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" data-unlock=\"natural\" data-winner=\"ledger_natural\" data-form=\"19\" aria-label=\"Defter ve tepsi\">\n  <svg class=\"rp-ledger-svg\" viewBox=\"0 0 100 36\" aria-hidden=\"true\">\n    <ellipse cx=\"26\" cy=\"22\" rx=\"16\" ry=\"7\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"1.1\"/>\n    <path d=\"M38 18 Q42 12 46 18\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.9\"/>\n    <rect x=\"48\" y=\"6\" width=\"36\" height=\"22\" rx=\"2\" fill=\"rgba(20,14,10,.55)\" stroke=\"#e8c9a0\" stroke-width=\"1\"/>\n    <line x1=\"54\" y1=\"12\" x2=\"78\" y2=\"12\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n    <line x1=\"54\" y1=\"17\" x2=\"74\" y2=\"17\" stroke=\"#c45c3e\" stroke-width=\"0.8\"/>\n    <line x1=\"54\" y1=\"22\" x2=\"78\" y2=\"22\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">MAIN 4/5 · Defter · tepsi</span>\n</div>",
+    "hideHeadphones": true,
+    "mainBar": {
+      "tr": "MAIN 4/5 · Defter & Tepsi",
+      "en": "MAIN 4/5 · Ledger & Tray",
+      "testId": "spine-cult-chip",
+      "mqId": "mq_ledger_tray"
+    },
+    "npcLine": {
+      "speakerId": "n1",
+      "text": {
+        "tr": "Tepsi ve defter kazandı — KULAKLIK yerini verdi.",
+        "en": "Tray and ledger won — HEADPHONES yielded."
+      },
+      "testId": "story-ledger-natural-npc"
+    }
+  },
+  "armRecommendTonightCandidate": {
+    "id": "arm_recommend_candidate_lived_ledger",
+    "armWhen": {
+      "flagsAll": [
+        "decibel_lived_beat_done",
+        "quest_ledger_tease"
+      ]
+    },
+    "alsoArmWhen": {
+      "flagsAll": [
+        "decibel_lived_beat_done",
+        "week2_decibel_ledger_seen"
+      ]
+    },
+    "setsFlag": "would_recommend_tonight_candidate",
+    "bar": {
+      "testId": "recommend-tonight-bar",
+      "dataCandidate": true,
+      "copy": {
+        "tr": "Bu gece tavsiye adayı — yaşayan Desibel + Defter tease.",
+        "en": "Tonight recommend candidate — lived Decibel + Ledger tease."
+      }
+    },
+    "auditorSeparate": {
+      "wouldRecommendTonight": "only if overall≥9 (and typically all cats≥8.5) — do not conflate with data-candidate arming"
+    },
+    "ensureLedgerTeaseOnLived": {
+      "note": "When decibel_lived_beat_done fires, also set quest_ledger_tease + arc_tea_ledger_seed if missing so candidate can arm",
+      "setsFlags": [
+        "quest_ledger_tease",
+        "arc_tea_ledger_seed",
+        "week2_decibel_ledger_seen"
+      ]
+    }
+  },
+  "cssAppend": "\n/* story-form-19 — Day10 ledger tray winner; headphones yields */\nbody.rp-ledger-wins .rp-stage-prop--headphones-note,\nbody.rp-ledger-wins [data-testid=\"story-street-headphones-note\"],\nbody[data-day-index=\"10\"] .rp-stage-prop--headphones-note,\nbody[data-day-index=\"11\"] .rp-stage-prop--headphones-note,\nbody[data-day-index=\"12\"] .rp-stage-prop--headphones-note {\n  display: none !important;\n}\n.rp-stage-prop--ledger-tray-winner {\n  left: 16%; width: 42%; top: 54%; height: 24%;\n  z-index: 10;\n  color: #e8c9a0;\n  animation: rp-ledger-win 1.8s ease-in-out infinite;\n}\n.rp-stage-prop--ledger-tray-winner .rp-stage-prop__tag {\n  font-size: 12px;\n  background: rgba(12,8,6,.92);\n  border: 1px solid rgba(232,180,120,.55);\n}\n.rp-ledger-svg { width: 100%; height: 100%; display: block; }\n@keyframes rp-ledger-win {\n  0%, 100% { filter: drop-shadow(0 0 0 rgba(232,180,120,0)); }\n  50% { filter: drop-shadow(0 0 8px rgba(232,180,120,.35)); }\n}\n.rp-recommend-tonight-bar[data-candidate=\"true\"] {\n  border-color: rgba(232,180,120,.75);\n  box-shadow: 0 0 0 1px rgba(232,180,120,.25);\n  font-weight: 600;\n}\n",
+  "integratorSnippet": {
+    "language": "js",
+    "comment": "Clean Day10 ledger tray + arm recommend candidate",
+    "pseudo": "\nfunction storyForm19(){ return state.questPack?.storyForm19 || state.storyForm19 || null; }\n\nfunction cleanLedgerTrayHtml() {\n  const c = storyForm19()?.cleanLedgerTrayWinner;\n  if (!c) return ledgerPropHtml(); // legacy\n  return state.locale === \"tr\" && c.htmlTr ? c.htmlTr : c.html;\n}\n\nfunction ledgerPropHtml() {\n  // Prefer form19 clean SVG always for tray testId\n  const c = storyForm19()?.cleanLedgerTrayWinner;\n  if (c) return state.locale === \"tr\" && c.htmlTr ? c.htmlTr : c.html;\n  // ...prior packs...\n}\n\nfunction syncLedgerWinsBodyClass() {\n  const day = state.save.dayIndex || 1;\n  const wins = day >= 10 || storyFlag(\"natural_ledger_street_wins\");\n  document.body.classList.toggle(\"rp-ledger-wins\", wins);\n  if (wins) document.body.dataset.dayIndex = String(day);\n}\n\nfunction armRecommendTonightCandidate() {\n  const f = state.save.storyFlags || (state.save.storyFlags = {});\n  const rule = storyForm19()?.armRecommendTonightCandidate;\n  if (!rule) return;\n  // ensure tease accompanies lived beat\n  if (f.decibel_lived_beat_done) {\n    for (const k of rule.ensureLedgerTeaseOnLived?.setsFlags || []) f[k] = true;\n  }\n  const a = rule.armWhen?.flagsAll || [];\n  const b = rule.alsoArmWhen?.flagsAll || [];\n  const okA = a.length && a.every((k) => f[k]);\n  const okB = b.length && b.every((k) => f[k]);\n  if (okA || okB) {\n    f[rule.setsFlag || \"would_recommend_tonight_candidate\"] = true;\n  }\n}\n\nfunction recommendTonightBarHtml() {\n  armRecommendTonightCandidate();\n  const bar = storyForm19()?.armRecommendTonightCandidate?.bar\n    || storyForm18()?.cultRecommendTonightBar?.recommendTonight;\n  if (!bar) return \"\";\n  const show = storyFlag(\"decibel_lived_beat_done\") || storyFlag(\"quest_ledger_tease\") || storyFlag(\"week2_decibel_ledger_seen\") || (state.save.dayIndex||1) >= 7;\n  if (!show) return \"\";\n  const candidate = !!storyFlag(\"would_recommend_tonight_candidate\");\n  const copy = candidate\n    ? (bar.copy || storyForm18()?.cultRecommendTonightBar?.recommendTonight?.copyWhenCandidate)\n    : (storyForm18()?.cultRecommendTonightBar?.recommendTonight?.copyWhenClimbing);\n  return `<div class=\"rp-recommend-tonight-bar\" data-testid=\"recommend-tonight-bar\" data-candidate=\"${candidate}\">${loc(copy)}</div>`;\n}\n\n// pickUnifiedStoryWinner day≥10:\n//   syncLedgerWinsBodyClass();\n//   return { id:\"ledger_natural\", html: cleanLedgerTrayHtml(), npc: ledgerNpc..., ...}\n\n// spineCultChipHtml:\n//   if (day>=10 || natural_ledger_street_wins) return MAIN 4/5 Ledger & Tray\n\n// armMech15DecibelLived fire(): also call armRecommendTonightCandidate() after setting lived flags + ensureLedgerTease\n"
+  },
+  "acceptanceChecks": [
+    {
+      "id": "day10_clean_tray",
+      "desc": "Day10: story-street-ledger-tray SVG visible with data-winner=ledger_natural; headphones note absent."
+    },
+    {
+      "id": "main_ledger_handoff",
+      "desc": "Day10 spine-cult-chip / MAIN reflects Ledger (4/5), not Decibel Accord."
+    },
+    {
+      "id": "recommend_candidate_armed",
+      "desc": "After decibel_lived_beat_done + quest_ledger_tease: would_recommend_tonight_candidate true; recommend-tonight-bar data-candidate=true with candidate copy."
+    },
+    {
+      "id": "auditor_overall_separate",
+      "desc": "data-candidate arms without overall≥9; auditor wouldRecommendTonight remains overall≥9 gate."
+    }
+  ],
+  "playtestScript": [
+    "Cold mediate overnight to day10 → street: clean ledger tray SVG, no headphones",
+    "MAIN/spine shows Ledger 4/5",
+    "Trigger lived beat (or wait auto-fire) → quest_ledger_tease set → recommend-tonight-bar data-candidate=true"
+  ],
+  "newStoryFlags": [],
+  "echoFollowUpsAppend": [
+    {
+      "id": "echo_form19_ledger_wins",
+      "priority": 104,
+      "when": {
+        "dayIndexMin": 10,
+        "flagsAny": [
+          "natural_ledger_street_wins",
+          "would_recommend_tonight_candidate"
+        ],
+        "slots": [
+          "street",
+          "evening"
+        ]
+      },
+      "speakerId": "narrator",
+      "headline": {
+        "tr": "Defter tepsi kazandı",
+        "en": "Ledger tray won"
+      },
+      "body": {
+        "tr": "MAIN 4/5 sokakta. Tavsiye adayı — yaşayan beat + Defter tease.",
+        "en": "MAIN 4/5 on the street. Recommend candidate — lived beat + Ledger tease."
+      },
+      "cta": {
+        "tr": "Tepsiyi gör",
+        "en": "See the tray"
+      }
+    }
+  ],
+  "meta": {
+    "squad": "story-quest",
+    "formIndex": 19,
+    "shipTrigger": "score 8.9 story 8.8 — clean Day10 ledger tray + arm recommend candidate",
+    "nextPackWhen": "story priorityFixes open OR story < 8.5",
+    "dependsOnForms": [
+      15,
+      18
+    ],
+    "implementationNote": "SVG tray winner + headphones CSS yield; arm candidate on lived+tease not overall≥9."
+  }
+}

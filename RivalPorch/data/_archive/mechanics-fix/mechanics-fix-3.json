@@ -1,0 +1,300 @@
+{
+  "schemaVersion": 1,
+  "id": "mechanics-fix-3",
+  "packNumber": 3,
+  "squad": "mechanics",
+  "shippedAt": "2026-11-23T11:47:00Z",
+  "noPrPush": true,
+  "extends": [
+    "internal/rival-porch-combat-pack.json",
+    "internal/squads/mechanics-fix-1.json",
+    "internal/squads/mechanics-fix-2.json"
+  ],
+  "mergeMode": "deepMergeIntoCombatPack",
+  "wirePathHint": "RivalPorch/data/combat-pack.json (+ overlay RivalPorch/data/mechanics-fix-3.json)",
+  "alsoRespects": [
+    "internal/rival-porch-session-density.json#practiceCupTeach"
+  ],
+  "scoreRef": {
+    "file": "internal/rival-porch-score-latest.json",
+    "buildCommit": "7eca67c",
+    "mechanicsScore": 7.0,
+    "priorityFixTitle": "Guarantee Practice → draft → arena fight"
+  },
+  "scoreGapsAddressed": [
+    "Fight often not entered from Practice lobby in cold play",
+    "Synergy footer can claim Rivalry while flow still says form synergy",
+    "Cold path stalls on cup lobby — arena stage unread"
+  ],
+  "targets": [
+    "practiceFlowGuarantee",
+    "lobbyAutoAdvance",
+    "startEnabledRules",
+    "footerCoachConsistency"
+  ],
+
+  "practiceFlowGuarantee": {
+    "path": ["practice_entry", "draft", "placement", "arena_fight", "comic"],
+    "mustNotStallAt": ["cup_lobby", "draft_ready_lock", "placement_confirm"],
+    "acceptance": {
+      "tr": "Göster + 3 pick sonrası Start tek tap ile arena pad dövüşüne girer; Skip öğreti bir kez ateşlenene kadar kapalı.",
+      "en": "After Show me + 3 picks, Start enters fight with units on arena pads within 1 tap; skip disabled until teach fires once."
+    },
+    "coldPathContract": {
+      "maxTapsFromShowMeToFight": 2,
+      "preferred": "Show me → (auto draft+place) → Start → fight",
+      "alternate": "manual 3 picks forming Rivalry → Start → fight",
+      "timeoutAutoAdvanceMs": 0,
+      "neverRequireHover": true
+    }
+  },
+
+  "lobbyAutoAdvance": {
+    "practiceOnly": true,
+    "onShowMe": {
+      "applyAutoPickFallback": ["n2", "n4", "n1"],
+      "expectedSynergyId": "syn_rivalry",
+      "setPicksImmediately": true,
+      "recomputeFooterSync": true,
+      "autoPlaceByRole": true,
+      "placementMap": [
+        { "neighborId": "n4", "padId": "p_front_left" },
+        { "neighborId": "n2", "padId": "p_front_right" },
+        { "neighborId": "n1", "padId": "p_back_mid" }
+      ],
+      "enemyLineupFixed": [
+        { "botId": "bot_n3", "padId": "e_front_left" },
+        { "botId": "bot_n5", "padId": "e_front_right" },
+        { "botId": "bot_n6", "padId": "e_back_mid" }
+      ],
+      "setsFlags": ["practice_show_me_applied", "practice_draft_ready"],
+      "unlockStart": true,
+      "coachLine": {
+        "tr": "Roster hazır — Start'a bas, Rekabeti dövüşte gör.",
+        "en": "Roster set — tap Start, see Rivalry in the fight."
+      },
+      "ctaPulse": {
+        "target": "start_button",
+        "ms": 1200
+      }
+    },
+    "onManualThreePicks": {
+      "when": "pickCount === 3",
+      "ifSynergyFormed": {
+        "synergyId": "syn_rivalry",
+        "autoPlaceIfNotPlaced": true,
+        "unlockStart": true,
+        "setsFlags": ["practice_draft_ready"]
+      },
+      "ifSynergyNotFormed": {
+        "keepStartDisabled": true,
+        "showCoach": {
+          "tr": "3 pick var ama Rekabet yok — Cem+Orhan dene veya Göster.",
+          "en": "3 picks but no Rivalry — try Cem+Orhan or Show me."
+        },
+        "offerShowMe": true
+      }
+    },
+    "skipPlacementScreenIfAutoPlaced": {
+      "enabled": true,
+      "practiceDefault": true,
+      "stillAllowManualAdjust": true,
+      "adjustLabel": {
+        "tr": "Yerleri düzenle",
+        "en": "Adjust pads"
+      }
+    },
+    "antiStall": {
+      "detectStuckMs": 8000,
+      "whenStuckOnLobbyWithShowMeDone": {
+        "forceUnlockStart": true,
+        "toast": {
+          "tr": "Takılma kalktı — Start açık.",
+          "en": "Unstuck — Start is open."
+        },
+        "setsFlags": ["practice_lobby_unstuck"]
+      },
+      "whenStuckOnLobbyWithThreePicksAndRivalry": {
+        "forceUnlockStart": true,
+        "forceFooterRecompute": true
+      },
+      "neverSoftLockReadyBehindDesyncedFooter": true
+    }
+  },
+
+  "startEnabledRules": {
+    "buttonId": "cup_start",
+    "labels": {
+      "enabled": { "tr": "Start — arena", "en": "Start — arena" },
+      "disabledNeedPicks": {
+        "tr": "3 komşu seç veya Göster",
+        "en": "Pick 3 neighbors or Show me"
+      },
+      "disabledNeedSynergy": {
+        "tr": "Rekabeti kur (veya Göster)",
+        "en": "Form Rivalry (or Show me)"
+      },
+      "disabledSyncing": {
+        "tr": "Sinerji senkron…",
+        "en": "Syncing synergy…"
+      }
+    },
+    "enableWhenAll": [
+      "pickCount === 3",
+      "OR(show_me_applied, activeSynergies.includes('syn_rivalry'))",
+      "footerSyncedWithPicks === true",
+      "placementResolved === true"
+    ],
+    "overridesFromFix2": {
+      "note": "fix-2 blocked Start on footer desync — that caused lobby stalls when footer lagged. fix-3: recompute footer synchronously in the same tick as picks/Show me; only briefly disable (<1 frame) then force sync.",
+      "blockStartOnDesync": false,
+      "onDesync": {
+        "action": "force_recompute_and_rerender_same_tick",
+        "blockStart": false,
+        "maxSyncRetries": 2,
+        "thenEnableIfPicksValid": true,
+        "devWarn": "synergy_footer_desync_recovered"
+      }
+    },
+    "onStartTap": {
+      "enterScene": "arena_fight",
+      "requireUnitsOnPads": true,
+      "seedFromPlacementMap": true,
+      "beginScriptedMoments": true,
+      "setsFlags": ["practice_fight_entered"],
+      "ifPadsEmpty": {
+        "action": "apply_default_practice_placement_then_enter",
+        "doNotAbortToLobby": true
+      }
+    },
+    "minTapTargetPx": 52,
+    "alwaysVisibleInPracticeLobby": true,
+    "disabledOpacity": 0.45,
+    "enabledPulseWhenUnlocked": true
+  },
+
+  "footerCoachConsistency": {
+    "problem": "Footer can claim Rivalry while coach still says form synergy — Start stays locked",
+    "rule": "coachGateState MUST equal footer.activeSynergies for taught synergy",
+    "onMismatch": {
+      "prefer": "footer_and_picks_as_source_of_truth",
+      "clearStaleRequireSynergyLock": true,
+      "unlockStartIfRivalryActive": true,
+      "coachLine": {
+        "tr": "Rekabet hazır — Start.",
+        "en": "Rivalry ready — Start."
+      }
+    },
+    "requireSynergyToReady": {
+      "practice": "satisfied_by_show_me_OR_rivalry_active",
+      "doNotKeepLockedAfterShowMe": true
+    }
+  },
+
+  "skipRules": {
+    "hideSkipUntilFlagsAll": [
+      "syn_taught_syn_rivalry",
+      "practice_cup_porch_call_done",
+      "practice_cup_done"
+    ],
+    "note": "Skip stays disabled until teach fires once (density gate). Do not use Skip as lobby escape.",
+    "lobbyHasNoSkipEscape": true
+  },
+
+  "flowStateMachine": {
+    "states": [
+      {
+        "id": "practice_entry",
+        "enter": ["show_coach_or_show_me"],
+        "exits": [{ "to": "draft", "when": "user_in_cup_lobby" }]
+      },
+      {
+        "id": "draft",
+        "enter": ["render_picks", "footer_live"],
+        "exits": [
+          {
+            "to": "placement_or_ready",
+            "when": "show_me_OR_(3_picks_AND_rivalry)"
+          }
+        ]
+      },
+      {
+        "id": "placement_or_ready",
+        "enter": ["auto_place_practice_default", "enable_start"],
+        "exits": [
+          { "to": "arena_fight", "when": "start_tapped" },
+          { "to": "placement_or_ready", "when": "adjust_pads" }
+        ]
+      },
+      {
+        "id": "arena_fight",
+        "enter": [
+          "mount_units_on_pads",
+          "run_scripted_moments",
+          "sticky_rivalry_procs"
+        ],
+        "exits": [{ "to": "comic", "when": "fight_finished" }]
+      },
+      {
+        "id": "comic",
+        "enter": ["seed_synergy_call_mvp", "set_practice_cup_done_atomic"]
+      }
+    ],
+    "illegal": [
+      "draft -> comic",
+      "practice_entry -> arena_fight without picks",
+      "stay_in_draft after show_me > 1s without start_enabled"
+    ]
+  },
+
+  "uiStringsPatch": {
+    "practice.show_me_then_start": {
+      "tr": "Göster → Start",
+      "en": "Show me → Start"
+    },
+    "practice.start_arena": {
+      "tr": "Start — arena",
+      "en": "Start — arena"
+    },
+    "practice.lobby_unstuck": {
+      "tr": "Takılma kalktı — Start açık.",
+      "en": "Unstuck — Start is open."
+    },
+    "practice.rivalry_ready_start": {
+      "tr": "Rekabet hazır — Start.",
+      "en": "Rivalry ready — Start."
+    }
+  },
+
+  "acceptanceChecks": [
+    "After Show me: 3 picks applied, pads filled, Start enabled within same tick",
+    "Start tap enters arena fight with units on pads (no return to lobby)",
+    "Manual Cem+Orhan(+Merve) Rivalry also enables Start without Show me",
+    "Footer Rivalry active ⇒ coach does not still demand form synergy",
+    "Skip remains hidden until syn_taught_syn_rivalry + porch_call_done + practice_cup_done",
+    "Anti-stall: lobby stuck >8s after Show me force-unlocks Start"
+  ],
+
+  "integrator": {
+    "owner": "code owner on cursor/rival-porch-slice-31f7",
+    "steps": [
+      "Merge after fix-2. Critical: change fix-2 footer desync from blockStart:true to same-tick recompute (see startEnabledRules.overridesFromFix2).",
+      "Show me handler must set picks + place + unlock Start atomically before paint.",
+      "Start onClick must enter arena_fight even if pads empty (apply default placement, do not abort).",
+      "Keep density Skip/End-evening gates; this pack only unsticks lobby→fight.",
+      "Cold smoke: clear storage → Practice → Show me → Start → assert fight scene + pads occupied.",
+      "No PR from this squad."
+    ],
+    "priority": "wire immediately — auditor PriorityFix for mechanics on 7eca67c"
+  },
+
+  "meta": {
+    "expectedMechanicsLift": "Unblocks arena mastery read; required before pad/proc acceptance can score",
+    "nextPackIfStillLow": "mechanics-fix-4 — closer HP races, Tea/Neon second practice, position column skill",
+    "compat": {
+      "practiceCupId": "practice_cup_rivalry_01",
+      "showMeFallback": ["n2", "n4", "n1"],
+      "neighborIds": ["n1", "n2", "n3", "n4", "n5", "n6"]
+    }
+  }
+}

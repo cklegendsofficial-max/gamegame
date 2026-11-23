@@ -1,0 +1,37 @@
+{
+  "packId": "ux-session-4",
+  "schemaVersion": 1,
+  "nuclear": true,
+  "supersedesGateWiring": [
+    "ux-session-2",
+    "ux-session-3"
+  ],
+  "scoreReact": {
+    "buildCommit": "2f67255",
+    "gameplay": 6.2,
+    "gap": "endEnabled false after fight; overnight softlock"
+  },
+  "forceFlagsOn": [
+    "screen-fight-end",
+    "auto_fight_end",
+    "comic_shown",
+    "comic_dismiss",
+    "result_banner"
+  ],
+  "setsFlags": [
+    "practice_cup_done",
+    "syn_taught_syn_rivalry",
+    "first_evening_practice_cleared"
+  ],
+  "recomputeOn": [
+    "renderEvening"
+  ],
+  "postFightNav": "evening",
+  "endEveningNav": "overnight",
+  "predicate": "practice_cup_done && syn_taught_syn_rivalry",
+  "htmlDataset": [
+    "endEnabled",
+    "practiceCupDone",
+    "synTaught"
+  ]
+}

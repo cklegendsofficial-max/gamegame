@@ -1,0 +1,347 @@
+{
+  "schemaVersion": 1,
+  "packId": "story-form-12",
+  "kind": "story-quest-form",
+  "formIndex": 12,
+  "localeDefault": "tr",
+  "purpose": "Volume/Ledger cold street SVG on natural unlock — story-street-headphones-note then story-street-ledger-tray without force-flag inject.",
+  "addressesScore": {
+    "scoreLatestPath": "internal/rival-porch-score-latest.json",
+    "overall": 8.4,
+    "storyScore": 8.5,
+    "playedAt": "2026-11-23T13:05:00Z",
+    "priorityFix": {
+      "squad": "story",
+      "title": "Volume/Ledger cold street SVG on natural unlock",
+      "acceptance": "After Antenna week advance (or seeded Week-2 cold), street shows story-street-headphones-note then story-street-ledger-tray with one-layer policy; smoke asserts testIds without flag inject."
+    },
+    "gaps": [
+      "Volume/Ledger street SVG not cold-proven on natural path",
+      "Antenna→Volume handoff not visible as street rewrite yet"
+    ]
+  },
+  "sourcePacks": [
+    "internal/squads/story-form-9.json",
+    "internal/squads/story-form-10.json",
+    "internal/squads/story-form-11.json"
+  ],
+  "integrator": {
+    "owner": "code owner on cursor/rival-porch-slice-31f7",
+    "noPrFromThisPackAuthor": true,
+    "mergeMode": "patch-overlay",
+    "wire": [
+      "Merge storyForm12; expose via normalizeQuestPack",
+      "Replace form9 Volume/Ledger streetArcStageProps when-clauses with form12.naturalStreetProps (day-based; no flagsAny required)",
+      "Call applyNaturalArcStreetUnlock() at overnight/day advance AND at street enter — sets soft seeds from dayIndex only (never force-* inject, never smoke flag poke)",
+      "streetArcStagePropsHtml: prefer storyForm12.naturalStreetProps over form9 for arc_volume_war / arc_tea_ledger",
+      "One-layer: if both Volume+Ledger eligible, Volume wins until volumeStreetDaysSeen>=2 OR dayIndex>= ledger day; then Ledger",
+      "Smoke: advance days via normal overnight only; assert testIds; do NOT set quest_volume_active / arc_* via test harness"
+    ],
+    "doNot": [
+      "Require force-overnight-story or flag inject for headphones/ledger SVG",
+      "Gate props on quest_volume_active / arc_volume_war_beat* alone",
+      "Show Volume note and Ledger tray stacked on first eligible paint"
+    ]
+  },
+  "principles": {
+    "storyNeverGatedBySpend": true,
+    "naturalUnlockNoForceFlags": true,
+    "smokeWithoutFlagInject": true,
+    "oneLayerWins": true,
+    "volumeThenLedger": true
+  },
+  "naturalUnlockSchedule": {
+    "id": "volume_ledger_natural",
+    "note": "Calendar + Antenna advance — not force flags. Soft seeds are optional mirrors for other systems; props MUST render from dayIndex alone.",
+    "volumeHeadphones": {
+      "testId": "story-street-headphones-note",
+      "paths": [
+        {
+          "id": "after_antenna_week",
+          "dayIndexMin": 3,
+          "antennaDoneAny": [
+            "arc_kite_antenna_complete",
+            "quest_antenna_complete",
+            "arc_kite_antenna_beat4",
+            "flag_fence_and_kite",
+            "flag_kite_chaos_buff"
+          ],
+          "softSeeds": [
+            "natural_volume_street",
+            "quest_volume_tease",
+            "arc_volume_war_seed"
+          ]
+        },
+        {
+          "id": "week2_cold_seed",
+          "dayIndexMin": 7,
+          "note": "Week-2 cold: calendar alone unlocks Volume street even if Antenna flags never fired",
+          "softSeeds": [
+            "natural_volume_street",
+            "week2_volume_seed"
+          ]
+        }
+      ],
+      "suppressWhen": [
+        "arc_volume_war_complete",
+        "flag_peri_stay",
+        "flag_peri_leaving_threat"
+      ]
+    },
+    "ledgerTray": {
+      "testId": "story-street-ledger-tray",
+      "paths": [
+        {
+          "id": "after_volume_street",
+          "dayIndexMin": 5,
+          "requiresSeen": "natural_volume_street",
+          "orVolumeDoneAny": [
+            "arc_volume_war_complete",
+            "quest_volume_complete",
+            "arc_volume_war_beat5",
+            "street_av_handoff_done"
+          ],
+          "softSeeds": [
+            "natural_ledger_street",
+            "quest_ledger_tease",
+            "arc_tea_ledger_seed"
+          ]
+        },
+        {
+          "id": "week2_ledger_seed",
+          "dayIndexMin": 10,
+          "note": "Later Week-2/3 cold: ledger tray without Volume flag inject",
+          "softSeeds": [
+            "natural_ledger_street",
+            "week2_ledger_seed"
+          ]
+        }
+      ],
+      "suppressWhen": [
+        "arc_tea_ledger_complete",
+        "flag_ledger_closed_kind",
+        "flag_ledger_private"
+      ]
+    },
+    "oneLayerOrder": [
+      "volumeHeadphones",
+      "ledgerTray"
+    ]
+  },
+  "naturalStreetProps": [
+    {
+      "id": "street_prop_volume_headphones_natural",
+      "arcId": "arc_volume_war",
+      "replacesForm9Id": "street_prop_volume_headphones",
+      "screens": [
+        "street"
+      ],
+      "priority": 88,
+      "unlockMode": "natural",
+      "when": {
+        "dayIndexMin": 3,
+        "flagsNone": [
+          "arc_volume_war_complete",
+          "flag_peri_stay",
+          "flag_peri_leaving_threat",
+          "natural_ledger_street_wins"
+        ],
+        "naturalAny": [
+          {
+            "dayIndexMin": 3,
+            "flagsAny": [
+              "arc_kite_antenna_complete",
+              "quest_antenna_complete",
+              "arc_kite_antenna_beat4",
+              "flag_fence_and_kite",
+              "flag_kite_chaos_buff",
+              "natural_volume_street",
+              "street_av_handoff_seen",
+              "quest_volume_tease",
+              "arc_volume_war_seed",
+              "quest_volume_active",
+              "arc_volume_war_beat1",
+              "arc_volume_war_beat2"
+            ]
+          },
+          {
+            "dayIndexMin": 7
+          }
+        ]
+      },
+      "html": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-headphones-note\" data-arc=\"arc_volume_war\" data-unlock=\"natural\" aria-label=\"HEADPHONES note\">\n  <div class=\"rp-note-door\">\n    <span class=\"rp-note-caps\">HEADPHONES</span>\n  </div>\n  <span class=\"rp-stage-prop__tag\">Decibel · note</span>\n</div>",
+      "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-headphones-note\" data-arc=\"arc_volume_war\" data-unlock=\"natural\" aria-label=\"KULAKLIK notu\">\n  <div class=\"rp-note-door\">\n    <span class=\"rp-note-caps\">KULAKLIK</span>\n  </div>\n  <span class=\"rp-stage-prop__tag\">Desibel · not</span>\n</div>",
+      "testId": "story-street-headphones-note",
+      "npcLine": {
+        "speakerId": "n5",
+        "text": {
+          "tr": "Kapıdaki KULAKLIK — doğal açılış, zorlama bayrak yok.",
+          "en": "HEADPHONES on the door — natural unlock, no force flags."
+        }
+      }
+    },
+    {
+      "id": "street_prop_ledger_tray_natural",
+      "arcId": "arc_tea_ledger",
+      "replacesForm9Id": "street_prop_ledger_tray",
+      "screens": [
+        "street"
+      ],
+      "priority": 86,
+      "unlockMode": "natural",
+      "when": {
+        "dayIndexMin": 5,
+        "flagsNone": [
+          "arc_tea_ledger_complete",
+          "flag_ledger_closed_kind",
+          "flag_ledger_private"
+        ],
+        "naturalAny": [
+          {
+            "dayIndexMin": 5,
+            "flagsAny": [
+              "natural_volume_street",
+              "natural_ledger_street",
+              "arc_volume_war_complete",
+              "quest_volume_complete",
+              "arc_volume_war_beat5",
+              "street_av_handoff_done",
+              "quest_ledger_active",
+              "arc_tea_ledger_beat1",
+              "arc_tea_ledger_seed",
+              "quest_ledger_tease"
+            ]
+          },
+          {
+            "dayIndexMin": 10
+          }
+        ]
+      },
+      "html": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" data-unlock=\"natural\" aria-label=\"Ledger & tray\">\n  <svg class=\"rp-ledger-svg\" viewBox=\"0 0 80 28\" aria-hidden=\"true\">\n    <ellipse cx=\"22\" cy=\"16\" rx=\"14\" ry=\"6\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/>\n    <rect x=\"42\" y=\"6\" width=\"22\" height=\"16\" rx=\"1.5\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n    <line x1=\"46\" y1=\"10\" x2=\"60\" y2=\"10\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"14\" x2=\"58\" y2=\"14\" stroke=\"#c45c3e\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"18\" x2=\"60\" y2=\"18\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Ledger · tray</span>\n</div>",
+      "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" data-unlock=\"natural\" aria-label=\"Defter ve tepsi\">\n  <svg class=\"rp-ledger-svg\" viewBox=\"0 0 80 28\" aria-hidden=\"true\">\n    <ellipse cx=\"22\" cy=\"16\" rx=\"14\" ry=\"6\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/>\n    <rect x=\"42\" y=\"6\" width=\"22\" height=\"16\" rx=\"1.5\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n    <line x1=\"46\" y1=\"10\" x2=\"60\" y2=\"10\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"14\" x2=\"58\" y2=\"14\" stroke=\"#c45c3e\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"18\" x2=\"60\" y2=\"18\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Defter · tepsi</span>\n</div>",
+      "testId": "story-street-ledger-tray",
+      "npcLine": {
+        "speakerId": "n1",
+        "text": {
+          "tr": "Tepsi ve defter — hafta ilerledi, sokak görüyor.",
+          "en": "Tray and ledger — week advanced, the street sees it."
+        }
+      }
+    }
+  ],
+  "applyNaturalUnlockContract": {
+    "id": "applyNaturalArcStreetUnlock",
+    "callSites": [
+      "renderOvernight",
+      "applyDay2ColdRewrite",
+      "renderStreet enter",
+      "endEvening→morning"
+    ],
+    "rules": [
+      "Never call forceOvernightStoryProve or poke quest_volume_active / arc_volume_war_beat* for smoke",
+      "If day>=3 and antennaDoneAny → set natural_volume_street (soft)",
+      "If day>=7 → set natural_volume_street (week2 cold) even without antenna flags",
+      "If day>=5 and natural_volume_street (or volume done) → set natural_ledger_street",
+      "If day>=10 → set natural_ledger_street (week2/3 cold)",
+      "Props render even if soft seeds skipped — when.naturalAny dayIndexMin:7 / :10 branches are enough"
+    ]
+  },
+  "smokeProveWithoutFlagInject": {
+    "id": "smoke_natural_vl_street",
+    "forbidden": [
+      "state.save.storyFlags.quest_volume_active = true",
+      "state.save.storyFlags.arc_volume_war_beat2 = true",
+      "state.save.storyFlags.quest_ledger_active = true",
+      "forceOvernightStoryProve flag poke for volume/ledger",
+      "URL ?forceFlags="
+    ],
+    "allowed": [
+      "Normal Day1 cold choice",
+      "Normal End evening / overnight day advances",
+      "Optional: complete Antenna objectives through UI (not flag inject)"
+    ],
+    "asserts": [
+      "After dayIndex>=7 via overnight only: query story-street-headphones-note",
+      "After further overnight to dayIndex>=10: query story-street-ledger-tray (Volume yields per one-layer)",
+      "OR after Antenna UI-complete + day>=3: headphones-note present"
+    ]
+  },
+  "cssAppend": "\n/* story-form-12 — natural Volume/Ledger street props (same visuals, unlock tag) */\n.rp-stage-prop--headphones-note[data-unlock=\"natural\"],\n.rp-stage-prop--ledger-tray[data-unlock=\"natural\"] {\n  z-index: 8;\n}\n.rp-stage-prop--headphones-note {\n  left: 62%; width: 28%; top: 34%; height: auto;\n}\n.rp-note-door {\n  background: #f4f0e4;\n  color: #1a120c;\n  padding: 0.55rem 0.65rem;\n  transform: rotate(-3deg);\n  box-shadow: 0 4px 12px rgba(0,0,0,.45);\n  border: 2px solid #1a120c;\n}\n.rp-note-caps { font: 800 13px/1.1 \"IBM Plex Mono\", ui-monospace, monospace; letter-spacing: 0.08em; }\n.rp-stage-prop--ledger-tray {\n  left: 18%; width: 36%; top: 60%; height: 18%; color: #e8c9a0;\n}\n.rp-ledger-svg { width: 100%; height: 100%; display: block; }\n",
+  "integratorSnippet": {
+    "language": "js",
+    "comment": "Natural Volume/Ledger street unlock — no force flags",
+    "pseudo": "\nfunction storyForm12() {\n  return state.questPack?.storyForm12 || state.storyForm12 || null;\n}\n\nfunction naturalAnyOk(clause) {\n  if (!clause) return true;\n  const day = state.save.dayIndex || 1;\n  const alts = clause.naturalAny;\n  if (!alts?.length) return whenFlagsOk(clause);\n  if (clause.dayIndexMin != null && day < clause.dayIndexMin) return false;\n  if (clause.flagsNone?.some((f) => storyFlag(f))) return false;\n  return alts.some((alt) => whenFlagsOk(alt));\n}\n\nfunction applyNaturalArcStreetUnlock() {\n  const sch = storyForm12()?.naturalUnlockSchedule;\n  if (!sch) return;\n  const day = state.save.dayIndex || 1;\n  const flags = state.save.storyFlags;\n  const antennaDone = (sch.volumeHeadphones.paths[0].antennaDoneAny || []).some(storyFlag);\n  // Volume\n  if (day >= 7 || (day >= 3 && antennaDone)) {\n    flags.natural_volume_street = true;\n  }\n  // Ledger after volume street or calendar\n  if (day >= 10 || (day >= 5 && (flags.natural_volume_street || [\"arc_volume_war_complete\",\"quest_volume_complete\",\"arc_volume_war_beat5\",\"street_av_handoff_done\"].some(storyFlag)))) {\n    flags.natural_ledger_street = true;\n  }\n  // one-layer: after volume has been shown 2+ days, prefer ledger\n  if (flags.natural_ledger_street && day >= 10) {\n    flags.natural_ledger_street_wins = true;\n  }\n}\n\nfunction streetArcStagePropsHtml() {\n  applyNaturalArcStreetUnlock();\n  const f12 = storyForm12()?.naturalStreetProps || [];\n  const f9 = (storyForm9()?.streetArcStageProps || []).filter(\n    (p) => !f12.some((n) => n.replacesForm9Id === p.id || n.arcId === p.arcId)\n  );\n  const props = [...f12, ...f9];\n  const coldShowing = isColdDay2();\n  const hit = props\n    .filter((p) => (p.screens || [\"street\"]).includes(\"street\"))\n    .filter((p) => p.unlockMode === \"natural\" ? naturalAnyOk(p.when || {}) : whenFlagsOk(p.when || {}))\n    .filter((p) => !(coldShowing && p.arcId === \"arc_kite_antenna\"))\n    .sort((a, b) => (b.priority || 0) - (a.priority || 0))[0];\n  if (!hit) return \"\";\n  return state.locale === \"tr\" && hit.htmlTr ? hit.htmlTr : hit.html || \"\";\n}\n"
+  },
+  "echoFollowUpsAppend": [
+    {
+      "id": "echo_form12_natural_street",
+      "priority": 99,
+      "when": {
+        "flagsAny": [
+          "natural_volume_street",
+          "natural_ledger_street"
+        ],
+        "slots": [
+          "street",
+          "evening"
+        ]
+      },
+      "speakerId": "narrator",
+      "headline": {
+        "tr": "Doğal açılış — zorlama yok",
+        "en": "Natural unlock — no force"
+      },
+      "body": {
+        "tr": "KULAKLIK notu ve defter-tepsi gün ilerlemesiyle sokakta. Smoke bayrak sokmaz.",
+        "en": "HEADPHONES note and ledger-tray arrive by day advance. Smoke does not inject flags."
+      },
+      "cta": {
+        "tr": "Sokağı doğrula",
+        "en": "Prove the street"
+      }
+    }
+  ],
+  "acceptanceChecks": [
+    {
+      "id": "headphones_natural",
+      "desc": "dayIndex>=7 overnight-only OR Antenna-complete+day>=3: story-street-headphones-note present without flag inject."
+    },
+    {
+      "id": "ledger_natural",
+      "desc": "dayIndex>=10 overnight-only OR after volume natural: story-street-ledger-tray present without flag inject."
+    },
+    {
+      "id": "one_layer",
+      "desc": "Headphones and ledger-tray never co-primary on first paint; ledger wins only after volume street tenure / day>=10."
+    },
+    {
+      "id": "no_force",
+      "desc": "Smoke path uses no forceOvernightStoryProve flag poke and no quest_volume_active assignment."
+    }
+  ],
+  "playtestScript": [
+    "Fresh save → Day1 cold → overnight to day 7 (no flag inject) → street: story-street-headphones-note",
+    "Continue overnight to day 10 → street: story-street-ledger-tray (headphones yields)",
+    "Alt: finish Antenna via UI by day 3+ → headphones-note same day/next street",
+    "Confirm smoke does not set arc_volume_war_beat* manually"
+  ],
+  "newStoryFlags": [
+    "natural_volume_street",
+    "natural_ledger_street",
+    "natural_ledger_street_wins",
+    "week2_volume_seed",
+    "week2_ledger_seed"
+  ],
+  "meta": {
+    "squad": "story-quest",
+    "formIndex": 12,
+    "shipTrigger": "score overall 8.4 / story 8.5 — Volume/Ledger natural street SVG without force flags",
+    "nextPackWhen": "story priorityFixes still open OR story < 8.5",
+    "dependsOnForms": [
+      9,
+      10,
+      11
+    ],
+    "implementationNote": "dayIndex naturalAny branches make props smoke-provable without flag inject; soft seeds are optional mirrors."
+  }
+}

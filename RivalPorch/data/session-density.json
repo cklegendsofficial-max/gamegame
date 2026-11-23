@@ -1,0 +1,2209 @@
+{
+  "schemaVersion": 1,
+  "packId": "rival-porch-session-density",
+  "localeDefault": "tr",
+  "purpose": "Honest 20+ min evening pull via micro-events, unfinished-quest echoes, hard Practice Cup gate, overnight teasers. Drop-in content only — code owner wires.",
+  "sourcePacks": [
+    "internal/rival-porch-quests.json",
+    "internal/rival-porch-story-content.json",
+    "internal/rival-porch-combat-pack.json"
+  ],
+  "designDoc": "docs/rival-porch-session-density.md",
+  "principles": {
+    "storyNeverGatedBySpend": true,
+    "softFailsOnly": true,
+    "noPayToSkipTeach": true,
+    "microEventsFillStreetNotReplaceArcBeat": true,
+    "echoesRequireUnfinishedObjective": true
+  },
+  "microEvents": [
+    {
+      "id": "me_street_whistle_echo",
+      "slot": "street",
+      "durationSec": 25,
+      "tags": [
+        "evening",
+        "street",
+        "ambient"
+      ],
+      "weight": 1.2,
+      "cooldownDays": 1,
+      "title": {
+        "tr": "Düdük yankısı",
+        "en": "Whistle echo"
+      },
+      "prompt": {
+        "tr": "Cem'in düdüğü iki sokak öteden geliyor. Antrenman bitmemiş gibi.",
+        "en": "Cem's whistle carries two doors down. Drills don't sound finished."
+      },
+      "choices": [
+        {
+          "id": "a",
+          "label": {
+            "tr": "Kenardan izle",
+            "en": "Watch from the curb"
+          },
+          "affinity": [
+            {
+              "id": "n2",
+              "delta": 1
+            }
+          ],
+          "rep": {
+            "rep_stage": 1
+          }
+        },
+        {
+          "id": "b",
+          "label": {
+            "tr": "Tempo tut",
+            "en": "Keep the tempo"
+          },
+          "affinity": [
+            {
+              "id": "n2",
+              "delta": 2
+            }
+          ],
+          "rep": {
+            "rep_stage": 1
+          }
+        },
+        {
+          "id": "c",
+          "label": {
+            "tr": "Kapıyı kapat, dinlen",
+            "en": "Close the door, rest"
+          },
+          "rep": {
+            "rep_mediator": 1
+          }
+        }
+      ],
+      "setsFlags": [
+        "me_whistle_echo_seen"
+      ],
+      "worldConsequenceId": "wc_cem_whistle_pouch_glow"
+    },
+    {
+      "id": "me_evening_steam_line",
+      "slot": "evening",
+      "durationSec": 20,
+      "tags": [
+        "evening",
+        "tea"
+      ],
+      "weight": 1.1,
+      "cooldownDays": 1,
+      "title": {
+        "tr": "Buhar çizgisi",
+        "en": "Steam line"
+      },
+      "prompt": {
+        "tr": "Merve'nin demliğinden ince buhar; üç verandaya aynı anda değiyor.",
+        "en": "Thin steam from Merve's pot touches three porches at once."
+      },
+      "choices": [
+        {
+          "id": "a",
+          "label": {
+            "tr": "Bardağı uzat",
+            "en": "Hold out a cup"
+          },
+          "affinity": [
+            {
+              "id": "n1",
+              "delta": 2
+            }
+          ],
+          "rep": {
+            "rep_mediator": 1
+          }
+        },
+        {
+          "id": "b",
+          "label": {
+            "tr": "Kim demledi diye sor",
+            "en": "Ask who brewed it"
+          },
+          "affinity": [
+            {
+              "id": "n1",
+              "delta": 1
+            }
+          ],
+          "rep": {
+            "rep_instigator": 1
+          }
+        },
+        {
+          "id": "c",
+          "label": {
+            "tr": "Sadece kokuyu al",
+            "en": "Just take the smell"
+          },
+          "rep": {
+            "rep_oven": 1
+          }
+        }
+      ],
+      "setsFlags": [
+        "me_steam_line_seen"
+      ]
+    },
+    {
+      "id": "me_street_antenna_glint",
+      "slot": "street",
+      "durationSec": 22,
+      "tags": [
+        "street",
+        "kite",
+        "evening"
+      ],
+      "weight": 1,
+      "requiresFlagsAny": [
+        "quest_welcome_active",
+        "quest_antenna_active",
+        "arc_kite_antenna_seed"
+      ],
+      "cooldownDays": 2,
+      "title": {
+        "tr": "Anten parıltısı",
+        "en": "Antenna glint"
+      },
+      "prompt": {
+        "tr": "Gün batımında Orhan'ın anteni bir an parlıyor — ip mi, ışık mı belli değil.",
+        "en": "At dusk Orhan's antenna flashes once — string or light, hard to tell."
+      },
+      "choices": [
+        {
+          "id": "a",
+          "label": {
+            "tr": "Yukarı bak, not al",
+            "en": "Look up, note it"
+          },
+          "affinity": [
+            {
+              "id": "n3",
+              "delta": 1
+            }
+          ],
+          "rep": {
+            "rep_stage": 1
+          }
+        },
+        {
+          "id": "b",
+          "label": {
+            "tr": "Orhan'a haber ver",
+            "en": "Tell Orhan"
+          },
+          "affinity": [
+            {
+              "id": "n4",
+              "delta": 2
+            }
+          ],
+          "rep": {
+            "rep_mediator": 1
+          }
+        },
+        {
+          "id": "c",
+          "label": {
+            "tr": "Leyla'ya fısılda",
+            "en": "Whisper to Leyla"
+          },
+          "affinity": [
+            {
+              "id": "n3",
+              "delta": 2
+            }
+          ],
+          "rep": {
+            "rep_instigator": 1
+          }
+        }
+      ],
+      "setsFlags": [
+        "me_antenna_glint_seen"
+      ],
+      "worldConsequenceId": "wc_kite_string_on_antenna"
+    },
+    {
+      "id": "me_evening_pastry_trail",
+      "slot": "evening",
+      "durationSec": 28,
+      "tags": [
+        "evening",
+        "bakery"
+      ],
+      "weight": 1,
+      "requiresFlagsAny": [
+        "quest_volume_active",
+        "night_bakery_open",
+        "arc_volume_war_beat2"
+      ],
+      "cooldownDays": 1,
+      "title": {
+        "tr": "Poğaça izi",
+        "en": "Pastry trail"
+      },
+      "prompt": {
+        "tr": "Can'ın tepsi izi kaldırımda; Soft koku neon'a karışıyor.",
+        "en": "Can's tray trail on the curb; Soft smell mixes with neon."
+      },
+      "choices": [
+        {
+          "id": "a",
+          "label": {
+            "tr": "İzi takip et",
+            "en": "Follow the trail"
+          },
+          "affinity": [
+            {
+              "id": "n6",
+              "delta": 2
+            }
+          ],
+          "rep": {
+            "rep_oven": 2
+          }
+        },
+        {
+          "id": "b",
+          "label": {
+            "tr": "Peri kapısına bırak",
+            "en": "Leave one at Peri's door"
+          },
+          "affinity": [
+            {
+              "id": "n5",
+              "delta": 1
+            },
+            {
+              "id": "n6",
+              "delta": 1
+            }
+          ],
+          "rep": {
+            "rep_mediator": 1
+          }
+        },
+        {
+          "id": "c",
+          "label": {
+            "tr": "Orhan'a götür",
+            "en": "Carry one to Orhan"
+          },
+          "affinity": [
+            {
+              "id": "n4",
+              "delta": 2
+            }
+          ],
+          "rep": {
+            "rep_mediator": 1
+          }
+        }
+      ],
+      "setsFlags": [
+        "me_pastry_trail_seen"
+      ],
+      "worldConsequenceId": "wc_pastry_trail_neon"
+    },
+    {
+      "id": "me_street_wrong_poster_corner",
+      "slot": "street",
+      "durationSec": 24,
+      "tags": [
+        "street",
+        "gossip",
+        "evening"
+      ],
+      "weight": 0.9,
+      "requiresFlagsAny": [
+        "gossip_wrong_active",
+        "quest_antenna_active"
+      ],
+      "cooldownDays": 2,
+      "title": {
+        "tr": "Afiş köşesi",
+        "en": "Poster corner"
+      },
+      "prompt": {
+        "tr": "Yanlış dedikodu afişinin bir köşesi rüzgârda kalkıyor. Kimse düzeltmiyor.",
+        "en": "A corner of the wrong-rumor poster lifts in the wind. Nobody fixes it."
+      },
+      "choices": [
+        {
+          "id": "a",
+          "label": {
+            "tr": "Köşeyi yapıştır",
+            "en": "Press the corner down"
+          },
+          "affinity": [
+            {
+              "id": "n1",
+              "delta": 1
+            }
+          ],
+          "rep": {
+            "rep_mediator": 2
+          },
+          "setsFlags": [
+            "me_poster_corner_held"
+          ]
+        },
+        {
+          "id": "b",
+          "label": {
+            "tr": "Biraz daha aç",
+            "en": "Peel it a little more"
+          },
+          "rep": {
+            "rep_instigator": 2
+          },
+          "setsFlags": [
+            "me_poster_corner_peeled"
+          ]
+        },
+        {
+          "id": "c",
+          "label": {
+            "tr": "Foto çek, sonra konuş",
+            "en": "Snap a photo, talk later"
+          },
+          "rep": {
+            "rep_stage": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "me_evening_empty_chair",
+      "slot": "evening",
+      "durationSec": 30,
+      "tags": [
+        "evening",
+        "orhan"
+      ],
+      "weight": 1,
+      "requiresFlagsAny": [
+        "orhan_softened",
+        "quest_antenna_active",
+        "orhan_fold_shared"
+      ],
+      "cooldownDays": 2,
+      "title": {
+        "tr": "Boş sandalye",
+        "en": "Empty chair"
+      },
+      "prompt": {
+        "tr": "Orhan'ın masasında ikinci bardak duruyor; sandalye boş ama ışık yanık.",
+        "en": "Second cup on Orhan's table; chair empty, lamp still on."
+      },
+      "choices": [
+        {
+          "id": "a",
+          "label": {
+            "tr": "Otur, sessiz kal",
+            "en": "Sit, stay quiet"
+          },
+          "affinity": [
+            {
+              "id": "n4",
+              "delta": 2
+            }
+          ],
+          "rep": {
+            "rep_mediator": 2
+          }
+        },
+        {
+          "id": "b",
+          "label": {
+            "tr": "Gazete kenarını düzelt",
+            "en": "Neaten the paper edge"
+          },
+          "affinity": [
+            {
+              "id": "n4",
+              "delta": 1
+            }
+          ],
+          "setsFlags": [
+            "me_orhan_paper_touched"
+          ]
+        },
+        {
+          "id": "c",
+          "label": {
+            "tr": "Işığı söndür, git",
+            "en": "Turn off the lamp, leave"
+          },
+          "affinity": [
+            {
+              "id": "n4",
+              "delta": -1
+            }
+          ]
+        }
+      ],
+      "worldConsequenceId": "wc_orhan_empty_chair_lit"
+    },
+    {
+      "id": "me_street_chalk_arrow_fade",
+      "slot": "street",
+      "durationSec": 20,
+      "tags": [
+        "street",
+        "leyla",
+        "evening"
+      ],
+      "weight": 1,
+      "requiresFlagsAny": [
+        "secret_leyla_map_peek",
+        "leyla_map_partial",
+        "quest_antenna_active"
+      ],
+      "cooldownDays": 1,
+      "title": {
+        "tr": "Solan tebeşir oku",
+        "en": "Fading chalk arrow"
+      },
+      "prompt": {
+        "tr": "Çatıdaki tebeşir oklarından biri siliniyor. Leyla çatıda yok.",
+        "en": "One rooftop chalk arrow is fading. Leyla isn't up there."
+      },
+      "choices": [
+        {
+          "id": "a",
+          "label": {
+            "tr": "Oku yeniden çiz",
+            "en": "Redraw the arrow"
+          },
+          "affinity": [
+            {
+              "id": "n3",
+              "delta": 2
+            }
+          ],
+          "rep": {
+            "rep_stage": 1
+          },
+          "setsFlags": [
+            "me_chalk_redrawn"
+          ]
+        },
+        {
+          "id": "b",
+          "label": {
+            "tr": "Leyla'yı ara",
+            "en": "Go find Leyla"
+          },
+          "affinity": [
+            {
+              "id": "n3",
+              "delta": 1
+            }
+          ],
+          "rep": {
+            "rep_mediator": 1
+          }
+        },
+        {
+          "id": "c",
+          "label": {
+            "tr": "Yağmura bırak",
+            "en": "Leave it to the rain"
+          },
+          "rep": {
+            "rep_instigator": 1
+          }
+        }
+      ],
+      "worldConsequenceId": "wc_chalk_arrows_roof"
+    },
+    {
+      "id": "me_evening_bass_rattle",
+      "slot": "evening",
+      "durationSec": 26,
+      "tags": [
+        "evening",
+        "neon",
+        "volume"
+      ],
+      "weight": 1.1,
+      "requiresFlagsAny": [
+        "quest_volume_active",
+        "arc_volume_war_beat1"
+      ],
+      "cooldownDays": 1,
+      "title": {
+        "tr": "Cam titremesi",
+        "en": "Window rattle"
+      },
+      "prompt": {
+        "tr": "Peri'nin setinden kısa bir bas; camlar bir kez titredi. Saat henüz erken.",
+        "en": "A short bass pulse from Peri's set; windows rattled once. Still early."
+      },
+      "choices": [
+        {
+          "id": "a",
+          "label": {
+            "tr": "Kapıyı çal, nazikçe",
+            "en": "Knock, gently"
+          },
+          "affinity": [
+            {
+              "id": "n5",
+              "delta": 1
+            }
+          ],
+          "rep": {
+            "rep_mediator": 1
+          }
+        },
+        {
+          "id": "b",
+          "label": {
+            "tr": "Ritme ayak uydur",
+            "en": "Tap along"
+          },
+          "affinity": [
+            {
+              "id": "n5",
+              "delta": 2
+            }
+          ],
+          "rep": {
+            "rep_instigator": 1
+          }
+        },
+        {
+          "id": "c",
+          "label": {
+            "tr": "Orhan'ın ışığına bak",
+            "en": "Check Orhan's light"
+          },
+          "affinity": [
+            {
+              "id": "n4",
+              "delta": 1
+            }
+          ],
+          "rep": {
+            "rep_mediator": 1
+          }
+        }
+      ],
+      "setsFlags": [
+        "me_bass_rattle_seen"
+      ],
+      "worldConsequenceId": "wc_bass_windows_rattle"
+    },
+    {
+      "id": "me_street_lamp_notice",
+      "slot": "street",
+      "durationSec": 18,
+      "tags": [
+        "street",
+        "decor",
+        "evening"
+      ],
+      "weight": 0.8,
+      "requiresFlagsAny": [
+        "welcome_met_three",
+        "decor_lamp_owned"
+      ],
+      "cooldownDays": 3,
+      "title": {
+        "tr": "Lamba bakışı",
+        "en": "Lamp glance"
+      },
+      "prompt": {
+        "tr": "Bir komşu verandandan geçerken lambaya (veya boş slota) bakıyor.",
+        "en": "A neighbor glances at your lamp — or the empty slot — while passing."
+      },
+      "choices": [
+        {
+          "id": "a",
+          "label": {
+            "tr": "Selam ver",
+            "en": "Wave hello"
+          },
+          "affinity": [
+            {
+              "id": "n1",
+              "delta": 1
+            }
+          ],
+          "rep": {
+            "rep_stage": 1
+          }
+        },
+        {
+          "id": "b",
+          "label": {
+            "tr": "Dükkânı sor",
+            "en": "Ask about the shop slot"
+          },
+          "setsFlags": [
+            "me_lamp_shop_hint"
+          ],
+          "worldConsequenceId": "wc_lamp_shop_highlight"
+        },
+        {
+          "id": "c",
+          "label": {
+            "tr": "Işığı biraz kıs",
+            "en": "Dim it a notch"
+          },
+          "affinity": [
+            {
+              "id": "n4",
+              "delta": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "me_evening_rival_poster_hum",
+      "slot": "evening",
+      "durationSec": 22,
+      "tags": [
+        "evening",
+        "rival",
+        "cup"
+      ],
+      "weight": 0.9,
+      "requiresFlagsAny": [
+        "cup_w1_done",
+        "rival_briefing",
+        "quest_welcome_complete"
+      ],
+      "cooldownDays": 2,
+      "title": {
+        "tr": "Ayna afiş uğultusu",
+        "en": "Mirror-poster hum"
+      },
+      "prompt": {
+        "tr": "Bakkal vitrinindeki Karşı Sırt afişi titreşiyor — sanki yarın maç varmış gibi.",
+        "en": "Rival Ridge poster in the shop window hums — like a match is tomorrow."
+      },
+      "choices": [
+        {
+          "id": "a",
+          "label": {
+            "tr": "Afişi okuyarak dur",
+            "en": "Stop and read it"
+          },
+          "affinity": [
+            {
+              "id": "n2",
+              "delta": 1
+            }
+          ],
+          "rep": {
+            "rep_stage": 2
+          }
+        },
+        {
+          "id": "b",
+          "label": {
+            "tr": "Cem'e 'görüyor musun' de",
+            "en": "Ask Cem if he sees it"
+          },
+          "affinity": [
+            {
+              "id": "n2",
+              "delta": 2
+            }
+          ],
+          "rep": {
+            "rep_stage": 1
+          }
+        },
+        {
+          "id": "c",
+          "label": {
+            "tr": "Gülümse, geç",
+            "en": "Smile and pass"
+          },
+          "rep": {
+            "rep_mediator": 1
+          }
+        }
+      ],
+      "worldConsequenceId": "wc_rival_poster_bakkal"
+    },
+    {
+      "id": "me_street_ledger_silhouette",
+      "slot": "street",
+      "durationSec": 24,
+      "tags": [
+        "street",
+        "tea",
+        "ledger"
+      ],
+      "weight": 0.85,
+      "requiresFlagsAny": [
+        "quest_ledger_active",
+        "arc_tea_ledger_seed",
+        "sq_tea_circle_gifts_complete"
+      ],
+      "cooldownDays": 2,
+      "title": {
+        "tr": "Defter silüeti",
+        "en": "Ledger silhouette"
+      },
+      "prompt": {
+        "tr": "Merve'nin demliğinin yanında bir an defter silüeti; sonra buharla kayboluyor.",
+        "en": "For a second a ledger silhouette sits by Merve's pot — then steam swallows it."
+      },
+      "choices": [
+        {
+          "id": "a",
+          "label": {
+            "tr": "Soru sorma, çay iç",
+            "en": "Don't ask — drink tea"
+          },
+          "affinity": [
+            {
+              "id": "n1",
+              "delta": 2
+            }
+          ],
+          "rep": {
+            "rep_mediator": 1
+          }
+        },
+        {
+          "id": "b",
+          "label": {
+            "tr": "Can'a bak",
+            "en": "Glance at Can"
+          },
+          "affinity": [
+            {
+              "id": "n6",
+              "delta": 1
+            }
+          ],
+          "rep": {
+            "rep_oven": 1
+          }
+        },
+        {
+          "id": "c",
+          "label": {
+            "tr": "Defteri gördün mü diye sor",
+            "en": "Ask if she saw the ledger"
+          },
+          "affinity": [
+            {
+              "id": "n1",
+              "delta": -1
+            }
+          ],
+          "rep": {
+            "rep_instigator": 1
+          }
+        }
+      ],
+      "worldConsequenceId": "wc_teapot_ledger_silhouette"
+    },
+    {
+      "id": "me_evening_knee_card_slip",
+      "slot": "evening",
+      "durationSec": 27,
+      "tags": [
+        "evening",
+        "cem",
+        "side"
+      ],
+      "weight": 0.9,
+      "requiresFlagsAny": [
+        "cem_knee_hint",
+        "quest_antenna_active"
+      ],
+      "requiresFlagsNone": [
+        "secret_cem_knee_revealed",
+        "cem_knee_exposed_harsh"
+      ],
+      "cooldownDays": 2,
+      "title": {
+        "tr": "Kart kayması",
+        "en": "Card slip"
+      },
+      "prompt": {
+        "tr": "Cem düdük kılıfını düzeltirken bir kart köşesi görünüyor — sonra kayboluyor.",
+        "en": "While Cem fixes his whistle pouch, a card corner shows — then vanishes."
+      },
+      "choices": [
+        {
+          "id": "a",
+          "label": {
+            "tr": "Görmezden gel",
+            "en": "Pretend you didn't see"
+          },
+          "affinity": [
+            {
+              "id": "n2",
+              "delta": 2
+            }
+          ],
+          "rep": {
+            "rep_mediator": 2
+          },
+          "setsFlags": [
+            "me_knee_card_respected"
+          ]
+        },
+        {
+          "id": "b",
+          "label": {
+            "tr": "Yumuşakça sor",
+            "en": "Ask softly"
+          },
+          "affinity": [
+            {
+              "id": "n2",
+              "delta": 1
+            }
+          ],
+          "setsFlags": [
+            "me_knee_card_asked"
+          ]
+        },
+        {
+          "id": "c",
+          "label": {
+            "tr": "Şaka yap",
+            "en": "Make a joke"
+          },
+          "affinity": [
+            {
+              "id": "n2",
+              "delta": -2
+            }
+          ],
+          "rep": {
+            "rep_instigator": 1
+          }
+        }
+      ],
+      "worldConsequenceId": "wc_cem_whistle_pouch_glow"
+    }
+  ],
+  "echoFollowUps": [
+    {
+      "id": "echo_welcome_three_doors",
+      "kind": "unfinished_objective",
+      "questId": "mq_welcome_porch",
+      "objectiveId": "mq_welcome_o2",
+      "priority": 90,
+      "when": {
+        "flagsAll": [
+          "quest_welcome_active",
+          "welcome_checkin_done"
+        ],
+        "flagsNone": [
+          "welcome_met_three"
+        ],
+        "slots": [
+          "evening",
+          "overnight_wake"
+        ]
+      },
+      "speakerId": "n1",
+      "headline": {
+        "tr": "Üç kapı hâlâ eksik",
+        "en": "Three doors still open"
+      },
+      "body": {
+        "tr": "Çay check-in tamam. Ama affinity ≥10 olan üç komşu yok — sokak seni tanımıyor sayılır.",
+        "en": "Tea check-in done. But you still don't have three neighbors at affinity ≥10 — the street barely knows you."
+      },
+      "cta": {
+        "tr": "Kapı çal",
+        "en": "Knock a door"
+      },
+      "uiHint": "quest_log_highlight",
+      "setsFlags": [
+        "echo_welcome_three_shown"
+      ]
+    },
+    {
+      "id": "echo_welcome_kite_seed",
+      "kind": "unfinished_objective",
+      "questId": "mq_welcome_porch",
+      "objectiveId": "mq_welcome_o3",
+      "priority": 85,
+      "when": {
+        "flagsAll": [
+          "quest_welcome_active",
+          "welcome_met_three"
+        ],
+        "flagsNone": [
+          "arc_kite_antenna_seed_resolved"
+        ],
+        "slots": [
+          "street",
+          "evening"
+        ]
+      },
+      "speakerId": "n3",
+      "headline": {
+        "tr": "İp antende asılı kaldı",
+        "en": "String still on the antenna"
+      },
+      "body": {
+        "tr": "Uçurtma tohum olayı çözülmedi. Leyla çatıda bekliyor; Orhan gazetesini kaldırmadı.",
+        "en": "The kite seed incident isn't resolved. Leyla waits on the roof; Orhan hasn't put the paper down."
+      },
+      "cta": {
+        "tr": "Tohum olayına bak",
+        "en": "Check the seed incident"
+      },
+      "dailyEventId": "de_11_kite_forecast",
+      "setsFlags": [
+        "echo_kite_seed_shown"
+      ]
+    },
+    {
+      "id": "echo_antenna_beat2_cem",
+      "kind": "unfinished_objective",
+      "questId": "mq_antenna_op",
+      "objectiveId": "mq_antenna_o2",
+      "priority": 88,
+      "when": {
+        "flagsAll": [
+          "quest_antenna_active",
+          "arc_kite_antenna_beat1"
+        ],
+        "flagsNone": [
+          "arc_kite_antenna_beat2"
+        ],
+        "slots": [
+          "evening",
+          "overnight_wake"
+        ]
+      },
+      "speakerId": "n2",
+      "headline": {
+        "tr": "İp disiplini bekliyor",
+        "en": "Line-tension drill waiting"
+      },
+      "body": {
+        "tr": "Takılan uçurtmayı gördün. Cem'in ip disiplini teklifi hâlâ masada — dinlemeden Arc A ilerlemez.",
+        "en": "You saw the snag. Cem's line-tension pitch is still on the table — Arc A won't move without hearing it."
+      },
+      "cta": {
+        "tr": "Cem'i bul",
+        "en": "Find Cem"
+      },
+      "dialogueTreeId": "dlg_kite_day2",
+      "setsFlags": [
+        "echo_antenna_beat2_shown"
+      ]
+    },
+    {
+      "id": "echo_antenna_peace_or_chaos",
+      "kind": "unfinished_objective",
+      "questId": "mq_antenna_op",
+      "objectiveId": "mq_antenna_o4",
+      "priority": 92,
+      "when": {
+        "flagsAll": [
+          "quest_antenna_active",
+          "arc_kite_antenna_beat3"
+        ],
+        "flagsNone": [
+          "arc_kite_antenna_complete",
+          "flag_fence_and_kite",
+          "flag_kite_chaos_buff"
+        ],
+        "slots": [
+          "evening",
+          "street"
+        ]
+      },
+      "speakerId": "n1",
+      "headline": {
+        "tr": "İki versiyon, bir seçim",
+        "en": "Two versions, one choice"
+      },
+      "body": {
+        "tr": "Merve'nin iki afişi asılı. Barış bayrağı mı, daha yüksek uçuş mu — seçmeden Cup echo zayıf kalır.",
+        "en": "Merve's two posters are up. Peace flag or fly higher — without a pick, Cup echo stays thin."
+      },
+      "cta": {
+        "tr": "Çözüm gününe git",
+        "en": "Go to resolution day"
+      },
+      "dialogueTreeId": "dlg_kite_day4",
+      "setsFlags": [
+        "echo_antenna_branch_shown"
+      ]
+    },
+    {
+      "id": "echo_volume_headphones",
+      "kind": "unfinished_objective",
+      "questId": "mq_decibel_accord",
+      "objectiveId": "mq_volume_o2",
+      "priority": 87,
+      "when": {
+        "flagsAll": [
+          "quest_volume_active",
+          "arc_volume_war_beat1"
+        ],
+        "flagsNone": [
+          "arc_volume_war_beat2"
+        ],
+        "slots": [
+          "overnight_wake",
+          "evening"
+        ]
+      },
+      "speakerId": "n4",
+      "headline": {
+        "tr": "KULAKLIK notu bekliyor",
+        "en": "HEADPHONES note waiting"
+      },
+      "body": {
+        "tr": "01:12 bas şokunu yaşadın. Peri kapısındaki gazete mürekkepli not hâlâ okunmadı.",
+        "en": "You survived the 01:12 bass shock. The newspaper-ink note on Peri's door still hasn't been read."
+      },
+      "cta": {
+        "tr": "Notu oku",
+        "en": "Read the note"
+      },
+      "dialogueTreeId": "dlg_volume_day2",
+      "worldConsequenceId": "wc_headphones_note_door",
+      "setsFlags": [
+        "echo_headphones_shown"
+      ]
+    },
+    {
+      "id": "echo_volume_accord_choice",
+      "kind": "unfinished_objective",
+      "questId": "mq_decibel_accord",
+      "objectiveId": "mq_volume_o5",
+      "priority": 93,
+      "when": {
+        "flagsAll": [
+          "quest_volume_active",
+          "arc_volume_war_beat4"
+        ],
+        "flagsNone": [
+          "arc_volume_war_complete",
+          "flag_peri_stay",
+          "flag_peri_leaving_threat"
+        ],
+        "slots": [
+          "evening",
+          "street"
+        ]
+      },
+      "speakerId": "n5",
+      "headline": {
+        "tr": "Kal / git henüz seçilmedi",
+        "en": "Stay / leave still unpicked"
+      },
+      "body": {
+        "tr": "Tren bileti ucu görünüyor. Antlaşma veya kariyer — mahalle kararı bekliyor.",
+        "en": "Edge of a train ticket shows. Accord or career — the block vote is waiting."
+      },
+      "cta": {
+        "tr": "Desibel çözümüne gir",
+        "en": "Enter volume resolution"
+      },
+      "dialogueTreeId": "dlg_volume_day5",
+      "setsFlags": [
+        "echo_volume_branch_shown"
+      ]
+    },
+    {
+      "id": "echo_ledger_pride",
+      "kind": "unfinished_objective",
+      "questId": "mq_ledger_tray",
+      "objectiveId": "mq_ledger_o3",
+      "priority": 86,
+      "when": {
+        "flagsAll": [
+          "quest_ledger_active",
+          "arc_tea_ledger_beat2"
+        ],
+        "flagsNone": [
+          "arc_tea_ledger_beat3",
+          "can_helped"
+        ],
+        "slots": [
+          "evening",
+          "overnight_wake"
+        ]
+      },
+      "speakerId": "n6",
+      "headline": {
+        "tr": "Tepsi tek elde",
+        "en": "Tray in one hand"
+      },
+      "body": {
+        "tr": "Merve'nin duvarını aştın. Can'ın gururu hâlâ yardım istemiyor — Soft yol açık.",
+        "en": "You cracked Merve's wall. Can's pride still won't ask — Soft path is open."
+      },
+      "cta": {
+        "tr": "Can'a uğra",
+        "en": "Stop by Can"
+      },
+      "dialogueTreeId": "dlg_tea_day3",
+      "setsFlags": [
+        "echo_ledger_can_shown"
+      ]
+    },
+    {
+      "id": "echo_cem_knee_side",
+      "kind": "unfinished_objective",
+      "questId": "sq_cem_knee",
+      "objectiveId": "sq_cem_o2",
+      "priority": 70,
+      "when": {
+        "flagsAll": [
+          "cem_knee_hint"
+        ],
+        "flagsNone": [
+          "cem_gift_soft",
+          "secret_cem_knee_revealed"
+        ],
+        "slots": [
+          "evening",
+          "street"
+        ]
+      },
+      "speakerId": "n2",
+      "headline": {
+        "tr": "Düdük kılıfı ağır",
+        "en": "Whistle pouch feels heavy"
+      },
+      "body": {
+        "tr": "Antrenman sonrası konuştunuz. Yumuşak hediye (20–40 coins) hâlâ verilmedi — diz sırrı kapalı.",
+        "en": "You talked after drills. Soft gift (20–40 coins) still unpaid — knee secret stays shut."
+      },
+      "cta": {
+        "tr": "Hediye götür",
+        "en": "Bring a soft gift"
+      },
+      "setsFlags": [
+        "echo_cem_gift_shown"
+      ]
+    },
+    {
+      "id": "echo_react_kite_aftermath",
+      "kind": "arc_reactive_invite",
+      "questId": "mq_antenna_op",
+      "dialogueTreeId": "dlg_react_kite_aftermath",
+      "priority": 80,
+      "when": {
+        "flagsAll": [
+          "arc_kite_antenna_complete"
+        ],
+        "flagsAny": [
+          "flag_fence_and_kite",
+          "flag_kite_chaos_buff"
+        ],
+        "flagsNone": [
+          "react_kite_aftermath_seen"
+        ],
+        "slots": [
+          "evening",
+          "street"
+        ]
+      },
+      "speakerId": "n1",
+      "headline": {
+        "tr": "Çatı hâlâ konuşuyor",
+        "en": "The roof is still talking"
+      },
+      "body": {
+        "tr": "Anten omurgası bitti ama artçı var — bayrak mı, tebeşir mi? Sokak soruyor.",
+        "en": "Antenna spine is done but the aftershock isn't — flag or chalk? The street is asking."
+      },
+      "cta": {
+        "tr": "Artçıyı dinle",
+        "en": "Hear the aftershock"
+      },
+      "uiHint": "quest_log_or_banner"
+    },
+    {
+      "id": "echo_react_bass_patience",
+      "kind": "arc_reactive_invite",
+      "questId": "mq_decibel_accord",
+      "objectiveId": "mq_volume_o2",
+      "dialogueTreeId": "dlg_react_orhan_bass_patience",
+      "priority": 87,
+      "when": {
+        "flagsAll": [
+          "quest_volume_active",
+          "arc_volume_war_beat1"
+        ],
+        "flagsAny": [
+          "flag_fence_and_kite",
+          "flag_kite_chaos_buff"
+        ],
+        "flagsNone": [
+          "react_orhan_bass_seen"
+        ],
+        "slots": [
+          "evening"
+        ]
+      },
+      "speakerId": "n4",
+      "headline": {
+        "tr": "Gazete, bas'ı antenle kıyaslıyor",
+        "en": "The paper is comparing bass to the antenna"
+      },
+      "body": {
+        "tr": "Orhan'ın sabrı Arc A seçimine bağlı. Desibel omurgası bundan yumuşak veya sert akar.",
+        "en": "Orhan's patience hinges on your Arc A choice. Decibel spine runs softer or sharper from it."
+      },
+      "cta": {
+        "tr": "Orhan'la konuş",
+        "en": "Talk to Orhan"
+      },
+      "uiHint": "quest_log_or_banner"
+    },
+    {
+      "id": "echo_react_finale_memory",
+      "kind": "arc_reactive_invite",
+      "questId": "mq_season_finale",
+      "objectiveId": "mq_finale_o1",
+      "dialogueTreeId": "dlg_react_finale_street_memory",
+      "priority": 91,
+      "when": {
+        "flagsAll": [
+          "quest_finale_active"
+        ],
+        "flagsNone": [
+          "react_finale_memory_antenna",
+          "react_finale_memory_neon",
+          "react_finale_memory_ledger"
+        ],
+        "slots": [
+          "evening"
+        ]
+      },
+      "speakerId": "narrator",
+      "headline": {
+        "tr": "Omurga 5/5 — sokak satırları",
+        "en": "Spine 5/5 — street lines"
+      },
+      "body": {
+        "tr": "Final öncesi: anten, neon, defter — hangi satır arenaya girecek?",
+        "en": "Before the Final: antenna, neon, ledger — which line walks into the arena?"
+      },
+      "cta": {
+        "tr": "Sokak hafızasını aç",
+        "en": "Open street memory"
+      },
+      "uiHint": "prefer_over_generic_cup_eve"
+    },
+    {
+      "id": "echo_day2_mediate_string",
+      "kind": "day2_cold_rewrite",
+      "priority": 95,
+      "when": {
+        "dayIndexMin": 2,
+        "flagsAll": [
+          "cold_open_mediate"
+        ],
+        "flagsNone": [
+          "day2_mediate_talk_seen"
+        ],
+        "slots": [
+          "evening",
+          "street",
+          "overnight_wake"
+        ]
+      },
+      "speakerId": "n1",
+      "headline": {
+        "tr": "Ortak ip duruyor",
+        "en": "The shared string holds"
+      },
+      "body": {
+        "tr": "Arabulucu seçimin sokakta: anten↔veranda ipi. Birine dokun.",
+        "en": "Your Mediator call is on the street: antenna↔porch string. Touch someone."
+      },
+      "cta": {
+        "tr": "Sokağa çık",
+        "en": "Go to the street"
+      },
+      "worldConsequenceId": "wc_day2_mediate_shared_string",
+      "dialogueTreeId": "dlg_day2_mediate_street"
+    },
+    {
+      "id": "echo_day2_instigate_high",
+      "kind": "day2_cold_rewrite",
+      "priority": 95,
+      "when": {
+        "dayIndexMin": 2,
+        "flagsAll": [
+          "cold_open_instigate"
+        ],
+        "flagsNone": [
+          "day2_instigate_talk_seen"
+        ],
+        "slots": [
+          "evening",
+          "street",
+          "overnight_wake"
+        ]
+      },
+      "speakerId": "n3",
+      "headline": {
+        "tr": "Uçurtma hâlâ yüksekte",
+        "en": "Kite still high"
+      },
+      "body": {
+        "tr": "Kışkırtıcı seçimin sokakta: yüksek uçuş + YASAK BÖLGE. Orhan bekliyor.",
+        "en": "Your Instigator call is on the street: high flight + FORBIDDEN ZONE. Orhan is waiting."
+      },
+      "cta": {
+        "tr": "Çatıya / çite bak",
+        "en": "Check roof / fence"
+      },
+      "worldConsequenceId": "wc_day2_instigate_kite_dare",
+      "dialogueTreeId": "dlg_day2_instigate_street"
+    },
+    {
+      "id": "echo_day2_stage_chalk",
+      "kind": "day2_cold_rewrite",
+      "priority": 95,
+      "when": {
+        "dayIndexMin": 2,
+        "flagsAll": [
+          "cold_open_stage"
+        ],
+        "flagsNone": [
+          "day2_stage_talk_seen"
+        ],
+        "slots": [
+          "evening",
+          "street",
+          "overnight_wake"
+        ]
+      },
+      "speakerId": "n2",
+      "headline": {
+        "tr": "Tebeşir Cup kaldırımda",
+        "en": "Chalk Cup on the cobbles"
+      },
+      "body": {
+        "tr": "Sahne Amiri seçimin sokakta: üç daire, düdük prova. Cem sayıyor.",
+        "en": "Your Stage call is on the street: three circles, whistle rehearsal. Cem is counting."
+      },
+      "cta": {
+        "tr": "Provaya gir",
+        "en": "Enter rehearsal"
+      },
+      "worldConsequenceId": "wc_day2_stage_cup_chalk",
+      "dialogueTreeId": "dlg_day2_stage_street"
+    },
+    {
+      "id": "echo_form3_prop_check",
+      "kind": "day2_prop_visibility",
+      "priority": 97,
+      "when": {
+        "dayIndexMin": 2,
+        "flagsAny": [
+          "cold_open_mediate",
+          "cold_open_instigate",
+          "cold_open_stage"
+        ],
+        "flagsNone": [
+          "day2_prop_ack"
+        ],
+        "slots": [
+          "evening",
+          "street"
+        ]
+      },
+      "speakerId": "narrator",
+      "headline": {
+        "tr": "Sokak değişti — bak",
+        "en": "The street changed — look"
+      },
+      "body": {
+        "tr": "Dünkü ilk kapı artık prop: ip, yüksek uçurtma veya tebeşir Cup. HUD'dan önce sahneye bak.",
+        "en": "Yesterday's first knock is now a prop: string, high kite, or chalk Cup. Look at the stage before the HUD."
+      },
+      "cta": {
+        "tr": "Sahneyi gör",
+        "en": "See the stage"
+      },
+      "uiHint": "Pin above quest whisper; tapping opens street"
+    }
+  ],
+  "practiceCupTeach": {
+    "id": "practice_cup_first_evening_hard_gate",
+    "extendsPracticeCupId": "practice_cup_rivalry_01",
+    "combatPackPath": "internal/rival-porch-combat-pack.json",
+    "title": {
+      "tr": "Prova Kupası — İlk Akşam (atlanamaz)",
+      "en": "Practice Cup — First Evening (unskippable)"
+    },
+    "purpose": {
+      "tr": "İlk akşam Rekabet öğretisi soft-skip edilemez; flag kapıları End Evening'i kilitler.",
+      "en": "First-evening Rivalry teach cannot soft-skip; flag gates lock End Evening."
+    },
+    "schedule": {
+      "forceOn": "first_evening",
+      "dayMax": 1,
+      "before": [
+        "end_evening",
+        "overnight",
+        "cup_w1"
+      ],
+      "insertAfter": [
+        "welcome_checkin_or_cold_open"
+      ]
+    },
+    "softSkipBlocked": true,
+    "ui": {
+      "hideSkipUntilFlagsAll": [
+        "syn_taught_syn_rivalry",
+        "practice_cup_porch_call_done",
+        "practice_cup_done"
+      ],
+      "skipButton": {
+        "visibleWhenBlocked": false,
+        "blockedTooltip": {
+          "tr": "Önce Prova: Rekabet rozeti + Veranda Çağrısı.",
+          "en": "Finish Practice: Rivalry badge + Porch Call first."
+        }
+      },
+      "endEvening": {
+        "blockedUntilFlagsAll": [
+          "practice_cup_done",
+          "syn_taught_syn_rivalry"
+        ],
+        "blockedCopy": {
+          "tr": "Akşam bitmez — Cem Prova Kupası'nda bekliyor.",
+          "en": "Evening won't end — Cem is waiting in Practice Cup."
+        }
+      }
+    },
+    "flagGates": {
+      "entryRequires": {
+        "flagsAny": [
+          "quest_welcome_active",
+          "first_evening_cup_available"
+        ],
+        "flagsNone": [
+          "practice_cup_done"
+        ]
+      },
+      "cannotExitUntil": {
+        "flagsAll": [
+          "syn_taught_syn_rivalry",
+          "practice_cup_rivalry_pop_seen",
+          "practice_cup_porch_call_done",
+          "practice_cup_done"
+        ]
+      },
+      "setsFlagsOnComplete": [
+        "practice_cup_done",
+        "syn_taught_syn_rivalry",
+        "first_evening_practice_cleared"
+      ],
+      "softSkipAttempts": {
+        "allow": false,
+        "onAttempt": {
+          "toast": {
+            "tr": "Atlama yok. Rozeti gör, çağrıyı seç.",
+            "en": "No skip. See the badge, pick the call."
+          },
+          "setsFlags": [
+            "practice_soft_skip_blocked"
+          ],
+          "forceMomentId": "prac_rivalry_arm"
+        }
+      }
+    },
+    "scriptedMoments": [
+      {
+        "id": "prac_gate_lock",
+        "tSec": 0.0,
+        "type": "gate_lock",
+        "locks": [
+          "skip",
+          "end_evening",
+          "leave_fight"
+        ],
+        "lines": {
+          "tr": "Bu prova atlanmaz. Rekabeti bir kez gör.",
+          "en": "This practice doesn't skip. See Rivalry once."
+        },
+        "speakerId": "n2"
+      },
+      {
+        "id": "prac_kickoff",
+        "tSec": 0.4,
+        "type": "coach_line",
+        "speakerId": "n2",
+        "lines": {
+          "tr": "Onlar açılışı flaşlı yapar — biz öğütürüz.",
+          "en": "They open flashy — we grind."
+        },
+        "vfxId": "vfx_neon_edge_flicker",
+        "cameraShakeId": "shake_light",
+        "blocking": true
+      },
+      {
+        "id": "prac_rivalry_arm",
+        "tSec": 3.5,
+        "type": "synergy_badge_pulse",
+        "synergyId": "syn_rivalry",
+        "showTooltipOnce": true,
+        "requireAck": false,
+        "ackLabel": {
+          "tr": "Rekabeti gördüm",
+          "en": "I see Rivalry"
+        },
+        "setsFlags": [
+          "syn_taught_syn_rivalry"
+        ],
+        "lines": {
+          "tr": "Rekabet rozeti yandı. İki etiket yan yana — eşik bekleniyor.",
+          "en": "Rivalry badge lit. Two tags side by side — waiting on the threshold."
+        },
+        "autoAckMs": 1200,
+        "mergeIntoCallResolve": true
+      },
+      {
+        "id": "prac_first_hit",
+        "tSec": 8.0,
+        "type": "forced_hit",
+        "targetNeighborId": "n4",
+        "damagePercentMaxHp": 0.18,
+        "damageFloatId": "float_enemy_hit",
+        "cameraShakeId": "shake_light"
+      },
+      {
+        "id": "prac_low_hp_pop",
+        "tSec": 14.0,
+        "type": "force_ally_hp_then_synergy_pop",
+        "targetNeighborId": "n2",
+        "setHpPercent": 0.32,
+        "synergyId": "syn_rivalry",
+        "damageFloatId": "float_rivalry_buff",
+        "vfxId": "vfx_rivalry_ember",
+        "cameraShakeId": "shake_medium",
+        "setsFlags": [
+          "practice_cup_rivalry_pop_seen"
+        ],
+        "requireVisibleFloat": true,
+        "lines": {
+          "tr": "Rekabet! Düşük HP → daha sert vuruş",
+          "en": "Rivalry! Low HP → harder hits"
+        }
+      },
+      {
+        "id": "prac_porch_call",
+        "tSec": 2.4,
+        "type": "porch_call",
+        "forceOptionIds": [
+          "call_focus_fire",
+          "call_prop_assist",
+          "call_chaos_kite"
+        ],
+        "pauseSec": 3.2,
+        "timeoutDefaultCallId": "call_focus_fire",
+        "cannotDismissWithoutPick": true,
+        "setsFlagsOnResolve": [
+          "practice_cup_porch_call_done",
+          "porch_call_resolved"
+        ],
+        "force": true,
+        "pauseAutoTicks": true,
+        "blockSkipDuringCall": true,
+        "setsFlagsOnOpen": [
+          "practice_porch_call_opened"
+        ],
+        "ui": {
+          "dimStage": true,
+          "lampRim": true,
+          "letterboxPulse": true,
+          "title": {
+            "tr": "Veranda Çağrısı — birini seç",
+            "en": "Porch Call — pick one"
+          },
+          "subtitle": {
+            "tr": "Odak / Prop / Swap — skor sallanır",
+            "en": "Focus / Prop / Swap — score swings"
+          }
+        }
+      },
+      {
+        "id": "prac_porch_call_watchdog",
+        "tSec": 2.6,
+        "type": "porch_call_watchdog",
+        "ifNotOpen": {
+          "action": "force_open_porch_call_modal",
+          "forceOptionIds": [
+            "call_focus_fire",
+            "call_prop_assist",
+            "call_chaos_kite"
+          ]
+        }
+      },
+      {
+        "id": "prac_call_resolve",
+        "tSec": 5.8,
+        "type": "porch_call_resolve_fx",
+        "speakerId": "n2",
+        "linesByCallId": {
+          "call_focus_fire": {
+            "tr": "Hedef kilit — Focus. Bu bir Veranda Çağrısı.",
+            "en": "Target locked — Focus. That's a Porch Call."
+          },
+          "call_prop_assist": {
+            "tr": "Prop savruldu — tempo değişti.",
+            "en": "Prop tossed — tempo shifted."
+          },
+          "call_chaos_kite": {
+            "tr": "Swap! Yerler değişti — cam kurtuldu.",
+            "en": "Swap! Places flipped — glass saved."
+          }
+        },
+        "cameraShakeId": "shake_medium",
+        "hitStopMs": 55,
+        "propToss": true
+      },
+      {
+        "id": "prac_tea_tip",
+        "tSec": 28.0,
+        "type": "coach_tip",
+        "speakerId": "n1",
+        "condition": "syn_tea_circle_not_active",
+        "lines": {
+          "tr": "Çay Çemberi için Can da lazım — sonraki Kupada dene. Bu gece Rekabet yeter.",
+          "en": "Tea Circle needs Can too — try next Cup. Tonight Rivalry is enough."
+        }
+      },
+      {
+        "id": "prac_finish",
+        "tSec": 34.0,
+        "type": "finish_banner",
+        "setsFlags": [
+          "practice_cup_done",
+          "first_evening_practice_cleared"
+        ],
+        "unlocks": [
+          "end_evening",
+          "skip"
+        ],
+        "comicSeed": {
+          "forceSynergyId": "syn_rivalry",
+          "includePorchCall": true,
+          "mvpPreferNeighborIds": [
+            "n2",
+            "n4"
+          ]
+        },
+        "postCopy": {
+          "tr": "Prova bitti. Akşamı kapatabilirsin — yarın sokağın yankısı gelir.",
+          "en": "Practice done. You can end the evening — tomorrow the street will echo."
+        }
+      },
+      {
+        "id": "prac_rivalry_after_call",
+        "tSec": 6.4,
+        "type": "force_ally_hp_then_synergy_pop",
+        "targetNeighborId": "n2",
+        "setHpPercent": 0.32,
+        "synergyId": "syn_rivalry",
+        "damageFloatId": "float_rivalry_buff",
+        "vfxId": "vfx_rivalry_ember",
+        "cameraShakeId": "shake_medium",
+        "requirePriorFlag": "practice_cup_porch_call_done",
+        "setsFlags": [
+          "practice_cup_rivalry_pop_seen"
+        ],
+        "lines": {
+          "tr": "Rekabet! Düşük HP → daha sert vuruş",
+          "en": "Rivalry! Low HP → harder hits"
+        }
+      }
+    ],
+    "playerLineup": [
+      {
+        "neighborId": "n4",
+        "cell": "front_left"
+      },
+      {
+        "neighborId": "n2",
+        "cell": "front_right"
+      },
+      {
+        "neighborId": "n1",
+        "cell": "back_mid"
+      }
+    ],
+    "enemyLineup": [
+      {
+        "botId": "bot_n3",
+        "cell": "front_left"
+      },
+      {
+        "botId": "bot_n5",
+        "cell": "front_right"
+      },
+      {
+        "botId": "bot_n6",
+        "cell": "back_mid"
+      }
+    ],
+    "acceptance": {
+      "coldStartMust": [
+        "syn_taught_syn_rivalry flag set",
+        "practice_cup_rivalry_pop_seen flag set",
+        "practice_cup_porch_call_done flag set",
+        "practice_cup_done flag set",
+        "End Evening disabled until practice_cup_done",
+        "Skip control hidden until cannotExitUntil flags"
+      ]
+    }
+  },
+  "overnightTeasers": [
+    {
+      "id": "ot_welcome_doors",
+      "priority": 90,
+      "when": {
+        "flagsAll": [
+          "quest_welcome_active"
+        ],
+        "flagsNone": [
+          "welcome_met_three"
+        ],
+        "activeQuestId": "mq_welcome_porch"
+      },
+      "title": {
+        "tr": "Gece Bir — Kapılar",
+        "en": "Night One — Doors"
+      },
+      "lines": [
+        {
+          "tr": "Üç kapı hâlâ aralık. Sabah çay buharı seni bekler.",
+          "en": "Three doors still ajar. Morning tea steam will wait for you."
+        }
+      ],
+      "tomorrowHook": {
+        "tr": "Yarın: komşularla konuş (affinity ≥10).",
+        "en": "Tomorrow: talk until three neighbors hit affinity ≥10."
+      },
+      "objectiveId": "mq_welcome_o2",
+      "coinsHint": {
+        "porch_coins": 5
+      }
+    },
+    {
+      "id": "ot_welcome_kite",
+      "priority": 88,
+      "when": {
+        "flagsAll": [
+          "quest_welcome_active",
+          "welcome_met_three"
+        ],
+        "flagsNone": [
+          "arc_kite_antenna_seed_resolved"
+        ],
+        "activeQuestId": "mq_welcome_porch"
+      },
+      "title": {
+        "tr": "Gece — Anten İpi",
+        "en": "Night — Antenna String"
+      },
+      "lines": [
+        {
+          "tr": "Rüzgâr antene takılan ipi hafifçe çekiyor. Leyla uyumadı.",
+          "en": "Wind tugs the string snagged on the antenna. Leyla isn't asleep."
+        }
+      ],
+      "tomorrowHook": {
+        "tr": "Yarın: uçurtma tohum olayını çöz.",
+        "en": "Tomorrow: resolve the kite seed incident."
+      },
+      "objectiveId": "mq_welcome_o3"
+    },
+    {
+      "id": "ot_antenna_snag",
+      "priority": 92,
+      "when": {
+        "flagsAll": [
+          "quest_antenna_active"
+        ],
+        "flagsNone": [
+          "arc_kite_antenna_beat1"
+        ],
+        "activeQuestId": "mq_antenna_op"
+      },
+      "title": {
+        "tr": "Gece — Dolaşık İp",
+        "en": "Night — Tangled Line"
+      },
+      "lines": [
+        {
+          "tr": "Antende gölge: uçurtma mı, Orhan'ın gazetesi mi? Sabah netleşir.",
+          "en": "Shadow on the antenna: kite or Orhan's paper? Morning will tell."
+        }
+      ],
+      "tomorrowHook": {
+        "tr": "Yarın: takılan uçurtmayı çöz veya tartış.",
+        "en": "Tomorrow: untangle or argue the snagged kite."
+      },
+      "objectiveId": "mq_antenna_o1"
+    },
+    {
+      "id": "ot_antenna_branch",
+      "priority": 94,
+      "when": {
+        "flagsAll": [
+          "quest_antenna_active",
+          "arc_kite_antenna_beat3"
+        ],
+        "flagsNone": [
+          "arc_kite_antenna_complete"
+        ],
+        "activeQuestId": "mq_antenna_op"
+      },
+      "title": {
+        "tr": "Gece — İki Afiş",
+        "en": "Night — Two Posters"
+      },
+      "lines": [
+        {
+          "tr": "Sokakta iki çelişkili afiş. Rüzgâr ikisini de sallıyor — seçim sende.",
+          "en": "Two conflicting posters on the street. Wind shakes both — the pick is yours."
+        }
+      ],
+      "tomorrowHook": {
+        "tr": "Yarın: barış bayrağı veya daha yüksek uçuş.",
+        "en": "Tomorrow: peace flag or fly higher."
+      },
+      "objectiveId": "mq_antenna_o4"
+    },
+    {
+      "id": "ot_volume_bass",
+      "priority": 91,
+      "when": {
+        "flagsAll": [
+          "quest_volume_active"
+        ],
+        "flagsNone": [
+          "arc_volume_war_beat2"
+        ],
+        "activeQuestId": "mq_decibel_accord"
+      },
+      "title": {
+        "tr": "Gece — Desibel",
+        "en": "Night — Decibel"
+      },
+      "lines": [
+        {
+          "tr": "Pencereler bir kez daha titreşti. Peri kapısında mürekkepli bir not var.",
+          "en": "Windows rattled once more. There's an ink note on Peri's door."
+        }
+      ],
+      "tomorrowHook": {
+        "tr": "Yarın: KULAKLIK notunu oku / yanıtla.",
+        "en": "Tomorrow: read / answer the HEADPHONES note."
+      },
+      "objectiveId": "mq_volume_o2"
+    },
+    {
+      "id": "ot_volume_ticket",
+      "priority": 93,
+      "when": {
+        "flagsAll": [
+          "quest_volume_active",
+          "arc_volume_war_beat4"
+        ],
+        "flagsNone": [
+          "arc_volume_war_complete"
+        ],
+        "activeQuestId": "mq_decibel_accord"
+      },
+      "title": {
+        "tr": "Gece — Bilet Ucu",
+        "en": "Night — Ticket Edge"
+      },
+      "lines": [
+        {
+          "tr": "Kulaklık kutusundan tren bileti ucu görünüyor. Mahalle kararı sabaha kaldı.",
+          "en": "Train-ticket edge peeks from the headphone case. The block vote waits for morning."
+        }
+      ],
+      "tomorrowHook": {
+        "tr": "Yarın: antlaşma veya kariyer yolu.",
+        "en": "Tomorrow: accord or career path."
+      },
+      "objectiveId": "mq_volume_o5"
+    },
+    {
+      "id": "ot_ledger_tray",
+      "priority": 89,
+      "when": {
+        "flagsAll": [
+          "quest_ledger_active"
+        ],
+        "flagsNone": [
+          "arc_tea_ledger_complete"
+        ],
+        "activeQuestId": "mq_ledger_tray"
+      },
+      "title": {
+        "tr": "Gece — Defter Buharı",
+        "en": "Night — Ledger Steam"
+      },
+      "lines": [
+        {
+          "tr": "Demliğin yanında defter silüeti. Can'ın tepsi standı yarım bırakılmış.",
+          "en": "Ledger silhouette by the teapot. Can's tray stand left half-done."
+        }
+      ],
+      "tomorrowHook": {
+        "tr": "Yarın: defteri aç veya Can'a yardım et.",
+        "en": "Tomorrow: open the ledger or help Can."
+      },
+      "objectiveId": "mq_ledger_o3"
+    },
+    {
+      "id": "ot_finale_eve",
+      "priority": 95,
+      "when": {
+        "flagsAll": [
+          "quest_finale_active"
+        ],
+        "flagsNone": [
+          "cup_w4_done"
+        ],
+        "activeQuestId": "mq_season_finale"
+      },
+      "title": {
+        "tr": "Gece — Final Provası",
+        "en": "Night — Final Rehearsal"
+      },
+      "lines": [
+        {
+          "tr": "Cuma prova ışıkları sönmedi. Karşı Sırt afişi bakkalda hum ediyor.",
+          "en": "Friday rehearsal lights didn't go out. Rival Ridge poster hums at the shop."
+        }
+      ],
+      "tomorrowHook": {
+        "tr": "Yarın: Porch Cup Finali'ne gir.",
+        "en": "Tomorrow: enter the Porch Cup Final."
+      },
+      "objectiveId": "mq_finale_o2"
+    },
+    {
+      "id": "ot_side_cem_knee",
+      "priority": 60,
+      "when": {
+        "flagsAll": [
+          "cem_knee_hint"
+        ],
+        "flagsNone": [
+          "secret_cem_knee_revealed",
+          "cem_gift_soft"
+        ],
+        "activeQuestId": "sq_cem_knee"
+      },
+      "title": {
+        "tr": "Gece — Düdük Kılıfı",
+        "en": "Night — Whistle Pouch"
+      },
+      "lines": [
+        {
+          "tr": "Cem bankta oturuyor; dizini ovuşturmuyor — ama ovuşturmuyor gibi duruyor.",
+          "en": "Cem sits on the bench; he isn't rubbing his knee — and that's the tell."
+        }
+      ],
+      "tomorrowHook": {
+        "tr": "Yarın: yumuşak hediye veya yumuşak soru.",
+        "en": "Tomorrow: soft gift or soft question."
+      },
+      "objectiveId": "sq_cem_o2"
+    },
+    {
+      "id": "ot_side_night_bakery",
+      "priority": 65,
+      "when": {
+        "flagsAll": [
+          "night_bakery_open"
+        ],
+        "flagsNone": [
+          "sq_night_bakery_complete",
+          "night_pastry_delivered"
+        ],
+        "activeQuestId": "sq_night_bakery"
+      },
+      "title": {
+        "tr": "Gece — Fırın Közü",
+        "en": "Night — Bakery Ember"
+      },
+      "lines": [
+        {
+          "tr": "Fırın közü yanıyor. Soft köprü kurulmadı — tepsi hâlâ Can'da.",
+          "en": "Bakery ember glows. Soft bridge unbuilt — tray still with Can."
+        }
+      ],
+      "tomorrowHook": {
+        "tr": "Yarın: Peri veya Orhan'a poğaça götür.",
+        "en": "Tomorrow: carry pastry to Peri or Orhan."
+      },
+      "objectiveId": "sq_night_o2"
+    },
+    {
+      "id": "ot_day2_mediate",
+      "priority": 96,
+      "when": {
+        "flagsAll": [
+          "cold_open_mediate"
+        ],
+        "flagsNone": [
+          "day2_cold_rewrite_applied"
+        ],
+        "activeQuestId": null
+      },
+      "title": {
+        "tr": "Gece Bir → İki · Ortak ip",
+        "en": "Night One → Two · Shared string"
+      },
+      "lines": [
+        {
+          "tr": "Uyurken biri ipi antene düğümledi. Sabah arabuluculuk sokakta duracak.",
+          "en": "While you slept, someone knotted the line to the antenna. Morning will put mediation on the street."
+        }
+      ],
+      "tomorrowHook": {
+        "tr": "Yarın: ortak ipi gör — mahalle Arabulucu diyor.",
+        "en": "Tomorrow: see the shared string — the block says Mediator."
+      },
+      "worldConsequenceId": "wc_day2_mediate_shared_string"
+    },
+    {
+      "id": "ot_day2_instigate",
+      "priority": 96,
+      "when": {
+        "flagsAll": [
+          "cold_open_instigate"
+        ],
+        "flagsNone": [
+          "day2_cold_rewrite_applied"
+        ]
+      },
+      "title": {
+        "tr": "Gece Bir → İki · Yüksek uçuş",
+        "en": "Night One → Two · High flight"
+      },
+      "lines": [
+        {
+          "tr": "Rüzgâr uçurtmayı yukarı itti. Orhan tebeşiri eline aldı — YASAK BÖLGE yarın kurur.",
+          "en": "Wind shoved the kite higher. Orhan took the chalk — FORBIDDEN ZONE dries tomorrow."
+        }
+      ],
+      "tomorrowHook": {
+        "tr": "Yarın: yüksek uçuş + gazete kalkan — Kışkırtıcı izi.",
+        "en": "Tomorrow: high flight + paper shield — Instigator mark."
+      },
+      "worldConsequenceId": "wc_day2_instigate_kite_dare"
+    },
+    {
+      "id": "ot_day2_stage",
+      "priority": 96,
+      "when": {
+        "flagsAll": [
+          "cold_open_stage"
+        ],
+        "flagsNone": [
+          "day2_cold_rewrite_applied"
+        ]
+      },
+      "title": {
+        "tr": "Gece Bir → İki · Tebeşir sahne",
+        "en": "Night One → Two · Chalk stage"
+      },
+      "lines": [
+        {
+          "tr": "Cem gece kaldırıma üç daire çizdi. Düdük yastığının altındaymış gibi.",
+          "en": "Cem chalked three circles on the cobbles overnight. Whistle feels like it's under the pillow."
+        }
+      ],
+      "tomorrowHook": {
+        "tr": "Yarın: Cup tebeşiri — Sahne Amiri provası.",
+        "en": "Tomorrow: Cup chalk — Stage Manager rehearsal."
+      },
+      "worldConsequenceId": "wc_day2_stage_cup_chalk"
+    },
+    {
+      "id": "ot_form3_consequence_promise",
+      "priority": 97,
+      "when": {
+        "flagsAny": [
+          "cold_open_mediate",
+          "cold_open_instigate",
+          "cold_open_stage"
+        ],
+        "flagsNone": [
+          "day2_cold_rewrite_applied"
+        ]
+      },
+      "title": {
+        "tr": "Yarın sokak dünü yazar",
+        "en": "Tomorrow the street writes yesterday"
+      },
+      "lines": [
+        {
+          "tr": "Bu gece sadece not değil — sabah prop, NPC satırı ve defterde Yankı kartı gelecek.",
+          "en": "Tonight isn't only a note — morning brings a prop, an NPC line, and an Aftermath card in the journal."
+        }
+      ],
+      "tomorrowHook": {
+        "tr": "Day 2: sahne değişimi (mediate / instigate / stage).",
+        "en": "Day 2: stage change (mediate / instigate / stage)."
+      }
+    }
+  ],
+  "sessionPacingHints": {
+    "targetEveningMinutes": {
+      "min": 20,
+      "honestIdeal": 25
+    },
+    "budgetMinutes": {
+      "checkin": 2,
+      "oneMicroOrEcho": 3,
+      "arcBeatOrTalk": 5,
+      "practiceOrCup": 8,
+      "sideFriction": 4,
+      "overnightTeaser": 1
+    },
+    "rules": [
+      "At most one main arc beat per evening.",
+      "Micro-events fill leftover street/evening slots; never replace unfinished main objective when echo priority ≥85.",
+      "First evening: Practice Cup hard gate before End Evening.",
+      "Overnight teaser picks highest priority matching active unfinished quest."
+    ]
+  },
+  "meta": {
+    "microEventCount": 12,
+    "echoFollowUpCount": 8,
+    "overnightTeaserCount": 10,
+    "practiceCupHardGate": true,
+    "implementation": "Merge microEvents into dailyEventPool or evening street rotator; resolve echoFollowUps + overnightTeasers from active quest objectives; overlay practiceCupTeach.flagGates onto combat practiceCup so first evening cannot soft-skip.",
+    "codeOwnerDoc": "docs/rival-porch-session-density.md"
+  }
+}

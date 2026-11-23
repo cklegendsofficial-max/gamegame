@@ -1,0 +1,363 @@
+/* Rival Porch — visual-fix-3
+   Score e36e494 visual 6.8 — unbury Meshy stage (street/evening) + pad-forward fight.
+   Requires data-wave="3" (pack 2). Paste after visual-fix-2.css.
+   Acceptance: ≥4 readable bust hotspots; CTA clear of faces; evening mid ≤40vh;
+   fight units sit on arena pad grid over wave3 hero.
+*/
+
+/* ── Shared: shrink chrome that buries the clay ─────────────────────────── */
+
+.rp-hud-top {
+  min-height: 0;
+  max-height: calc(48px + var(--rp-safe-top, 0px));
+  padding: calc(6px + var(--rp-safe-top, 0px)) 10px 4px;
+  background: transparent !important;
+}
+
+.rp-hud-top .rp-chip {
+  padding: 4px 8px;
+  font-size: 11px;
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 48%, transparent);
+}
+
+/* Quest spine = one whisper chip, not a text wall */
+.rp-quest-banner,
+.rp-spine-banner,
+.rp-hud-quest {
+  max-width: calc(100% - 24px);
+  margin: 4px 12px 0;
+  padding: 6px 10px !important;
+  font-size: 11px !important;
+  line-height: 1.25;
+  max-height: 2.6em;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 45%, transparent) !important;
+}
+
+/* Kill world-consequence bullet stacks on first viewport */
+.rp-screen--street .rp-mid__bullets,
+.rp-screen--street .rp-consequence-list,
+.rp-screen--evening .rp-mid__bullets,
+.rp-screen--evening .rp-consequence-list,
+.rp-hud-consequence,
+.rp-street-agenda {
+  display: none !important;
+}
+
+/* Affinity toast: compact, never over porch faces */
+.rp-affinity-toast,
+.rp-toast--affinity {
+  left: 50%;
+  bottom: calc(var(--rp-dock-h, 72px) + 10px + var(--rp-safe-bottom, 0px));
+  transform: translateX(-50%);
+  max-width: 90%;
+  padding: 6px 10px;
+  font-size: 11px;
+  z-index: 8;
+}
+
+/* Dock budget: shorter so faces stay clear */
+.rp-dock {
+  --rp-dock-h: 72px;
+  min-height: 0;
+  padding: 8px 10px calc(10px + var(--rp-safe-bottom, 0px));
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--mud-night, #1A1612) 70%, transparent) 0%,
+    transparent 100%
+  ) !important;
+}
+.rp-dock .rp-btn {
+  padding: 10px 8px;
+  font-size: 12px;
+}
+.rp-dock--links,
+.rp-dock .rp-tertiary-row {
+  font-size: 11px;
+  gap: 10px;
+  padding-top: 2px;
+}
+
+/* ── A. Street: always-on readable bust hotspots ────────────────────────── */
+
+.rp-screen--street .rp-hotspots {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.rp-screen--street .rp-hotspot {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: 18%;
+  max-width: 72px;
+  aspect-ratio: 1 / 1.15;
+  transform: translate(-50%, -70%);
+  pointer-events: auto;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  z-index: 3;
+}
+
+/* Bust ALWAYS visible (not only on select) — acceptance ≥4 readable */
+.rp-screen--street .rp-hotspot__bust {
+  display: block !important;
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 56px;
+  height: 56px;
+  margin: 0;
+  transform: translateX(-50%);
+  object-fit: cover;
+  object-position: center 22%;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--porch-lamp, #E8A045) 70%, transparent);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--mud-night, #1A1612) 55%, transparent),
+    0 8px 18px color-mix(in srgb, var(--mud-night, #1A1612) 65%, transparent);
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 40%, transparent);
+}
+
+.rp-screen--street .rp-hotspot__glow {
+  position: absolute;
+  left: 50%;
+  bottom: 2%;
+  width: 28px;
+  height: 10px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  box-shadow: 0 0 14px 4px color-mix(in srgb, var(--porch-lamp, #E8A045) 45%, transparent);
+  animation: rp-lamp-breathe 2.4s ease-in-out infinite;
+}
+
+.rp-screen--street .rp-hotspot__name {
+  position: absolute;
+  left: 50%;
+  top: 58px;
+  transform: translateX(-50%);
+  font-size: 9px;
+  line-height: 1.1;
+  white-space: nowrap;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 62%, transparent);
+  color: var(--tea-cream, #F2E6D8);
+  pointer-events: none;
+}
+
+.rp-screen--street .rp-hotspot.is-available .rp-hotspot__bust {
+  border-color: var(--porch-lamp, #E8A045);
+}
+.rp-screen--street .rp-hotspot[aria-disabled="true"] {
+  opacity: 0.45;
+}
+.rp-screen--street .rp-hotspot[aria-disabled="true"] .rp-hotspot__glow {
+  animation: none;
+  opacity: 0.2;
+}
+
+/* Whisper sits ABOVE dock, never over bust row (busts ~y 38–48%) */
+.rp-screen--street .rp-whisper {
+  bottom: calc(var(--rp-dock-h, 72px) + 6px + var(--rp-safe-bottom, 0px));
+  max-height: 36px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+/* Primary CTA must not cover faces — dock stays ≤72px; clear bust band */
+.rp-screen--street .rp-dock {
+  z-index: 6;
+}
+.rp-screen--street .rp-hotspots {
+  /* reserve lower 22% for dock+whisper — hotspots stay in mid band */
+  bottom: 22%;
+  top: 12%;
+}
+
+/* Stage crop: show porch row, not cobble-only zoom */
+.rp-screen--street .rp-stage[data-wave="3"][data-stage="street"] .rp-stage__img {
+  object-position: center 40%;
+  transform: scale(1.14);
+  transform-origin: center 40%;
+}
+
+/* ── B. Evening: mid-card ≤40vh ─────────────────────────────────────────── */
+
+.rp-screen--evening .rp-mid,
+.rp-screen--evening .rp-evening-card {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: calc(var(--rp-dock-h, 72px) + 12px + var(--rp-safe-bottom, 0px));
+  top: auto;
+  margin: 0;
+  max-height: 40vh; /* hard acceptance cap */
+  max-width: 26rem;
+  margin-inline: auto;
+  padding: 10px 12px !important;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 52%, transparent) !important;
+  backdrop-filter: blur(8px);
+  border-radius: 14px;
+  z-index: 5;
+}
+
+.rp-screen--evening .rp-night-title {
+  font-size: clamp(1.15rem, 4.5vw, 1.35rem) !important;
+  margin: 0 0 6px !important;
+  line-height: 1.1;
+}
+
+.rp-screen--evening .rp-kicker {
+  margin: 0 0 2px !important;
+  font-size: 10px !important;
+}
+
+.rp-screen--evening .rp-progress {
+  margin-bottom: 4px !important;
+}
+
+.rp-screen--evening .rp-mid__line {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.82rem !important;
+  margin: 0 !important;
+}
+
+/* Hide evening fat extras that blow past 40vh */
+.rp-screen--evening .rp-mid__bullets,
+.rp-screen--evening .rp-meta-row,
+.rp-screen--evening .rp-evening-card__stats,
+.rp-screen--evening .rp-agenda-list,
+.rp-screen--evening .rp-mid p + p + p {
+  display: none !important;
+}
+
+/* Leave clay visible above mid-card */
+.rp-screen--evening .rp-stage[data-wave="3"][data-stage="street"] .rp-stage__img {
+  object-position: center 38%;
+  transform: scale(1.12);
+  transform-origin: center 38%;
+  filter: brightness(0.92); /* less smother than full dim */
+}
+
+/* ── C. Fight: pad-forward over wave3 arena hero ────────────────────────── */
+
+.rp-screen--fight .rp-page-title,
+.rp-screen--fight .rp-fight-banner,
+.rp-screen--fight .rp-card-wall,
+.rp-screen--fight .rp-unit-card,
+.rp-screen--fight .rp-arena-panel,
+.rp-screen--fight .rp-pick-grid {
+  display: none !important;
+}
+
+/* Thin fight chrome */
+.rp-screen--fight .rp-hud-top {
+  opacity: 0.65;
+}
+.rp-screen--fight .rp-quest-banner,
+.rp-screen--fight .rp-hud-quest {
+  opacity: 0.75;
+  max-height: 1.4em;
+}
+
+.rp-screen--fight .rp-arena {
+  position: absolute;
+  inset: calc(52px + var(--rp-safe-top, 0px)) 0
+    calc(var(--rp-dock-h, 72px) + var(--rp-safe-bottom, 0px));
+  z-index: 3;
+  pointer-events: none;
+}
+
+.rp-screen--fight .rp-arena > * {
+  pointer-events: auto;
+}
+
+/* Units sit ON clay pads — not mid-air cards */
+.rp-screen--fight .rp-unit {
+  position: absolute;
+  left: var(--pad-x);
+  top: var(--pad-y);
+  width: 64px;
+  transform: translate(-50%, -78%);
+  text-align: center;
+  z-index: 3;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.rp-screen--fight .rp-unit img {
+  width: 54px;
+  height: 54px;
+  object-fit: cover;
+  object-position: center 22%;
+  border-radius: 14px;
+  display: block;
+  margin: 0 auto;
+  border: 2px solid var(--neon-teal, #2EC4B6);
+  box-shadow: 0 6px 14px color-mix(in srgb, var(--mud-night, #1A1612) 70%, transparent);
+  background: transparent;
+}
+
+.rp-screen--fight .rp-unit--enemy img {
+  border-color: var(--neon-sign, #FF6B4A);
+}
+
+.rp-screen--fight .rp-unit__name,
+.rp-screen--fight .rp-unit figcaption {
+  font-size: 9px;
+  margin-top: 2px;
+  opacity: 0.85;
+  white-space: nowrap;
+}
+
+.rp-screen--fight .rp-hp {
+  width: 54px;
+  height: 5px;
+  margin: 2px auto 0;
+}
+
+/* Score chips float; no thick scoreboard bar over stage */
+.rp-screen--fight .rp-arena__score {
+  top: 2px;
+}
+.rp-screen--fight .rp-scoreboard,
+.rp-screen--fight .rp-fight-status-bar {
+  display: none !important;
+}
+
+.rp-screen--fight .rp-arena__vs {
+  top: 46%;
+  font-size: 11px;
+  opacity: 0.5;
+}
+
+/* Arena hero crop: keep PORCH CUP sign + pad grid + footlights */
+.rp-screen--fight .rp-stage[data-wave="3"][data-stage="arena"] .rp-stage__img {
+  object-position: center 55%;
+  transform: scale(1.18);
+  transform-origin: center 55%;
+}
+
+.rp-screen--fight .rp-dock--fight {
+  grid-template-columns: 1fr 1fr;
+  --rp-dock-h: 68px;
+}
+
+.rp-screen--fight .rp-vfx[data-vfx="rivalry"] {
+  bottom: 14%;
+  width: min(68%, 240px);
+  mix-blend-mode: screen;
+}

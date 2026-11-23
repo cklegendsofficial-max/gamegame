@@ -1,0 +1,221 @@
+{
+  "schemaVersion": 1,
+  "packId": "story-form-20",
+  "kind": "story-quest-form",
+  "formIndex": 20,
+  "localeDefault": "tr",
+  "optional": true,
+  "purpose": "OPTIONAL post-GATE-9.0: kill dual MAIN chip on Day10 — only MAIN 4/5 Ledger.",
+  "addressesScore": {
+    "scoreLatestPath": "internal/rival-porch-score-latest.json",
+    "overall": 9.0,
+    "storyScore": 8.9,
+    "playedAt": "2026-11-23T14:11:02Z",
+    "gaps": [
+      "Dual MAIN chip (4/5 Ledger + 3/5 Decibel) on Day10",
+      "Ledger tray testid present but not screenshot-tall"
+    ],
+    "gate": "9.0 hit — optional polish"
+  },
+  "sourcePacks": [
+    "internal/squads/story-form-11.json",
+    "internal/squads/story-form-19.json"
+  ],
+  "integrator": {
+    "owner": "code owner on cursor/rival-porch-slice-31f7",
+    "noPrFromThisPackAuthor": true,
+    "mergeMode": "patch-overlay",
+    "wire": [
+      "Merge storyForm20 (optional polish)",
+      "Replace mqStreetChipHtml with form20 one-chip policy",
+      "On day≥10 / ledger_natural / natural_ledger_street_wins: suppress mq-street-chip-volume; show at most ONE MAIN chip (prefer spine-cult-chip MAIN 4/5 Ledger)",
+      "renderStreet: if oneMainChipDay10, do not mount both spineCultChipHtml and mqStreetChipHtml",
+      "Optional: bump ledger tray SVG height (screenshotTallTray)",
+      "Append cssAppend"
+    ],
+    "doNot": [
+      "Leave mq-street-chip-volume matching while Day10 Ledger MAIN is up",
+      "Mount spine-cult-chip + mq-street-chip both saying MAIN on Day10"
+    ]
+  },
+  "principles": {
+    "storyNeverGatedBySpend": true,
+    "oneMainChipOnDay10": true,
+    "ledgerFourBeatsDecibelThree": true
+  },
+  "oneMainChipDay10": {
+    "id": "kill_dual_main_day10",
+    "bug": "spineCultChipHtml returns MAIN 4/5 Ledger on day≥10 while mqStreetChipHtml still hits mq_street_volume (MAIN 3/5 Decibel) because flagsNone lacks ledger wins and chips.find returns volume before ledger.",
+    "policy": {
+      "when": {
+        "dayIndexMin": 10,
+        "orFlagsAny": [
+          "natural_ledger_street_wins",
+          "natural_ledger_street",
+          "quest_ledger_tease",
+          "week2_decibel_ledger_seen"
+        ],
+        "orWinnerIn": [
+          "ledger_natural"
+        ]
+      },
+      "singleChip": {
+        "prefer": "spine-cult-chip",
+        "label": {
+          "tr": "MAIN 4/5 · Defter & Tepsi",
+          "en": "MAIN 4/5 · Ledger & Tray"
+        },
+        "testId": "spine-cult-chip",
+        "suppressTestIds": [
+          "mq-street-chip-volume",
+          "mq-street-chip-antenna",
+          "mq-street-chip"
+        ]
+      },
+      "mqStreetChipHtml": "return '' when oneMainChipActive() — spine cult owns Day10",
+      "volumeChipWhenOverride": {
+        "flagsAny": [
+          "quest_volume_active",
+          "street_av_handoff_seen",
+          "arc_volume_war_seed"
+        ],
+        "flagsNone": [
+          "arc_volume_war_complete",
+          "street_vl_handoff_seen",
+          "natural_ledger_street_wins",
+          "natural_ledger_street",
+          "quest_ledger_tease"
+        ],
+        "dayIndexMax": 9
+      },
+      "ledgerChipWhenOverride": {
+        "flagsAny": [
+          "quest_ledger_active",
+          "street_vl_handoff_seen",
+          "arc_tea_ledger_seed",
+          "natural_ledger_street",
+          "natural_ledger_street_wins",
+          "quest_ledger_tease"
+        ],
+        "flagsNone": [
+          "arc_tea_ledger_complete"
+        ],
+        "dayIndexMin": 10
+      }
+    }
+  },
+  "screenshotTallTray": {
+    "id": "taller_ledger_tray",
+    "extends": "story-form-19.cleanLedgerTrayWinner",
+    "cssBoost": true,
+    "note": "Soft gap: tray testid present but not screenshot-tall — enlarge winner tray"
+  },
+  "cssAppend": "\n/* story-form-20 — one MAIN chip on Day10; taller ledger tray */\nbody.rp-ledger-wins .rp-mq-street-chip,\nbody.rp-one-main-chip .rp-mq-street-chip,\nbody[data-day-index=\"10\"] .rp-mq-street-chip,\nbody[data-day-index=\"11\"] .rp-mq-street-chip,\nbody[data-day-index=\"12\"] .rp-mq-street-chip,\nbody.rp-ledger-wins [data-testid=\"mq-street-chip-volume\"],\nbody.rp-ledger-wins [data-testid=\"mq-street-chip-antenna\"] {\n  display: none !important;\n}\nbody.rp-one-main-chip .rp-spine-cult-chip,\nbody.rp-ledger-wins .rp-spine-cult-chip {\n  display: block;\n}\n/* taller tray for screenshot read */\nbody.rp-ledger-wins .rp-stage-prop--ledger-tray,\nbody.rp-ledger-wins .rp-stage-prop--ledger-tray-winner {\n  left: 12%;\n  width: 52%;\n  top: 48%;\n  height: 32%;\n  z-index: 10;\n}\nbody.rp-ledger-wins .rp-stage-prop--ledger-tray-winner .rp-stage-prop__tag {\n  font-size: 13px;\n  padding: 0.3rem 0.55rem;\n}\n",
+  "integratorSnippet": {
+    "language": "js",
+    "comment": "Day10 single MAIN 4/5 Ledger chip",
+    "pseudo": "\nfunction storyForm20(){ return state.questPack?.storyForm20 || state.storyForm20 || null; }\n\nfunction oneMainChipActive() {\n  const day = state.save.dayIndex || 1;\n  if (day >= 10) return true;\n  if ([\"natural_ledger_street_wins\",\"natural_ledger_street\"].some(storyFlag)) return true;\n  try {\n    const w = pickUnifiedStoryWinner();\n    if (w?.id === \"ledger_natural\") return true;\n  } catch {}\n  return false;\n}\n\nfunction mqStreetChipHtml() {\n  if (oneMainChipActive()) {\n    document.body.classList.add(\"rp-one-main-chip\");\n    return \"\"; // spineCultChipHtml owns MAIN 4/5 Ledger\n  }\n  const chips = (storyForm20()?.mqStreetChipsOverride || storyForm11()?.mqStreetChips || []);\n  // prefer highest MAIN step: scan ledger first\n  const ordered = [...chips].sort((a, b) => (b.stepRank || 0) - (a.stepRank || 0));\n  const hit = ordered.find((c) => whenFlagsOk(c.when || {}));\n  if (!hit) return \"\";\n  return `<button class=\"rp-mq-street-chip\" type=\"button\" data-testid=\"${hit.testId}\" data-action=\"open-quests\">${loc(hit.chip)}</button>`;\n}\n\n// renderStreet: spineCultChipHtml() once; mqStreetChipHtml() returns '' on Day10\n// syncLedgerWinsBodyClass already toggles rp-ledger-wins — CSS hides volume mq chip\n"
+  },
+  "mqStreetChipsOverride": [
+    {
+      "id": "mq_street_antenna",
+      "stepRank": 2,
+      "testId": "mq-street-chip-antenna",
+      "chip": {
+        "tr": "MAIN 2/5 · Anten Operasyonu",
+        "en": "MAIN 2/5 · Antenna Op"
+      },
+      "when": {
+        "dayIndexMax": 9,
+        "flagsAny": [
+          "quest_antenna_active",
+          "arc_kite_antenna_beat1"
+        ],
+        "flagsNone": [
+          "arc_kite_antenna_complete",
+          "street_av_handoff_seen",
+          "natural_ledger_street_wins"
+        ]
+      }
+    },
+    {
+      "id": "mq_street_volume",
+      "stepRank": 3,
+      "testId": "mq-street-chip-volume",
+      "chip": {
+        "tr": "MAIN 3/5 · Desibel Antlaşması",
+        "en": "MAIN 3/5 · Decibel Accord"
+      },
+      "when": {
+        "dayIndexMax": 9,
+        "flagsAny": [
+          "quest_volume_active",
+          "street_av_handoff_seen",
+          "arc_volume_war_seed"
+        ],
+        "flagsNone": [
+          "arc_volume_war_complete",
+          "street_vl_handoff_seen",
+          "natural_ledger_street_wins",
+          "natural_ledger_street",
+          "quest_ledger_tease"
+        ]
+      }
+    },
+    {
+      "id": "mq_street_ledger",
+      "stepRank": 4,
+      "testId": "mq-street-chip-ledger",
+      "chip": {
+        "tr": "MAIN 4/5 · Defter & Tepsi",
+        "en": "MAIN 4/5 · Ledger & Tray"
+      },
+      "when": {
+        "dayIndexMin": 10,
+        "flagsAny": [
+          "quest_ledger_active",
+          "street_vl_handoff_seen",
+          "arc_tea_ledger_seed",
+          "natural_ledger_street",
+          "natural_ledger_street_wins",
+          "quest_ledger_tease"
+        ],
+        "flagsNone": [
+          "arc_tea_ledger_complete"
+        ]
+      },
+      "note": "Normally unused on Day10 — spine-cult-chip is the single MAIN; override exists if spine suppressed"
+    }
+  ],
+  "acceptanceChecks": [
+    {
+      "id": "one_main_day10",
+      "desc": "Day10 street/evening: exactly one MAIN chip — MAIN 4/5 Ledger; zero mq-street-chip-volume / MAIN 3/5 Decibel."
+    },
+    {
+      "id": "spine_owns_day10",
+      "desc": "spine-cult-chip present with Ledger 4/5; mqStreetChipHtml returns empty when oneMainChipActive."
+    },
+    {
+      "id": "tray_taller",
+      "desc": "Optional: ledger tray winner reads taller in screenshot under rp-ledger-wins."
+    }
+  ],
+  "playtestScript": [
+    "Day10 cold street: queryAll MAIN chips / spine-cult + mq chips → only 4/5 Ledger",
+    "Confirm no Decibel 3/5 chip in HUD"
+  ],
+  "newStoryFlags": [],
+  "meta": {
+    "squad": "story-quest",
+    "formIndex": 20,
+    "optional": true,
+    "shipTrigger": "GATE 9.0 hit — optional kill dual MAIN chip on Day10",
+    "nextPackWhen": "only if coordinator asks or story < 8.5",
+    "dependsOnForms": [
+      11,
+      19
+    ],
+    "implementationNote": "mqStreetChipHtml empty on Day10; CSS hide volume chip; taller tray polish."
+  }
+}

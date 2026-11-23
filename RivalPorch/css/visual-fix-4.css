@@ -1,0 +1,172 @@
+/* Rival Porch — visual-fix-4
+   R15b / 7eca67c: street .rp-hotspot height=0 (wallpaper regression).
+   Restore human-tappable bust targets WITHOUT breaking cover bleed (letterboxY=0).
+
+   RULES:
+   - Do NOT change .rp-stage__img object-fit/cover/scale that keeps letterboxY=0
+     unless a selector below is explicitly marked STAGE-SAFE.
+   - Hotspots use FIXED px size + in-flow bust (never aspect-ratio-only + abs children).
+   - min-height/min-width ≥ 48px — CI asserts getBoundingClientRect().height ≥ 48.
+*/
+
+/* ── Hotspot hit-targets (supersedes visual-fix-3 §A sizing) ───────────── */
+
+.rp-screen--street .rp-hotspots,
+.rp-hotspots {
+  position: absolute;
+  inset: 0;              /* full stage; do not shrink with top/bottom % */
+  z-index: 3;
+  pointer-events: none;
+  overflow: visible;
+}
+
+/* Kill pack-3 shrink that made % tops ambiguous */
+.rp-screen--street .rp-hotspots {
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+}
+
+.rp-screen--street .rp-hotspot,
+.rp-hotspot {
+  /* Explicit box — NEVER height:auto/aspect-ratio alone with abs children */
+  position: absolute;
+  left: var(--x, 50%);
+  top: var(--y, 44%);
+  width: 56px !important;
+  height: 72px !important;
+  min-width: 48px !important;
+  min-height: 48px !important;
+  max-width: none !important;
+  aspect-ratio: auto !important;
+  transform: translate(-50%, -85%);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  pointer-events: auto;
+  z-index: 3;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2px;
+  overflow: visible;
+  box-sizing: border-box;
+  line-height: normal;
+  font-size: 10px;
+  /* buttons sometimes collapse in UA stylesheet without this */
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* Bust IN FLOW — gives the button intrinsic layout height for CI */
+.rp-screen--street .rp-hotspot__bust,
+.rp-hotspot__bust {
+  position: relative !important; /* not absolute */
+  left: auto !important;
+  top: auto !important;
+  transform: none !important;
+  display: block !important;
+  visibility: visible !important;
+  width: 56px !important;
+  height: 56px !important;
+  min-width: 48px !important;
+  min-height: 48px !important;
+  flex: 0 0 56px;
+  object-fit: cover;
+  object-position: center 22%;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--porch-lamp, #E8A045) 75%, transparent);
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--mud-night, #1A1612) 50%, transparent),
+    0 6px 14px color-mix(in srgb, var(--mud-night, #1A1612) 60%, transparent);
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 35%, transparent);
+  pointer-events: none; /* tap goes to button */
+}
+
+.rp-screen--street .rp-hotspot__glow,
+.rp-hotspot__glow {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 24px;
+  height: 8px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow: 0 0 12px 3px color-mix(in srgb, var(--porch-lamp, #E8A045) 45%, transparent);
+  animation: rp-lamp-breathe 2.4s ease-in-out infinite;
+}
+
+.rp-screen--street .rp-hotspot__name,
+.rp-hotspot__name {
+  position: relative !important; /* in flow under bust */
+  left: auto !important;
+  top: auto !important;
+  transform: none !important;
+  display: block;
+  font-size: 9px;
+  line-height: 1.1;
+  white-space: nowrap;
+  max-width: 72px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 62%, transparent);
+  color: var(--tea-cream, #F2E6D8);
+  pointer-events: none;
+}
+
+.rp-hotspot.is-available .rp-hotspot__bust {
+  border-color: var(--porch-lamp, #E8A045);
+}
+.rp-hotspot[aria-disabled="true"],
+.rp-hotspot:disabled {
+  opacity: 0.45;
+}
+.rp-hotspot[aria-disabled="true"] .rp-hotspot__glow,
+.rp-hotspot:disabled .rp-hotspot__glow {
+  animation: none;
+  opacity: 0.2;
+}
+
+/* Hidden attribute must not win if JS forgets to unhide */
+.rp-hotspot__bust[hidden] {
+  display: block !important;
+}
+
+/* ── STAGE-SAFE: keep cover bleed (do not regress letterboxY) ───────────── */
+/* Only reinforce pack-2 cover; do not add translate()-based hacks. */
+
+.rp-stage[data-wave="3"] .rp-stage__img {
+  object-fit: cover;
+  /* leave existing scale/object-position from pack-2 / integrator intact */
+}
+
+/* Soften pack-3 street scale bump if it fights coverRatio CI — optional clamp */
+.rp-screen--street .rp-stage[data-wave="3"][data-stage="street"] .rp-stage__img {
+  object-fit: cover;
+  object-position: center 42%;
+  transform: scale(1.1);
+  transform-origin: center 42%;
+}
+
+/* Dock must not steal pointer events from hotspot band */
+.rp-screen--street .rp-dock {
+  z-index: 6;
+  pointer-events: auto;
+}
+.rp-screen--street .rp-hotspots {
+  z-index: 5; /* above stage, below sheets; above whisper if whisper is non-interactive */
+}
+.rp-screen--street .rp-whisper {
+  z-index: 4;
+  pointer-events: none;
+}
+.rp-screen--street .rp-whisper button,
+.rp-screen--street .rp-whisper a {
+  pointer-events: auto;
+}

@@ -1,0 +1,171 @@
+/* Rival Porch — visual-fix-13 (HOTFIX)
+   Seals holes in fix-12 that still let SHARED STRING / prop tags land in bust band:
+   1) Day2-only selectors miss cold mediate on day≥3
+   2) clip-path inset expanded bottom, did NOT clip upward into rail
+   3) orphan tags / SVG <text> / unlabeled chips without known classes
+   Paste AFTER visual-fix-12.css.
+*/
+
+/* ── Scope: any street where cold mediate (or day2) prop is live ─────────── */
+
+.rp-screen--street[data-day="2"],
+.rp-screen--street.is-day2,
+.rp-screen--street.rp-cold-day2,
+body.rp-cold-day2 .rp-screen--street,
+.rp-screen--street[data-story-winner="cold_day2_prop"],
+.rp-screen--street:has([data-testid="story-day2-mediate-string"]),
+.rp-screen--street:has([data-testid="story-day2-instigate-kite"]),
+.rp-screen--street:has([data-testid="story-day2-stage-chalk"]) {
+  --rp-bust-rail-top: calc(48px + var(--rp-safe-top, 0px));
+  --rp-bust-rail-bottom: calc(var(--rp-street-bust-band-top, 96px) + 96px);
+  --rp-prop-mid-top: max(36%, calc(var(--rp-bust-rail-bottom) + 12px));
+  --rp-prop-tag-bottom: calc(var(--rp-dock-h, 72px) + 56px + var(--rp-safe-bottom, 0px));
+}
+
+/* Shared selector alias (repeat for each rule — no CSS @mixin) */
+/* Use :is() for cold + day2 + has-prop */
+
+/* ── A. Hard mid-stage prop cage (overflow clips upward paint) ───────────── */
+
+.rp-screen--street:is([data-day="2"], .is-day2, .rp-cold-day2, [data-story-winner="cold_day2_prop"]):has([data-testid^="story-day2-"]) .rp-stage-prop,
+.rp-screen--street:has([data-testid="story-day2-mediate-string"]) .rp-stage-prop,
+.rp-screen--street [data-testid="story-day2-mediate-string"],
+.rp-screen--street [data-testid="story-day2-instigate-kite"],
+.rp-screen--street [data-testid="story-day2-stage-chalk"],
+.rp-screen--street [data-testid="story-day2-forbidden-zone"],
+body.rp-cold-day2 .rp-screen--street .rp-stage-prop {
+  position: absolute !important;
+  top: var(--rp-prop-mid-top, 36%) !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: translateX(-50%) !important;
+  width: min(88vw, 320px) !important;
+  max-height: min(26vh, 200px) !important;
+  z-index: 5 !important;
+  /* CRITICAL: clip children that paint above the box into bust rail */
+  overflow: hidden !important;
+  clip-path: none !important; /* undo fix-12's wrong inset(0 0 -40px 0) */
+  pointer-events: none !important;
+  contain: layout paint;
+}
+
+/* Allow tag to sit just under cage via sibling slot — see B */
+
+/* ── B. Tag slot: NEVER use top% near busts; force below rail floor ──────── */
+
+.rp-screen--street .rp-stage-prop__tag,
+.rp-screen--street .rp-prop-chip,
+.rp-screen--street .rp-prop-tag,
+.rp-screen--street .rp-stage-prop-label,
+.rp-screen--street .rp-shared-string-tag,
+.rp-screen--street [data-prop-tag],
+.rp-screen--street [data-testid="shared-string-tag"],
+.rp-screen--street [data-testid="prop-tag-shared-string"],
+.rp-screen--street [data-testid="story-day2-mediate-string"] [class*="tag"],
+.rp-screen--street [data-testid="story-day2-mediate-string"] [class*="label"],
+.rp-screen--street [data-testid="story-day2-mediate-string"] [class*="chip"],
+.rp-screen--street [data-testid="story-day2-mediate-string"] [data-label],
+body.rp-cold-day2 .rp-screen--street [class*="shared-string"],
+body.rp-cold-day2 .rp-screen--street [aria-label*="Shared string" i],
+body.rp-cold-day2 .rp-screen--street [aria-label*="SHARED STRING" i],
+.rp-screen--street [title="SHARED STRING"],
+.rp-screen--street [title="Shared string"] {
+  position: fixed !important; /* escape any bust-rail containing block */
+  left: 50% !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: var(--rp-prop-tag-bottom, calc(72px + 56px)) !important;
+  transform: translateX(-50%) !important;
+  z-index: 6 !important;
+  max-width: 12rem !important;
+  max-height: 28px !important;
+  margin: 0 !important;
+  padding: 4px 10px !important;
+  font-size: 10px !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 82%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--tea-cream, #F2E6D8) 22%, transparent) !important;
+  color: var(--tea-cream, #F2E6D8) !important;
+  pointer-events: none !important;
+  /* Hard floor: never paint inside bust rail on 390×844 */
+  /* (fixed bottom keeps us near dock; min() guard if dock tall) */
+}
+
+/* Prefer dedicated under-prop slot when integrator adds it */
+.rp-screen--street .rp-prop-tag-slot,
+.rp-screen--street [data-testid="prop-tag-slot"] {
+  position: absolute !important;
+  left: 12px !important;
+  right: 12px !important;
+  top: auto !important;
+  bottom: var(--rp-prop-tag-bottom, calc(72px + 56px)) !important;
+  z-index: 6 !important;
+  display: flex !important;
+  justify-content: center;
+  pointer-events: none;
+  max-height: 28px;
+  overflow: hidden;
+}
+
+.rp-screen--street .rp-prop-tag-slot .rp-stage-prop__tag,
+.rp-screen--street .rp-prop-tag-slot .rp-prop-chip,
+.rp-screen--street [data-testid="prop-tag-slot"] > * {
+  position: static !important;
+  transform: none !important;
+  bottom: auto !important;
+  left: auto !important;
+}
+
+/* ── C. Kill anything that can still sit in the bust band ────────────────── */
+
+/* Hotspot / HUD orphans */
+.rp-screen--street .rp-hotspots .rp-prop-chip,
+.rp-screen--street .rp-hotspots .rp-stage-prop__tag,
+.rp-screen--street .rp-hotspots .rp-prop-tag,
+.rp-screen--street .rp-hotspot .rp-prop-chip,
+.rp-screen--street .rp-hud-top .rp-prop-chip,
+.rp-screen--street .rp-hud-mid .rp-prop-chip,
+.rp-screen--street .rp-quest-strip .rp-prop-chip,
+.rp-screen--street .rp-quest .rp-prop-chip,
+body.rp-cold-day2 .rp-hotspots [class*="shared-string"],
+body.rp-cold-day2 .rp-hud-top [class*="shared-string"] {
+  display: none !important;
+}
+
+/* SVG <text> labels drawn along the string arc through faces */
+.rp-screen--street [data-testid="story-day2-mediate-string"] svg text,
+.rp-screen--street .rp-stage-prop svg text,
+.rp-screen--street [data-testid="story-day2-mediate-string"] foreignObject {
+  display: none !important;
+}
+
+/* Invisible rail mask: blocks residual absolute paint in bust band */
+.rp-screen--street:is([data-day="2"], .is-day2, .rp-cold-day2, [data-story-winner="cold_day2_prop"])::before,
+.rp-screen--street:has([data-testid="story-day2-mediate-string"])::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--rp-bust-rail-top, 48px);
+  height: calc(var(--rp-bust-rail-bottom, 192px) - var(--rp-bust-rail-top, 48px));
+  z-index: 7; /* above prop (5) / tags that sneak up; BELOW bust hit targets if they are z8 */
+  pointer-events: none;
+  /* no fill — layout fence only; real busts must be z≥8 (fix-11) */
+  background: transparent;
+}
+
+/* Ensure bust rail wins over any leftover tag that ignored fixed bottom */
+.rp-screen--street .rp-hotspots {
+  z-index: 8 !important;
+  isolation: isolate;
+}
+.rp-screen--street .rp-hotspot__bust,
+.rp-screen--street .rp-hotspot__name {
+  position: relative;
+  z-index: 2;
+}

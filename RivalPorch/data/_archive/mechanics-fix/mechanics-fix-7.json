@@ -1,0 +1,245 @@
+{
+  "schemaVersion": 1,
+  "id": "mechanics-fix-7",
+  "packNumber": 7,
+  "squad": "mechanics",
+  "shippedAt": "2026-11-23T12:26:30Z",
+  "noPrPush": true,
+  "extends": [
+    "internal/rival-porch-combat-pack.json",
+    "internal/squads/mechanics-fix-5.json",
+    "internal/squads/mechanics-fix-6.json"
+  ],
+  "mergeMode": "deepMergeIntoCombatPack",
+  "wirePathHint": "RivalPorch/js/combat.js practice scriptedMoments + rivalry ack + second decision",
+  "scoreRef": {
+    "file": "internal/rival-porch-score-latest.json",
+    "buildCommit": "2828d35",
+    "mechanicsScore": 7.8,
+    "overall": 7.8,
+    "priorityFixTitles": [
+      "Auto-clear or merge Rivalry badge ack into Call flow",
+      "Second mid-fight decision (not only one Call!)"
+    ]
+  },
+  "scoreGapsAddressed": [
+    "Rivalry badge ack soft-stalls fight if ignored",
+    "Only one meaningful decision per Practice fight",
+    "Rivalry pop can strand players mid-fight",
+    "Auto Fight still carries most of the match"
+  ],
+  "targets": [
+    "mergeRivalryAckIntoCall",
+    "secondMidFightDecision",
+    "noStallBeforeComic"
+  ],
+
+  "acceptance": {
+    "rivalryAck": "Practice fight always reaches comic within 15s of porch-call pick without a separate stranded ack; or ack is the same tap as Call resolve.",
+    "secondDecision": "Practice exposes a second player choice (swap/focus/prop) that changes score before KO."
+  },
+
+  "mergeRivalryAckIntoCall": {
+    "problem": "After porch-call, fight can sit on 'I see Rivalry' and never reach comic/End evening",
+    "policy": "never_block_on_standalone_rivalry_ack_mid_fight",
+    "lobbyAck": {
+      "keep": true,
+      "phase": "draft_or_placement_only",
+      "id": "prac_rivalry_arm",
+      "requireAck": true,
+      "note": "Lobby/placement ack OK; mid-fight must NOT re-require blocking ack."
+    },
+    "midFightRivalryPop": {
+      "id": "prac_rivalry_after_call",
+      "blocking": false,
+      "requireAck": false,
+      "autoClearMs": 1400,
+      "mergeIntoCallResolve": true,
+      "onCallResolve": {
+        "ifSynergyActive": "syn_rivalry",
+        "showCombinedToast": {
+          "tr": "Çağrı + Rekabet! Düşük HP → daha sert",
+          "en": "Call + Rivalry! Low HP → harder hits"
+        },
+        "setsFlags": [
+          "practice_cup_rivalry_pop_seen",
+          "syn_taught_syn_rivalry"
+        ],
+        "floatId": "float_rivalry_buff",
+        "cameraShakeId": "shake_medium"
+      },
+      "ifCallResolveMissedRivalry": {
+        "fallbackPop": {
+          "tSecOffsetAfterCall": 0.6,
+          "nonBlocking": true,
+          "autoDismissMs": 1200,
+          "noAckButton": true
+        }
+      }
+    },
+    "killStandaloneAck": {
+      "removeOrDisable": [
+        "mid_fight_requireAck_I_see_Rivalry",
+        "blocking coach modal after call that waits for tap"
+      ],
+      "ifLegacyAckStillMounted": {
+        "action": "auto_click_ack_or_dismiss",
+        "afterMs": 400,
+        "setsFlags": ["practice_cup_rivalry_pop_seen"]
+      }
+    },
+    "comicGate": {
+      "maxSecAfterPorchCallPick": 15,
+      "mustReach": "screen-comic",
+      "doNotRequire": ["separate_rivalry_ack_click"],
+      "watchdog": {
+        "id": "prac_finish_watchdog",
+        "tSecAfterCallResolve": 12,
+        "type": "force_finish_banner_if_not_done",
+        "setsFlags": ["practice_cup_done", "first_evening_practice_cleared"]
+      }
+    }
+  },
+
+  "secondMidFightDecision": {
+    "problem": "One required Call! is progress; mastery still unread",
+    "id": "prac_second_decision",
+    "timing": {
+      "armAfterCallResolveSec": 2.5,
+      "forceOpenIfUnusedSec": 3.0,
+      "beforeKoGuard": true,
+      "minRemainingFightSec": 4
+    },
+    "type": "micro_choice",
+    "ui": {
+      "title": {
+        "tr": "İkinci hamle — birini seç",
+        "en": "Second move — pick one"
+      },
+      "subtitle": {
+        "tr": "Focus / Prop / Swap — skor yine sallanır",
+        "en": "Focus / Prop / Swap — score swings again"
+      },
+      "pauseAutoTicks": true,
+      "cannotDismissWithoutPick": true,
+      "timeoutDefaultCallId": null,
+      "practiceRequirePick": true,
+      "testId": "second-decision-modal",
+      "dockTestId": "second-decision-ready"
+    },
+    "forceOptionIds": ["call_focus_fire", "call_prop_assist", "call_chaos_kite"],
+    "excludeIfSameAsFirstCall": true,
+    "selectionRule": {
+      "preferDifferentFromFirst": true,
+      "ifFirstWasFocus": ["call_prop_assist", "call_chaos_kite", "call_hold_fence"],
+      "ifFirstWasProp": ["call_focus_fire", "call_chaos_kite", "call_cheer"],
+      "ifFirstWasSwap": ["call_focus_fire", "call_prop_assist", "call_tea_break"],
+      "alwaysThreeOptions": true
+    },
+    "effects": {
+      "mustChangeScoreBeforeKo": true,
+      "showScoreDeltaToast": true,
+      "minVisibleSwingPercent": 5,
+      "holdPauseMsAfterPick": 700
+    },
+    "setsFlagsOnResolve": ["practice_second_decision_done"],
+    "comicHintSlot": "secondCall",
+    "ladderOptional": {
+      "enable": true,
+      "armWhen": "first_call_resolved AND fight_time_percent_lte_0.75 AND any_ally_hp_lte_0.45",
+      "oncePerFight": true
+    }
+  },
+
+  "practiceTimelinePatch": {
+    "note": "Relative to call resolve; integrator merges into practiceCup.scriptedMoments",
+    "moments": [
+      {
+        "id": "prac_call_resolve_merged_rivalry",
+        "type": "porch_call_resolve_fx",
+        "mergeRivalryTeach": true,
+        "noBlockingAck": true
+      },
+      {
+        "id": "prac_second_decision_arm",
+        "tSecFromCallResolve": 2.5,
+        "type": "second_decision_arm",
+        "dockPulse": true
+      },
+      {
+        "id": "prac_second_decision",
+        "tSecFromCallResolve": 3.0,
+        "type": "second_decision_modal",
+        "forceOpen": true
+      },
+      {
+        "id": "prac_second_resolve",
+        "type": "second_decision_resolve_fx",
+        "showScoreDelta": true
+      },
+      {
+        "id": "prac_finish",
+        "tSecFromCallResolveMax": 14,
+        "type": "finish_banner",
+        "setsFlags": [
+          "practice_cup_done",
+          "syn_taught_syn_rivalry",
+          "practice_cup_rivalry_pop_seen",
+          "practice_cup_porch_call_done",
+          "practice_second_decision_done",
+          "first_evening_practice_cleared"
+        ]
+      }
+    ]
+  },
+
+  "uiStringsPatch": {
+    "fight.rivalry_merged": {
+      "tr": "Çağrı + Rekabet!",
+      "en": "Call + Rivalry!"
+    },
+    "fight.second_decision_title": {
+      "tr": "İkinci hamle — birini seç",
+      "en": "Second move — pick one"
+    },
+    "fight.second_decision_ready": {
+      "tr": "İkinci hamle hazır",
+      "en": "Second move ready"
+    },
+    "fight.no_stranded_ack": {
+      "tr": "Rekabet öğretisi çağrıyla birleşti",
+      "en": "Rivalry teach merged into the call"
+    }
+  },
+
+  "acceptanceChecks": [
+    "No mid-fight blocking 'I see Rivalry' after Call pick",
+    "Comic within 15s of porch-call pick (watchdog if needed)",
+    "Second decision modal Focus/Prop/Swap (different from first) before KO",
+    "Second pick changes score visibly",
+    "practice_second_decision_done + practice_cup_done set; End evening path clear"
+  ],
+
+  "integrator": {
+    "owner": "code owner on cursor/rival-porch-slice-31f7",
+    "steps": [
+      "On Call resolve: set rivalry teach flags + non-blocking float; remove requireAck mid-fight.",
+      "Auto-dismiss any legacy Rivalry ack modal within 400ms.",
+      "Arm second decision ~2.5s after call; force modal at 3.0s; require pick; show score delta.",
+      "Prefer options ≠ first call; still 3 choices.",
+      "Finish watchdog ≤15s after first call pick → comic.",
+      "Smoke: Call!→Focus→(no ack stall)→Second move→Prop→comic <15s from first pick.",
+      "No PR from this squad."
+    ],
+    "priority": "wire next — dual PriorityFixes on 2828d35"
+  },
+
+  "meta": {
+    "expectedMechanicsLift": "7.8 → toward ≥8.5 with two decisions + no ack stall",
+    "nextPackIfStillLow": "mechanics-fix-8 — ladder deliberate call + position micro-choice",
+    "compat": {
+      "firstCallOptions": ["call_focus_fire", "call_prop_assist", "call_chaos_kite"],
+      "secondDecisionTestId": "second-decision-modal"
+    }
+  }
+}

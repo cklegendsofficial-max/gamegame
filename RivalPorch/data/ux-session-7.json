@@ -1,0 +1,52 @@
+{
+  "packId": "ux-session-7",
+  "schemaVersion": 1,
+  "scoreReact": {
+    "buildCommit": "2828d35",
+    "overall": 7.8,
+    "gameplay": 7.5,
+    "gap": "Evening agenda still todo-list shaped"
+  },
+  "eveningHome": {
+    "mode": "one_next_action",
+    "maxBeatLinesOnHome": 0,
+    "maxSupportChars": 90,
+    "primaryTestId": "evening-primary",
+    "forbidSelectors": [
+      ".agenda-list",
+      ".beat-list",
+      ".ritual",
+      "[data-agenda]",
+      "ul.rp-checklist"
+    ]
+  },
+  "nextActionPriority": [
+    "end_evening",
+    "sa_checkin",
+    "sa_visit",
+    "sa_kite",
+    "sa_practice",
+    "sa_claim",
+    "sa_echo",
+    "sa_street"
+  ],
+  "cultLoop": {
+    "stayOnStreetAfter": [
+      "sa_checkin",
+      "sa_visit",
+      "sa_kite",
+      "sa_event"
+    ],
+    "returnEveningAfter": [
+      "sa_practice"
+    ],
+    "toastMaxLines": 1
+  },
+  "acceptanceChecks": [
+    "evening_mid_has_no_checklist_list",
+    "exactly_one_evening_primary",
+    "after_checkin_primary_becomes_door_or_practice",
+    "after_practice_primary_is_end_evening",
+    "quest_sheet_still_lists_full_objectives"
+  ]
+}

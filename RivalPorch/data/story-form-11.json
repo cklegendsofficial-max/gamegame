@@ -1,0 +1,436 @@
+{
+  "schemaVersion": 1,
+  "packId": "story-form-11",
+  "kind": "story-quest-form",
+  "formIndex": 11,
+  "localeDefault": "tr",
+  "purpose": "Prove long-arc pull past Day2: Volume beat-by-beat street props + single unified story layer + MQ spine chips on street (screenshot-readable).",
+  "addressesScore": {
+    "scoreLatestPath": "internal/rival-porch-score-latest.json",
+    "storyScore": 8.4,
+    "playedAt": "2026-11-23T12:50:00Z",
+    "gaps": [
+      "Long-arc pull still thin after Day2 beat",
+      "Antenna Op beat CTA competes with street prop readability",
+      "story win often unreadable under stacked street chrome"
+    ],
+    "timerFire": "2026-11-23T13:00:01Z",
+    "note": "Forms 9–10 already shipped for spotlight/handoff; form11 deepens Volume street evolution + unified prove layer for auditor re-score."
+  },
+  "sourcePacks": [
+    "internal/squads/story-form-8.json",
+    "internal/squads/story-form-9.json",
+    "internal/squads/story-form-10.json"
+  ],
+  "integrator": {
+    "owner": "code owner on cursor/rival-porch-slice-31f7",
+    "noPrFromThisPackAuthor": true,
+    "mergeMode": "patch-overlay",
+    "wire": [
+      "Merge storyForm11",
+      "renderStreet: compute single storyLayerWinner via unifiedStreetStoryLayer priority ladder — only ONE primary story signal + optional MQ chip",
+      "Inject volumeStreetBeatProps for active Volume beat (evolution replaces previous)",
+      "Match comic: append matchComicHandoffEchoes when street_av_handoff_seen",
+      "Append cssAppend; body.rp-story-one-signal class when unified layer active"
+    ],
+    "doNot": [
+      "Stack Antenna banner + Volume banner + handoff + cold prop + MQ chip all at once",
+      "Leave Volume beats journal-only after form10 handoff"
+    ]
+  },
+  "principles": {
+    "storyNeverGatedBySpend": true,
+    "oneStorySignalOnStreet": true,
+    "volumeBeatsHaveStreetProps": true,
+    "mqSpineReadableOnStreet": true,
+    "screenshotProveWithoutJournal": true
+  },
+  "unifiedStreetStoryLayer": {
+    "id": "one_story_signal",
+    "purpose": "Auditor screenshot: exactly one primary story visual wins",
+    "priorityLadder": [
+      {
+        "id": "cold_day2_prop",
+        "when": {
+          "dayIndex": 2,
+          "flagsAny": [
+            "cold_open_mediate",
+            "cold_open_instigate",
+            "cold_open_stage"
+          ]
+        },
+        "source": "storyForm5/6/9"
+      },
+      {
+        "id": "av_handoff",
+        "when": {
+          "flagsAny": [
+            "street_av_handoff_seen"
+          ],
+          "flagsNone": [
+            "street_av_handoff_done",
+            "quest_volume_active"
+          ]
+        },
+        "source": "storyForm10"
+      },
+      {
+        "id": "volume_beat_prop",
+        "when": {
+          "flagsAny": [
+            "quest_volume_active",
+            "arc_volume_war_beat1",
+            "arc_volume_war_seed"
+          ]
+        },
+        "source": "storyForm11.volumeStreetBeatProps"
+      },
+      {
+        "id": "vl_handoff",
+        "when": {
+          "flagsAny": [
+            "street_vl_handoff_seen"
+          ],
+          "flagsNone": [
+            "street_vl_handoff_done"
+          ]
+        },
+        "source": "storyForm10"
+      },
+      {
+        "id": "ledger_prop",
+        "when": {
+          "flagsAny": [
+            "quest_ledger_active"
+          ]
+        },
+        "source": "storyForm9"
+      },
+      {
+        "id": "antenna_prop",
+        "when": {
+          "flagsAny": [
+            "quest_antenna_active"
+          ]
+        },
+        "source": "storyForm9"
+      }
+    ],
+    "secondaryAllowed": [
+      "singleNpcBubble",
+      "mqStreetChip"
+    ],
+    "forbiddenWithPrimary": [
+      "fullArcBeatBanner",
+      "day2Spotlight",
+      "secondStageProp"
+    ],
+    "bodyClass": "rp-story-one-signal",
+    "testId": "street-story-one-signal"
+  },
+  "volumeStreetBeatProps": [
+    {
+      "id": "volume_street_beat1_bass",
+      "beatId": "arc_volume_war_beat1",
+      "when": {
+        "flagsAny": [
+          "quest_volume_active",
+          "arc_volume_war_beat1",
+          "arc_volume_war_seed",
+          "quest_volume_tease"
+        ],
+        "flagsNone": [
+          "arc_volume_war_beat2",
+          "arc_volume_war_complete"
+        ]
+      },
+      "testId": "story-street-volume-bass",
+      "html": "<div class=\"rp-stage-prop rp-stage-prop--volume-bass\" data-testid=\"story-street-volume-bass\" aria-label=\"01:12 bass rings\">\n  <svg class=\"rp-vol-svg\" viewBox=\"0 0 100 40\" aria-hidden=\"true\">\n        <circle cx=\"70\" cy=\"20\" r=\"5\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"1\"/>\n        <circle cx=\"70\" cy=\"20\" r=\"10\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.6\" opacity=\"0.55\"/>\n        <circle cx=\"70\" cy=\"20\" r=\"15\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.35\" opacity=\"0.3\"/>\n        <text x=\"8\" y=\"24\" fill=\"#e8b478\" font-size=\"8\" font-family=\"monospace\">01:12</text>\n      </svg>\n  <span class=\"rp-stage-prop__tag\">Volume · 01:12</span>\n</div>",
+      "npcLine": {
+        "speakerId": "n3",
+        "text": {
+          "tr": "Duvar 01:12'de titredi. Bu Anten değil — Desibel.",
+          "en": "Wall shook at 01:12. Not Antenna — Decibel."
+        }
+      },
+      "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--volume-bass\" data-testid=\"story-street-volume-bass\" aria-label=\"01:12 bas halkaları\">\n  <svg class=\"rp-vol-svg\" viewBox=\"0 0 100 40\" aria-hidden=\"true\">\n        <circle cx=\"70\" cy=\"20\" r=\"5\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"1\"/>\n        <circle cx=\"70\" cy=\"20\" r=\"10\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.6\" opacity=\"0.55\"/>\n        <circle cx=\"70\" cy=\"20\" r=\"15\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.35\" opacity=\"0.3\"/>\n        <text x=\"8\" y=\"24\" fill=\"#e8b478\" font-size=\"8\" font-family=\"monospace\">01:12</text>\n      </svg>\n  <span class=\"rp-stage-prop__tag\">Desibel · 01:12</span>\n</div>"
+    },
+    {
+      "id": "volume_street_beat2_note",
+      "beatId": "arc_volume_war_beat2",
+      "when": {
+        "flagsAny": [
+          "arc_volume_war_beat2"
+        ],
+        "flagsNone": [
+          "arc_volume_war_beat3",
+          "arc_volume_war_complete"
+        ]
+      },
+      "testId": "story-street-volume-note",
+      "reuseForm9": "street_prop_volume_headphones",
+      "html": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-volume-note\" aria-label=\"HEADPHONES note\">\n  <div class=\"rp-note-door\"><span class=\"rp-note-caps\">HEADPHONES</span></div>\n  <span class=\"rp-stage-prop__tag\">Volume · note</span>\n</div>",
+      "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-volume-note\" aria-label=\"KULAKLIK notu\">\n  <div class=\"rp-note-door\"><span class=\"rp-note-caps\">KULAKLIK</span></div>\n  <span class=\"rp-stage-prop__tag\">Desibel · not</span>\n</div>",
+      "npcLine": {
+        "speakerId": "n5",
+        "text": {
+          "tr": "Not hâlâ kapıda. Sınır büyük harf.",
+          "en": "Note still on the door. Boundary in block caps."
+        }
+      }
+    },
+    {
+      "id": "volume_street_beat3_pastry",
+      "beatId": "arc_volume_war_beat3",
+      "when": {
+        "flagsAny": [
+          "arc_volume_war_beat3"
+        ],
+        "flagsNone": [
+          "arc_volume_war_beat4",
+          "arc_volume_war_complete"
+        ]
+      },
+      "testId": "story-street-volume-pastry",
+      "html": "<div class=\"rp-stage-prop rp-stage-prop--volume-pastry\" data-testid=\"story-street-volume-pastry\" aria-label=\"Midnight pastry bag\">\n  <svg class=\"rp-vol-svg\" viewBox=\"0 0 80 36\" aria-hidden=\"true\">\n        <path d=\"M20 28 L28 10 L52 10 L60 28 Z\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.9\"/>\n        <ellipse cx=\"40\" cy=\"28\" rx=\"20\" ry=\"4\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.6\"/>\n      </svg>\n  <span class=\"rp-stage-prop__tag\">Volume · pastry</span>\n</div>",
+      "npcLine": {
+        "speakerId": "n2",
+        "text": {
+          "tr": "Poğaça torbası — Soft diplomasi sokakta.",
+          "en": "Pastry bag — Soft diplomacy on the street."
+        }
+      },
+      "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--volume-pastry\" data-testid=\"story-street-volume-pastry\" aria-label=\"Gece poğaçası\">\n  <svg class=\"rp-vol-svg\" viewBox=\"0 0 80 36\" aria-hidden=\"true\">\n        <path d=\"M20 28 L28 10 L52 10 L60 28 Z\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.9\"/>\n        <ellipse cx=\"40\" cy=\"28\" rx=\"20\" ry=\"4\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.6\"/>\n      </svg>\n  <span class=\"rp-stage-prop__tag\">Desibel · poğaça</span>\n</div>"
+    },
+    {
+      "id": "volume_street_beat4_offer",
+      "beatId": "arc_volume_war_beat4",
+      "when": {
+        "flagsAny": [
+          "arc_volume_war_beat4"
+        ],
+        "flagsNone": [
+          "arc_volume_war_beat5",
+          "arc_volume_war_complete"
+        ]
+      },
+      "testId": "story-street-volume-offer",
+      "html": "<div class=\"rp-stage-prop rp-stage-prop--volume-offer\" data-testid=\"story-street-volume-offer\" aria-label=\"Club offer slip\">\n  <svg class=\"rp-vol-svg\" viewBox=\"0 0 70 36\" aria-hidden=\"true\">\n        <rect x=\"18\" y=\"6\" width=\"34\" height=\"24\" rx=\"1.5\" fill=\"none\" stroke=\"#f2e6d8\" stroke-width=\"0.8\"/>\n        <line x1=\"24\" y1=\"12\" x2=\"46\" y2=\"12\" stroke=\"#7eb8d4\" stroke-width=\"0.5\"/>\n        <line x1=\"24\" y1=\"17\" x2=\"42\" y2=\"17\" stroke=\"#e8b478\" stroke-width=\"0.5\"/>\n        <line x1=\"24\" y1=\"22\" x2=\"44\" y2=\"22\" stroke=\"#e8b478\" stroke-width=\"0.5\"/>\n      </svg>\n  <span class=\"rp-stage-prop__tag\">Volume · offer</span>\n</div>",
+      "npcLine": {
+        "speakerId": "n5",
+        "text": {
+          "tr": "Mektup sızdı. Tren bileti cebinde gibi.",
+          "en": "The letter leaked. Train ticket feels pocketed."
+        }
+      },
+      "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--volume-offer\" data-testid=\"story-street-volume-offer\" aria-label=\"Kulüp teklif notu\">\n  <svg class=\"rp-vol-svg\" viewBox=\"0 0 70 36\" aria-hidden=\"true\">\n        <rect x=\"18\" y=\"6\" width=\"34\" height=\"24\" rx=\"1.5\" fill=\"none\" stroke=\"#f2e6d8\" stroke-width=\"0.8\"/>\n        <line x1=\"24\" y1=\"12\" x2=\"46\" y2=\"12\" stroke=\"#7eb8d4\" stroke-width=\"0.5\"/>\n        <line x1=\"24\" y1=\"17\" x2=\"42\" y2=\"17\" stroke=\"#e8b478\" stroke-width=\"0.5\"/>\n        <line x1=\"24\" y1=\"22\" x2=\"44\" y2=\"22\" stroke=\"#e8b478\" stroke-width=\"0.5\"/>\n      </svg>\n  <span class=\"rp-stage-prop__tag\">Desibel · teklif</span>\n</div>"
+    },
+    {
+      "id": "volume_street_beat5_accord",
+      "beatId": "arc_volume_war_beat5",
+      "when": {
+        "flagsAny": [
+          "arc_volume_war_beat5",
+          "flag_peri_stay",
+          "flag_peri_leaving_threat"
+        ],
+        "flagsNone": [
+          "street_vl_handoff_seen",
+          "arc_volume_war_complete"
+        ]
+      },
+      "testId": "story-street-volume-accord",
+      "html": "<div class=\"rp-stage-prop rp-stage-prop--volume-accord\" data-testid=\"story-street-volume-accord\" aria-label=\"Accord chalk\">\n  <div class=\"rp-accord-chalk\">QUIET HRS · NEON NIGHT</div>\n  <span class=\"rp-stage-prop__tag\">Volume · accord</span>\n</div>",
+      "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--volume-accord\" data-testid=\"story-street-volume-accord\" aria-label=\"Antlaşma tebeşiri\">\n  <div class=\"rp-accord-chalk\">SESSİZ SAAT · NEON NIGHT</div>\n  <span class=\"rp-stage-prop__tag\">Desibel · antlaşma</span>\n</div>",
+      "npcLine": {
+        "speakerId": "n3",
+        "text": {
+          "tr": "Tebeşir: sessiz saatler ya da veda. Seçim sokakta.",
+          "en": "Chalk: quiet hours or goodbye. Choice is on the street."
+        }
+      }
+    }
+  ],
+  "mqStreetChips": [
+    {
+      "id": "mq_street_antenna",
+      "mqId": "mq_antenna_op",
+      "step": "2/5",
+      "when": {
+        "flagsAny": [
+          "quest_antenna_active",
+          "arc_kite_antenna_beat1"
+        ],
+        "flagsNone": [
+          "arc_kite_antenna_complete",
+          "street_av_handoff_seen"
+        ]
+      },
+      "chip": {
+        "tr": "MAIN 2/5 · Anten Operasyonu",
+        "en": "MAIN 2/5 · Antenna Op"
+      },
+      "testId": "mq-street-chip-antenna"
+    },
+    {
+      "id": "mq_street_volume",
+      "mqId": "mq_decibel_accord",
+      "step": "3/5",
+      "when": {
+        "flagsAny": [
+          "quest_volume_active",
+          "street_av_handoff_seen",
+          "arc_volume_war_seed"
+        ],
+        "flagsNone": [
+          "arc_volume_war_complete",
+          "street_vl_handoff_seen"
+        ]
+      },
+      "chip": {
+        "tr": "MAIN 3/5 · Desibel Antlaşması",
+        "en": "MAIN 3/5 · Decibel Accord"
+      },
+      "testId": "mq-street-chip-volume"
+    },
+    {
+      "id": "mq_street_ledger",
+      "mqId": "mq_ledger_tray",
+      "step": "4/5",
+      "when": {
+        "flagsAny": [
+          "quest_ledger_active",
+          "street_vl_handoff_seen",
+          "arc_tea_ledger_seed"
+        ],
+        "flagsNone": [
+          "arc_tea_ledger_complete"
+        ]
+      },
+      "chip": {
+        "tr": "MAIN 4/5 · Defter & Tepsi",
+        "en": "MAIN 4/5 · Ledger & Tray"
+      },
+      "testId": "mq-street-chip-ledger"
+    }
+  ],
+  "matchComicHandoffEchoes": [
+    {
+      "id": "comic_echo_av_handoff",
+      "when": {
+        "flagsAny": [
+          "street_av_handoff_seen",
+          "street_av_handoff_done"
+        ]
+      },
+      "panel": {
+        "tr": "Anten izi soldu. Bas halkaları Orhan'a yürüdü. Desibel sokakta.",
+        "en": "Antenna scar faded. Bass rings walked to Orhan. Decibel is on the street."
+      },
+      "captionTag": {
+        "tr": "MAIN 2→3",
+        "en": "MAIN 2→3"
+      },
+      "testId": "comic-echo-av-handoff"
+    },
+    {
+      "id": "comic_echo_volume_accord",
+      "when": {
+        "flagsAny": [
+          "arc_volume_war_beat5",
+          "flag_peri_stay",
+          "flag_peri_leaving_threat"
+        ]
+      },
+      "panel": {
+        "tr": "Tebeşir: SESSİZ SAAT · NEON NIGHT. Antlaşma ya da kariyer — sokak seçti.",
+        "en": "Chalk: QUIET HRS · NEON NIGHT. Accord or career — the street chose."
+      },
+      "captionTag": {
+        "tr": "Desibel Beat 5",
+        "en": "Decibel Beat 5"
+      },
+      "testId": "comic-echo-volume-accord"
+    }
+  ],
+  "cssAppend": "\n/* story-form-11 — one story signal; Volume beat street props; MQ chip */\nbody.rp-story-one-signal .rp-arc-beat-banner { display: none; }\nbody.rp-story-one-signal .rp-day2-spotlight { display: none !important; }\n\n.rp-mq-street-chip {\n  position: absolute;\n  top: 0.55rem; left: 50%;\n  transform: translateX(-50%);\n  z-index: 6;\n  padding: 0.28rem 0.6rem;\n  border-radius: 6px;\n  background: rgba(12,8,6,.82);\n  border: 1px solid rgba(232,180,120,.4);\n  color: #f2e6d8;\n  font-size: 11px;\n  letter-spacing: 0.04em;\n  white-space: nowrap;\n  max-width: 92%;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n\n.rp-stage-prop--volume-bass { left: 48%; right: 8%; top: 30%; height: 28%; z-index: 8; }\n.rp-stage-prop--volume-pastry { left: 28%; width: 32%; top: 58%; height: 18%; z-index: 8; color: #e8c9a0; }\n.rp-stage-prop--volume-offer { left: 58%; width: 28%; top: 36%; height: 22%; z-index: 8; }\n.rp-stage-prop--volume-accord { left: 22%; right: 22%; top: 56%; height: auto; z-index: 8; }\n.rp-accord-chalk {\n  font: 700 11px/1.2 \"IBM Plex Mono\", ui-monospace, monospace;\n  letter-spacing: 0.06em;\n  padding: 0.4rem 0.55rem;\n  background: rgba(20,14,10,.9);\n  border: 1px dashed #e8b478;\n  color: #f2e6d8;\n  text-align: center;\n}\n.rp-vol-svg { width: 100%; height: 100%; display: block; }\n",
+  "integratorSnippet": {
+    "language": "js",
+    "comment": "One story signal + Volume beat street props + MQ chip",
+    "pseudo": "\nfunction storyForm11(){ return state.questPack?.storyForm11 || state.storyForm11 || null; }\n\nfunction pickUnifiedStoryWinner() {\n  const ladder = storyForm11()?.unifiedStreetStoryLayer?.priorityLadder || [];\n  for (const step of ladder) {\n    if (whenOk(step.when)) return step.id;\n  }\n  return null;\n}\n\nfunction volumeStreetBeatHtml() {\n  const props = storyForm11()?.volumeStreetBeatProps || [];\n  const hit = props.filter(p => whenOk(p.when)).sort((a,b)=>0)[0]; // first matching by list order = beat order\n  // prefer highest beat: reverse scan\n  for (let i = props.length-1; i >= 0; i--) if (whenOk(props[i].when)) {\n    const p = props[i];\n    return (state.locale===\"tr\" && p.htmlTr) ? p.htmlTr : p.html;\n  }\n  return \"\";\n}\n\nfunction mqStreetChipHtml() {\n  const chips = storyForm11()?.mqStreetChips || [];\n  const hit = chips.find(c => whenOk(c.when));\n  if (!hit) return \"\";\n  const t = hit.chip[state.locale] || hit.chip.en;\n  return `<div class=\"rp-mq-street-chip\" data-testid=\"${hit.testId}\">${t}</div>`;\n}\n\n// renderStreet:\nconst winner = pickUnifiedStoryWinner();\ndocument.body.classList.toggle(\"rp-story-one-signal\", !!winner);\n// paint only winner's prop family + mq chip + one bubble\n"
+  },
+  "echoFollowUpsAppend": [
+    {
+      "id": "echo_form11_volume_street",
+      "priority": 98,
+      "when": {
+        "flagsAny": [
+          "quest_volume_active",
+          "arc_volume_war_seed",
+          "street_av_handoff_seen"
+        ],
+        "flagsNone": [
+          "arc_volume_war_complete"
+        ],
+        "slots": [
+          "street",
+          "evening"
+        ]
+      },
+      "speakerId": "narrator",
+      "headline": {
+        "tr": "Desibel sokakta evrimleşiyor",
+        "en": "Decibel evolves on the street"
+      },
+      "body": {
+        "tr": "Bas → not → poğaça → mektup → tebeşir. Her beat sahne prop'u; defter yedek.",
+        "en": "Bass → note → pastry → letter → chalk. Each beat is a stage prop; journal is backup."
+      },
+      "cta": {
+        "tr": "Beat prop'unu gör",
+        "en": "See the beat prop"
+      }
+    }
+  ],
+  "acceptanceChecks": [
+    {
+      "id": "one_signal",
+      "desc": "Street paint: at most one primary story prop; body.rp-story-one-signal; no stacked full banners with spotlight."
+    },
+    {
+      "id": "volume_beat_props",
+      "desc": "Each Volume beat 1–5 has distinct street testId prop while that beat is active."
+    },
+    {
+      "id": "mq_chip",
+      "desc": "While Volume active post-handoff: mq-street-chip-volume shows MAIN 3/5."
+    },
+    {
+      "id": "comic_handoff",
+      "desc": "After A→V handoff, match comic includes comic-echo-av-handoff panel."
+    },
+    {
+      "id": "screenshot_no_journal",
+      "desc": "Auditor can identify active arc from street screenshot alone."
+    }
+  ],
+  "playtestScript": [
+    "Post Antenna handoff → street shows volume bass or note prop + MAIN 3/5 chip, no Antenna full banner",
+    "Advance Volume beats → prop evolves (bass→note→pastry→offer→accord)",
+    "Fight after handoff → comic echo MAIN 2→3",
+    "Screenshot audit: one story signal readable"
+  ],
+  "newStoryFlags": [],
+  "meta": {
+    "squad": "story-quest",
+    "formIndex": 11,
+    "shipTrigger": "timer story-score-watch; story still 8.4",
+    "nextPackWhen": "story category < 8.5",
+    "dependsOnForms": [
+      8,
+      9,
+      10
+    ],
+    "implementationNote": "Unified layer + Volume street beat evolution + MQ chips + comic echoes."
+  }
+}
