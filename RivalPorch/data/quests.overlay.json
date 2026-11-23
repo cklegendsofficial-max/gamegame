@@ -2050,6 +2050,177 @@
         ],
         "seasonWeekId": "w3"
       }
+    },
+    {
+      "id": "sq_day2_echo_mediate",
+      "type": "side",
+      "title": {
+        "tr": "Yankı: Ortak İp",
+        "en": "Echo: Shared String"
+      },
+      "summary": {
+        "tr": "cold_open_mediate → sokakta ortak ip + Orhan satırı.",
+        "en": "cold_open_mediate → shared string + Orhan line on the street."
+      },
+      "giver": "n1",
+      "dayWindow": {
+        "start": 2,
+        "end": 7
+      },
+      "unlockRequires": {
+        "flagsAll": [
+          "cold_open_mediate"
+        ]
+      },
+      "autoAcceptOnDayMin": 2,
+      "setsFlagsOnStart": [
+        "quest_day2_echo_mediate_active"
+      ],
+      "objectives": [
+        {
+          "id": "sq_d2em_o1",
+          "order": 1,
+          "kind": "flag",
+          "label": {
+            "tr": "Sokağın ortak ipini doğrula",
+            "en": "Confirm the street's shared string"
+          },
+          "track": {
+            "type": "flag",
+            "flag": "cold_open_mediate"
+          },
+          "setsFlags": [
+            "day2_cold_rewrite_mediate",
+            "day2_cold_rewrite_applied",
+            "day2_prop_ack",
+            "sq_d2em_done"
+          ],
+          "worldConsequenceId": "wc_day2_mediate_shared_string"
+        }
+      ],
+      "rewards": {
+        "porch_coins": 12,
+        "rep": {
+          "rep_mediator": 2
+        },
+        "flags": [
+          "quest_day2_echo_mediate_complete"
+        ]
+      }
+    },
+    {
+      "id": "sq_day2_echo_instigate",
+      "type": "side",
+      "title": {
+        "tr": "Yankı: Yüksek Uçuş",
+        "en": "Echo: High Flight"
+      },
+      "summary": {
+        "tr": "cold_open_instigate → yüksek uçurtma + YASAK BÖLGE.",
+        "en": "cold_open_instigate → high kite + FORBIDDEN ZONE."
+      },
+      "giver": "n3",
+      "dayWindow": {
+        "start": 2,
+        "end": 7
+      },
+      "unlockRequires": {
+        "flagsAll": [
+          "cold_open_instigate"
+        ]
+      },
+      "autoAcceptOnDayMin": 2,
+      "setsFlagsOnStart": [
+        "quest_day2_echo_instigate_active"
+      ],
+      "objectives": [
+        {
+          "id": "sq_d2ei_o1",
+          "order": 1,
+          "kind": "flag",
+          "label": {
+            "tr": "Yüksek uçuşu ve tebeşiri doğrula",
+            "en": "Confirm high flight and the chalk"
+          },
+          "track": {
+            "type": "flag",
+            "flag": "cold_open_instigate"
+          },
+          "setsFlags": [
+            "day2_cold_rewrite_instigate",
+            "day2_cold_rewrite_applied",
+            "day2_prop_ack",
+            "sq_d2ei_done"
+          ],
+          "worldConsequenceId": "wc_day2_instigate_kite_dare"
+        }
+      ],
+      "rewards": {
+        "porch_coins": 12,
+        "rep": {
+          "rep_instigator": 2
+        },
+        "flags": [
+          "quest_day2_echo_instigate_complete"
+        ]
+      }
+    },
+    {
+      "id": "sq_day2_echo_stage",
+      "type": "side",
+      "title": {
+        "tr": "Yankı: Tebeşir Cup",
+        "en": "Echo: Chalk Cup"
+      },
+      "summary": {
+        "tr": "cold_open_stage → kaldırımda tebeşir Cup + Cem düdüğü.",
+        "en": "cold_open_stage → chalk Cup on cobbles + Cem whistle."
+      },
+      "giver": "n2",
+      "dayWindow": {
+        "start": 2,
+        "end": 7
+      },
+      "unlockRequires": {
+        "flagsAll": [
+          "cold_open_stage"
+        ]
+      },
+      "autoAcceptOnDayMin": 2,
+      "setsFlagsOnStart": [
+        "quest_day2_echo_stage_active"
+      ],
+      "objectives": [
+        {
+          "id": "sq_d2es_o1",
+          "order": 1,
+          "kind": "flag",
+          "label": {
+            "tr": "Tebeşir Cup arenasını doğrula",
+            "en": "Confirm the chalk Cup arena"
+          },
+          "track": {
+            "type": "flag",
+            "flag": "cold_open_stage"
+          },
+          "setsFlags": [
+            "day2_cold_rewrite_stage",
+            "day2_cold_rewrite_applied",
+            "day2_prop_ack",
+            "sq_d2es_done"
+          ],
+          "worldConsequenceId": "wc_day2_stage_cup_chalk"
+        }
+      ],
+      "rewards": {
+        "porch_coins": 12,
+        "rep": {
+          "rep_stage": 2
+        },
+        "flags": [
+          "quest_day2_echo_stage_complete"
+        ]
+      }
     }
   ],
   "worldConsequences": {
@@ -3233,6 +3404,322 @@
           "tr": "Mahalle fısıldadı: Sahne Amiri prova izini getirdi.",
           "en": "The block whispered: Stage Manager brought rehearsal dust."
         }
+      }
+    ]
+  },
+  "storyForm4": {
+    "packId": "story-form-4",
+    "schemaVersion": 1,
+    "overnightColdConsequences": [
+      {
+        "id": "onc_mediate",
+        "when": {
+          "flagsAll": [
+            "cold_open_mediate"
+          ]
+        },
+        "kicker": {
+          "tr": "Gece yazdı · Arabulucu",
+          "en": "Night wrote · Mediator"
+        },
+        "title": {
+          "tr": "Ortak ip gerildi",
+          "en": "The shared string went taut"
+        },
+        "lines": [
+          {
+            "tr": "Uyurken anten ile Leyla'nın verandası aynı iple bağlandı. Orhan gazetesi bir milimetre açık kaldı.",
+            "en": "While you slept, antenna and Leyla's porch knotted onto one string. Orhan's paper stayed one millimeter open."
+          },
+          {
+            "tr": "Bu Day1 tohumu değil — cold_open_mediate sonucu. Sabah sokakta göreceksin.",
+            "en": "This is not a Day1 seed — it's cold_open_mediate. You'll see it on the morning street."
+          }
+        ],
+        "propLabel": {
+          "tr": "Ortak ip",
+          "en": "Shared string"
+        },
+        "npcLine": {
+          "speakerId": "n4",
+          "text": {
+            "tr": "İp duruyor. Gazetem… hâlâ bir milimetre açık.",
+            "en": "String holds. My paper… still one millimeter open."
+          }
+        },
+        "worldConsequenceId": "wc_day2_mediate_shared_string",
+        "journalBeatId": "jb_day2_mediate",
+        "distinctFromDay1Seeds": [
+          "kite string seed",
+          "tea steam",
+          "Cup score chalk"
+        ]
+      },
+      {
+        "id": "onc_instigate",
+        "when": {
+          "flagsAll": [
+            "cold_open_instigate"
+          ]
+        },
+        "kicker": {
+          "tr": "Gece yazdı · Kışkırtıcı",
+          "en": "Night wrote · Instigator"
+        },
+        "title": {
+          "tr": "Uçurtma antenin üstüne çıktı",
+          "en": "The kite climbed above the antenna"
+        },
+        "lines": [
+          {
+            "tr": "Rüzgâr + senin 'daha yüksek' seçimin: uçurtma antenin ÜSTÜNDE. Kapıda taze tebeşir — YASAK BÖLGE.",
+            "en": "Wind + your 'higher' call: kite ABOVE the antenna. Fresh chalk on the door — FORBIDDEN ZONE."
+          },
+          {
+            "tr": "Day1 seed'den farklı: bu cold_open_instigate artçısı.",
+            "en": "Unlike Day1 seeds: this is the cold_open_instigate aftershock."
+          }
+        ],
+        "propLabel": {
+          "tr": "Yüksek uçuş",
+          "en": "High flight"
+        },
+        "npcLine": {
+          "speakerId": "n3",
+          "text": {
+            "tr": "Hâlâ yukarıda! Harita kazanıyor.",
+            "en": "Still up there! The map is winning."
+          }
+        },
+        "worldConsequenceId": "wc_day2_instigate_kite_dare",
+        "journalBeatId": "jb_day2_instigate",
+        "distinctFromDay1Seeds": [
+          "kite string seed",
+          "tea steam",
+          "Cup score chalk"
+        ]
+      },
+      {
+        "id": "onc_stage",
+        "when": {
+          "flagsAll": [
+            "cold_open_stage"
+          ]
+        },
+        "kicker": {
+          "tr": "Gece yazdı · Sahne Amiri",
+          "en": "Night wrote · Stage Manager"
+        },
+        "title": {
+          "tr": "Kaldırıma Cup tebeşiri çizildi",
+          "en": "Cup chalk was drawn on the cobbles"
+        },
+        "lines": [
+          {
+            "tr": "Cem gece üç daire çizdi (anten / uçurtma / düdük). Düdük prova sayıyor — senin 'sahneye koy' seçimin.",
+            "en": "Cem chalked three circles overnight (antenna / kite / whistle). Whistle counting rehearsal — your 'stage it' call."
+          },
+          {
+            "tr": "Day1 seed değil: cold_open_stage sonucu.",
+            "en": "Not a Day1 seed: cold_open_stage consequence."
+          }
+        ],
+        "propLabel": {
+          "tr": "Tebeşir Cup",
+          "en": "Chalk Cup"
+        },
+        "npcLine": {
+          "speakerId": "n2",
+          "text": {
+            "tr": "Üç daire. Prova. Düdük hazır.",
+            "en": "Three circles. Rehearsal. Whistle ready."
+          }
+        },
+        "worldConsequenceId": "wc_day2_stage_cup_chalk",
+        "journalBeatId": "jb_day2_stage",
+        "distinctFromDay1Seeds": [
+          "kite string seed",
+          "tea steam",
+          "Cup score chalk"
+        ]
+      }
+    ],
+    "overnightUi": {
+      "injectBlockId": "rp-overnight-cold",
+      "place": "above_ticks",
+      "htmlHint": "Show kicker + title + lines + prop chip + npc line; use stageLayer street behind.",
+      "mustCall": [
+        "applyDay2ColdRewrite",
+        "streetPropOverlayHtml('overnight')"
+      ],
+      "cssClasses": [
+        "rp-overnight-cold",
+        "rp-prop-overlay",
+        "rp-prop-chip",
+        "rp-prop-npc"
+      ]
+    },
+    "day1EveningEscapeChip": {
+      "id": "chip_force_overnight_story",
+      "when": {
+        "dayIndex": 1,
+        "flagsAny": [
+          "cold_open_mediate",
+          "cold_open_instigate",
+          "cold_open_stage"
+        ],
+        "endEveningBlocked": true
+      },
+      "label": {
+        "tr": "Hikâye: sabaha geç (End evening kapalıysa)",
+        "en": "Story: skip to morning (if End evening blocked)"
+      },
+      "hint": {
+        "tr": "Practice kapısını atlamaz — sadece overnight→Day2 cold yankısını kanıtlar.",
+        "en": "Does not clear Practice gate forever — only proves overnight→Day2 cold echo."
+      },
+      "action": "force-overnight-story"
+    },
+    "integratorHooks": {
+      "forceOvernightStoryProve": {
+        "id": "forceOvernightStoryProve",
+        "action": "force-overnight-story",
+        "when": {
+          "flagsAny": [
+            "cold_open_mediate",
+            "cold_open_instigate",
+            "cold_open_stage"
+          ],
+          "dayIndex": 1
+        },
+        "behavior": [
+          "Do NOT require canEndEvening() / practice_cup_done",
+          "Increment dayIndex 1→2",
+          "Reset evening bag (same fields as endEvening day-advance)",
+          "Call applyDay2ColdRewrite()",
+          "renderOvernight() with overnightColdConsequences block visible",
+          "Set flag overnight_story_prove_used"
+        ],
+        "pseudo": "\nfunction forceOvernightStoryProve() {\n  const flags = state.save.storyFlags || {};\n  const cold = ['cold_open_mediate','cold_open_instigate','cold_open_stage'].some(f => flags[f]);\n  if (!cold) { toast('No cold_open_* flag'); return; }\n  if ((state.save.dayIndex||1) !== 1) { renderOvernight(); return; }\n  // Day advance WITHOUT End-evening gate\n  state.save.dayIndex = 2;\n  state.save.weekNumber = weekNumber();\n  state.save.evening = { checkin:false, visits:[], streetEvent:false, errand:false, secondBeat:false, cupDone:false, cupEveDone:false, complete:false };\n  state.save.visitedArcToday = {};\n  state.save.storyFlags.overnight_story_prove_used = true;\n  applyDay2ColdRewrite();\n  saveNow();\n  renderOvernight({ lines: [], tease: '' });\n}\n"
+      },
+      "renderOvernightPatch": {
+        "id": "renderOvernightPatch",
+        "pseudo": "\nfunction renderOvernight(payoff) {\n  applyDay2ColdRewrite(); // NEW — dayIndex already 2 after endEvening OR forceOvernight\n  const cold = pickOvernightColdConsequence(state.questPack?.storyForm4);\n  // ...existing teaser/echo...\n  screen.innerHTML = `\n    ${stageLayer(\"street\", true)}\n    ${streetPropOverlayHtml(\"overnight\")}\n    <div class=\"rp-overnight\">\n      ...\n      ${cold ? overnightColdHtml(cold) : \"\"}\n      <ul class=\"rp-ticks\">...</ul>\n      ...\n    </div>`;\n}\n"
+      }
+    },
+    "runtimeFlags": {
+      "coldOpen": [
+        "cold_open_mediate",
+        "cold_open_instigate",
+        "cold_open_stage"
+      ],
+      "note": "Set by resolveColdOpen. Form-4 proves consequence on overnight + Day2 without End-evening dependency."
+    },
+    "echoFollowUpsAppend": [
+      {
+        "id": "echo_overnight_cold_ready",
+        "kind": "overnight_cold_prove",
+        "priority": 99,
+        "when": {
+          "dayIndexMin": 2,
+          "flagsAny": [
+            "cold_open_mediate",
+            "cold_open_instigate",
+            "cold_open_stage"
+          ],
+          "slots": [
+            "overnight_wake",
+            "evening",
+            "street"
+          ]
+        },
+        "speakerId": "narrator",
+        "headline": {
+          "tr": "Gece cold seçimini yazdı",
+          "en": "Night wrote your cold choice"
+        },
+        "body": {
+          "tr": "Overnight kartında prop + NPC satırı olmalı. Yoksa form-4 hook'u eksik.",
+          "en": "Overnight card must show prop + NPC line. If missing, form-4 hook isn't wired."
+        },
+        "cta": {
+          "tr": "Sokağa çık",
+          "en": "Go to the street"
+        }
+      }
+    ],
+    "overnightTeasersAppend": [
+      {
+        "id": "ot_form4_mediate_prove",
+        "priority": 99,
+        "when": {
+          "flagsAll": [
+            "cold_open_mediate"
+          ]
+        },
+        "title": {
+          "tr": "Sabah · Ortak ip",
+          "en": "Morning · Shared string"
+        },
+        "lines": [
+          {
+            "tr": "cold_open_mediate: anten↔veranda ipi. Day1 seed değil — sabah prop'u.",
+            "en": "cold_open_mediate: antenna↔porch string. Not a Day1 seed — morning prop."
+          }
+        ],
+        "tomorrowHook": {
+          "tr": "Sokakta Ortak ip + Orhan satırını gör.",
+          "en": "See Shared string + Orhan's line on the street."
+        },
+        "worldConsequenceId": "wc_day2_mediate_shared_string"
+      },
+      {
+        "id": "ot_form4_instigate_prove",
+        "priority": 99,
+        "when": {
+          "flagsAll": [
+            "cold_open_instigate"
+          ]
+        },
+        "title": {
+          "tr": "Sabah · Yüksek uçuş",
+          "en": "Morning · High flight"
+        },
+        "lines": [
+          {
+            "tr": "cold_open_instigate: uçurtma antenin üstünde + YASAK BÖLGE.",
+            "en": "cold_open_instigate: kite above antenna + FORBIDDEN ZONE."
+          }
+        ],
+        "tomorrowHook": {
+          "tr": "Sokakta Yüksek uçuş + Leyla satırını gör.",
+          "en": "See High flight + Leyla's line on the street."
+        },
+        "worldConsequenceId": "wc_day2_instigate_kite_dare"
+      },
+      {
+        "id": "ot_form4_stage_prove",
+        "priority": 99,
+        "when": {
+          "flagsAll": [
+            "cold_open_stage"
+          ]
+        },
+        "title": {
+          "tr": "Sabah · Tebeşir Cup",
+          "en": "Morning · Chalk Cup"
+        },
+        "lines": [
+          {
+            "tr": "cold_open_stage: kaldırımda üç daire, Cem düdüğü.",
+            "en": "cold_open_stage: three chalk circles, Cem's whistle."
+          }
+        ],
+        "tomorrowHook": {
+          "tr": "Sokakta Tebeşir Cup + Cem satırını gör.",
+          "en": "See Chalk Cup + Cem's line on the street."
+        },
+        "worldConsequenceId": "wc_day2_stage_cup_chalk"
       }
     ]
   }

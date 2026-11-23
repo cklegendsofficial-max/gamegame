@@ -430,12 +430,12 @@
         "id": "call_focus_fire",
         "category": "swingy",
         "label": {
-          "tr": "Hedef göster",
-          "en": "Focus fire"
+          "tr": "Focus",
+          "en": "Focus"
         },
         "blurb": {
-          "tr": "En yüksek ATK düşmanı 6 sn işaretle — sert swing.",
-          "en": "Mark highest-ATK foe 6s — hard swing."
+          "tr": "En yüksek ATK düşmanı 6 sn işaretle.",
+          "en": "Mark highest-ATK enemy for 6s."
         },
         "effect": {
           "type": "mark_enemy_focus",
@@ -454,7 +454,9 @@
         "hpSwingDisplay": {
           "minPercent": 12,
           "maxPercent": 18
-        }
+        },
+        "propIcon": "prop_point_finger",
+        "focusTargetClickable": true
       },
       {
         "id": "call_tea_break",
@@ -546,12 +548,12 @@
         "id": "call_chaos_kite",
         "category": "swingy",
         "label": {
-          "tr": "Kaos yer değiştir",
-          "en": "Chaos kite"
+          "tr": "Swap",
+          "en": "Swap"
         },
         "blurb": {
-          "tr": "İki müttefifi anında swap — cam topu kurtar.",
-          "en": "Instant ally swap — save the glass."
+          "tr": "İki müttefifi anında yer değiştir.",
+          "en": "Instantly swap two allies."
         },
         "effect": {
           "type": "swap_two_allies",
@@ -568,7 +570,8 @@
         "hpSwingDisplay": {
           "minPercent": 12,
           "maxPercent": 18
-        }
+        },
+        "propIcon": "prop_kite_string"
       },
       {
         "id": "call_hold_fence",
@@ -626,6 +629,33 @@
         "hpSwingDisplay": {
           "minPercent": 8,
           "maxPercent": 12
+        }
+      },
+      {
+        "id": "call_prop_assist",
+        "category": "synergy_leaning",
+        "lean": "syn_rivalry",
+        "label": {
+          "tr": "Prop",
+          "en": "Prop"
+        },
+        "blurb": {
+          "tr": "Veranda prop'u savur — ön sıra 5 sn hasarı çeker + küçük ATK.",
+          "en": "Toss a porch prop — front taunts 5s + small ATK."
+        },
+        "propIcon": "prop_newspaper",
+        "effect": {
+          "type": "prop_toss_front_taunt_atk",
+          "durationSec": 5,
+          "damageRedirectPercent": 0.3,
+          "atkBonusPercent": 0.08,
+          "teamHpSwingHintPercent": 0.12
+        },
+        "vfxId": "vfx_call_prop_toss",
+        "cameraShakeId": "shake_medium",
+        "comicHint": {
+          "tr": "Gazete / düdük savruldu — prop işe yaradı.",
+          "en": "Newspaper / whistle flew — the prop worked."
         }
       }
     ],
@@ -826,36 +856,75 @@
       },
       {
         "id": "prac_porch_call",
-        "tSec": 18.0,
+        "tSec": 2.4,
         "type": "porch_call",
         "forceOptionIds": [
-          "call_cheer",
           "call_focus_fire",
-          "call_tea_break"
+          "call_prop_assist",
+          "call_chaos_kite"
         ],
-        "pauseSec": 2.2
+        "pauseSec": 3.2,
+        "force": true,
+        "timeoutDefaultCallId": "call_focus_fire",
+        "cannotDismissWithoutPick": true,
+        "pauseAutoTicks": true,
+        "blockSkipDuringCall": true,
+        "setsFlagsOnOpen": [
+          "practice_porch_call_opened"
+        ],
+        "setsFlagsOnResolve": [
+          "practice_cup_porch_call_done",
+          "porch_call_resolved"
+        ],
+        "ui": {
+          "dimStage": true,
+          "lampRim": true,
+          "letterboxPulse": true,
+          "title": {
+            "tr": "Veranda Çağrısı — birini seç",
+            "en": "Porch Call — pick one"
+          },
+          "subtitle": {
+            "tr": "Odak / Prop / Swap — skor sallanır",
+            "en": "Focus / Prop / Swap — score swings"
+          }
+        }
+      },
+      {
+        "id": "prac_porch_call_watchdog",
+        "tSec": 2.6,
+        "type": "porch_call_watchdog",
+        "ifNotOpen": {
+          "action": "force_open_porch_call_modal",
+          "forceOptionIds": [
+            "call_focus_fire",
+            "call_prop_assist",
+            "call_chaos_kite"
+          ]
+        }
       },
       {
         "id": "prac_call_resolve",
-        "tSec": 22.0,
+        "tSec": 5.8,
         "type": "porch_call_resolve_fx",
         "speakerId": "n2",
         "linesByCallId": {
-          "call_cheer": {
-            "tr": "Alkış iyi — tempo bizde.",
-            "en": "Cheer works — tempo's ours."
-          },
           "call_focus_fire": {
-            "tr": "Leyla'yı işaretledin. Sert.",
-            "en": "You marked Leyla. Clean."
+            "tr": "Hedef kilit — Focus. Bu bir Veranda Çağrısı.",
+            "en": "Target locked — Focus. That's a Porch Call."
           },
-          "call_tea_break": {
-            "tr": "Yudum yetişti. Devam.",
-            "en": "Sip landed. Keep going."
+          "call_prop_assist": {
+            "tr": "Prop savruldu — tempo değişti.",
+            "en": "Prop tossed — tempo shifted."
+          },
+          "call_chaos_kite": {
+            "tr": "Swap! Yerler değişti — cam kurtuldu.",
+            "en": "Swap! Places flipped — glass saved."
           }
         },
         "cameraShakeId": "shake_medium",
-        "hitStopMs": 50
+        "hitStopMs": 55,
+        "propToss": true
       },
       {
         "id": "prac_tea_tip",
@@ -879,6 +948,25 @@
             "n2",
             "n4"
           ]
+        }
+      },
+      {
+        "id": "prac_rivalry_after_call",
+        "tSec": 6.4,
+        "type": "force_ally_hp_then_synergy_pop",
+        "targetNeighborId": "n2",
+        "setHpPercent": 0.32,
+        "synergyId": "syn_rivalry",
+        "damageFloatId": "float_rivalry_buff",
+        "vfxId": "vfx_rivalry_ember",
+        "cameraShakeId": "shake_medium",
+        "requirePriorFlag": "practice_cup_porch_call_done",
+        "setsFlags": [
+          "practice_cup_rivalry_pop_seen"
+        ],
+        "lines": {
+          "tr": "Rekabet! Düşük HP → daha sert vuruş",
+          "en": "Rivalry! Low HP → harder hits"
         }
       }
     ],
@@ -904,7 +992,8 @@
         "bot_n3",
         "bot_n5"
       ]
-    }
+    },
+    "minPracticeFightSec": 12
   },
   "juiceHints": {
     "damageFloats": {

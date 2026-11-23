@@ -12,6 +12,8 @@ import {
 } from "./sfx.js";
 import * as Combat from "./combat.js";
 import * as Density from "./density.js";
+import * as EndEvening from "./endEvening.js";
+import * as Ux4 from "./uxSession4Nuclear.js";
 
 const DAY1_BUSTS = {
   n1: "assets/rival-porch/bust-n1-aunt-merve.png",
@@ -142,46 +144,96 @@ function storyFlag(id) {
   return !!state.save.storyFlags?.[id];
 }
 
-/** ux-session-2 + density: Day1 End evening = practice flags only; Day2+ always. */
+/** ux-session-3/4: Day1 End evening = ONLY practice_cup_done ∧ syn_taught_syn_rivalry. */
 function canEndEvening() {
-  return Density.canEndEvening(state.save, state.uxPack2, state.densityPack);
+  EndEvening.normalizePracticeFlags(state.save);
+  return Ux4.endEnabled(state) || Density.canEndEvening(state.save, state.uxPack2, state.densityPack, state.uxPack3);
 }
 
 function syncEndEveningUnlock() {
   state.ui = state.ui || {};
   const ok = canEndEvening();
   state.ui.endEveningEnabled = ok;
+  state.ui.endEveningBlocked = !ok;
   state.ui.endEveningBlockedReason = ok ? null : "practice";
-  state.ui.overnightReachable = ok;
+  state.ui.overnightReachable = ok || (state.save.dayIndex || 1) > 1;
+  Ux4.paintEndEveningControls(state, state.locale);
   return ok;
 }
 
-/** Atomic Practice finish — flags + unlock before next evening paint (≤1 render). */
-function onPracticeResolved() {
+/** Atomic Practice finish — nuclear force BOTH flags (ux-session-4). */
+function onPracticeResolved(reason = "fight_finish") {
   state.save.storyFlags = state.save.storyFlags || {};
-  const gate = state.uxPack2?.endEveningGate || {};
-  const setFlags = gate.onPracticeResolvedSetFlags || [
-    "practice_cup_done",
-    "syn_taught_syn_rivalry",
-    "first_evening_practice_cleared",
-  ];
-  for (const f of setFlags) state.save.storyFlags[f] = true;
-  for (const f of gate.alsoEnsureFlags || [
-    "practice_cup_rivalry_pop_seen",
-    "practice_cup_porch_call_done",
-  ]) {
-    state.save.storyFlags[f] = true;
-  }
+  EndEvening.markPracticeCleared(state.save, reason);
+  Ux4.forcePracticeFlags(state, reason);
   const teach = Density.practiceTeach(state.densityPack);
   for (const f of teach?.flagGates?.setsFlagsOnComplete || []) state.save.storyFlags[f] = true;
+  state.save.evening = state.save.evening || {};
   state.save.evening.cupDone = true;
+  state.meta = state.meta || {};
+  state.meta.lastCupWasPractice = true;
   syncEndEveningUnlock();
   saveNow();
-  return state.ui.endEveningEnabled;
+  return canEndEvening();
+}
+
+/** ux-session-3 cold-audit settle (debug-free). */
+function onPracticeSettleConfirm(reason = "audit_settle") {
+  onPracticeResolved(reason);
+  renderEvening();
+  showScreen("screen-evening");
+  requestAnimationFrame(() => {
+    syncEndEveningUnlock();
+    Ux4.paintEndEveningControls(state, state.locale);
+  });
+}
+
+function coldAuditActive() {
+  try {
+    if (document.documentElement.dataset.auditCold === "1") return true;
+    return new URLSearchParams(location.search).get("coldAudit") === "1";
+  } catch {
+    return false;
+  }
+}
+
+function shouldShowPracticeSettle() {
+  if (!state.practiceMode && !practiceCupRequired()) return false;
+  if (canEndEvening()) return false;
+  if (coldAuditActive()) return true;
+  if (state.showMeApplied || storyFlag("practice_show_me_applied") || storyFlag("practice_fight_entered")) return true;
+  if (storyFlag("syn_taught_syn_rivalry") && !storyFlag("practice_cup_done")) return true;
+  if ((state.cupPicks || []).length >= 3) return true;
+  return false;
+}
+
+function practiceSettleHtml() {
+  if (!shouldShowPracticeSettle()) return "";
+  const tr = state.locale === "tr";
+  const label = tr ? "Cem: Prova yeter — akşamı bırak" : "Cem: Practice is enough — settle evening";
+  return `<div class="rp-settle-wrap" data-testid="practice-settle-wrap">
+    <button id="btn-practice-settle" class="btn btn-teal rp-settle" type="button" data-action="practice-settle" data-testid="practice-settle" data-audit="practice-settle">${label}</button>
+  </div>`;
+}
+
+function practiceSettleConfirmHtml() {
+  const tr = state.locale === "tr";
+  return `<div class="rp-settle-sheet" data-testid="practice-settle-sheet">
+    <h3>${tr ? "Düdük bitsin mi?" : "Whistle down?"}</h3>
+    <p>${tr ? "Provayı öğretti sayılır; Akşamı bırak açılır. Kapışma bir sonraki Kupada." : "Marks Practice taught and unlocks End evening. Fight polish can come next Cup."}</p>
+    <div class="btn-row">
+      <button class="btn btn-ember" type="button" data-action="practice-settle-confirm" data-testid="practice-settle-confirm">${tr ? "Provayı kapat" : "Settle Practice"}</button>
+      <button class="btn btn-secondary" type="button" data-action="practice-settle-cancel">${tr ? "Seçime dön" : "Back to picks"}</button>
+    </div>
+  </div>`;
 }
 
 function eveningPrimaryCta() {
   const tr = state.locale === "tr";
+  // ux-session-4: End evening wins the primary dock as soon as flags are live
+  if (canEndEvening()) {
+    return { id: "end_evening", action: "end-evening", label: loc(state.uxPack2?.strings?.["evening.cta.end"]) || (tr ? "Akşamı bırak" : "End evening") };
+  }
   if (!storyFlag("practice_cup_done") && (state.save.dayIndex || 1) <= 1) {
     if (!state.save.evening?.checkin && !storyFlag("welcome_checkin_done")) {
       return { id: "sa_checkin", action: "goto-street", label: tr ? "Demliğe git" : "Go to the pot" };
@@ -190,9 +242,6 @@ function eveningPrimaryCta() {
       return { id: "sa_visit", action: "goto-street", label: tr ? "Bir kapı çal" : "Knock a door" };
     }
     return { id: "sa_practice", action: "goto-cup", label: tr ? "Prova maçı ★" : "Practice match ★" };
-  }
-  if (canEndEvening()) {
-    return { id: "end_evening", action: "end-evening", label: loc(state.uxPack2?.strings?.["evening.cta.end"]) || (tr ? "Akşamı bırak" : "End evening") };
   }
   return { id: "sa_visit", action: "goto-street", label: tr ? "Sokağa çık" : "Out to the street" };
 }
@@ -1064,13 +1113,63 @@ function resolveColdOpen(cid) {
   showScreen("screen-evening");
 }
 
+function pickOvernightColdConsequence() {
+  const form = state.questPack?.storyForm4 || state.storyForm4;
+  const rows = form?.overnightColdConsequences || [];
+  return rows.find((r) => (r.when?.flagsAll || []).every((f) => storyFlag(f))) || null;
+}
+
+function overnightColdHtml(cold) {
+  if (!cold) return "";
+  const lines = (cold.lines || []).map((l) => `<li>${loc(l)}</li>`).join("");
+  const npc = cold.npcLine
+    ? `<p class="rp-prop-npc">${loc(neighborById(cold.npcLine.speakerId)?.name) || ""}: ${loc(cold.npcLine.text)}</p>`
+    : "";
+  return `<div class="rp-overnight-cold" id="rp-overnight-cold" data-testid="overnight-cold" data-cold="${cold.id}">
+    <p class="rp-kicker">${loc(cold.kicker)}</p>
+    <h3 class="rp-night-title">${loc(cold.title)}</h3>
+    <ul class="rp-ticks">${lines}</ul>
+    <div class="rp-prop-overlay"><span class="rp-prop-chip">${loc(cold.propLabel)}</span>${npc}</div>
+  </div>`;
+}
+
+function forceOvernightStoryProve() {
+  const flags = state.save.storyFlags || (state.save.storyFlags = {});
+  const cold = ["cold_open_mediate", "cold_open_instigate", "cold_open_stage"].some((f) => flags[f]);
+  if (!cold) {
+    toast(state.locale === "tr" ? "cold_open_* yok" : "No cold_open_* flag");
+    return;
+  }
+  if ((state.save.dayIndex || 1) !== 1) {
+    renderOvernight({ lines: [], tease: "" });
+    return;
+  }
+  state.save.dayIndex = 2;
+  state.save.weekNumber = weekNumber();
+  state.save.evening = {
+    checkin: false, visits: [], streetEvent: false, errand: false,
+    secondBeat: false, cupDone: false, cupEveDone: false, complete: false,
+  };
+  state.save.visitedArcToday = {};
+  flags.overnight_story_prove_used = true;
+  applyDay2ColdRewrite();
+  saveNow();
+  renderOvernight({ lines: [], tease: "" });
+}
+
 function renderOvernight(payoff) {
   const screen = document.getElementById("screen-overnight");
   const tr = state.locale === "tr";
+  applyDay2ColdRewrite();
+  saveNow();
+  const cold = pickOvernightColdConsequence();
   const teaser = Density.pickOvernightTeaser(state.densityPack, state.save, state.questPack);
+  const form4Teasers = state.questPack?.storyForm4?.overnightTeasersAppend || [];
+  const form4Hit = form4Teasers.find((r) => (r.when?.flagsAll || []).every((f) => storyFlag(f)));
+  const useTeaser = form4Hit || teaser;
   const echo = Density.pickEcho(state.densityPack, state.save, state.questPack, "overnight_wake");
   const whisper = questHudWhisper();
-  const teaserLines = (teaser?.lines || []).map((l) => loc(l)).filter(Boolean);
+  const teaserLines = (useTeaser?.lines || []).map((l) => loc(l)).filter(Boolean);
   const bitsSrc = [
     ...teaserLines.slice(0, 2),
     ...(payoff?.lines || []).slice(0, 1),
@@ -1079,18 +1178,20 @@ function renderOvernight(payoff) {
     .filter(Boolean)
     .slice(0, 3);
   const bits = bitsSrc.map((l) => `<li>${l}</li>`).join("") || `<li>${tr ? "Mahalle uyudu." : "The block slept."}</li>`;
-  const tomorrow = teaser ? loc(teaser.title) : loc(dayHeadline());
-  const hook = teaser ? loc(teaser.tomorrowHook) : payoff?.tease || "";
+  const tomorrow = useTeaser ? loc(useTeaser.title) : loc(dayHeadline());
+  const hook = useTeaser ? loc(useTeaser.tomorrowHook) : payoff?.tease || "";
   const primaryLabel = tr ? `Yarım kalan: ${whisper}` : `Still open: ${whisper}`;
   const primaryCta = whisper.includes("ödül") || whisper.toLowerCase().includes("reward") || whisper.toLowerCase().includes("tray")
     ? "open-quests"
     : "overnight-open-quest";
   screen.innerHTML = `
     ${stageLayer("street", true)}
-    <div class="rp-overnight">
+    ${streetPropOverlayHtml("overnight")}
+    <div class="rp-overnight" data-testid="overnight">
       <p class="rp-kicker">${tr ? "Gece geçti" : "Night passed"}</p>
       <h2 class="rp-night-title">${tomorrow}</h2>
       <p class="overnight-quest-pull">◎ ${tr ? "Yarım kalan" : "Still open"}: ${whisper}</p>
+      ${cold ? overnightColdHtml(cold) : ""}
       <ul class="rp-ticks">${bits}</ul>
       <p class="evening-cup-tease">${hook}</p>
       <button class="rp-btn rp-btn--primary" type="button" data-action="${primaryCta}">${primaryLabel}</button>
@@ -1101,6 +1202,12 @@ function renderOvernight(payoff) {
 
 
 function renderEvening() {
+  EndEvening.normalizePracticeFlags(state.save);
+  if (state.meta?.lastCupWasPractice || state.save.evening?.cupDone) {
+    if (!storyFlag("practice_cup_done") || !storyFlag("syn_taught_syn_rivalry")) {
+      Ux4.forcePracticeFlags(state, "render_evening_heal");
+    }
+  }
   syncEndEveningUnlock();
   const st = eveningStats();
   const screen = document.getElementById("screen-evening");
@@ -1190,12 +1297,12 @@ function renderEvening() {
       }
     </div>
     <footer class="rp-dock">
-      <button class="rp-btn rp-btn--primary" type="button" data-action="${cta.action}" ${cta.action === "end-evening" && !endEnabled ? "disabled" : ""} data-end-enabled="${endEnabled ? "1" : "0"}">${cta.label}</button>
+      <button id="btn-end-evening" class="rp-btn rp-btn--primary rp-end-evening" type="button" data-action="${endEnabled ? "end-evening" : cta.action}" data-testid="${endEnabled ? "end-evening" : "evening-primary"}" data-end-evening="1" data-end-enabled="${endEnabled}" ${endEnabled ? "" : (cta.action === "end-evening" ? "disabled" : "")}>${endEnabled ? endLabel : cta.label}</button>
       <button class="rp-btn" type="button" data-action="open-quests">${state.locale === "tr" ? "Görevler" : "Quests"}</button>
       ${
         endEnabled
-          ? `<button class="rp-btn" type="button" data-action="goto-street">${state.locale === "tr" ? "Sokak" : "Street"}</button>`
-          : `<button class="rp-btn ${st.cupRequired && !st.cupDone ? "rp-btn--ember" : ""}" type="button" data-action="goto-cup">${isCupNight() ? t("cup.season_night") : t("cup.practice")}${st.cupRequired && !st.cupDone ? " ★" : ""}</button>`
+          ? `<button class="rp-btn" type="button" data-action="goto-street" data-testid="go-overnight" data-overnight-link hidden style="display:none"></button><button class="rp-btn" type="button" data-action="goto-street">${state.locale === "tr" ? "Sokak" : "Street"}</button>`
+          : `<button class="rp-btn ${st.cupRequired && !st.cupDone ? "rp-btn--ember" : ""}" type="button" data-action="goto-cup" data-testid="practice-match">${isCupNight() ? t("cup.season_night") : t("cup.practice")}${st.cupRequired && !st.cupDone ? " ★" : ""}</button>`
       }
     </footer>
     <div class="rp-dock-extra">
@@ -1203,12 +1310,24 @@ function renderEvening() {
       <button class="rp-btn rp-btn--ghost" type="button" data-action="open-story-log">${state.locale === "tr" ? "Hikâye" : "Journal"}</button>
       ${
         endEnabled
-          ? ""
-          : `<button class="rp-btn rp-btn--ghost" type="button" data-action="end-evening" disabled data-end-enabled="0">${endLabel}</button>`
+          ? `<button class="rp-btn rp-btn--ghost rp-go-overnight" type="button" data-action="end-evening" data-testid="go-overnight" data-overnight-link data-end-enabled="true">${state.locale === "tr" ? "Geceye geç" : "Go overnight"}</button>`
+          : `<button id="btn-end-evening-ghost" class="rp-btn rp-btn--ghost rp-end-evening" type="button" data-action="end-evening" data-testid="end-evening" data-end-evening="1" disabled data-end-enabled="false">${endLabel}</button>`
       }
+      ${day1EscapeChipHtml(endEnabled)}
     </div>
-    ${endEnabled ? "" : `<p class="street-hint">${lockedCopy}</p>`}
+    ${endEnabled ? "" : `<p class="street-hint" data-testid="end-evening-hint">${lockedCopy}</p>`}
   `;
+  requestAnimationFrame(() => Ux4.paintEndEveningControls(state, state.locale));
+}
+
+function day1EscapeChipHtml(endEnabled) {
+  const chip = state.questPack?.storyForm4?.day1EveningEscapeChip || state.storyForm4?.day1EveningEscapeChip;
+  if (!chip) return "";
+  if (endEnabled) return "";
+  if ((state.save.dayIndex || 1) !== 1) return "";
+  const cold = ["cold_open_mediate", "cold_open_instigate", "cold_open_stage"].some((f) => storyFlag(f));
+  if (!cold) return "";
+  return `<button class="rp-btn rp-btn--ghost" type="button" data-action="force-overnight-story" data-testid="force-overnight-story" title="${loc(chip.hint) || ""}">${loc(chip.label)}</button>`;
 }
 
 function renderStreet() {
@@ -1940,27 +2059,33 @@ function renderCupLobby() {
       </button>`;
     })
     .join("");
-  const tags = state.cupPicks.map((id) => neighborById(id).synergyTag);
+  const showMeDone = !!state.showMeApplied || storyFlag("practice_show_me_applied");
+  // If Show me was applied earlier but picks were cleared (goto-cup reset), restore them FIRST
+  if (state.practiceMode && showMeDone && state.cupPicks.length < state.pickCount) {
+    applyShowMePractice();
+  }
+  const tags = state.cupPicks.map((id) => neighborById(id)?.synergyTag).filter(Boolean);
   const syns = activeSynergies(tags);
   const footerRows = synergyFooterFromPicks(state.cupPicks);
   const footerActiveIds = footerRows.filter((r) => r.active).map((r) => r.sid).sort().join(",");
   const liveActiveIds = syns.map((s) => s.id).sort().join(",");
   const footerDesync = footerActiveIds !== liveActiveIds;
   if (footerDesync) {
-    // mechanics-fix-3: never soft-lock Start behind desync — same-tick recover
     console.warn("synergy_footer_desync_recovered", { footerActiveIds, liveActiveIds });
   }
-  const rivalryOn = syns.some((s) => s.id === "syn_rivalry") || footerRows.some((r) => r.sid === "syn_rivalry" && r.active);
-  const showMeDone = !!state.showMeApplied || storyFlag("practice_show_me_applied");
-  const teachSynOk =
-    showMeDone ||
-    rivalryOn ||
-    !teach?.requireSynergyToReady ||
-    !teach?.synergyId ||
-    syns.some((s) => s.id === teach.synergyId) ||
-    state.save.storyFlags?.[`syn_taught_${teach.synergyId}`];
-  // fix-3: 3 picks + (Show me OR Rivalry) — footer desync does NOT block
-  const ready = state.cupPicks.length === state.pickCount && teachSynOk;
+  const rivalryNow =
+    syns.some((s) => s.id === "syn_rivalry") || footerRows.some((r) => r.sid === "syn_rivalry" && r.active);
+  const synsNow = syns;
+  // Auditor PriorityFix: ANY valid 3 picks enable Start in Practice (Rivalry preferred, not hard-gated)
+  const teachSynOk = state.practiceMode
+    ? true
+    : showMeDone ||
+      rivalryNow ||
+      !teach?.requireSynergyToReady ||
+      !teach?.synergyId ||
+      synsNow.some((s) => s.id === teach.synergyId) ||
+      state.save.storyFlags?.[`syn_taught_${teach.synergyId}`];
+  const ready = state.cupPicks.length >= state.pickCount && teachSynOk;
   if (ready && state.practiceMode) {
     ensurePracticePlacement();
     state.practiceDraftReady = true;
@@ -1987,32 +2112,38 @@ function renderCupLobby() {
     })
     .join("");
   const startLabels = state.combatPack?.startEnabledRules?.labels || {};
-  const synHint = rivalryOn || showMeDone
-    ? (loc(state.combatPack?.lobbyAutoAdvance?.onShowMe?.coachLine) ||
-      (state.locale === "tr" ? "Roster hazır — Start'a bas, Rekabeti dövüşte gör." : "Roster set — tap Start, see Rivalry in the fight."))
-    : syns.length
-      ? syns.map(synDesc).join(" · ")
+  const picksReady = state.cupPicks.length >= state.pickCount;
+  const synHint = picksReady
+    ? rivalryNow || showMeDone
+      ? loc(state.combatPack?.lobbyAutoAdvance?.onShowMe?.coachLine) ||
+        (state.locale === "tr" ? "Roster hazır — Start'a bas, arenaya gir." : "Roster set — tap Start to enter the arena.")
       : state.locale === "tr"
-        ? "Aynı etiketlerden 2+ seç → sinerji"
-        : "Pick 2+ matching tags → synergy";
+        ? "3 pick hazır — Start ile arenaya gir (Rekabet önerilir)."
+        : "3 picks ready — Start enters the arena (Rivalry recommended)."
+    : synsNow.length
+      ? synsNow.map(synDesc).join(" · ")
+      : state.locale === "tr"
+        ? "3 komşu seç veya Göster"
+        : "Pick 3 neighbors or Show me";
   const startLabel = ready
     ? loc(startLabels.enabled) || (state.locale === "tr" ? "Start — arena" : "Start — arena")
-    : state.cupPicks.length < state.pickCount
-      ? loc(startLabels.disabledNeedPicks) || t("cup.start")
-      : loc(startLabels.disabledNeedSynergy) || t("cup.start");
-  // Practice: Start skips draft when auto-placed (Show me / Rivalry)
-  const startAction =
-    state.practiceMode && ready && (state.placement || []).filter(Boolean).length >= state.cupPicks.length
-      ? "start-fight"
-      : "goto-draft";
+    : loc(startLabels.disabledNeedPicks) || (state.locale === "tr" ? "3 komşu seç veya Göster" : "Pick 3 or Show me");
+  // Practice: always jump lobby → fight (auto-place); draft only via Adjust
+  const startAction = state.practiceMode && ready ? "start-fight" : ready ? "goto-draft" : "start-fight";
   const teachBlock = teach
     ? `<div class="syn-teach">
         <p>${loc(teach.lines)}</p>
         <div class="btn-row">
           <button class="btn btn-teal" type="button" data-action="syn-show-me" data-id="${teach.synergyId}">${loc(teach.showMeLabel)}</button>
+          <button class="btn btn-ember" type="button" data-action="practice-enter-now">${state.locale === "tr" ? "Hemen Prova" : "Enter Practice now"}</button>
         </div>
       </div>`
-    : "";
+    : state.practiceMode
+      ? `<div class="syn-teach"><div class="btn-row">
+          <button class="btn btn-teal" type="button" data-action="syn-show-me">Show me</button>
+          <button class="btn btn-ember" type="button" data-action="practice-enter-now">${state.locale === "tr" ? "Hemen Prova" : "Enter Practice now"}</button>
+        </div></div>`
+      : "";
 
   const cupWorld = worldCupLines();
   const prac = state.practiceMode ? Combat.practiceSetup(state.combatPack) : null;
@@ -2033,13 +2164,16 @@ function renderCupLobby() {
     <p class="pick-status">${state.cupPicks.length}/${state.pickCount}${teach && !teachSynOk ? (state.locale === "tr" ? " · sinerji kur" : " · form synergy") : ""}</p>
     ${synergyCoachHtml(state.cupPicks)}
     <div class="btn-row">
-      <button class="btn btn-primary ${ready ? "rp-cta-pulse" : ""}" type="button" data-action="${startAction}" ${ready ? "" : "disabled"} data-ready="${ready ? "1" : "0"}">${startLabel}</button>
+      <button class="btn btn-teal" type="button" data-action="syn-show-me" data-testid="show-me">${state.locale === "tr" ? "Göster" : "Show me"}</button>
+      <button class="btn btn-primary ${ready ? "rp-cta-pulse" : ""}" type="button" data-action="start-fight" data-testid="start-fight" id="btn-start-fight" ${ready ? "" : "disabled"} data-ready="${ready ? "1" : "0"}">${startLabel}</button>
       ${
         state.practiceMode && ready
-          ? `<button class="btn btn-secondary" type="button" data-action="goto-draft">${state.locale === "tr" ? "Yerleri düzenle" : "Adjust pads"}</button>`
-          : ""
+          ? `<button class="btn btn-secondary" type="button" data-action="goto-draft" data-testid="goto-draft">${state.locale === "tr" ? "Yerleri düzenle" : "Adjust pads"}</button>`
+          : `<button class="btn btn-secondary" type="button" data-action="goto-draft" data-testid="goto-draft" ${ready ? "" : "disabled"}>${state.locale === "tr" ? "Draft" : "Draft"}</button>`
       }
-    </div>`;
+    </div>
+    ${practiceSettleHtml()}
+    ${state.settleConfirmOpen ? practiceSettleConfirmHtml() : ""}`;
 }
 
 function togglePick(id) {
@@ -2261,89 +2395,132 @@ function pickEnemyLineup(allyIds) {
 }
 
 function startFight() {
-  if (state.fightTimer) clearInterval(state.fightTimer);
-  // mechanics-fix-3: never abort to lobby — fill pads if empty
-  if (!state.cupPicks?.length) applyShowMePractice();
-  ensurePracticePlacement();
-  state.save.storyFlags = state.save.storyFlags || {};
-  state.save.storyFlags.practice_fight_entered = true;
-  const prac = state.practiceMode ? Combat.practiceSetup(state.combatPack) : null;
-  const lineup = prac ? Density.practiceLineup(prac, state.densityPack) : null;
-  if (prac && !state.save.storyFlags?.practice_cup_done) {
-    // Prefer Show-me / manual placement; only overwrite if still empty
-    const filled = (state.placement || []).filter(Boolean).length;
-    if (!filled && lineup?.playerLineup?.length) {
-      const placement = Array(6).fill(null);
-      const practiceSlots = [1, 2, 3];
-      (lineup.playerLineup || []).forEach((row, i) => {
-        placement[practiceSlots[i] ?? Combat.cellToSlot(row.cell)] = row.neighborId;
-      });
-      state.placement = placement;
-      state.cupPicks = (lineup.playerLineup || []).map((r) => r.neighborId);
-      state.enemyLineup = (lineup.enemyLineup || []).map((r) => r.botId);
-    } else if (!state.enemyLineup?.length && lineup?.enemyLineup?.length) {
-      state.enemyLineup = (lineup.enemyLineup || []).map((r) => r.botId);
+  try {
+    if (state.fightTimer) clearInterval(state.fightTimer);
+    state.practiceMode = !isCupNight() && !(state.save.storyFlags?.practice_cup_done);
+    // Never abort — guarantee picks + pads + enemies
+    if (!state.cupPicks?.length || state.cupPicks.length < (state.pickCount || 3)) {
+      applyShowMePractice();
     }
+    ensurePracticePlacement();
+    if (!(state.placement || []).filter(Boolean).length) {
+      autoPlaceSilent();
+    }
+    state.save.storyFlags = state.save.storyFlags || {};
+    state.save.storyFlags.practice_fight_entered = true;
+    const prac = state.practiceMode ? Combat.practiceSetup(state.combatPack) : null;
+    const lineup = prac ? Density.practiceLineup(prac, state.densityPack) || {} : {};
+    if (prac && !state.save.storyFlags?.practice_cup_done) {
+      const filled = (state.placement || []).filter(Boolean).length;
+      if (!filled && lineup.playerLineup?.length) {
+        const placement = Array(6).fill(null);
+        const practiceSlots = [1, 2, 3];
+        lineup.playerLineup.forEach((row, i) => {
+          placement[practiceSlots[i] ?? Combat.cellToSlot(row.cell)] = row.neighborId;
+        });
+        state.placement = placement;
+        state.cupPicks = lineup.playerLineup.map((r) => r.neighborId);
+      }
+      if (!state.enemyLineup?.length && lineup.enemyLineup?.length) {
+        state.enemyLineup = lineup.enemyLineup.map((r) => r.botId);
+      }
+    }
+    let allyIds = (state.placement || []).filter(Boolean);
+    if (!allyIds.length) {
+      applyShowMePractice();
+      ensurePracticePlacement();
+      allyIds = (state.placement || []).filter(Boolean);
+    }
+    const bot = state.content.botCupRoster;
+    const botUnits = bot?.units || [];
+    const placedSlots = (state.placement || [])
+      .map((id, slot) => (id ? slot : null))
+      .filter((s) => s != null);
+    const allFront = placedSlots.length > 0 && placedSlots.every((s) => s < 3);
+    const curve = state.combatPack?.botAi?.pressureCurve || {};
+    const week = weekNumber();
+    const pressure =
+      (prac && curve.practiceCup) ||
+      (week <= 1 && curve.week1Ladder) ||
+      (week === 2 && curve.week2Ladder) ||
+      curve.week3Ladder ||
+      {};
+    const aggro = pressure.botAggro || state.combatPack?.botAi?.aggroDefault || 1.15;
+    let mult = (state.botMult || 1) * aggro * (pressure.botDamageDealtMult || 1);
+    if (allFront) mult *= 1.28;
+    if (prac && pressure.winBiasRespectCombatPack !== false) mult *= 0.92;
+    let enemyIds = state.enemyLineup?.length
+      ? [...state.enemyLineup]
+      : pickEnemyLineup(allyIds.length ? allyIds : state.cupPicks);
+    enemyIds = enemyIds.filter((id) => botUnits.some((u) => u.id === id));
+    while (enemyIds.length < 3) {
+      const next = botUnits.find((u) => !enemyIds.includes(u.id));
+      if (!next) break;
+      enemyIds.push(next.id);
+    }
+    state.enemyLineup = enemyIds.slice(0, 3);
+    const enemySlots = prac || state.practiceMode ? [1, 2, 3] : [0, 1, 3];
+    const enemies = state.enemyLineup
+      .map((id, i) => {
+        const unit = botUnits.find((x) => x.id === id);
+        return unit ? makeBotFighter(unit, enemySlots[i] ?? i, mult) : null;
+      })
+      .filter(Boolean);
+    const allies = (state.placement || [])
+      .map((id, slot) => {
+        if (!id) return null;
+        try { return makeFighter(id, "ally", slot); } catch (e) { return null; }
+      })
+      .filter(Boolean);
+    if (!allies.length || !enemies.length) {
+      toast(state.locale === "tr" ? "Kadroyu kuramıyorum — Show me dene" : "Can't form roster — try Show me");
+      applyShowMePractice();
+      renderCupLobby();
+      showScreen("screen-cup");
+      return;
+    }
+    const battle = {
+      allies,
+      enemies,
+      allySyn: activeSynergies(allies.map((a) => a.synergyTag)),
+      enemySyn: activeSynergies(enemies.map((e) => e.synergyTag)),
+      elapsed: 0,
+      finished: false,
+      log: [],
+      floaters: [],
+      paused: false,
+      actionUsed: false,
+      actionOffered: false,
+      focusTargetSlot: null,
+      allFront,
+      propReady: true,
+      practice: !!(prac || state.practiceMode),
+      scripted: prac ? Density.mergedPracticeScript(prac, state.densityPack) : [],
+      scriptedDone: new Set(),
+      cannotDismissPorch: false,
+      fightId: `f_${Date.now()}`,
+    };
+    if (allFront) {
+      battle.log.unshift(state.locale === "tr" ? "Bot: hep ön sıra cezası!" : "Bot: all-front punish!");
+    }
+    state.battle = battle;
+    document.querySelectorAll(".toast").forEach((n) => n.remove());
+    renderFight(battle);
+    showScreen("screen-fight");
+    // Hard assert for auditor / smoke
+    if (!document.querySelector("#screen-fight.active")) {
+      document.getElementById("screen-fight")?.classList.add("active");
+    }
+    resumeFightLoop(battle);
+  } catch (err) {
+    console.error("startFight failed", err);
+    toast(state.locale === "tr" ? "Dövüş açılamadı — tekrar dene" : "Fight failed to open — retry");
+    try {
+      applyShowMePractice();
+      renderCupLobby();
+      showScreen("screen-cup");
+    } catch { /* */ }
   }
-  const allyIds = state.placement.filter(Boolean);
-  const bot = state.content.botCupRoster;
-  const placedSlots = state.placement
-    .map((id, slot) => (id ? slot : null))
-    .filter((s) => s != null);
-  const allFront = placedSlots.length > 0 && placedSlots.every((s) => s < 3);
-  // Bot challenge pack: aggro + pressure curves
-  const curve = state.combatPack?.botAi?.pressureCurve || {};
-  const week = weekNumber();
-  const pressure =
-    (prac && curve.practiceCup) ||
-    (week <= 1 && curve.week1Ladder) ||
-    (week === 2 && curve.week2Ladder) ||
-    curve.week3Ladder ||
-    {};
-  const aggro = pressure.botAggro || state.combatPack?.botAi?.aggroDefault || 1.15;
-  let mult = (state.botMult || 1) * aggro * (pressure.botDamageDealtMult || 1);
-  if (allFront) mult *= 1.28;
-  if (prac && pressure.winBiasRespectCombatPack !== false) mult *= 0.92;
-  const enemyIds = state.enemyLineup?.length ? state.enemyLineup : pickEnemyLineup(allyIds);
-  state.enemyLineup = enemyIds;
-  // Match draft board: bots sit front/front/back (slots 0,1,3)
-  const enemySlots = prac
-    ? [1, 2, 3].slice(0, (lineup.enemyLineup || []).length)
-    : [0, 1, 3];
-  const enemies = enemyIds.map((id, i) => makeBotFighter(bot.units.find((x) => x.id === id), enemySlots[i] ?? i, mult));
-  // Preserve placement slots on fighters
-  const allies = state.placement
-    .map((id, slot) => (id ? makeFighter(id, "ally", slot) : null))
-    .filter(Boolean);
-  const battle = {
-    allies,
-    enemies,
-    allySyn: activeSynergies(allies.map((a) => a.synergyTag)),
-    enemySyn: activeSynergies(enemies.map((a) => a.synergyTag)),
-    elapsed: 0,
-    finished: false,
-    log: [],
-    floaters: [],
-    paused: false,
-    actionUsed: false,
-    actionOffered: false,
-    focusTargetSlot: null,
-    allFront,
-    propReady: true,
-    practice: !!prac,
-    scripted: prac ? Density.mergedPracticeScript(prac, state.densityPack) : [],
-    scriptedDone: new Set(),
-    cannotDismissPorch: false,
-  };
-  if (allFront) {
-    battle.log.unshift(state.locale === "tr" ? "Bot: hep ön sıra cezası!" : "Bot: all-front punish!");
-  }
-  state.battle = battle;
-  // Clear lobby toast chrome before fight stage
-  document.querySelectorAll(".toast").forEach((n) => n.remove());
-  renderFight(battle);
-  showScreen("screen-fight");
-  resumeFightLoop(battle);
 }
 
 function resumeFightLoop(battle) {
@@ -2377,7 +2554,25 @@ function resumeFightLoop(battle) {
     battle.floaters = (battle.floaters || []).filter((f) => battle.elapsed - f.t < 0.85);
     updateFightUI(battle);
     const bothAlive = battle.allies.some((u) => u.alive) && battle.enemies.some((u) => u.alive);
+    const minPrac = state.mechFix5?.pauseAutoFightForCall?.minPracticeFightSec || state.combatPack?.practiceCup?.minPracticeFightSec || 12;
     const timeUp = battle.elapsed >= 75;
+    // mechanics-fix-5: force porch-call UI by ~2.4s; keep fight alive until call
+    if (battle.practice && !battle.actionUsed && battle.elapsed >= 2.4 && !battle.actionOffered) {
+      battle.actionOffered = true;
+      battle.paused = true;
+      battle.cannotDismissPorch = true;
+      battle.forcePorchIds = ["call_focus_fire", "call_prop_assist", "call_chaos_kite"];
+      state.save.storyFlags = state.save.storyFlags || {};
+      state.save.storyFlags.practice_porch_call_opened = true;
+      updateFightUI(battle);
+      showFightActions(battle);
+      return;
+    }
+    if (battle.practice && battle.elapsed < minPrac && !battle.actionUsed) {
+      for (const u of [...battle.allies, ...battle.enemies]) {
+        if (u.alive && u.hp < 1) u.hp = 1;
+      }
+    }
     // Practice hard gate: don't finish until porch call resolved
     if (battle.practice && !battle.actionUsed && (timeUp || !bothAlive)) {
       if (!battle.actionOffered) {
@@ -2449,15 +2644,17 @@ function runScriptedMoments(battle) {
         applyBeatFlags(beat);
         saveNow();
       }
-    } else if (beat.type === "porch_call" && !battle.actionUsed) {
+    } else if ((beat.type === "porch_call" || beat.type === "porch_call_watchdog") && !battle.actionUsed) {
+      if (beat.type === "porch_call_watchdog" && battle.actionOffered) continue;
       battle.actionOffered = true;
       battle.paused = true;
-      battle.cannotDismissPorch = !!beat.cannotDismissWithoutPick;
-      battle.forcePorchIds = beat.forceOptionIds || null;
+      battle.cannotDismissPorch = beat.cannotDismissWithoutPick !== false;
+      battle.forcePorchIds = beat.forceOptionIds || beat.ifNotOpen?.forceOptionIds || ["call_focus_fire", "call_prop_assist", "call_chaos_kite"];
+      state.save.storyFlags = state.save.storyFlags || {};
+      for (const f of beat.setsFlagsOnOpen || ["practice_porch_call_opened"]) state.save.storyFlags[f] = true;
       updateFightUI(battle);
       showFightActions(battle);
-      // flags apply on resolve via applyPorchCall
-      battle._porchResolveFlags = beat.setsFlagsOnResolve || [];
+      battle._porchResolveFlags = beat.setsFlagsOnResolve || ["practice_cup_porch_call_done", "porch_call_resolved"];
     } else if (beat.type === "finish_banner") {
       applyBeatFlags(beat);
       showSynProc(loc(beat.lines) || (state.locale === "tr" ? "Prova bitti" : "Practice clear"));
@@ -2509,7 +2706,8 @@ function showFightActions(battle) {
       ? (tr ? `≈ %${o.hpSwingDisplay.minPercent}–${o.hpSwingDisplay.maxPercent} takım HP` : `≈ ${o.hpSwingDisplay.minPercent}–${o.hpSwingDisplay.maxPercent}% team HP`)
       : "";
     const prop = porchCallProp(o);
-    return `<button class="porch-call-card btn ${cat === "safe" ? "btn-teal" : cat === "swingy" ? "btn-ember" : "btn-primary"}" type="button" data-action="porch-call" data-id="${o.id}">
+    const testId = o.id === "call_focus_fire" ? "porch-call-focus" : o.id === "call_prop_assist" ? "porch-call-prop" : o.id === "call_chaos_kite" ? "porch-call-swap" : `porch-call-${o.id}`;
+    return `<button class="porch-call-card btn ${cat === "safe" ? "btn-teal" : cat === "swingy" ? "btn-ember" : "btn-primary"}" type="button" data-action="porch-call" data-id="${o.id}" data-testid="${testId}">
       <img class="porch-call-prop" src="${prop}" alt="" width="36" height="36" />
       <span class="porch-call-chip">${chip}</span>
       <strong>${loc(o.label)}</strong>
@@ -2517,6 +2715,8 @@ function showFightActions(battle) {
       ${swing ? `<span class="porch-call-swing">${swing}</span>` : ""}
     </button>`;
   };
+  bar.dataset.testid = "porch-call-modal";
+  bar.setAttribute("data-testid", "porch-call-modal");
   bar.innerHTML = `
     <p class="fight-action-prompt">${title}</p>
     <p class="muted porch-call-sub">${subtitle}</p>
@@ -3059,11 +3259,11 @@ function endFight(battle) {
   if (syn) emitQuestEvent({ type: "cup_synergy", synergy: syn.id || syn.name });
   saveNow();
   if (won) playWinSting();
-  if (state.practiceMode || battle.practice) {
+  if (state.practiceMode || battle.practice || !isCupNight()) {
     state.save.storyFlags = state.save.storyFlags || {};
     for (const s of battle.allySyn || []) state.save.storyFlags[`syn_taught_${s.id}`] = true;
-    // mechanics-fix-2 + ux-session-2: atomic Practice finish → End evening ≤1 render
-    onPracticeResolved();
+    // ux-session-4 NUCLEAR: force both End evening flags on fight end
+    onPracticeResolved("fight_end");
     const doneToast = state.uxPack2?.stageActions?.toasts?.practice;
     if (doneToast) toast(loc(doneToast), 2200);
   }
@@ -3154,6 +3354,10 @@ function doSecondStreetBeat() {
 }
 
 function renderComic() {
+  // ux-session-4: comic_shown nuclear force
+  if (state.practiceMode || state.meta?.lastCupWasPractice || !isCupNight()) {
+    onPracticeResolved("comic_shown");
+  }
   const r = state.lastResult;
   const comic = state.content.matchComic;
   const vars = { winner: r.winner, synergy: r.synergy, mvp: r.mvp };
@@ -3656,6 +3860,10 @@ function onAction(action, target) {
       showScreen("screen-evening");
       break;
     case "goto-evening":
+      // ux-session-4: leaving comic/fight after Practice forces flags
+      if (state.practiceMode || state.meta?.lastCupWasPractice || state.save.evening?.cupDone) {
+        onPracticeResolved("comic_dismiss");
+      }
       renderEvening();
       showScreen("screen-evening");
       break;
@@ -3778,6 +3986,25 @@ function onAction(action, target) {
     case "start-fight":
       startFight();
       break;
+    case "practice-enter-now":
+      applyShowMePractice();
+      startFight();
+      break;
+    case "practice-settle":
+      state.settleConfirmOpen = true;
+      renderCupLobby();
+      break;
+    case "practice-settle-confirm":
+      state.settleConfirmOpen = false;
+      onPracticeSettleConfirm(coldAuditActive() ? "audit_settle" : "show_me_settle");
+      break;
+    case "practice-settle-cancel":
+      state.settleConfirmOpen = false;
+      renderCupLobby();
+      break;
+    case "force-overnight-story":
+      forceOvernightStoryProve();
+      break;
     case "skip-fight":
       hideFightActions();
       skipFight();
@@ -3877,7 +4104,7 @@ async function tryPullStorePacks() {
 
 async function boot() {
   try {
-    const [content, economy, stories, ladder, depthMeta, questPack, combatPack, densityPack, uxPack, uxPack2] = await Promise.all([
+    const [content, economy, stories, ladder, depthMeta, questPack, combatPack, densityPack, uxPack, uxPack2, uxPack3, uxPack4, mechFix4, mechFix5] = await Promise.all([
       fetch("data/content.json").then((r) => r.json()),
       fetch("data/economy.json").then((r) => r.json()),
       fetch("data/stories.json").then((r) => r.json()),
@@ -3888,6 +4115,10 @@ async function boot() {
       fetch("data/session-density.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
       fetch("data/ux-session-1.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
       fetch("data/ux-session-2.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      fetch("data/ux-session-3.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      fetch("data/ux-session-4.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      fetch("data/mechanics-fix-4.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      fetch("data/mechanics-fix-5.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
     ]);
     state.content = content;
     state.economy = economy;
@@ -3899,10 +4130,53 @@ async function boot() {
     state.densityPack = densityPack;
     state.uxPack = uxPack;
     state.uxPack2 = uxPack2;
+    state.uxPack3 = uxPack3;
+    state.uxPack4 = uxPack4;
+    state.mechFix4 = mechFix4;
+    state.mechFix5 = mechFix5;
     state.storyForm2 = questPack?.storyForm2 || null;
     state.storyForm3 = questPack?.storyForm3 || null;
-    if (uxPack2?.strings) {
-      state.uxPack = { ...(uxPack || {}), ...(uxPack2 || {}), strings: { ...(uxPack?.strings || {}), ...(uxPack2.strings || {}) } };
+    state.storyForm4 = questPack?.storyForm4 || null;
+    if (uxPack2?.strings || uxPack3?.copy) {
+      state.uxPack = {
+        ...(uxPack || {}),
+        ...(uxPack2 || {}),
+        ...(uxPack3 || {}),
+        ...(uxPack4 || {}),
+        strings: { ...(uxPack?.strings || {}), ...(uxPack2?.strings || {}) },
+      };
+    }
+    // ?coldAudit=1 → settle visible immediately
+    try {
+      if (new URLSearchParams(location.search).get("coldAudit") === "1") {
+        document.documentElement.dataset.auditCold = "1";
+      }
+    } catch { /* */ }
+    // mechanics-fix-5: apply porch-call 2.4s override onto combat pack moments at boot
+    if (mechFix5?.forcePorchCallEarly?.overrideScriptedMoment && combatPack) {
+      const ov = mechFix5.forcePorchCallEarly.overrideScriptedMoment;
+      const applyMoments = (moments) => {
+        if (!Array.isArray(moments)) return;
+        for (let i = 0; i < moments.length; i++) {
+          if (moments[i].id === "prac_porch_call") {
+            moments[i] = { ...moments[i], ...ov, tSec: 2.4, force: true };
+          }
+        }
+        const wd = mechFix5.forcePorchCallEarly.alsoInsert;
+        if (wd && !moments.some((m) => m.id === wd.id)) {
+          const idx = moments.findIndex((m) => m.id === "prac_porch_call");
+          moments.splice(idx >= 0 ? idx + 1 : moments.length, 0, wd);
+        }
+      };
+      const walk = (obj) => {
+        if (!obj || typeof obj !== "object") return;
+        if (Array.isArray(obj.scriptedMoments)) applyMoments(obj.scriptedMoments);
+        for (const v of Object.values(obj)) {
+          if (v && typeof v === "object") walk(v);
+        }
+      };
+      walk(combatPack);
+      walk(densityPack);
     }
     if (combatPack) Combat.applySynergyPools(state.content, combatPack);
     // Merge economy uiStrings over content placeholders for shop/pass

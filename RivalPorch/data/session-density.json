@@ -1611,41 +1611,75 @@
       },
       {
         "id": "prac_porch_call",
-        "tSec": 18.0,
+        "tSec": 2.4,
         "type": "porch_call",
         "forceOptionIds": [
-          "call_cheer",
           "call_focus_fire",
-          "call_tea_break"
+          "call_prop_assist",
+          "call_chaos_kite"
         ],
-        "pauseSec": 2.2,
-        "timeoutDefaultCallId": "call_cheer",
+        "pauseSec": 3.2,
+        "timeoutDefaultCallId": "call_focus_fire",
         "cannotDismissWithoutPick": true,
         "setsFlagsOnResolve": [
-          "practice_cup_porch_call_done"
-        ]
+          "practice_cup_porch_call_done",
+          "porch_call_resolved"
+        ],
+        "force": true,
+        "pauseAutoTicks": true,
+        "blockSkipDuringCall": true,
+        "setsFlagsOnOpen": [
+          "practice_porch_call_opened"
+        ],
+        "ui": {
+          "dimStage": true,
+          "lampRim": true,
+          "letterboxPulse": true,
+          "title": {
+            "tr": "Veranda Çağrısı — birini seç",
+            "en": "Porch Call — pick one"
+          },
+          "subtitle": {
+            "tr": "Odak / Prop / Swap — skor sallanır",
+            "en": "Focus / Prop / Swap — score swings"
+          }
+        }
+      },
+      {
+        "id": "prac_porch_call_watchdog",
+        "tSec": 2.6,
+        "type": "porch_call_watchdog",
+        "ifNotOpen": {
+          "action": "force_open_porch_call_modal",
+          "forceOptionIds": [
+            "call_focus_fire",
+            "call_prop_assist",
+            "call_chaos_kite"
+          ]
+        }
       },
       {
         "id": "prac_call_resolve",
-        "tSec": 22.0,
+        "tSec": 5.8,
         "type": "porch_call_resolve_fx",
         "speakerId": "n2",
         "linesByCallId": {
-          "call_cheer": {
-            "tr": "Alkış iyi — tempo bizde. Unutma: seçimin skoru salladı.",
-            "en": "Cheer works — tempo's ours. Remember: your pick swung the score."
-          },
           "call_focus_fire": {
-            "tr": "Leyla'yı işaretledin. Bu bir Veranda Çağrısı — her Cup'ta bir kez.",
-            "en": "You marked Leyla. That's a Porch Call — once per Cup."
+            "tr": "Hedef kilit — Focus. Bu bir Veranda Çağrısı.",
+            "en": "Target locked — Focus. That's a Porch Call."
           },
-          "call_tea_break": {
-            "tr": "Yudum yetişti. Çay Çemberi için sonra Can da lazım.",
-            "en": "Sip landed. You'll need Can later for Tea Circle."
+          "call_prop_assist": {
+            "tr": "Prop savruldu — tempo değişti.",
+            "en": "Prop tossed — tempo shifted."
+          },
+          "call_chaos_kite": {
+            "tr": "Swap! Yerler değişti — cam kurtuldu.",
+            "en": "Swap! Places flipped — glass saved."
           }
         },
         "cameraShakeId": "shake_medium",
-        "hitStopMs": 50
+        "hitStopMs": 55,
+        "propToss": true
       },
       {
         "id": "prac_tea_tip",
@@ -1681,6 +1715,25 @@
         "postCopy": {
           "tr": "Prova bitti. Akşamı kapatabilirsin — yarın sokağın yankısı gelir.",
           "en": "Practice done. You can end the evening — tomorrow the street will echo."
+        }
+      },
+      {
+        "id": "prac_rivalry_after_call",
+        "tSec": 6.4,
+        "type": "force_ally_hp_then_synergy_pop",
+        "targetNeighborId": "n2",
+        "setHpPercent": 0.32,
+        "synergyId": "syn_rivalry",
+        "damageFloatId": "float_rivalry_buff",
+        "vfxId": "vfx_rivalry_ember",
+        "cameraShakeId": "shake_medium",
+        "requirePriorFlag": "practice_cup_porch_call_done",
+        "setsFlags": [
+          "practice_cup_rivalry_pop_seen"
+        ],
+        "lines": {
+          "tr": "Rekabet! Düşük HP → daha sert vuruş",
+          "en": "Rivalry! Low HP → harder hits"
         }
       }
     ],

@@ -1,0 +1,153 @@
+/* Rival Porch — visual-fix-5
+   bb8b0f7 visual 7.0: hotspots are 56×72 but spine/HUD buries faces (audit-r17/05-street).
+   Goal: ≥4 tappable 56px busts CLEAR of spine + dock. Keep letterboxY=0 / cover bleed.
+   Paste AFTER visual-fix-4.css.
+*/
+
+.rp-screen--street {
+  /* Top chrome budget (day chips + ONE spine whisper). Dock separate. */
+  --rp-street-chrome-top: calc(10px + var(--rp-safe-top, 0px));
+  --rp-street-chrome-h: 88px; /* hard cap — spine cannot grow over busts */
+  --rp-street-bust-band-top: calc(var(--rp-street-chrome-top) + var(--rp-street-chrome-h) + 6px);
+  --rp-street-bust-band-bottom: calc(var(--rp-dock-h, 72px) + var(--rp-safe-bottom, 0px) + 44px);
+  --rp-hotspot-w: 56px;
+  --rp-hotspot-h: 72px;
+}
+
+/* ── A. Thin top chrome — no full-width slab over faces ─────────────────── */
+
+.rp-screen--street .rp-hud-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 4;
+  max-height: 48px;
+  min-height: 0;
+  padding: calc(6px + var(--rp-safe-top, 0px)) 10px 4px;
+  background: transparent !important;
+  pointer-events: none;
+}
+.rp-screen--street .rp-hud-top > * {
+  pointer-events: auto;
+}
+
+/* Spine / quest = ONE chip under HUD — never a multi-line card wall */
+.rp-screen--street .rp-hud-quest,
+.rp-screen--street .rp-quest-banner,
+.rp-screen--street .rp-spine-banner,
+.rp-screen--street .rp-spine,
+.rp-screen--street .rp-street-spine {
+  position: absolute;
+  top: calc(44px + var(--rp-safe-top, 0px));
+  left: 10px;
+  right: 10px;
+  z-index: 4;
+  max-height: 36px !important;
+  margin: 0 !important;
+  padding: 6px 10px !important;
+  font-size: 11px !important;
+  line-height: 1.2 !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 48%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--tea-cream, #F2E6D8) 16%, transparent);
+  pointer-events: auto;
+  box-sizing: border-box;
+}
+
+/* Kill fat consequence / agenda overlays that paint over the bust rail */
+.rp-screen--street .rp-consequence-list,
+.rp-screen--street .rp-hud-consequence,
+.rp-screen--street .rp-street-agenda,
+.rp-screen--street .rp-mid__bullets,
+.rp-screen--street .rp-spine-card,
+.rp-screen--street .rp-quest-panel:not(.rp-sheet__panel) {
+  display: none !important;
+}
+
+/* Secondary spine progress (Back · Spine 1/5) — pin under chip, still inside chrome budget */
+.rp-screen--street .rp-street-nav,
+.rp-screen--street .rp-spine-progress {
+  position: absolute;
+  top: calc(82px + var(--rp-safe-top, 0px));
+  left: 10px;
+  right: 10px;
+  z-index: 4;
+  max-height: 22px;
+  font-size: 11px;
+  pointer-events: none;
+}
+.rp-screen--street .rp-street-nav a,
+.rp-screen--street .rp-street-nav button {
+  pointer-events: auto;
+}
+
+/* ── B. Bust rail lives ONLY in the clear band (below chrome, above dock) ─ */
+
+.rp-screen--street .rp-hotspots {
+  position: absolute !important;
+  top: var(--rp-street-bust-band-top) !important;
+  right: 0 !important;
+  bottom: var(--rp-street-bust-band-bottom) !important;
+  left: 0 !important;
+  z-index: 5 !important; /* above spine/HUD for taps + paint */
+  pointer-events: none;
+  overflow: visible;
+}
+
+/* Keep 56×72 from fix-4; place with --x/--y relative to CLEAR BAND */
+.rp-screen--street .rp-hotspot {
+  position: absolute;
+  left: var(--x, 50%);
+  /* Default mid-porch inside the band; clamp so chrome/dock never clip */
+  top: clamp(4%, var(--y, 28%), 78%);
+  width: var(--rp-hotspot-w) !important;
+  height: var(--rp-hotspot-h) !important;
+  min-width: 48px !important;
+  min-height: 48px !important;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  pointer-events: auto;
+}
+
+.rp-screen--street .rp-hotspot__bust {
+  width: 56px !important;
+  height: 56px !important;
+  min-width: 56px !important;
+  min-height: 56px !important;
+  flex: 0 0 56px;
+  position: relative !important;
+  display: block !important;
+}
+
+/* Dock stays bottom; never extend into bust band */
+.rp-screen--street .rp-dock {
+  z-index: 6;
+  max-height: calc(var(--rp-dock-h, 72px) + var(--rp-safe-bottom, 0px));
+  pointer-events: auto;
+}
+
+/* Affinity toast sits in dock margin — not over faces */
+.rp-screen--street .rp-affinity-toast,
+.rp-screen--street .rp-toast--affinity {
+  z-index: 6;
+  bottom: calc(var(--rp-dock-h, 72px) + 8px + var(--rp-safe-bottom, 0px));
+  top: auto !important;
+}
+
+/* Whisper under bust band, above dock */
+.rp-screen--street .rp-whisper {
+  z-index: 4;
+  bottom: calc(var(--rp-dock-h, 72px) + 6px + var(--rp-safe-bottom, 0px));
+  max-height: 32px;
+  pointer-events: none;
+}
+
+/* ── C. STAGE-SAFE cover (unchanged letterbox contract) ─────────────────── */
+
+.rp-screen--street .rp-stage[data-wave="3"] .rp-stage__img {
+  object-fit: cover;
+}

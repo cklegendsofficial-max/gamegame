@@ -1,0 +1,313 @@
+{
+  "schemaVersion": 1,
+  "id": "mechanics-fix-5",
+  "packNumber": 5,
+  "squad": "mechanics",
+  "shippedAt": "2026-11-23T12:05:30Z",
+  "noPrPush": true,
+  "severity": "critical",
+  "extends": [
+    "internal/rival-porch-combat-pack.json",
+    "internal/squads/mechanics-fix-1.json",
+    "internal/squads/mechanics-fix-2.json",
+    "internal/squads/mechanics-fix-3.json",
+    "internal/squads/mechanics-fix-4.json"
+  ],
+  "mergeMode": "deepMergeIntoCombatPack",
+  "wirePathHint": "RivalPorch/js/combat.js practice scriptedMoments + porch-call modal; data/combat-pack.json overlay",
+  "scoreRef": {
+    "file": "internal/rival-porch-score-latest.json",
+    "buildCommit": "2f67255",
+    "mechanicsScore": 6.5,
+    "overall": 6.7,
+    "priorityFixTitle": "Expose porch-call / focus during Practice fight"
+  },
+  "scoreGapsAddressed": [
+    "No porch-call / prop / focus during Practice fight",
+    "Auto-only; mastery unread",
+    "Pick gate still fiddly (needed forced enable in audit)",
+    "Synergy teach does not equal playable decisions"
+  ],
+  "targets": [
+    "forcePorchCallEarly",
+    "focusPropSwapTrio",
+    "pauseAutoFightForCall",
+    "hardenThreePickStart"
+  ],
+
+  "acceptance": {
+    "auditor": "At least one porch-call and one focus target clickable before auto resolves; Rivalry proc visible after player action.",
+    "coordinator": "force porch-call UI at ~2.4s during Practice with Focus/Prop/Swap.",
+    "playwrightAssert": {
+      "porchCallVisibleByTSec": 2.4,
+      "optionIds": ["call_focus_fire", "call_prop_assist", "call_chaos_kite"],
+      "clickableBeforeAutoResolve": true,
+      "activeScreenId": "screen-fight"
+    }
+  },
+
+  "forcePorchCallEarly": {
+    "practiceCupId": "practice_cup_rivalry_01",
+    "overrideScriptedMoment": {
+      "id": "prac_porch_call",
+      "tSec": 2.4,
+      "type": "porch_call",
+      "force": true,
+      "forceOptionIds": ["call_focus_fire", "call_prop_assist", "call_chaos_kite"],
+      "pauseSec": 3.2,
+      "timeoutDefaultCallId": "call_focus_fire",
+      "cannotDismissWithoutPick": true,
+      "pauseAutoTicks": true,
+      "blockSkipDuringCall": true,
+      "ui": {
+        "dimStage": true,
+        "lampRim": true,
+        "letterboxPulse": true,
+        "title": { "tr": "Veranda Çağrısı — birini seç", "en": "Porch Call — pick one" },
+        "subtitle": {
+          "tr": "Odak / Prop / Swap — skor sallanır",
+          "en": "Focus / Prop / Swap — score swings"
+        }
+      },
+      "setsFlagsOnOpen": ["practice_porch_call_opened"],
+      "setsFlagsOnResolve": ["practice_cup_porch_call_done", "porch_call_resolved"]
+    },
+    "alsoInsert": {
+      "id": "prac_porch_call_watchdog",
+      "tSec": 2.6,
+      "type": "porch_call_watchdog",
+      "ifNotOpen": {
+        "action": "force_open_porch_call_modal",
+        "forceOptionIds": ["call_focus_fire", "call_prop_assist", "call_chaos_kite"]
+      }
+    },
+    "moveOld18sCall": {
+      "note": "Replace combat-pack prac_porch_call at 18.0 — auto fight often ends before 18s. 2.4s guarantees visibility.",
+      "removeOrDisable": { "id": "prac_porch_call", "oldTSec": 18.0 }
+    },
+    "resolveMoment": {
+      "id": "prac_call_resolve",
+      "tSec": 5.8,
+      "type": "porch_call_resolve_fx",
+      "speakerId": "n2",
+      "linesByCallId": {
+        "call_focus_fire": {
+          "tr": "Hedef kilit — Focus. Bu bir Veranda Çağrısı.",
+          "en": "Target locked — Focus. That's a Porch Call."
+        },
+        "call_prop_assist": {
+          "tr": "Prop savruldu — tempo değişti.",
+          "en": "Prop tossed — tempo shifted."
+        },
+        "call_chaos_kite": {
+          "tr": "Swap! Yerler değişti — cam kurtuldu.",
+          "en": "Swap! Places flipped — glass saved."
+        }
+      },
+      "cameraShakeId": "shake_medium",
+      "hitStopMs": 55,
+      "propToss": true
+    },
+    "rivalryAfterPlayerAction": {
+      "id": "prac_rivalry_after_call",
+      "tSec": 6.4,
+      "type": "force_ally_hp_then_synergy_pop",
+      "targetNeighborId": "n2",
+      "setHpPercent": 0.32,
+      "synergyId": "syn_rivalry",
+      "damageFloatId": "float_rivalry_buff",
+      "vfxId": "vfx_rivalry_ember",
+      "cameraShakeId": "shake_medium",
+      "requirePriorFlag": "practice_cup_porch_call_done",
+      "setsFlags": ["practice_cup_rivalry_pop_seen"],
+      "lines": {
+        "tr": "Rekabet! Düşük HP → daha sert vuruş",
+        "en": "Rivalry! Low HP → harder hits"
+      }
+    }
+  },
+
+  "focusPropSwapTrio": {
+    "options": [
+      {
+        "id": "call_focus_fire",
+        "category": "swingy",
+        "label": { "tr": "Focus", "en": "Focus" },
+        "blurb": {
+          "tr": "En yüksek ATK düşmanı 6 sn işaretle.",
+          "en": "Mark highest-ATK enemy for 6s."
+        },
+        "propIcon": "prop_point_finger",
+        "effect": {
+          "type": "mark_enemy_focus",
+          "durationSec": 6,
+          "targetRule": "enemy_highest_atk",
+          "damageTakenBonusPercent": 0.2,
+          "teamHpSwingHintPercent": 0.14
+        },
+        "focusTargetClickable": true,
+        "vfxId": "vfx_call_focus",
+        "cameraShakeId": "shake_medium",
+        "comicHint": {
+          "tr": "Parmak uzandı — hedef netleşti.",
+          "en": "A finger pointed — the target locked."
+        }
+      },
+      {
+        "id": "call_prop_assist",
+        "category": "synergy_leaning",
+        "lean": "syn_rivalry",
+        "label": { "tr": "Prop", "en": "Prop" },
+        "blurb": {
+          "tr": "Veranda prop'u savur — ön sıra 5 sn hasarı çeker + küçük ATK.",
+          "en": "Toss a porch prop — front taunts 5s + small ATK."
+        },
+        "propIcon": "prop_newspaper",
+        "effect": {
+          "type": "prop_toss_front_taunt_atk",
+          "durationSec": 5,
+          "damageRedirectPercent": 0.3,
+          "atkBonusPercent": 0.08,
+          "teamHpSwingHintPercent": 0.12
+        },
+        "vfxId": "vfx_call_prop_toss",
+        "cameraShakeId": "shake_medium",
+        "comicHint": {
+          "tr": "Gazete / düdük savruldu — prop işe yaradı.",
+          "en": "Newspaper / whistle flew — the prop worked."
+        }
+      },
+      {
+        "id": "call_chaos_kite",
+        "category": "swingy",
+        "label": { "tr": "Swap", "en": "Swap" },
+        "blurb": {
+          "tr": "İki müttefifi anında yer değiştir.",
+          "en": "Instantly swap two allies."
+        },
+        "propIcon": "prop_kite_string",
+        "effect": {
+          "type": "swap_two_allies",
+          "defaultPairRule": "lowest_hp_front_with_highest_atk_back",
+          "teamHpSwingHintPercent": 0.16
+        },
+        "vfxId": "vfx_call_swap",
+        "cameraShakeId": "shake_medium",
+        "comicHint": {
+          "tr": "Uçurtma ipi gerildi — yerler değişti.",
+          "en": "Kite string pulled taut — places swapped."
+        }
+      }
+    ],
+    "selectionRulesPractice": {
+      "forceIds": ["call_focus_fire", "call_prop_assist", "call_chaos_kite"],
+      "forceReadableOrder": ["call_focus_fire", "call_prop_assist", "call_chaos_kite"],
+      "showCategoryChip": true,
+      "showBlurb": true,
+      "showPropIcon": true,
+      "showHpSwingHint": true,
+      "minTapTargetPx": 52
+    },
+    "mergeIntoPorchCallsOptions": true,
+    "note": "call_prop_assist is new — add to porchCalls.options; Practice force trio replaces Cheer/Tea for teach agency."
+  },
+
+  "pauseAutoFightForCall": {
+    "problem": "Auto Fight resolves with no agency — porch-call never shown",
+    "rules": [
+      "When porch_call modal open: timescale = 0 (or pause combat ticks).",
+      "Do not auto-resolve fight while practice_porch_call_opened && !practice_cup_porch_call_done.",
+      "Hide or disable Skip during call.",
+      "Practice label may stay 'Practice — no skip' but call UI must still mount above arena.",
+      "If fight duration would end before 2.4s, extend minPracticeFightSec to >= 12."
+    ],
+    "minPracticeFightSec": 12,
+    "autoFightDoesNotSkipPorchCall": true,
+    "modalZIndexAboveArena": true,
+    "testIds": {
+      "modal": "porch-call-modal",
+      "optFocus": "porch-call-focus",
+      "optProp": "porch-call-prop",
+      "optSwap": "porch-call-swap"
+    }
+  },
+
+  "hardenThreePickStart": {
+    "scorePriority": "Harden 3-pick → Start without force-enable",
+    "acceptance": "Selecting any 3 neighbors enables Start; no disabled stuck state; smoke test asserts screen-fight.",
+    "rules": [
+      "On each pick toggle: state.cup.picks sync; if length===3 enable start-fight + goto-draft (removeAttribute disabled).",
+      "Never leave start-fight disabled when picks.length===3.",
+      "Auditor must not need disabled=false hacks.",
+      "Reconcile borders from state every paint while on cup lobby."
+    ],
+    "enableWhen": "state.cup.picks.length === 3 || state.cup.showMeApplied === true",
+    "smoke": [
+      "pick any 3 → start-fight.enabled === true without console",
+      "click start-fight → screen-fight"
+    ]
+  },
+
+  "uiStringsPatch": {
+    "fight.porch_call_title": {
+      "tr": "Veranda Çağrısı — birini seç",
+      "en": "Porch Call — pick one"
+    },
+    "fight.porch_call_hint": {
+      "tr": "Focus / Prop / Swap — skor sallanır",
+      "en": "Focus / Prop / Swap — score swings"
+    },
+    "call.focus": { "tr": "Focus", "en": "Focus" },
+    "call.prop": { "tr": "Prop", "en": "Prop" },
+    "call.swap": { "tr": "Swap", "en": "Swap" }
+  },
+
+  "integratorPatchContract": {
+    "filesLikely": ["js/combat.js", "js/cup.js"],
+    "requiredChanges": [
+      "Move/override prac_porch_call to tSec 2.4 with Focus/Prop/Swap ids",
+      "Pause auto ticks while modal open",
+      "Register call_prop_assist effect handler",
+      "Ensure modal mounts on screen-fight even when Auto Fight label shown",
+      "minPracticeFightSec >= 12"
+    ],
+    "smokeTest": [
+      "Practice → Start → screen-fight",
+      "wait 2.4s → assert porch-call-modal visible",
+      "assert Focus + Prop + Swap clickable",
+      "click Focus → resolve FX + later Rivalry float",
+      "3-pick enables Start with no force-enable hack"
+    ]
+  },
+
+  "acceptanceChecks": [
+    "Practice fight shows porch-call modal at ~2.4s (not 18s)",
+    "Options Focus / Prop / Swap all clickable before auto resolve",
+    "Auto Fight paused during call; cannot skip past without pick/timeout",
+    "After call, Rivalry proc float visible on pads",
+    "Any 3 picks enable Start without console disabled=false"
+  ],
+
+  "integrator": {
+    "owner": "code owner on cursor/rival-porch-slice-31f7",
+    "steps": [
+      "Override prac_porch_call to t=2.4 with forceOptionIds Focus/Prop/Swap.",
+      "Add call_prop_assist to porchCalls.options + effect handler.",
+      "Pause combat ticks while modal open; z-index above arena.",
+      "Extend Practice fight min duration so call cannot be skipped by early KO.",
+      "Keep fix-4 enterScreenFight; this pack adds mid-fight agency.",
+      "No PR from this squad."
+    ],
+    "priority": "P0 — wire immediately; mechanics stuck at 6.5 while Auto Fight has zero agency"
+  },
+
+  "meta": {
+    "expectedMechanicsLift": "6.5 → 8+ once porch-call clickable in cold Practice",
+    "nextPackIfStillLow": "mechanics-fix-6 — sticky Rivalry after call, closer bot HP, second teach (Tea)",
+    "compat": {
+      "screenIdFight": "screen-fight",
+      "porchCallOptionIds": ["call_focus_fire", "call_prop_assist", "call_chaos_kite"],
+      "tSec": 2.4
+    }
+  }
+}

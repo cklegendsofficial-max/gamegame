@@ -107,18 +107,24 @@ export function practiceExitBlocked(density, save) {
   return need.some((f) => !save.storyFlags?.[f]);
 }
 
-/** Authoritative End-evening gate (ux-session-2). Day1 = practice flags; Day2+ always. */
-export function canEndEvening(save, uxPack2 = null, density = null) {
+/** Authoritative End-evening gate (ux-session-3). Day1 = ONLY two practice flags; Day2+ always. */
+export function canEndEvening(save, uxPack2 = null, density = null, uxPack3 = null) {
   const day = save?.dayIndex ?? 1;
-  const gate = uxPack2?.endEveningGate;
-  if (day <= 1) {
-    const need =
-      gate?.day1RequiresFlagsAll ||
-      practiceTeach(density)?.ui?.endEvening?.blockedUntilFlagsAll ||
-      ["practice_cup_done", "syn_taught_syn_rivalry"];
-    return need.every((f) => !!save?.storyFlags?.[f]);
+  if (day > 1) {
+    const gate = uxPack2?.endEveningGate;
+    return gate?.day2PlusAlwaysAllow !== false;
   }
-  return gate?.day2PlusAlwaysAllow !== false;
+  // ux-session-3: pure derive — ignore agenda/ritual/gift/porch_call extras
+  const flags = save?.storyFlags || {};
+  if (flags.syn_taught && !flags.syn_taught_syn_rivalry) flags.syn_taught_syn_rivalry = true;
+  const need =
+    uxPack3?.endEvening?.requiresFlagsAll ||
+    uxPack2?.endEveningGate?.day1RequiresFlagsAll ||
+    ["practice_cup_done", "syn_taught_syn_rivalry"];
+  // Hard clamp: never require more than the two practice flags
+  const only = need.filter((f) => f === "practice_cup_done" || f === "syn_taught_syn_rivalry");
+  const req = only.length ? only : ["practice_cup_done", "syn_taught_syn_rivalry"];
+  return req.every((f) => !!flags[f]);
 }
 
 /** Merge density practiceCupTeach moments over combat-pack moments (by id). */

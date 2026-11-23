@@ -67,10 +67,13 @@ export function pickPorchCallOptions(pack, allySynIds = [], practice = false) {
   const calls = pack?.porchCalls;
   if (!calls?.options?.length) return null;
   const rules = calls.selectionRules || {};
-  if (practice && rules.practiceCupForceIds?.length) {
-    return rules.practiceCupForceIds
+  const practiceForce =
+    (practice && (rules.practiceCupForceIds || ["call_focus_fire", "call_prop_assist", "call_chaos_kite"])) || null;
+  if (practiceForce?.length) {
+    const forced = practiceForce
       .map((id) => calls.options.find((o) => o.id === id))
       .filter(Boolean);
+    if (forced.length) return forced;
   }
   const byCat = (cat) => calls.options.filter((o) => o.category === cat);
   const picked = [];
@@ -129,6 +132,17 @@ export function applyPorchCallEffect(battle, option, locFn) {
         battle.tauntUntil = (battle.elapsed || 0) + (fx.durationSec || 5);
         battle.tauntRedirect = fx.damageRedirectPercent || 0.35;
       }
+      break;
+    }
+    case "prop_toss_front_taunt_atk": {
+      const front = allies.find((u) => u.slot < 3) || allies[0];
+      if (front) {
+        battle.tauntSlot = front.slot;
+        battle.tauntUntil = (battle.elapsed || 0) + (fx.durationSec || 5);
+        battle.tauntRedirect = fx.damageRedirectPercent || 0.3;
+      }
+      battle.atkBuffUntil = (battle.elapsed || 0) + (fx.durationSec || 5);
+      battle.atkBuffPct = fx.atkBonusPercent || 0.08;
       break;
     }
     case "ally_dodge_buff":

@@ -93,6 +93,7 @@ export function normalizeQuestPack(raw) {
     journalSpine: raw.journalSpine || null,
     storyForm2: raw.storyForm2 || null,
     storyForm3: raw.storyForm3 || null,
+    storyForm4: raw.storyForm4 || null,
   };
 }
 
@@ -107,6 +108,7 @@ export function mergeQuestPacks(stub, overlay) {
       worldConsequences: { ...(a.worldConsequences || {}), ...(b.worldConsequences || {}) },
       storyForm2: b.storyForm2 || a.storyForm2,
       storyForm3: b.storyForm3 || a.storyForm3,
+      storyForm4: b.storyForm4 || a.storyForm4,
       journalSpine: b.journalSpine || a.journalSpine,
     };
   }
@@ -118,6 +120,7 @@ export function mergeQuestPacks(stub, overlay) {
     worldConsequences: { ...(a.worldConsequences || {}), ...(b.worldConsequences || {}) },
     storyForm2: b.storyForm2 || a.storyForm2,
     storyForm3: b.storyForm3 || a.storyForm3,
+    storyForm4: b.storyForm4 || a.storyForm4,
     journalSpine: b.journalSpine || a.journalSpine,
   };
 }
@@ -416,7 +419,15 @@ export function completeQuest(save, pack, id, grantFn) {
 export function autoOfferArcQuests(pack, save) {
   const offered = [];
   for (const q of allQuestDefs(pack)) {
-    if (!q.arcId || isAccepted(save, q.id)) continue;
+    if (isAccepted(save, q.id)) continue;
+    // story-form-4: auto-accept preferred Day2 echo quests
+    const dayMin = q.autoAcceptOnDayMin ?? q._raw?.autoAcceptOnDayMin;
+    if (dayMin != null && (save.dayIndex || 1) >= dayMin && unlockOk(save, q.unlockRequires || q._raw?.unlockRequires || {})) {
+      acceptQuest(save, pack, q.id);
+      offered.push(q.id);
+      continue;
+    }
+    if (!q.arcId) continue;
     if (save.arcs?.[q.arcId] || save.storyFlags?.[`${q.arcId}_active`] || save.storyFlags?.[`${q.arcId}_seed`]) {
       offered.push(q.id);
     }
