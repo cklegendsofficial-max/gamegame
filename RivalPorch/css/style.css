@@ -3148,3 +3148,39 @@ html, body, #app, .app {
   transform: none !important;
   display: block !important;
 }
+
+/* ===== R16b: dock letterbox band + evening mid further unbury ===== */
+#screen-street .rp-dock,
+#screen-evening .rp-dock,
+.rp-screen--street .rp-dock,
+.rp-screen--evening .rp-dock {
+  --rp-dock-h: 64px;
+  min-height: 0;
+  padding: 6px 10px calc(8px + var(--rp-safe-bottom, 0px));
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--mud-night, #1A1612) 55%, transparent) 0%,
+    transparent 100%
+  ) !important;
+  border-top: 0 !important;
+  box-shadow: none !important;
+}
+#screen-evening .rp-dock-extra,
+.rp-screen--evening .rp-dock-extra {
+  position: absolute;
+  left: 8px; right: 8px;
+  bottom: calc(var(--rp-dock-h, 64px) + 4px + var(--rp-safe-bottom, 0px));
+  display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;
+  z-index: 6;
+  background: transparent !important;
+}
+#screen-evening .rp-mid,
+.rp-screen--evening .rp-mid {
+  max-height: 36vh !important;
+  padding: 8px 10px !important;
+}
+#screen-evening .rp-dock-extra .rp-btn {
+  padding: 6px 8px;
+  font-size: 11px;
+  background: color-mix(in srgb, var(--mud-night, #1A1612) 42%, transparent);
+}
