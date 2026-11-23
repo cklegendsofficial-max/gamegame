@@ -1,22 +1,17 @@
-# Rival Porch playtest — Round 8 honesty reset
+# Rival Porch playtest — Round 9
 
-**Prior claimed 9.0 is VOID.** CK Legends product call: live build is **~5/10 max** under harsh criteria.
+**Prior claimed 9.0 is VOID.** Round 8 honesty reset **5.2**. Round 8b quest wire **~6.3**.
 
-Canonical scorecard (Project store):
-`docs/rival-porch-playtest-score.md` on the Project agent store.
+Canonical scorecard: Project store `docs/rival-porch-playtest-score.md`.
 
-| Harsh bar | Status |
-|-----------|--------|
-| Meshy clay world in-game (not dark menus + busts) | FAIL |
-| Cup fights meaningful (placement + mid-fight + synergy mastery) | FAIL |
-| Story arcs visible; choices change later evenings | FAIL |
-| Real quest log (accept / progress / complete) | FAIL |
-| Friend plays 20+ min without boredom | FAIL |
+| Harsh bar | Status (R9) |
+|-----------|-------------|
+| Meshy clay world in-game | ~ — full-bleed `rp-stage` + gold busts; title env still letterboxed |
+| Cup fights meaningful | ~ — synergyTagPools + Practice Rivalry teach + porchCalls + juice floats/shake |
+| Story arcs visible; choices change later evenings | ~ — journal + flags; overnight references unfinished quests |
+| Real quest log | ✓ — HUD quest always visible; main spine on evening |
+| Friend plays 20+ min without boredom | ✗ — denser, not yet |
 
-**Round 8 honesty reset: 5.2 / 10.** Prior claimed 9.0 is VOID.
+**Round 9 honest: 7.4 / 10.** Not ≥9. Keep climbing.
 
-**Round 8b (quest pack wired): ~6.3 / 10** — Quest Log + Welcome main drives evening; Meshy env stages on; harsh visual/combat/20-min bars still fail.
-
-Rebuild order: quests ✓ → art-forward Meshy (in progress) → combat juice/synergy tutorial → denser session → honest replay until ≥9.0.
-
-Canonical: Project store `docs/rival-porch-playtest-score.md`.
+Shipped this round: art-forward CSS pack, SFX hooks, combat-pack.json (pools / practiceCup / porchCalls / juiceHints).

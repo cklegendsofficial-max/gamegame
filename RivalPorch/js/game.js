@@ -6,6 +6,11 @@ import {
 } from "./wallet.js";
 import * as Story from "./story.js";
 import * as Quests from "./quests.js";
+import {
+  preloadSfx, unlockAudio, playKnock, playTeapotClink, playWinSting,
+  playUiTap, startCrowdMurmur, stopCrowdMurmur,
+} from "./sfx.js";
+import * as Combat from "./combat.js";
 
 const DAY1_BUSTS = {
   n1: "assets/rival-porch/bust-n1-aunt-merve.png",
@@ -68,6 +73,8 @@ const state = {
   botMult: 1,
   questPack: null,
   questTab: "active",
+  combatPack: null,
+  practiceMode: false,
 };
 
 const el = { app: document.getElementById("app"), canvas: document.getElementById("share-canvas") };
@@ -100,6 +107,9 @@ function toast(msg) {
 function showScreen(id) {
   document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
   document.getElementById(id)?.classList.add("active");
+  // Ambient bed on street / cup lobby; duck elsewhere
+  if (id === "screen-street" || id === "screen-cup") startCrowdMurmur();
+  else stopCrowdMurmur();
 }
 function saveNow() {
   state.save.locale = state.locale;
@@ -189,10 +199,7 @@ function activeSynergyDefs() {
 }
 
 function activeSynergies(tags) {
-  return activeSynergyDefs().filter((s) => {
-    const count = tags.filter((tag) => s.tagsRequired.includes(tag)).length;
-    return count >= s.minCount;
-  });
+  return Combat.activeFromPools(state.combatPack, tags, activeSynergyDefs());
 }
 
 function ensureNeighborState(id) {
@@ -263,9 +270,31 @@ function currencyName(id) {
   return shopStr(`shop.currency.${id === "porch_coins" ? "coins" : id === "neon_thread" ? "thread" : "tokens"}`);
 }
 
+function unfinishedQuestHeadline() {
+  Quests.ensureQuestSave(state.save);
+  const actives = Quests.activeQuests(state.questPack, state.save);
+  if (!actives.length) {
+    const avail = Quests.availableQuests(state.questPack, state.save)[0];
+    if (avail) {
+      return state.locale === "tr"
+        ? `Bekleyen görev: ${loc(avail.title)}`
+        : `Waiting quest: ${loc(avail.title)}`;
+    }
+    return null;
+  }
+  const main = actives.find((q) => q.type === "main") || actives[0];
+  const e = state.save.quests.entries[main.id];
+  const next = (main.objectives || []).find((o) => !Quests.objectiveDone(e, o));
+  const nextLabel = next ? loc(next.label) : loc(main.title);
+  return state.locale === "tr"
+    ? `${loc(main.title)} — sırada: ${nextLabel}`
+    : `${loc(main.title)} — next: ${nextLabel}`;
+}
+
 function hudHtml() {
   const s = state.save;
   const dayLine = fillTemplate(t("day.label"), { day: s.dayIndex, week: weekNumber() });
+  const qLine = unfinishedQuestHeadline();
   return `
     <div class="meta-hud">
       <div class="meta-day">${dayLine}</div>
@@ -274,7 +303,51 @@ function hudHtml() {
         <span title="${currencyName("neon_thread")}">🧵 ${s.currencies.neon_thread||0} <em>${currencyName("neon_thread")}</em></span>
         <span title="${currencyName("clay_tokens")}">🧱 ${s.currencies.clay_tokens||0} <em>${currencyName("clay_tokens")}</em></span>
       </div>
+      <button class="hud-quest" type="button" data-action="open-quests" title="${qLine || (state.locale === "tr" ? "Görevler" : "Quests")}">
+        <span class="hud-quest-label">${state.locale === "tr" ? "Görev" : "Quest"}</span>
+        <span class="hud-quest-next">${qLine || (state.locale === "tr" ? "Defteri aç" : "Open log")}</span>
+      </button>
     </div>`;
+}
+
+function synergyCoachHtml(pickedIds = []) {
+  const tr = state.locale === "tr";
+  const tags = pickedIds.map((id) => neighborById(id)?.synergyTag).filter(Boolean);
+  const active = activeSynergies(tags);
+  // Teach order: Rivalry → Tea → Neon (combat juice pack)
+  const order = ["syn_rivalry", "syn_tea_circle", "syn_neon_night"];
+  const defs = order
+    .map((id) => (state.content.synergies || []).find((s) => s.id === id))
+    .filter(Boolean);
+  const seen = state.save.storyFlags || {};
+  const nextTeach =
+    defs.find((s) => !seen[`syn_taught_${s.id}`]) || defs[0];
+  const tipFor = (s) => {
+    const examples = unlockedNeighbors()
+      .filter((n) => s.tagsRequired.includes(n.synergyTag))
+      .slice(0, 3)
+      .map((n) => loc(n.name))
+      .join(" · ");
+    const on = active.some((a) => a.id === s.id);
+    const focus = nextTeach?.id === s.id && !on;
+    return `<div class="syn-coach-card ${on ? "on" : ""} ${focus ? "focus" : ""}">
+      <div class="syn-coach-title">${on ? "✓ " : focus ? "★ " : ""}${loc(s.name)} <span class="chip ${s.tagsRequired[0].toLowerCase()}">${s.tagsRequired.join("+")}</span></div>
+      <p>${loc(s.rules?.description)}</p>
+      <p class="muted">${tr ? "Örnek:" : "Try:"} ${examples || "—"}</p>
+    </div>`;
+  };
+  const head = nextTeach
+    ? tr
+      ? `Önce bunu kur: ${loc(nextTeach.name)}`
+      : `Form this first: ${loc(nextTeach.name)}`
+    : tr
+      ? "Tea heal · Rivalry düşük HP hasarı · Neon açılış dodge"
+      : "Tea heals · Rivalry low-HP damage · Neon opening dodge";
+  return `<div class="syn-coach">
+    <h3 class="section-label">${tr ? "Sinerji okulu" : "Synergy school"}</h3>
+    <p class="muted">${head}</p>
+    <div class="syn-coach-grid">${defs.map(tipFor).join("")}</div>
+  </div>`;
 }
 
 function buildShell() {
@@ -299,6 +372,19 @@ function buildShell() {
 
 function stageBg(primary, fallback) {
   return `url("${primary}"), url("${fallback}")`;
+}
+
+function stageLayer(kind = "street", dim = false) {
+  const primary = kind === "arena" ? ART.arenaStage : ART.streetHero;
+  const fallback = kind === "arena" ? ART.arenaStageFallback : ART.streetHeroFallback;
+  return `<div class="rp-stage" data-stage="${kind}" ${dim ? 'data-dim="night"' : ""} aria-hidden="true">
+    <img class="rp-stage__img" src="${primary}" alt="" decoding="async" onerror="this.src='${fallback}'" />
+    <div class="rp-stage__vignette"></div>
+  </div>`;
+}
+
+function goldBust(id) {
+  return ART.busts[id] || bust(id);
 }
 
 function noteQuestHits(hits) {
@@ -447,23 +533,23 @@ function renderQuestLog() {
 
 function renderTitle() {
   const screen = document.getElementById("screen-title");
-  screen.style.backgroundImage = stageBg(ART.streetHero, ART.streetHeroFallback);
+  screen.style.backgroundImage = "";
   const hasSave = state.save.dayIndex > 1 || state.save.evening.checkin || state.save.cupHistory.length;
   const stake = state.locale === "tr"
-    ? "Karşı Sırt bu Cumartesi Cup'a geliyor. Bu akşam üç kapı, bir seçim, bir sahne."
-    : "Rival Ridge brings Cup on Saturday. Tonight: three doors, one choice, one stage.";
+    ? "Bu akşam: üç kapı, bir seçim, bir sahne."
+    : "Tonight: three doors, one choice, one stage.";
   screen.innerHTML = `
-    <div class="title-panel">
-      <button class="btn btn-secondary lang-toggle" type="button" data-action="toggle-lang" aria-label="Language">EN | TR · ${state.locale.toUpperCase()}</button>
-      <h1 class="brand">${t("app.title")}</h1>
-      <p class="title-tag">${stake}</p>
-      <p class="muted title-sub">${state.locale === "tr"
-        ? "Kil diorama mahalle · demlenen ilişkiler · sezonluk Porch Cup"
-        : "Clay-diorama street · brewing bonds · seasonal Porch Cup"}</p>
-      ${hasSave ? `<button class="btn btn-primary" type="button" data-action="continue-save">${t("common.continue_save")} — ${fillTemplate(t("day.label"), { day: state.save.dayIndex, week: weekNumber() })}</button>` : ""}
-      <button class="btn ${hasSave ? "btn-secondary" : "btn-primary"}" type="button" data-action="new-game">${hasSave ? t("common.new_game") : t("boot.tap_to_start")}</button>
-      <button class="btn btn-secondary" type="button" data-action="open-shop">${t("shop.title")}</button>
-    </div>`;
+    ${stageLayer("street")}
+    <div class="rp-title-stack">
+      <button class="rp-chip rp-lang" type="button" data-action="toggle-lang" aria-label="Language">EN | TR · ${state.locale.toUpperCase()}</button>
+      <h1 class="rp-brand">${t("app.title")}</h1>
+      <p class="rp-lede">${stake}</p>
+    </div>
+    <footer class="rp-dock rp-dock--title">
+      ${hasSave ? `<button class="rp-btn rp-btn--primary" type="button" data-action="continue-save">${t("common.continue_save")} — ${fillTemplate(t("day.label"), { day: state.save.dayIndex, week: weekNumber() })}</button>` : ""}
+      <button class="rp-btn rp-btn--primary" type="button" data-action="new-game">${hasSave ? t("common.new_game") : t("boot.tap_to_start")}</button>
+      <button class="rp-btn rp-btn--ghost" type="button" data-action="open-shop">${t("shop.title")}</button>
+    </footer>`;
 }
 
 
@@ -489,6 +575,13 @@ function dayHeadline() {
     6: { tr: "Sezon Cup Gecesi", en: "Season Cup Night" },
     7: { tr: "Cup Sonrası — Mahalle Konuşur", en: "After Cup — The Block Talks" },
   };
+  const qHead = unfinishedQuestHeadline();
+  if (qHead && d >= 2) {
+    return {
+      tr: map[d]?.tr ? `${map[d].tr.split(" — ")[0]} — ${qHead}` : qHead,
+      en: map[d]?.en ? `${map[d].en.split(" — ")[0]} — ${qHead}` : qHead,
+    };
+  }
   if (map[d]) return map[d];
   const week = Story.weekDef(state.stories, d);
   return week?.title || { tr: `Gün ${d}`, en: `Day ${d}` };
@@ -515,6 +608,8 @@ function renderColdOpen() {
       <p class="muted cold-hint cold-reveal" id="cold-hint" hidden>${tr ? "Sonra akşam gündemi açılır." : "Then the evening agenda opens."}</p>
     </div>`;
   showScreen("screen-cold");
+  unlockAudio();
+  playKnock();
   // Staggered cold open: knock → brand → stake choices
   setTimeout(() => {
     const b = document.getElementById("cold-brand");
@@ -581,19 +676,19 @@ function resolveColdOpen(cid) {
 function renderOvernight(payoff) {
   const screen = document.getElementById("screen-overnight");
   const tr = state.locale === "tr";
-  const bits = (payoff?.lines || []).map((l) => `<li>${l}</li>`).join("") || `<li>${tr ? "Mahalle uyudu." : "The block slept."}</li>`;
+  const bits = (payoff?.lines || []).slice(0, 5).map((l) => `<li>${l}</li>`).join("") || `<li>${tr ? "Mahalle uyudu." : "The block slept."}</li>`;
   const tomorrow = loc(dayHeadline());
+  const qPull = unfinishedQuestHeadline();
   screen.innerHTML = `
-    ${hudHtml()}
-    <div class="overnight-card">
-      <p class="muted overnight-kicker">${tr ? "Gece geçti" : "Night passed"}</p>
-      <h2>${tomorrow}</h2>
-      <p class="prompt">${fillTemplate(t("idle.overnight_done"), { day: state.save.dayIndex })}</p>
-      <ul class="agenda-list">${bits}</ul>
+    ${stageLayer("street", true)}
+    <div class="rp-overnight">
+      <p class="rp-kicker">${tr ? "Gece geçti" : "Night passed"}</p>
+      <h2 class="rp-night-title">${tomorrow}</h2>
+      ${qPull ? `<p class="overnight-quest-pull">◎ ${qPull}</p>` : ""}
+      <ul class="rp-ticks">${bits}</ul>
       <p class="evening-cup-tease">${payoff?.tease || ""}</p>
-      <div class="btn-row">
-        <button class="btn btn-primary" type="button" data-action="goto-evening">${tr ? "Yeni akşama gir" : "Enter the new evening"}</button>
-      </div>
+      <button class="rp-btn rp-btn--primary" type="button" data-action="goto-evening">${tr ? "Yeni akşama gir" : "Enter the new evening"}</button>
+      <button class="rp-btn rp-btn--ghost" type="button" data-action="open-quests">${tr ? "Görev defteri" : "Quest log"}</button>
     </div>`;
   showScreen("screen-overnight");
 }
@@ -711,38 +806,45 @@ function renderEvening() {
       </div>`
     : `<p class="street-hint">${state.locale === "tr" ? "Henüz ana görev yok — Görevler → Available." : "No main quest yet — Quests → Available."}</p>`;
 
+  const doneN = items.filter((i) => i.ok).length;
+  const progPct = Math.round((doneN / Math.max(1, items.length)) * 100);
+  const mainTitle = mainAgenda?.title || (state.locale === "tr" ? "Akşam omurgası" : "Evening spine");
+  const mainDone = mainAgenda
+    ? mainAgenda.objectives.filter((o) => o.done).length
+    : doneN;
+  const mainTotal = mainAgenda ? mainAgenda.objectives.length : items.length;
+  const faceId = mainAgenda?.quest?.neighbors?.[0] || unlockedNeighbors()[0]?.id || "n1";
+
   screen.innerHTML = `
+    ${stageLayer("street")}
     ${hudHtml()}
-    <div class="art-hero evening-hero" style="background-image:${stageBg(ART.streetHero, ART.streetHeroFallback)}">
-      <div class="art-hero-scrim">
-        <div class="topbar"><h2>${loc(dayHeadline())}</h2>
-          <button class="btn btn-secondary" type="button" data-action="open-ladder">${t("meta.ladder")}</button>
-        </div>
-        <p class="muted evening-meta">${fillTemplate(t("day.streak"), { n: state.save.checkinStreak })} · ${state.save.moodLabel || "calm"}${dom ? ` · ${Story.repLabel(dom, state.locale)}` : ""} · <strong class="cup-countdown">${cupCount}</strong></p>
-        <p class="prompt evening-week">${loc(week?.title)} — ${loc(week?.focus)}</p>
-        ${arcBeat
-          ? `<p class="arc-banner">🎭 <strong>${loc(arcBeat.arc.title)}</strong> — ${loc(arcBeat.beat.prompt)}
-              <span class="chip tea">${(arcBeat.arc.neighbors || []).map((id) => loc(neighborById(id)?.name) || id).slice(0, 3).join(" · ")}</span></p>`
-          : `<p class="muted">${state.locale === "tr" ? "Kapıları gez — her komşunun kendi sahnesi var." : "Walk the doors — each neighbor has their own scene."}</p>`}
-        ${cupTease}
-        ${worldBits.length ? `<p class="world-consequence">${worldBits.map((l) => `◈ ${l}`).join(" · ")}</p>` : ""}
-        <div class="quest-strip">${questStrip}</div>
+    <div class="rp-mid">
+      <p class="rp-kicker">${state.locale === "tr" ? "Ana görev" : "Main"} · ${mainTitle}</p>
+      <h2 class="rp-night-title">${loc(dayHeadline())}</h2>
+      <div class="rp-progress">
+        <img src="${goldBust(faceId)}" alt="" width="40" height="40" onerror="this.src='${DAY1_BUSTS.n1}'" />
+        <div class="rp-progress__bar" aria-valuenow="${mainDone}" aria-valuemax="${mainTotal}"><i style="width:${Math.round((mainDone / Math.max(1, mainTotal)) * 100)}%"></i></div>
+        <span>${mainDone}/${mainTotal}</span>
       </div>
+      <p class="rp-mid__line">${loc(hook)}</p>
+      ${worldBits.length ? `<p class="world-consequence">${worldBits.map((l) => `◈ ${l}`).join(" · ")}</p>` : ""}
+      <div class="quest-strip">${questStrip}</div>
+      ${
+        mainAgenda?.ready
+          ? `<button class="rp-btn rp-btn--primary" type="button" data-action="quest-complete" data-id="${mainAgenda.quest.id}">${state.locale === "tr" ? "Ana görev ödülünü topla" : "Claim main quest reward"}</button>`
+          : ""
+      }
+      <p class="muted evening-meta">${cupCount} · ${fillTemplate(t("day.streak"), { n: state.save.checkinStreak })} · ritual ${doneN}/${items.length}</p>
     </div>
-    ${mainBlock}
-    <h3 class="section-label">${state.locale === "tr" ? "Akşam ritüeli" : "Evening ritual"}</h3>
-    <ul class="agenda-list agenda-compact">
-      ${items.map((i) => `<li class="${i.ok ? "done" : ""}">${i.ok ? "✓" : "○"} ${i.label}${i.hint && !i.ok ? ` <span class="agenda-hint">${i.hint}</span>` : ""}</li>`).join("")}
-    </ul>
-    <div class="btn-row">
-      <button class="btn btn-primary" type="button" data-action="goto-street">${t("street.header")}</button>
-      <button class="btn btn-teal" type="button" data-action="open-quests">${state.locale === "tr" ? "Görevler" : "Quests"}</button>
-      <button class="btn btn-ember" type="button" data-action="goto-cup">${isCupNight() ? t("cup.season_night") : t("cup.practice")}</button>
-    </div>
-    <div class="btn-row">
-      <button class="btn btn-secondary" type="button" data-action="open-shop">${t("shop.title")}</button>
-      <button class="btn btn-secondary" type="button" data-action="open-story-log">${state.locale === "tr" ? "Hikâye defteri" : "Story ledger"}</button>
-      <button class="btn btn-rose" type="button" data-action="end-evening" ${st.complete ? "" : "disabled"}>${t("evening.end")}</button>
+    <footer class="rp-dock">
+      <button class="rp-btn rp-btn--primary" type="button" data-action="goto-street">${t("street.header")}</button>
+      <button class="rp-btn" type="button" data-action="open-quests">${state.locale === "tr" ? "Görevler" : "Quests"}</button>
+      <button class="rp-btn" type="button" data-action="goto-cup">${isCupNight() ? t("cup.season_night") : t("cup.practice")}</button>
+    </footer>
+    <div class="rp-dock-extra">
+      <button class="rp-btn rp-btn--ghost" type="button" data-action="open-shop">${t("shop.title")}</button>
+      <button class="rp-btn rp-btn--ghost" type="button" data-action="open-story-log">${state.locale === "tr" ? "Hikâye" : "Journal"}</button>
+      <button class="rp-btn rp-btn--ghost" type="button" data-action="end-evening" ${st.complete ? "" : "disabled"}>${t("evening.end")}</button>
     </div>
     ${st.complete ? "" : `<p class="street-hint">${t("evening.locked")}</p>`}
   `;
@@ -750,44 +852,42 @@ function renderEvening() {
 
 function renderStreet() {
   const screen = document.getElementById("screen-street");
+  const HOT = {
+    n1: [12, 48],
+    n2: [28, 46],
+    n3: [42, 44],
+    n4: [56, 46],
+    n5: [70, 45],
+    n6: [84, 48],
+  };
   const spots = unlockedNeighbors()
-    .slice(0, 12)
+    .slice(0, 6)
     .map((n) => {
       const done = state.save.evening.visits.includes(n.id);
-      const meshy = ART.meshyBusts[n.id] || bust(n.id);
-      return `<button class="hotspot clay-spot ${done ? "visited" : ""}" type="button" data-action="open-neighbor" data-id="${n.id}" aria-label="${loc(n.name)}">
-        <img class="bust-mini" src="${meshy}" alt="" onerror="this.src='${bust(n.id)}'" />
-        <span class="label">${loc(n.name)}${done ? " ✓" : ""}</span>
+      const xy = HOT[n.id] || [50, 48];
+      return `<button class="rp-hotspot ${done ? "visited" : ""}" style="--x:${xy[0]}%;--y:${xy[1]}%" type="button" data-action="open-neighbor" data-id="${n.id}" aria-label="${loc(n.name)}">
+        <span class="rp-hotspot__glow"></span>
+        <img class="rp-hotspot__bust" src="${goldBust(n.id)}" alt="" onerror="this.src='${DAY1_BUSTS.n1}'" />
+        <span class="rp-hotspot__name">${loc(n.name)}${done ? " ✓" : ""}</span>
       </button>`;
     })
     .join("");
 
-  const activeQ = Quests.activeMainQuest(state.questPack, state.save) || Quests.activeQuests(state.questPack, state.save)[0];
-  const questHint = activeQ
-    ? `<p class="street-quest-hint"><button type="button" data-action="open-quests">${loc(activeQ.title)}</button> — ${Quests.progressSummary(activeQ, state.save.quests.entries[activeQ.id], state.locale).split(" · ")[0] || ""}</p>`
-    : "";
+  const spine = unfinishedQuestHeadline();
   const worldBits = worldStreetLines();
 
   screen.innerHTML = `
+    ${stageLayer("street")}
     ${hudHtml()}
-    <div class="topbar">
-      <h2>${t("street.header")}</h2>
-      <button class="btn btn-secondary" type="button" data-action="goto-evening">${t("common.back")}</button>
-    </div>
-    <div class="street-stage clay-stage" style="background-image:${stageBg(ART.streetHero, ART.streetHeroFallback)}">
-      <div class="prop-row" aria-hidden="true">
-        <span class="prop-chip">🫖</span><span class="prop-chip">🪁</span><span class="prop-chip">📰</span><span class="prop-chip">🎧</span>
-      </div>
-      <div class="hotspots hotspots-wrap">${spots}</div>
-      ${worldBits.length ? `<div class="world-banner">${worldBits.map((l) => `<span>◈ ${l}</span>`).join("")}</div>` : ""}
-    </div>
-    ${questHint}
-    <p class="street-hint">${t("street.hint_tap_neighbor")}</p>
-    <div class="mood-bar">
-      <button class="btn btn-rose" type="button" data-action="checkin" ${state.save.evening.checkin ? "disabled" : ""}>${t("street.porch_checkin")}</button>
-      <button class="btn btn-secondary" type="button" data-action="street-event" ${state.save.evening.streetEvent ? "disabled" : ""}>${t("street.event")}</button>
-      <button class="btn btn-teal" type="button" data-action="open-quests">${state.locale === "tr" ? "Görevler" : "Quests"}</button>
-    </div>`;
+    <button class="rp-chip rp-back" type="button" data-action="goto-evening">${t("common.back")}</button>
+    <div class="rp-hotspots" role="list">${spots}</div>
+    ${spine ? `<div class="rp-whisper"><span>◎ ${spine}</span></div>` : ""}
+    ${worldBits.length ? `<div class="world-banner street-float">${worldBits.map((l) => `<span>◈ ${l}</span>`).join("")}</div>` : ""}
+    <footer class="rp-dock">
+      <button class="rp-btn rp-btn--primary" type="button" data-action="checkin" ${state.save.evening.checkin ? "disabled" : ""}>${t("street.porch_checkin")}</button>
+      <button class="rp-btn" type="button" data-action="street-event" ${state.save.evening.streetEvent ? "disabled" : ""}>${t("street.event")}</button>
+      <button class="rp-btn" type="button" data-action="open-quests">${state.locale === "tr" ? "Görevler" : "Quests"}</button>
+    </footer>`;
 }
 
 
@@ -1048,6 +1148,7 @@ function doGift(id) {
       <p class="muted">${tr ? "Errand ✓ — akşam gündemine dönebilirsin." : "Errand ✓ — you can return to the evening agenda."}</p>
     </div>`;
   emitQuestEvent({ type: "gift", neighborId: id });
+  playTeapotClink();
   toast(tr ? `Hediye onay · ${loc(n.name)} +${gain}` : `Gift confirmed · ${loc(n.name)} +${gain}`);
 }
 
@@ -1211,6 +1312,29 @@ function endEvening() {
   const lastNote = (state.save.storyRecap || [])[0]?.text;
   if (lastNote) lines.push(tr ? `Hatırlanan: ${lastNote}` : `Remembered: ${lastNote}`);
 
+  Quests.ensureQuestSave(state.save);
+  const openQs = Quests.activeQuests(state.questPack, state.save);
+  for (const q of openQs.slice(0, 3)) {
+    const e = state.save.quests.entries[q.id];
+    const next = (q.objectives || []).find((o) => !Quests.objectiveDone(e, o));
+    const nextLabel = next ? loc(next.label) : loc(q.title);
+    lines.push(
+      tr
+        ? `Yarım kalan: ${loc(q.title)} — sırada ${nextLabel}`
+        : `Unfinished: ${loc(q.title)} — still need ${nextLabel}`
+    );
+  }
+  if (!openQs.length) {
+    const waiting = Quests.availableQuests(state.questPack, state.save)[0];
+    if (waiting) {
+      lines.push(
+        tr
+          ? `Kapıda bekleyen görev: ${loc(waiting.title)}`
+          : `A quest waits at the door: ${loc(waiting.title)}`
+      );
+    }
+  }
+
   state.save.dayIndex += 1;
   state.save.weekNumber = weekNumber();
   state.save.dailyEarn = { talkCoins: 0, dramaThread: false, shareClaimed: false };
@@ -1356,19 +1480,30 @@ function renderCupLobby() {
   state.botMult = difficultyForWeek().statMult || 1;
   const screen = document.getElementById("screen-cup");
   const list = unlockedNeighbors();
+  state.practiceMode = !isCupNight() && !(state.save.storyFlags?.practice_cup_done);
+  const teach = Combat.nextLobbyTeach(state.combatPack, state.save.storyFlags || {});
+  const spotlight = new Set(teach?.spotlightNeighborIds || []);
   const cards = list
     .map((n) => {
       const selected = state.cupPicks.includes(n.id);
-      return `<button class="pick-card ${selected ? "selected" : ""}" type="button" data-action="toggle-pick" data-id="${n.id}">
-        <img src="${bust(n.id)}" alt="" onerror="this.src='${DAY1_BUSTS.n1}'" />
+      const src = goldBust(n.id);
+      const tag = n.synergyTag || "";
+      const dim = spotlight.size && !spotlight.has(n.id) && !selected;
+      return `<button class="pick-card ${selected ? "selected" : ""} ${spotlight.has(n.id) ? "spotlight" : ""} ${dim ? "dimmed" : ""}" type="button" data-action="toggle-pick" data-id="${n.id}">
+        <img src="${src}" alt="" onerror="this.src='${DAY1_BUSTS.n1}'" />
         <div class="name">${loc(n.name)}</div>
-        <div class="muted" style="font-size:0.65rem">${n.role}</div>
+        <div class="muted pick-meta">${n.role} · <span class="chip ${String(tag).toLowerCase()}">${tag}</span></div>
       </button>`;
     })
     .join("");
-  const ready = state.cupPicks.length === state.pickCount;
   const tags = state.cupPicks.map((id) => neighborById(id).synergyTag);
   const syns = activeSynergies(tags);
+  const teachSynOk =
+    !teach?.requireSynergyToReady ||
+    !teach?.synergyId ||
+    syns.some((s) => s.id === teach.synergyId) ||
+    state.save.storyFlags?.[`syn_taught_${teach.synergyId}`];
+  const ready = state.cupPicks.length === state.pickCount && teachSynOk;
   const synDesc = (s) => loc(s.rules?.description) || loc(s.name);
   const preview = syns
     .map((s) => `<span class="chip ${s.tagsRequired[0].toLowerCase()}" title="${synDesc(s)}">${loc(s.name)}</span>`)
@@ -1378,22 +1513,33 @@ function renderCupLobby() {
     : state.locale === "tr"
       ? "Aynı etiketlerden 2+ seç → sinerji"
       : "Pick 2+ matching tags → synergy";
+  const teachBlock = teach
+    ? `<div class="syn-teach">
+        <p>${loc(teach.lines)}</p>
+        <div class="btn-row">
+          <button class="btn btn-teal" type="button" data-action="syn-show-me" data-id="${teach.synergyId}">${loc(teach.showMeLabel)}</button>
+        </div>
+      </div>`
+    : "";
 
   const cupWorld = worldCupLines();
+  const prac = state.practiceMode ? Combat.practiceSetup(state.combatPack) : null;
   screen.innerHTML = `
+    ${stageLayer("arena")}
     ${hudHtml()}
-    <div class="topbar"><h2>${t("cup.lobby_title")}</h2>
-      <button class="btn btn-secondary" type="button" data-action="goto-evening">${t("common.back")}</button>
+    <div class="rp-mid cup-mid">
+      <div class="topbar"><h2>${prac ? loc(prac.title) : t("cup.lobby_title")}</h2>
+        <button class="btn btn-secondary" type="button" data-action="goto-evening">${t("common.back")}</button>
+      </div>
+      <p class="street-hint">${fillTemplate(t("cup.week"), { week: weekNumber(), mult: state.botMult.toFixed(2) })} · ${isCupNight() ? t("cup.season_night") : t("cup.practice")}</p>
+      ${cupWorld.length ? `<p class="world-consequence">${cupWorld.map((l) => `◈ ${l}`).join(" · ")}</p>` : ""}
+      <p class="evening-cup-tease">${fillTemplate(t("cup.picks"), { n: state.pickCount })} · ${synHint}</p>
+      ${teachBlock}
     </div>
-    <p class="street-hint">${fillTemplate(t("cup.week"), { week: weekNumber(), mult: state.botMult.toFixed(2) })} · ${isCupNight() ? t("cup.season_night") : t("cup.practice")}</p>
-    <p class="muted">${econT(state.economy, state.locale, "cup.flair.free_ok")}</p>
-    <div class="arena-hero clay-stage" style="background-image:${stageBg(ART.arenaStage, ART.arenaStageFallback)}"></div>
-    ${cupWorld.length ? `<p class="world-consequence">${cupWorld.map((l) => `◈ ${l}`).join(" · ")}</p>` : ""}
-    <p class="street-hint">${fillTemplate(t("cup.picks"), { n: state.pickCount })} (${list.length} ${state.locale === "tr" ? "açık" : "unlocked"})</p>
     <div class="pick-grid pick-grid-dense">${cards}</div>
     <div class="synergy-pills" style="justify-content:center">${preview}</div>
-    <p class="muted synergy-hint">${synHint}</p>
-    <p class="pick-status">${state.cupPicks.length}/${state.pickCount}</p>
+    <p class="pick-status">${state.cupPicks.length}/${state.pickCount}${teach && !teachSynOk ? (state.locale === "tr" ? " · sinerji kur" : " · form synergy") : ""}</p>
+    ${synergyCoachHtml(state.cupPicks)}
     <div class="btn-row">
       <button class="btn btn-primary" type="button" data-action="goto-draft" ${ready ? "" : "disabled"}>${t("cup.start")}</button>
     </div>`;
@@ -1417,7 +1563,10 @@ function renderDraft() {
   const allyCells = state.placement
     .map((pid, idx) => {
       const lane = idx < 3 ? (tr ? "ön" : "F") : (tr ? "arka" : "B");
-      const filled = pid ? `<img src="${bust(pid)}" alt="" onerror="this.src='${DAY1_BUSTS.n1}'" />` : `<span class="cell-lane">${lane}</span>`;
+      const src = pid ? goldBust(pid) : "";
+      const filled = pid
+        ? `<img src="${src}" alt="" onerror="this.src='${DAY1_BUSTS.n1}'" />`
+        : `<span class="cell-lane">${lane}</span>`;
       return `<button class="cell ${pid ? "filled" : ""} ${idx < 3 ? "lane-front" : "lane-back"}" type="button" data-action="place-cell" data-idx="${idx}">${filled}</button>`;
     })
     .join("");
@@ -1430,15 +1579,19 @@ function renderDraft() {
         return `<div class="cell enemy ${idx < 3 ? "lane-front" : "lane-back"}"><span class="cell-lane">${lane}</span></div>`;
       }
       const unit = bot.units.find((u) => u.id === botId);
-      return `<div class="cell enemy filled ${idx < 3 ? "lane-front" : "lane-back"}"><img src="${bust(unit.mirrorOf)}" alt="" /></div>`;
+      const mid = unit.mirrorOf;
+      const src = goldBust(mid);
+      return `<div class="cell enemy filled ${idx < 3 ? "lane-front" : "lane-back"}"><img src="${src}" alt="" onerror="this.src='${DAY1_BUSTS.n1}'" /></div>`;
     })
     .join("");
   const bench = state.cupPicks
     .map((id) => {
       const placed = state.placement.includes(id);
       const role = neighborById(id)?.role || "";
+      const tag = neighborById(id)?.synergyTag || "";
+      const src = goldBust(id);
       return `<button class="bench-unit ${placed ? "placed" : ""} ${state.selectedBench === id ? "selected" : ""}" type="button" data-action="select-bench" data-id="${id}" ${placed ? "disabled" : ""}>
-        <img src="${bust(id)}" alt="" onerror="this.src='${DAY1_BUSTS.n1}'" /><span class="bench-role">${role}</span></button>`;
+        <img src="${src}" alt="" onerror="this.src='${DAY1_BUSTS.n1}'" /><span class="bench-role">${role} · ${tag}</span></button>`;
     })
     .join("");
   const placedCount = state.placement.filter(Boolean).length;
@@ -1453,12 +1606,19 @@ function renderDraft() {
         ? `Ön ${frontCount} · Arka ${backCount}${frontCount === placedCount && placedCount > 1 ? " ⚠ hep ön" : ""}`
         : `Front ${frontCount} · Back ${backCount}${frontCount === placedCount && placedCount > 1 ? " ⚠ all-front" : ""}`;
   const screen = document.getElementById("screen-draft");
+  const liveSyn = activeSynergies(state.cupPicks.map((id) => neighborById(id)?.synergyTag).filter(Boolean));
+  const liveSynLine = liveSyn.length
+    ? liveSyn.map((s) => loc(s.name)).join(" · ")
+    : tr
+      ? "Sinerji yok — Tea/Rivalry/Neon etiketlerini eşleştir"
+      : "No synergy — match Tea / Rivalry / Neon tags";
   screen.innerHTML = `
     ${hudHtml()}
     <div class="topbar"><h2>${t("draft.title")}</h2>
       <button class="btn btn-secondary" type="button" data-action="goto-cup">${t("common.back")}</button>
     </div>
     <p class="street-hint">${t("draft.hint")} · ${formHint}</p>
+    <p class="syn-live">${liveSynLine}</p>
     <div class="placement-board">
       <div><div class="grid-label">${tr ? "Sen (ön→arka)" : "You (front→back)"}</div><div class="grid-side ally-side">${allyCells}</div></div>
       <div><div class="grid-label">${loc(bot.label)}</div><div class="grid-side enemy-side">${enemyHtml}</div></div>
@@ -1605,6 +1765,17 @@ function pickEnemyLineup(allyIds) {
 
 function startFight() {
   if (state.fightTimer) clearInterval(state.fightTimer);
+  const prac = state.practiceMode ? Combat.practiceSetup(state.combatPack) : null;
+  if (prac && !state.save.storyFlags?.practice_cup_done) {
+    // Scripted practice lineup: Orhan + Cem front, Merve back
+    const placement = Array(6).fill(null);
+    for (const row of prac.playerLineup || []) {
+      placement[Combat.cellToSlot(row.cell)] = row.neighborId;
+    }
+    state.placement = placement;
+    state.cupPicks = (prac.playerLineup || []).map((r) => r.neighborId);
+    state.enemyLineup = (prac.enemyLineup || []).map((r) => r.botId);
+  }
   const allyIds = state.placement.filter(Boolean);
   const bot = state.content.botCupRoster;
   const placedSlots = state.placement
@@ -1614,10 +1785,13 @@ function startFight() {
   // Practice Cup bots fight harder; all-front placement gets punished harder
   let mult = (state.botMult || 1) * (isCupNight() ? 1 : 1.18);
   if (allFront) mult *= 1.28;
+  if (prac) mult *= 0.92; // teachable win bias
   const enemyIds = state.enemyLineup?.length ? state.enemyLineup : pickEnemyLineup(allyIds);
   state.enemyLineup = enemyIds;
   // Match draft board: bots sit front/front/back (slots 0,1,3)
-  const enemySlots = [0, 1, 3];
+  const enemySlots = prac
+    ? (prac.enemyLineup || []).map((r) => Combat.cellToSlot(r.cell))
+    : [0, 1, 3];
   const enemies = enemyIds.map((id, i) => makeBotFighter(bot.units.find((x) => x.id === id), enemySlots[i] ?? i, mult));
   // Preserve placement slots on fighters
   const allies = state.placement
@@ -1638,6 +1812,9 @@ function startFight() {
     focusTargetSlot: null,
     allFront,
     propReady: true,
+    practice: !!prac,
+    scripted: prac?.scriptedMoments ? [...prac.scriptedMoments] : [],
+    scriptedDone: new Set(),
   };
   if (allFront) {
     battle.log.unshift(state.locale === "tr" ? "Bot: hep ön sıra cezası!" : "Bot: all-front punish!");
@@ -1668,6 +1845,7 @@ function resumeFightLoop(battle) {
     combatAcc += uiMs;
     while (combatAcc >= tickMs) {
       combatAcc -= tickMs;
+      runScriptedMoments(battle);
       combatTick(battle);
     }
     battle.floaters = (battle.floaters || []).filter((f) => battle.elapsed - f.t < 0.85);
@@ -1678,24 +1856,117 @@ function resumeFightLoop(battle) {
   }, uiMs);
 }
 
+function runScriptedMoments(battle) {
+  if (!battle.scripted?.length) return;
+  for (const beat of battle.scripted) {
+    if (battle.scriptedDone.has(beat.id)) continue;
+    if (battle.elapsed < (beat.tSec || 0)) continue;
+    battle.scriptedDone.add(beat.id);
+    if (beat.type === "coach_line" || beat.type === "coach_tip" || beat.type === "synergy_badge_pulse") {
+      if (beat.condition === "syn_tea_circle_not_active" && battle.allySyn.some((s) => s.id === "syn_tea_circle")) continue;
+      showSynProc(loc(beat.lines));
+      battle.log.unshift(loc(beat.lines));
+      if (beat.cameraShakeId) stageShake(Combat.shakeClass(state.combatPack?.juiceHints, beat.cameraShakeId));
+    } else if (beat.type === "forced_hit") {
+      const u = battle.allies.find((a) => a.id === beat.targetNeighborId || a.mirrorOf === beat.targetNeighborId);
+      if (u && u.alive) {
+        const dmg = Math.max(1, Math.floor(u.maxHp * (beat.damagePercentMaxHp || 0.18)));
+        u.hp = Math.max(1, u.hp - dmg);
+        battle.floaters.push({ side: u.side, slot: u.slot, dmg, t: battle.elapsed });
+        stageShake("shake");
+      }
+    } else if (beat.type === "force_ally_hp_then_synergy_pop") {
+      const u = battle.allies.find((a) => a.id === beat.targetNeighborId || a.mirrorOf === beat.targetNeighborId);
+      if (u && u.alive) {
+        u.hp = Math.max(1, Math.floor(u.maxHp * (beat.setHpPercent || 0.32)));
+        showSynProc(loc(beat.lines));
+        battle.floaters.push({ side: u.side, slot: u.slot, dmg: 9, rivalry: true, t: battle.elapsed });
+        stageShake("shake-medium");
+      }
+    } else if (beat.type === "porch_call" && !battle.actionUsed) {
+      battle.actionOffered = true;
+      battle.paused = true;
+      updateFightUI(battle);
+      showFightActions(battle);
+    }
+  }
+}
+
 function showFightActions(battle) {
   const bar = document.getElementById("fight-actions");
   if (!bar) return;
   const tr = state.locale === "tr";
-  const foes = battle.enemies.filter((u) => u.alive);
-  const focusBtns = foes
-    .map(
-      (u) =>
-        `<button class="btn btn-ember" type="button" data-action="fight-focus" data-slot="${u.slot}">${tr ? "Hedef" : "Focus"} ${u.name}</button>`
-    )
-    .join("");
+  const synIds = (battle.allySyn || []).map((s) => s.id);
+  const opts =
+    Combat.pickPorchCallOptions(state.combatPack, synIds, state.practiceMode) ||
+    [];
+  if (!opts.length) {
+    // Legacy fallback
+    const foes = battle.enemies.filter((u) => u.alive);
+    bar.innerHTML = `
+      <p class="fight-action-prompt">${tr ? "Porch hamlesi — birini seç" : "Porch call — pick one"}</p>
+      <div class="btn-row wrap">
+        ${foes.map((u) => `<button class="btn btn-ember" type="button" data-action="fight-focus" data-slot="${u.slot}">${tr ? "Hedef" : "Focus"} ${u.name}</button>`).join("")}
+        <button class="btn btn-teal" type="button" data-action="fight-prop">${tr ? "Prop: demlik heal" : "Prop: teapot heal"}</button>
+        <button class="btn btn-secondary" type="button" data-action="fight-swap">${tr ? "Ön↔Arka swap" : "Front↔Back swap"}</button>
+      </div>`;
+    bar.hidden = false;
+    return;
+  }
+  battle.porchCallOptions = opts;
+  const stage = document.querySelector("#screen-fight.active .fight-stage, #screen-fight.active .rp-stage");
+  if (stage) stage.classList.add("porch-call-dim");
   bar.innerHTML = `
     <p class="fight-action-prompt">${tr ? "Porch hamlesi — birini seç" : "Porch call — pick one"}</p>
-    <div class="btn-row wrap">${focusBtns}
-      <button class="btn btn-teal" type="button" data-action="fight-prop">${tr ? "Prop: demlik heal" : "Prop: teapot heal"}</button>
-      <button class="btn btn-secondary" type="button" data-action="fight-swap">${tr ? "Ön↔Arka swap" : "Front↔Back swap"}</button>
+    <div class="btn-row wrap porch-call-row">
+      ${opts
+        .map(
+          (o) =>
+            `<button class="btn ${o.category === "safe" ? "btn-teal" : o.category === "swingy" ? "btn-ember" : "btn-primary"}" type="button" data-action="porch-call" data-id="${o.id}" title="${loc(o.blurb)}">${loc(o.label)}</button>`
+        )
+        .join("")}
     </div>`;
   bar.hidden = false;
+  // Timeout → default cheer
+  const pause = state.combatPack?.porchCalls?.window?.pauseSec || 2.2;
+  clearTimeout(battle._porchTimeout);
+  battle._porchTimeout = setTimeout(() => {
+    if (battle.actionUsed || battle.finished) return;
+    const defId = state.combatPack?.porchCalls?.window?.timeoutDefaultCallId || "call_cheer";
+    const opt = opts.find((o) => o.id === defId) || opts[0];
+    if (opt) applyPorchCall(opt.id);
+  }, Math.max(2200, pause * 1000));
+}
+
+function applyPorchCall(callId) {
+  const battle = state.battle;
+  if (!battle || battle.actionUsed) return;
+  clearTimeout(battle._porchTimeout);
+  const opt =
+    (battle.porchCallOptions || []).find((o) => o.id === callId) ||
+    state.combatPack?.porchCalls?.options?.find((o) => o.id === callId);
+  if (!opt) return;
+  const label = Combat.applyPorchCallEffect(battle, opt, loc);
+  battle.log.unshift(label);
+  toast(label);
+  if (opt.id === "call_tea_break" || opt.id === "call_oven_warm") playTeapotClink();
+  showSynProc(label);
+  stageShake(Combat.shakeClass(state.combatPack?.juiceHints, opt.cameraShakeId) || "shake-medium");
+  battle.actionUsed = true;
+  battle.paused = false;
+  const stage = document.querySelector("#screen-fight.active .fight-stage, #screen-fight.active .rp-stage");
+  if (stage) stage.classList.remove("porch-call-dim");
+  hideFightActions();
+  updateFightUI(battle);
+  resumeFightLoop(battle);
+}
+
+function stageShake(cls = "shake") {
+  const stage = document.querySelector("#screen-fight.active .fight-stage") || document.querySelector("#screen-fight.active .rp-stage");
+  if (!stage) return;
+  stage.classList.remove("shake", "shake-medium", "shake-heavy");
+  void stage.offsetWidth;
+  stage.classList.add(cls || "shake");
 }
 
 function applyFightFocus(slot) {
@@ -1720,8 +1991,12 @@ function applyFightProp() {
   if (hurt) {
     const heal = Math.max(12, Math.floor(hurt.maxHp * 0.22));
     hurt.hp = Math.min(hurt.maxHp, hurt.hp + heal);
+    battle.floaters = battle.floaters || [];
+    battle.floaters.push({ side: hurt.side, slot: hurt.slot, heal, t: battle.elapsed });
     const msg = state.locale === "tr" ? `Demlik +${heal} → ${hurt.name}` : `Teapot +${heal} → ${hurt.name}`;
     battle.log.unshift(msg);
+    showSynProc(state.locale === "tr" ? "Demlik" : "Teapot");
+    playTeapotClink();
     toast(msg);
   }
   battle.actionUsed = true;
@@ -1784,14 +2059,46 @@ function combatTick(battle) {
 
     const syns = attacker.side === "ally" ? battle.enemySyn : battle.allySyn;
     const neon = syns.find((s) => s.rules.type === "opening_dodge");
-    if (neon && battle.elapsed <= neon.rules.windowSec && Math.random() < neon.rules.dodgeChance) continue;
+    if (neon && battle.elapsed <= neon.rules.windowSec && Math.random() < neon.rules.dodgeChance) {
+      if (attacker.side === "enemy") showSynProc(loc(neon.name));
+      battle.floaters = battle.floaters || [];
+      battle.floaters.push({
+        side: target.side,
+        slot: target.slot,
+        dodge: true,
+        t: battle.elapsed,
+      });
+      battle.log.unshift(`${loc(neon.name)} dodge`);
+      continue;
+    }
 
-    let dmg = Math.max(1, attacker.atk - Math.floor(target.def * 0.45));
+    // Porch-call dodge buff
+    if (attacker.side === "enemy" && battle.dodgeBuffUntil && battle.elapsed <= battle.dodgeBuffUntil) {
+      if (Math.random() < (battle.dodgeBuffChance || 0.15)) {
+        battle.floaters = battle.floaters || [];
+        battle.floaters.push({ side: target.side, slot: target.slot, dodge: true, t: battle.elapsed });
+        continue;
+      }
+    }
+    let atk = attacker.atk;
+    if (attacker.side === "ally" && battle.atkBuffUntil && battle.elapsed <= battle.atkBuffUntil) {
+      atk = Math.floor(atk * (1 + (battle.atkBuffPct || 0.12)));
+    }
+    let def = target.def;
+    if (target.side === "ally" && battle.defBuffUntil && battle.elapsed <= battle.defBuffUntil) {
+      def = Math.floor(def * (1 + (battle.defBuffPct || 0.2)));
+    }
+    let dmg = Math.max(1, atk - Math.floor(def * 0.45));
     if (attacker.side === "enemy" && battle.allFront && target.slot < 3) dmg = Math.floor(dmg * 1.2);
+    if (attacker.side === "ally" && battle.focusUntil && battle.elapsed <= battle.focusUntil && target.slot === battle.focusTargetSlot) {
+      dmg = Math.floor(dmg * (1 + (battle.focusDmgBonus || 0.2)));
+    }
     const selfSyn = attacker.side === "ally" ? battle.allySyn : battle.enemySyn;
     const rivalry = selfSyn.find((s) => s.rules.type === "low_hp_damage_buff");
+    let rivalryProc = false;
     if (rivalry && attacker.hp / attacker.maxHp <= rivalry.rules.hpThresholdPercent) {
       dmg = Math.floor(dmg * (1 + rivalry.rules.damageBonusPercent));
+      rivalryProc = attacker.side === "ally";
     }
     const fence = selfSyn.find((s) => s.rules.type === "team_def_buff");
     if (fence) dmg = Math.max(1, Math.floor(dmg * (1 - (fence.rules.defBonusPercent || 0) * 0.5)));
@@ -1799,13 +2106,18 @@ function combatTick(battle) {
     if (chaos && Math.random() < chaos.rules.critChance) dmg = Math.floor(dmg * (chaos.rules.critMult || 1.5));
 
     if (attacker.role === "AoE" || /AoE|Burst/i.test(attacker.role || "")) {
-      for (const f of foes) applyDamage(f, f === target ? dmg : Math.max(1, Math.floor(dmg * 0.35)), attacker, battle);
-    } else applyDamage(target, dmg, attacker, battle);
+      for (const f of foes) applyDamage(f, f === target ? dmg : Math.max(1, Math.floor(dmg * 0.35)), attacker, battle, rivalryProc && f === target);
+    } else applyDamage(target, dmg, attacker, battle, rivalryProc);
 
     if (/Healer|heal/i.test(attacker.role || "") || attacker.synergyTag === "Oven") {
       const friends = attacker.side === "ally" ? battle.allies : battle.enemies;
       const hurt = friends.filter((u) => u.alive && u.hp < u.maxHp).sort((a, b) => a.hp - b.hp)[0];
-      if (hurt) hurt.hp = Math.min(hurt.maxHp, hurt.hp + Math.max(2, Math.floor(attacker.atk * 0.6)));
+      if (hurt) {
+        const amt = Math.max(2, Math.floor(attacker.atk * 0.6));
+        hurt.hp = Math.min(hurt.maxHp, hurt.hp + amt);
+        battle.floaters = battle.floaters || [];
+        battle.floaters.push({ side: hurt.side, slot: hurt.slot, heal: amt, t: battle.elapsed });
+      }
     }
     flashUnit(target.side, target.slot);
   }
@@ -1816,28 +2128,60 @@ function combatTick(battle) {
       const interval = tea.rules.intervalSec || 4;
       if (Math.floor(battle.elapsed / interval) !== Math.floor((battle.elapsed - 0.4) / interval)) {
         const units = side === "ally" ? battle.allies : battle.enemies;
+        let healed = 0;
         for (const u of units) {
           if (!u.alive) continue;
-          u.hp = Math.min(u.maxHp, u.hp + Math.floor(u.maxHp * tea.rules.healPercentMaxHp));
+          const amt = Math.max(1, Math.floor(u.maxHp * tea.rules.healPercentMaxHp));
+          u.hp = Math.min(u.maxHp, u.hp + amt);
+          battle.floaters = battle.floaters || [];
+          battle.floaters.push({ side: u.side, slot: u.slot, heal: amt, t: battle.elapsed });
+          healed += amt;
+        }
+        if (healed && side === "ally") {
+          battle.log.unshift(`${loc(tea.name)} +${healed}`);
+          showSynProc(loc(tea.name));
         }
       }
     }
   }
 }
 
-function applyDamage(target, dmg, attacker, battle) {
+function showSynProc(text) {
+  const stage = document.querySelector("#screen-fight.active .fight-stage");
+  if (!stage) return;
+  let node = stage.querySelector(".syn-proc");
+  if (!node) {
+    node = document.createElement("div");
+    node.className = "syn-proc";
+    stage.appendChild(node);
+  }
+  node.textContent = text;
+  node.classList.remove("pop");
+  void node.offsetWidth;
+  node.classList.add("pop");
+}
+
+function applyDamage(target, dmg, attacker, battle, rivalryProc = false) {
   target.hp -= dmg;
   attacker.damageDealt += dmg;
   if (battle) {
     battle.floaters = battle.floaters || [];
-    battle.floaters.push({ side: target.side, slot: target.slot, dmg, t: battle.elapsed });
+    battle.floaters.push({ side: target.side, slot: target.slot, dmg, rivalry: rivalryProc, t: battle.elapsed });
     battle.log = battle.log || [];
-    battle.log.unshift(`${attacker.name} → ${target.name} −${dmg}`);
+    if (rivalryProc) {
+      const rivalry = (attacker.side === "ally" ? battle.allySyn : battle.enemySyn).find((s) => s.rules.type === "low_hp_damage_buff");
+      if (rivalry) {
+        showSynProc(loc(rivalry.name));
+        stageShake("shake-medium");
+      }
+    }
+    battle.log.unshift(`${attacker.name} → ${target.name} −${dmg}${rivalryProc ? "!" : ""}`);
     battle.log = battle.log.slice(0, 4);
   }
   if (target.hp <= 0) {
     target.hp = 0;
     target.alive = false;
+    stageShake("shake-heavy");
   }
 }
 function flashUnit(side, slot) {
@@ -1846,6 +2190,7 @@ function flashUnit(side, slot) {
   node.classList.remove("hit");
   void node.offsetWidth;
   node.classList.add("hit");
+  stageShake("shake");
 }
 
 function renderFight(battle) {
@@ -1853,15 +2198,33 @@ function renderFight(battle) {
   const enemyPills = battle.enemySyn.map((s) => `<span class="chip ${s.tagsRequired[0].toLowerCase()}">Bot · ${loc(s.name)}</span>`).join("");
   const synPills = allyPills || enemyPills ? allyPills + enemyPills : `<span class="muted">${t("synergy.active")}: —</span>`;
   const tr = state.locale === "tr";
+  state.save.storyFlags = state.save.storyFlags || {};
+  for (const s of battle.allySyn) {
+    state.save.storyFlags[`syn_taught_${s.id}`] = true;
+  }
+  if (battle.allySyn.length) state.save.storyFlags.synergy_school_seen = true;
+  saveNow();
+  const teachLine = (s) => {
+    if (s.id === "syn_rivalry") return tr ? "Rekabet! Düşük HP → sert vuruş" : "Rivalry! Low HP → harder hits";
+    if (s.id === "syn_tea_circle") return tr ? "Çay Çemberi — heal aura" : "Tea Circle — heal aura";
+    if (s.id === "syn_neon_night") return tr ? "Neon Gece — 8 sn dodge penceresi" : "Neon Night — 8s dodge window";
+    return loc(s.name);
+  };
+  const coachBanner = battle.allySyn.length
+    ? `<div class="syn-fight-tip">${battle.allySyn.map(teachLine).join(" · ")}</div>`
+    : `<div class="syn-fight-tip soft">${tr ? "Sinerji yok — Cup'ta Tea/Rivalry/Neon eşleştir" : "No synergy — match Tea/Rivalry/Neon in Cup"}</div>`;
   const screen = document.getElementById("screen-fight");
   screen.innerHTML = `
-    <div class="topbar"><h2>${t("fight.title")}</h2>
+    ${stageLayer("arena")}
+    ${hudHtml()}
+    <div class="topbar fight-top"><h2>${t("fight.title")}</h2>
       <button class="btn btn-secondary" type="button" data-action="skip-fight">${t("fight.skip")}</button>
     </div>
+    ${coachBanner}
     <div class="fight-hud" style="margin-bottom:0.35rem">
       <span id="ally-hp-total" class="hud-ally"></span><span id="fight-timer">0.0s</span><span id="enemy-hp-total" class="hud-enemy"></span>
     </div>
-    <div class="fight-stage clay-stage" style="background-image:${stageBg(ART.arenaStage, ART.arenaStageFallback)}">
+    <div class="fight-stage fight-stage-glass">
       <div class="fight-side-label enemy-label">${tr ? "Rakip" : "Rival"}</div>
       <div class="fight-lane-label">${tr ? "ön" : "front"}</div>
       <div class="fight-row front" id="enemy-front"></div>
@@ -1879,17 +2242,26 @@ function renderFight(battle) {
     <p class="fight-log muted" id="fight-log"></p>`;
   screen._battle = battle;
   updateFightUI(battle);
+  if (battle.allySyn[0]) {
+    setTimeout(() => showSynProc(loc(battle.allySyn[0].name)), 400);
+  }
 }
 
 function unitCard(u, side, floaters = []) {
   const pct = Math.max(0, Math.round((u.hp / u.maxHp) * 100));
   const floater = floaters
     .filter((f) => f.side === side && f.slot === u.slot)
-    .map((f) => `<span class="dmg-floater">−${f.dmg}</span>`)
+    .map((f) => {
+      if (f.heal) return `<span class="heal-floater">+${f.heal}</span>`;
+      if (f.dodge) return `<span class="dodge-floater">${state.locale === "tr" ? "kaç!" : "dodge"}</span>`;
+      if (f.rivalry) return `<span class="dmg-floater rivalry-floater">−${f.dmg}!</span>`;
+      return `<span class="dmg-floater">−${f.dmg}</span>`;
+    })
     .join("");
+  const face = goldBust(u.mirrorOf || u.id);
   return `<div class="unit-slot ${side === "enemy" ? "enemy" : "ally"} ${u.alive ? "" : "dead"}" data-side="${side}" data-slot="${u.slot}">
     <div class="unit-name">${u.name}</div>
-    <img src="${bust(u.mirrorOf || u.id)}" alt="${u.name}" onerror="this.src='${DAY1_BUSTS.n1}'" />
+    <img src="${face}" alt="${u.name}" onerror="this.src='${DAY1_BUSTS.n1}'" />
     <div class="hp-track"><div class="hp-fill" style="width:${pct}%"></div></div>
     <div class="hp-num">${Math.max(0, Math.round(u.hp))}/${u.maxHp}</div>
     ${floater}
@@ -1982,6 +2354,17 @@ function endFight(battle) {
   emitQuestEvent({ type: "cup_finish", won });
   if (syn) emitQuestEvent({ type: "cup_synergy", synergy: syn.id || syn.name });
   saveNow();
+  if (won) playWinSting();
+  if (state.practiceMode) {
+    state.save.storyFlags = state.save.storyFlags || {};
+    state.save.storyFlags.practice_cup_done = true;
+    for (const s of battle.allySyn || []) state.save.storyFlags[`syn_taught_${s.id}`] = true;
+    saveNow();
+  }
+  if (state.lastResult.porchCallComic) {
+    /* comic uses synergy/mvp; porch call stored for share */
+    state.lastResult.porchCall = battle.porchCallId;
+  }
   renderComic();
   showScreen("screen-comic");
 }
@@ -2545,6 +2928,7 @@ function onAction(action, target) {
       if (rewards) {
         const def = Quests.questDef(state.questPack, target.dataset.id);
         toast((state.locale === "tr" ? "Görev bitti · " : "Quest complete · ") + loc(def?.title));
+        playWinSting();
         saveNow();
         if (document.getElementById("screen-evening")?.classList.contains("active")) renderEvening();
         else if (document.getElementById("screen-quests")?.classList.contains("active")) renderQuestLog();
@@ -2604,6 +2988,17 @@ function onAction(action, target) {
     case "fight-swap":
       applyFightSwap();
       break;
+    case "porch-call":
+      applyPorchCall(target.dataset.id);
+      break;
+    case "syn-show-me": {
+      const teach = Combat.nextLobbyTeach(state.combatPack, state.save.storyFlags || {});
+      const picks = teach?.autoPickFallback || ["n2", "n4", "n1"];
+      state.cupPicks = picks.slice(0, state.pickCount);
+      toast(state.locale === "tr" ? "Örnek kadro kuruldu" : "Sample roster set");
+      renderCupLobby();
+      break;
+    }
     case "share-copy":
       copyShare(decodeURIComponent(target.dataset.text || ""));
       break;
@@ -2619,8 +3014,10 @@ function onAction(action, target) {
 }
 
 el.app.addEventListener("click", (e) => {
+  unlockAudio();
   const target = e.target.closest("[data-action]");
   if (!target) return;
+  playUiTap();
   onAction(target.dataset.action, target);
 });
 
@@ -2643,13 +3040,14 @@ async function tryPullStorePacks() {
 
 async function boot() {
   try {
-    const [content, economy, stories, ladder, depthMeta, questPack] = await Promise.all([
+    const [content, economy, stories, ladder, depthMeta, questPack, combatPack] = await Promise.all([
       fetch("data/content.json").then((r) => r.json()),
       fetch("data/economy.json").then((r) => r.json()),
       fetch("data/stories.json").then((r) => r.json()),
       fetch("data/ladder.json").then((r) => r.json()),
       fetch("data/depth-meta.json").then((r) => r.json()),
       loadQuestPack(),
+      fetch("data/combat-pack.json").then((r) => (r.ok ? r.json() : null)).catch(() => null),
     ]);
     state.content = content;
     state.economy = economy;
@@ -2657,6 +3055,8 @@ async function boot() {
     state.ladder = ladder;
     state.depthMeta = depthMeta;
     state.questPack = questPack;
+    state.combatPack = combatPack;
+    if (combatPack) Combat.applySynergyPools(state.content, combatPack);
     // Merge economy uiStrings over content placeholders for shop/pass
     state.content.uiStrings = { ...state.content.uiStrings, ...economy.uiStrings };
     const hadSave = !!localStorage.getItem("rivalPorch.save.v4");
@@ -2674,6 +3074,7 @@ async function boot() {
     buildShell();
     document.documentElement.lang = state.locale;
     document.title = t("app.title");
+    preloadSfx().catch(() => {});
     renderTitle();
     showScreen("screen-title");
   } catch (err) {

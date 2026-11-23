@@ -1,0 +1,792 @@
+{
+  "schemaVersion": 1,
+  "id": "rival-porch-combat-pack",
+  "sliceId": "rival-porch-day1",
+  "localeDefault": "tr",
+  "designedFor": "cult-TFT-lite mobile Cup — synergy teach, Porch-call agency, juice, bot AI",
+  "sourceDocs": [
+    "docs/rival-porch-gdd-slice.md",
+    "docs/rival-porch-combat-juice.md",
+    "docs/rival-porch-playtest-score.md"
+  ],
+  "synergyTagPools": [
+    {
+      "synergyId": "syn_tea_circle",
+      "name": { "tr": "Çay Çemberi", "en": "Tea Circle" },
+      "tagsThatCount": ["Tea", "Oven"],
+      "neighborIds": ["n1", "n6"],
+      "minCount": 2,
+      "rules": {
+        "type": "periodic_heal_aura",
+        "intervalSec": 4,
+        "healPercentMaxHp": 0.04,
+        "radius": "allied_grid"
+      },
+      "teachOrder": 2,
+      "vfxId": "vfx_tea_steam_ring",
+      "sfxId": "sfx_demlik_pour"
+    },
+    {
+      "synergyId": "syn_rivalry",
+      "name": { "tr": "Rekabet", "en": "Rivalry" },
+      "tagsThatCount": ["Rivalry", "Chaos", "Fence"],
+      "neighborIds": ["n2", "n3", "n4"],
+      "minCount": 2,
+      "rules": {
+        "type": "low_hp_damage_buff",
+        "hpThresholdPercent": 0.35,
+        "damageBonusPercent": 0.25
+      },
+      "teachOrder": 1,
+      "vfxId": "vfx_rivalry_ember",
+      "sfxId": "sfx_whistle_sharp"
+    },
+    {
+      "synergyId": "syn_neon_night",
+      "name": { "tr": "Neon Gece", "en": "Neon Night" },
+      "tagsThatCount": ["Neon", "Chaos"],
+      "neighborIds": ["n5", "n3"],
+      "minCount": 2,
+      "rules": {
+        "type": "opening_dodge",
+        "windowSec": 8,
+        "dodgeChance": 0.2
+      },
+      "teachOrder": 3,
+      "vfxId": "vfx_neon_edge_flicker",
+      "sfxId": "sfx_neon_buzz"
+    }
+  ],
+  "dualTagPivot": {
+    "neighborId": "n3",
+    "note": {
+      "tr": "Leyla (Chaos) hem Rekabet hem Neon Gece'ye sayılır — mastery kancası.",
+      "en": "Leyla (Chaos) counts for both Rivalry and Neon Night — the mastery hook."
+    }
+  },
+  "synergyTeachBeats": [
+    {
+      "id": "teach_rivalry_lobby",
+      "synergyId": "syn_rivalry",
+      "phase": "lobby",
+      "gate": "first_cup_or_practice",
+      "spotlightNeighborIds": ["n2", "n3", "n4"],
+      "coachSpeakerId": "n2",
+      "requireSynergyToReady": true,
+      "autoPickFallback": ["n2", "n4", "n1"],
+      "lines": {
+        "tr": "İki Rekabet / Kaos / Çit etiketi yan yana = Rekabet. Canın azalınca vuruş sertleşir. Cem + Orhan ile dene.",
+        "en": "Two Rivalry / Chaos / Fence tags = Rivalry. When HP dips, hits hit harder. Try Cem + Orhan."
+      },
+      "confirmLabel": {
+        "tr": "Rekabeti kurdum",
+        "en": "I formed Rivalry"
+      },
+      "showMeLabel": {
+        "tr": "Göster",
+        "en": "Show me"
+      }
+    },
+    {
+      "id": "teach_rivalry_fight_pop",
+      "synergyId": "syn_rivalry",
+      "phase": "fight",
+      "trigger": "first_ally_under_hp_threshold_with_synergy",
+      "durationMs": 1400,
+      "blocking": false,
+      "lines": {
+        "tr": "Rekabet! Düşük HP → daha sert vuruş",
+        "en": "Rivalry! Low HP → harder hits"
+      },
+      "vfxId": "vfx_rivalry_ember",
+      "cameraShakeId": "shake_medium"
+    },
+    {
+      "id": "teach_tea_lobby",
+      "synergyId": "syn_tea_circle",
+      "phase": "lobby",
+      "gate": "after_rivalry_taught",
+      "spotlightNeighborIds": ["n1", "n6"],
+      "coachSpeakerId": "n1",
+      "requireSynergyToReady": true,
+      "autoPickFallback": ["n1", "n6", "n4"],
+      "lines": {
+        "tr": "Çay + Fırın = Çay Çemberi. Her 4 saniyede mahalle yudumlar — heal aura.",
+        "en": "Tea + Oven = Tea Circle. Every 4s the porch sips — heal aura."
+      },
+      "confirmLabel": {
+        "tr": "Çemberi kurdum",
+        "en": "I formed Tea Circle"
+      },
+      "showMeLabel": {
+        "tr": "Göster",
+        "en": "Show me"
+      }
+    },
+    {
+      "id": "teach_tea_fight_pop",
+      "synergyId": "syn_tea_circle",
+      "phase": "fight",
+      "trigger": "first_heal_tick",
+      "durationMs": 1400,
+      "blocking": false,
+      "lines": {
+        "tr": "Çay Çemberi — bir yudum HP",
+        "en": "Tea Circle — a sip of HP"
+      },
+      "vfxId": "vfx_tea_steam_ring",
+      "cameraShakeId": "shake_none"
+    },
+    {
+      "id": "teach_neon_lobby",
+      "synergyId": "syn_neon_night",
+      "phase": "lobby",
+      "gate": "after_tea_taught",
+      "spotlightNeighborIds": ["n5", "n3"],
+      "coachSpeakerId": "n5",
+      "requireSynergyToReady": true,
+      "autoPickFallback": ["n5", "n3", "n2"],
+      "lines": {
+        "tr": "Neon + Kaos = Neon Gece. İlk 8 saniye dodge şansı. Leyla pivot — dikkat.",
+        "en": "Neon + Chaos = Neon Night. Dodge chance for the first 8s. Leyla is the pivot — careful."
+      },
+      "confirmLabel": {
+        "tr": "Neon'u kurdum",
+        "en": "I formed Neon Night"
+      },
+      "showMeLabel": {
+        "tr": "Göster",
+        "en": "Show me"
+      }
+    },
+    {
+      "id": "teach_neon_fight_pop",
+      "synergyId": "syn_neon_night",
+      "phase": "fight",
+      "trigger": "fight_start_if_active",
+      "durationMs": 1400,
+      "blocking": false,
+      "lines": {
+        "tr": "Neon Gece — dodge penceresi 8 sn",
+        "en": "Neon Night — dodge window 8s"
+      },
+      "vfxId": "vfx_neon_edge_flicker",
+      "cameraShakeId": "shake_light"
+    },
+    {
+      "id": "teach_placement_role",
+      "phase": "placement",
+      "gate": "first_placement",
+      "lines": {
+        "tr": "Ön sıra darbeyi yer. Tank / Bruiser öne; Support / Healer / Glass arkaya.",
+        "en": "Front row eats hits. Tank / Bruiser front; Support / Healer / Glass back."
+      },
+      "warnIfSupportFront": {
+        "neighborRoles": ["Support buffer", "Healer"],
+        "lines": {
+          "tr": "Ön sıra tehlikeli — Merve / Can arkada daha mutlu.",
+          "en": "Front row is rough — Merve / Can are happier in back."
+        }
+      },
+      "autoPlaceOrder": {
+        "frontRoles": ["Tank", "Bruiser"],
+        "backRoles": ["Support buffer", "Healer", "Glass cannon", "AoE"]
+      }
+    }
+  ],
+  "tooltips": {
+    "synergies": {
+      "syn_tea_circle": {
+        "title": { "tr": "Çay Çemberi", "en": "Tea Circle" },
+        "body": {
+          "tr": "2+ Çay veya Fırın etiketi. Her 4 sn müttefiklere max HP'nin %4'ü heal.",
+          "en": "2+ Tea or Oven tags. Every 4s heal allies for 4% max HP."
+        },
+        "firesWhen": {
+          "tr": "Sinerji aktifken sürekli (4 sn tick).",
+          "en": "While synergy is active (4s ticks)."
+        },
+        "tagPoolLabel": {
+          "tr": "Çay · Fırın",
+          "en": "Tea · Oven"
+        }
+      },
+      "syn_rivalry": {
+        "title": { "tr": "Rekabet", "en": "Rivalry" },
+        "body": {
+          "tr": "2+ Rekabet / Kaos / Çit. HP %35 altına inince hasar +%25.",
+          "en": "2+ Rivalry / Chaos / Fence. Under 35% HP → +25% damage."
+        },
+        "firesWhen": {
+          "tr": "Bir müttefik eşik altına indiğinde.",
+          "en": "When an ally crosses under the HP threshold."
+        },
+        "tagPoolLabel": {
+          "tr": "Rekabet · Kaos · Çit",
+          "en": "Rivalry · Chaos · Fence"
+        }
+      },
+      "syn_neon_night": {
+        "title": { "tr": "Neon Gece", "en": "Neon Night" },
+        "body": {
+          "tr": "2+ Neon veya Kaos. İlk 8 sn %20 dodge şansı.",
+          "en": "2+ Neon or Chaos. 20% dodge for the first 8s."
+        },
+        "firesWhen": {
+          "tr": "Maç başı — 8 sn sonra söner.",
+          "en": "Fight start — fades after 8s."
+        },
+        "tagPoolLabel": {
+          "tr": "Neon · Kaos",
+          "en": "Neon · Chaos"
+        }
+      }
+    },
+    "roles": {
+      "Tank": {
+        "tr": "Darbeyi emer; ön sıra.",
+        "en": "Soaks hits; front row."
+      },
+      "Bruiser": {
+        "tr": "Dayanıklı vurucu; genelde ön.",
+        "en": "Sturdy hitter; usually front."
+      },
+      "Support buffer": {
+        "tr": "Takımı besler; arkada kal.",
+        "en": "Buffs the team; stay back."
+      },
+      "Healer": {
+        "tr": "HP yudumlatır; arkada kal.",
+        "en": "Sips HP onto allies; stay back."
+      },
+      "Glass cannon": {
+        "tr": "Sert vurur, çabuk düşer; arka.",
+        "en": "Hard hits, soft shell; back row."
+      },
+      "AoE": {
+        "tr": "Sıra/küme hasarı; arka.",
+        "en": "Row/cluster damage; back row."
+      }
+    },
+    "porchCall": {
+      "title": { "tr": "Veranda Çağrısı", "en": "Porch Call" },
+      "body": {
+        "tr": "Maç ortası tek seçim. Skoru sallar — seç, izle.",
+        "en": "One mid-fight choice. It swings the score — pick, then watch."
+      }
+    },
+    "practiceCup": {
+      "title": { "tr": "Prova Kupası", "en": "Practice Cup" },
+      "body": {
+        "tr": "Rekabeti öğreten kısa senaryo. Rakip ayna değil.",
+        "en": "Short script that teaches Rivalry. Enemy is not a mirror."
+      }
+    }
+  },
+  "porchCalls": {
+    "window": {
+      "id": "porch_call_window",
+      "triggerPriority": [
+        "fight_time_percent_gte_0.45",
+        "first_ally_hp_percent_lte_0.5"
+      ],
+      "pauseSec": 2.2,
+      "timeoutDefaultCallId": "call_cheer",
+      "optionsShown": 3,
+      "ui": {
+        "dimStage": true,
+        "lampRim": true,
+        "letterboxPulse": true
+      }
+    },
+    "options": [
+      {
+        "id": "call_cheer",
+        "category": "safe",
+        "label": { "tr": "Alkış / Moral", "en": "Cheer" },
+        "blurb": {
+          "tr": "Herkese kısa ATK buff.",
+          "en": "Short ATK buff for all allies."
+        },
+        "effect": {
+          "type": "ally_atk_buff",
+          "durationSec": 6,
+          "atkBonusPercent": 0.12,
+          "teamHpSwingHintPercent": 0.08
+        },
+        "vfxId": "vfx_call_cheer",
+        "cameraShakeId": "shake_light",
+        "comicHint": {
+          "tr": "Veranda alkışladı — tempo yükseldi.",
+          "en": "The porch cheered — tempo rose."
+        },
+        "lean": null
+      },
+      {
+        "id": "call_focus_fire",
+        "category": "swingy",
+        "label": { "tr": "Hedef göster", "en": "Focus fire" },
+        "blurb": {
+          "tr": "En yüksek ATK'lı düşmanı 6 sn işaretle.",
+          "en": "Mark the highest-ATK enemy for 6s."
+        },
+        "effect": {
+          "type": "mark_enemy_focus",
+          "durationSec": 6,
+          "targetRule": "enemy_highest_atk",
+          "damageTakenBonusPercent": 0.2,
+          "teamHpSwingHintPercent": 0.14
+        },
+        "vfxId": "vfx_call_focus",
+        "cameraShakeId": "shake_medium",
+        "comicHint": {
+          "tr": "Parmak uzandı — hedef netleşti.",
+          "en": "A finger pointed — the target locked."
+        },
+        "lean": null
+      },
+      {
+        "id": "call_tea_break",
+        "category": "synergy_leaning",
+        "lean": "syn_tea_circle",
+        "label": { "tr": "Çay molası", "en": "Tea break" },
+        "blurb": {
+          "tr": "En düşük HP'li müttefike anında heal.",
+          "en": "Instant heal on lowest-HP ally."
+        },
+        "effect": {
+          "type": "instant_heal_lowest_ally",
+          "healPercentMaxHp": 0.22,
+          "teamHpSwingHintPercent": 0.12
+        },
+        "vfxId": "vfx_call_tea",
+        "cameraShakeId": "shake_light",
+        "comicHint": {
+          "tr": "Demlik eğildi — bir yudum yetişti.",
+          "en": "The pot tipped — a sip arrived in time."
+        }
+      },
+      {
+        "id": "call_whistle_push",
+        "category": "synergy_leaning",
+        "lean": "syn_rivalry",
+        "label": { "tr": "Düdük bas", "en": "Whistle push" },
+        "blurb": {
+          "tr": "Ön sıra 5 sn hasarı üstüne çeker.",
+          "en": "Front-row ally taunts damage for 5s."
+        },
+        "effect": {
+          "type": "front_ally_taunt",
+          "durationSec": 5,
+          "damageRedirectPercent": 0.35,
+          "teamHpSwingHintPercent": 0.1
+        },
+        "vfxId": "vfx_call_whistle",
+        "cameraShakeId": "shake_medium",
+        "comicHint": {
+          "tr": "Düdük çaldı — ön sıra kilitlendi.",
+          "en": "Whistle blew — front row locked in."
+        }
+      },
+      {
+        "id": "call_neon_flash",
+        "category": "synergy_leaning",
+        "lean": "syn_neon_night",
+        "label": { "tr": "Neon flaş", "en": "Neon flash" },
+        "blurb": {
+          "tr": "4 sn dodge şansı +%15.",
+          "en": "+15% dodge chance for 4s."
+        },
+        "effect": {
+          "type": "ally_dodge_buff",
+          "durationSec": 4,
+          "dodgeChanceBonus": 0.15,
+          "teamHpSwingHintPercent": 0.11
+        },
+        "vfxId": "vfx_call_neon",
+        "cameraShakeId": "shake_light",
+        "comicHint": {
+          "tr": "Mercan neon bir kez daha kıvılcımlandı.",
+          "en": "Coral neon sparked one more time."
+        }
+      },
+      {
+        "id": "call_chaos_kite",
+        "category": "swingy",
+        "label": { "tr": "Kaos yer değiştir", "en": "Chaos kite" },
+        "blurb": {
+          "tr": "İki müttefifi anında yer değiştir.",
+          "en": "Instantly swap two allies."
+        },
+        "effect": {
+          "type": "swap_two_allies",
+          "defaultPairRule": "lowest_hp_front_with_highest_atk_back",
+          "teamHpSwingHintPercent": 0.16
+        },
+        "vfxId": "vfx_call_swap",
+        "cameraShakeId": "shake_medium",
+        "comicHint": {
+          "tr": "Uçurtma ipi gerildi — yerler değişti.",
+          "en": "Kite string pulled taut — places swapped."
+        },
+        "lean": null
+      },
+      {
+        "id": "call_hold_fence",
+        "category": "safe",
+        "label": { "tr": "Çiti tut", "en": "Hold the fence" },
+        "blurb": {
+          "tr": "Gerideyken 5 sn takım DEF buff.",
+          "en": "Team DEF buff for 5s while behind on HP."
+        },
+        "effect": {
+          "type": "ally_def_buff",
+          "durationSec": 5,
+          "defBonusPercent": 0.2,
+          "onlyIfTeamHpBehind": true,
+          "teamHpSwingHintPercent": 0.09
+        },
+        "vfxId": "vfx_call_fence",
+        "cameraShakeId": "shake_light",
+        "comicHint": {
+          "tr": "Gazete kalktı — çit dayandı.",
+          "en": "Newspaper up — the fence held."
+        },
+        "lean": null
+      },
+      {
+        "id": "call_oven_warm",
+        "category": "synergy_leaning",
+        "lean": "syn_tea_circle",
+        "label": { "tr": "Fırın sıcaklığı", "en": "Oven warm" },
+        "blurb": {
+          "tr": "Tek seferlik heal aura nabzı.",
+          "en": "One-shot heal-aura pulse."
+        },
+        "effect": {
+          "type": "heal_aura_pulse",
+          "healPercentMaxHp": 0.08,
+          "teamHpSwingHintPercent": 0.1
+        },
+        "vfxId": "vfx_call_oven",
+        "cameraShakeId": "shake_light",
+        "comicHint": {
+          "tr": "Tepsi ısındı — fırın nefesi yayıldı.",
+          "en": "Tray warmed — oven breath rolled out."
+        }
+      }
+    ],
+    "selectionRules": {
+      "alwaysIncludeCategories": ["safe", "swingy"],
+      "preferLeanMatchingActiveSynergy": true,
+      "practiceCupForceIds": ["call_cheer", "call_focus_fire", "call_tea_break"],
+      "fallbackTrio": ["call_cheer", "call_focus_fire", "call_hold_fence"]
+    }
+  },
+  "practiceCup": {
+    "id": "practice_cup_rivalry_01",
+    "title": { "tr": "Prova: Rekabet", "en": "Practice: Rivalry" },
+    "unlock": "first_evening_cup_available",
+    "playerLineup": [
+      { "neighborId": "n4", "cell": "front_left" },
+      { "neighborId": "n2", "cell": "front_right" },
+      { "neighborId": "n1", "cell": "back_mid" }
+    ],
+    "expectedPlayerSynergyIds": ["syn_rivalry"],
+    "enemyLineup": [
+      { "botId": "bot_n3", "cell": "front_left", "name": { "tr": "Bot Leyla", "en": "Bot Leyla" } },
+      { "botId": "bot_n5", "cell": "front_right", "name": { "tr": "Bot Peri", "en": "Bot Peri" } },
+      { "botId": "bot_n6", "cell": "back_mid", "name": { "tr": "Bot Can", "en": "Bot Can" } }
+    ],
+    "enemyNotMirror": true,
+    "porchCallForceIds": ["call_cheer", "call_focus_fire", "call_tea_break"],
+    "scriptedMoments": [
+      {
+        "id": "prac_kickoff",
+        "tSec": 0.0,
+        "type": "coach_line",
+        "speakerId": "n2",
+        "lines": {
+          "tr": "Onlar açılışı flaşlı yapar — biz öğütürüz.",
+          "en": "They open flashy — we grind."
+        },
+        "vfxId": "vfx_neon_edge_flicker",
+        "cameraShakeId": "shake_light"
+      },
+      {
+        "id": "prac_rivalry_arm",
+        "tSec": 3.5,
+        "type": "synergy_badge_pulse",
+        "synergyId": "syn_rivalry",
+        "showTooltipOnce": true,
+        "lines": {
+          "tr": "Rekabet rozeti yandı. Eşik bekleniyor.",
+          "en": "Rivalry badge lit. Waiting on the threshold."
+        }
+      },
+      {
+        "id": "prac_first_hit",
+        "tSec": 8.0,
+        "type": "forced_hit",
+        "targetNeighborId": "n4",
+        "damagePercentMaxHp": 0.18,
+        "damageFloatId": "float_enemy_hit",
+        "cameraShakeId": "shake_light"
+      },
+      {
+        "id": "prac_low_hp_pop",
+        "tSec": 14.0,
+        "type": "force_ally_hp_then_synergy_pop",
+        "targetNeighborId": "n2",
+        "setHpPercent": 0.32,
+        "synergyId": "syn_rivalry",
+        "damageFloatId": "float_rivalry_buff",
+        "vfxId": "vfx_rivalry_ember",
+        "cameraShakeId": "shake_medium",
+        "lines": {
+          "tr": "Rekabet! Düşük HP → daha sert vuruş",
+          "en": "Rivalry! Low HP → harder hits"
+        }
+      },
+      {
+        "id": "prac_porch_call",
+        "tSec": 18.0,
+        "type": "porch_call",
+        "forceOptionIds": ["call_cheer", "call_focus_fire", "call_tea_break"],
+        "pauseSec": 2.2
+      },
+      {
+        "id": "prac_call_resolve",
+        "tSec": 22.0,
+        "type": "porch_call_resolve_fx",
+        "speakerId": "n2",
+        "linesByCallId": {
+          "call_cheer": {
+            "tr": "Alkış iyi — tempo bizde.",
+            "en": "Cheer works — tempo's ours."
+          },
+          "call_focus_fire": {
+            "tr": "Leyla'yı işaretledin. Sert.",
+            "en": "You marked Leyla. Clean."
+          },
+          "call_tea_break": {
+            "tr": "Yudum yetişti. Devam.",
+            "en": "Sip landed. Keep going."
+          }
+        },
+        "cameraShakeId": "shake_medium",
+        "hitStopMs": 50
+      },
+      {
+        "id": "prac_tea_tip",
+        "tSec": 28.0,
+        "type": "coach_tip",
+        "speakerId": "n1",
+        "condition": "syn_tea_circle_not_active",
+        "lines": {
+          "tr": "Çay Çemberi için Can da lazım — sonraki Kupada dene.",
+          "en": "Tea Circle needs Can too — try next Cup."
+        }
+      },
+      {
+        "id": "prac_finish",
+        "tSec": 34.0,
+        "type": "finish_banner",
+        "comicSeed": {
+          "forceSynergyId": "syn_rivalry",
+          "includePorchCall": true,
+          "mvpPreferNeighborIds": ["n2", "n4"]
+        }
+      }
+    ],
+    "winBias": {
+      "ifCallIds": ["call_focus_fire", "call_tea_break"],
+      "playerDamageBonusPercent": 0.08,
+      "note": "Cheer still winnable; Focus/Tea preferred teach outcomes."
+    },
+    "followUpPractice": {
+      "id": "practice_cup_tea_02",
+      "optional": true,
+      "playerLineupNeighborIds": ["n1", "n6", "n4"],
+      "expectedSynergyId": "syn_tea_circle",
+      "enemyBotIds": ["bot_n2", "bot_n3", "bot_n5"]
+    }
+  },
+  "juiceHints": {
+    "damageFloats": {
+      "float_ally_hit": {
+        "color": "#F2E6D8",
+        "stroke": "#2A6F6A",
+        "fontPxMobile": 18,
+        "risePx": 36,
+        "durationMs": 700,
+        "format": "-{amount}"
+      },
+      "float_enemy_hit": {
+        "color": "#FF6B4A",
+        "stroke": "#3A1510",
+        "fontPxMobile": 18,
+        "risePx": 36,
+        "durationMs": 700,
+        "format": "-{amount}"
+      },
+      "float_rivalry_buff": {
+        "color": "#F0C14A",
+        "stroke": "#3A2A00",
+        "fontPxMobile": 20,
+        "risePx": 42,
+        "durationMs": 850,
+        "format": "-{amount}!",
+        "prefixLabel": { "tr": "Rekabet", "en": "Rivalry" }
+      },
+      "float_heal": {
+        "color": "#7DCF9A",
+        "stroke": "#143322",
+        "fontPxMobile": 16,
+        "risePx": 28,
+        "durationMs": 750,
+        "format": "+{amount}"
+      },
+      "float_dodge": {
+        "color": "#FF8AC8",
+        "stroke": "#2A1020",
+        "fontPxMobile": 16,
+        "risePx": 24,
+        "durationMs": 600,
+        "text": { "tr": "kaç!", "en": "dodge" }
+      },
+      "float_miss": {
+        "color": "#B8B0A8",
+        "stroke": "#2A2824",
+        "fontPxMobile": 15,
+        "risePx": 20,
+        "durationMs": 500,
+        "text": { "tr": "—", "en": "—" }
+      }
+    },
+    "cameraShake": {
+      "shake_none": { "ampPx": 0, "durationMs": 0 },
+      "shake_light": { "ampPx": 2, "durationMs": 90, "freq": 18 },
+      "shake_medium": { "ampPx": 3.5, "durationMs": 140, "freq": 16 },
+      "shake_heavy": { "ampPx": 4, "durationMs": 180, "freq": 14, "maxAmpPxMobile": 4 },
+      "triggers": {
+        "normalHit": "shake_light",
+        "rivalryProc": "shake_medium",
+        "porchCallResolve": "shake_medium",
+        "ko": "shake_heavy",
+        "neonStart": "shake_light"
+      }
+    },
+    "hitStop": {
+      "koMs": 55,
+      "porchCallResolveMs": 50,
+      "rivalryFirstProcMs": 40,
+      "normalHitMs": 0
+    },
+    "hpBarChip": {
+      "flashColor": "#FFFFFF",
+      "flashMs": 120
+    },
+    "synergyBadge": {
+      "activateScale": 1.18,
+      "activateMs": 220,
+      "pulseMs": 400
+    },
+    "ko": {
+      "desaturateMs": 280,
+      "propToss": true,
+      "scaleTo": 0.82
+    },
+    "stage": {
+      "porchCallDimOpacity": 0.45,
+      "lampRimColor": "#FFB86B",
+      "avoidFullScreenFlash": true
+    },
+    "webImplNotes": {
+      "tr": "CSS transform + requestAnimationFrame yeterli; parçacık lib şart değil. Shake parent arena node'da translate.",
+      "en": "CSS transform + requestAnimationFrame is enough; no particle lib required. Apply shake as translate on the arena parent node."
+    }
+  },
+  "botAi": {
+    "targeting": [
+      {
+        "id": "prefer_low_hp_front",
+        "priority": 1,
+        "rule": "lowest_hp_percent_among_occupied_front_row_else_back"
+      },
+      {
+        "id": "glass_punish_exposed_support",
+        "priority": 2,
+        "appliesToRoles": ["Glass cannon"],
+        "rule": "if_enemy_support_or_healer_in_front_prioritize_them"
+      },
+      {
+        "id": "aoe_front_cluster",
+        "priority": 2,
+        "appliesToRoles": ["AoE"],
+        "rule": "hit_frontmost_occupied_row_cluster"
+      },
+      {
+        "id": "healer_lowest_ally",
+        "priority": 1,
+        "appliesToRoles": ["Healer"],
+        "rule": "heal_lowest_ally_hp_percent_each_skill_tick"
+      }
+    ],
+    "placement": {
+      "defaultFrontRoles": ["Tank", "Bruiser"],
+      "defaultBackRoles": ["AoE", "Glass cannon", "Support buffer", "Healer"],
+      "punishAllFrontPlayer": {
+        "enabled": true,
+        "behavior": "focus_single_column_until_first_ko"
+      },
+      "practiceCupFixed": true
+    },
+    "synergyShowcase": {
+      "week1": { "preferSynergyId": "syn_rivalry", "exampleBots": ["bot_n2", "bot_n4", "bot_n5"] },
+      "week2": { "preferSynergyId": "syn_neon_night", "exampleBots": ["bot_n5", "bot_n3", "bot_n2"] },
+      "week3": { "preferSynergyId": "syn_tea_circle", "exampleBots": ["bot_n1", "bot_n6", "bot_n3"] }
+    },
+    "knobs": {
+      "botAggro": { "min": 0.8, "max": 1.2, "default": 1.0 },
+      "botSkillBias": { "min": -0.15, "max": 0.15, "default": 0.0 },
+      "note": "Do not invent stats beyond content.json hp/atk/def/spd."
+    }
+  },
+  "uiStrings": {
+    "fight.porch_call_title": { "tr": "Veranda Çağrısı", "en": "Porch Call" },
+    "fight.porch_call_hint": {
+      "tr": "Tek seçim — skor sallanır",
+      "en": "One pick — the score swings"
+    },
+    "fight.synergy_active": { "tr": "Aktif sinerji", "en": "Active synergy" },
+    "fight.no_synergy": { "tr": "Sinerji yok", "en": "No synergy" },
+    "fight.surviving_hp": { "tr": "Kalan HP", "en": "Surviving HP" },
+    "fight.skip": { "tr": "Atla", "en": "Skip" },
+    "coach.show_me": { "tr": "Göster", "en": "Show me" },
+    "coach.got_it": { "tr": "Anladım", "en": "Got it" },
+    "placement.front": { "tr": "Ön", "en": "Front" },
+    "placement.back": { "tr": "Arka", "en": "Back" },
+    "placement.auto": { "tr": "Otomatik yerleştir", "en": "Auto place" },
+    "practice.title": { "tr": "Prova Kupası", "en": "Practice Cup" },
+    "practice.cta": { "tr": "Rekabeti öğren", "en": "Learn Rivalry" },
+    "comic.porch_call_slot": { "tr": "Çağrı: {porchCall}", "en": "Call: {porchCall}" }
+  },
+  "acceptanceChecks": [
+    "Player forms Rivalry knowingly in Practice Cup",
+    "Rivalry proc shows gold float + medium shake",
+    "Porch-call changes surviving HP race",
+    "Comic names synergy + call + MVP",
+    "Cup flow 60–110s, thumb-only"
+  ],
+  "meta": {
+    "integrator": "code owner on cursor/rival-porch-slice-31f7",
+    "noPrFromThisPackAuthor": true,
+    "compat": {
+      "neighborIds": ["n1", "n2", "n3", "n4", "n5", "n6"],
+      "contentSynergyIds": ["syn_tea_circle", "syn_rivalry", "syn_neon_night"],
+      "overridesTagPools": true,
+      "reason": "Single-tag neighbors cannot hit minCount 2; pools match playtest Rivalry language + Tea/Oven story + Neon/Chaos pivot"
+    }
+  }
+}
