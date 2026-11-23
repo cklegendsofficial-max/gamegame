@@ -71,8 +71,8 @@
         "en": "New Porch"
       },
       "summary": {
-        "tr": "Aşağı Sırt seni ölçüyor — kimin yanında duracaksın?",
-        "en": "Lower Ridge is sizing you up — whose side are you on?"
+        "tr": "Leyla ile Orhan’ın utancı kapıda. Bir taraf tut — sokak unutmaz.",
+        "en": "Leyla and Orhan’s shame is at your door. Take a side — the street won’t forget."
       },
       "giver": "n1",
       "week": 1,
@@ -93,8 +93,8 @@
           "order": 1,
           "kind": "checkin",
           "label": {
-            "tr": "Merve ile sabah çayı",
-            "en": "Share morning tea with Merve"
+            "tr": "Kapıdaki utancı dinle",
+            "en": "Hear the shame at the door"
           },
           "track": {
             "type": "action",
@@ -113,8 +113,8 @@
           "order": 2,
           "kind": "talk",
           "label": {
-            "tr": "Üç kapıyı tanı",
-            "en": "Meet three doors on the block"
+            "tr": "Bir çatı tarafı seç — mahalle baksın",
+            "en": "Pick a roof side — let the street watch"
           },
           "track": {
             "type": "affinityAny",
@@ -131,8 +131,8 @@
           "order": 3,
           "kind": "drama",
           "label": {
-            "tr": "Çatıdaki ipi gör",
-            "en": "See the line on the roof"
+            "tr": "Yarın sokağın hatırasını gör",
+            "en": "See what the street remembers tomorrow"
           },
           "track": {
             "type": "flag",
@@ -149,8 +149,8 @@
           "order": 4,
           "kind": "cup",
           "label": {
-            "tr": "Verandada ilk Cup",
-            "en": "First Cup on the porch"
+            "tr": "Cup’ta utancı yankıla",
+            "en": "Echo the shame in a Cup"
           },
           "track": {
             "type": "cupComplete",
@@ -376,8 +376,8 @@
       "spineCode": "",
       "nextQuestId": "mq_decibel_accord",
       "hudBlurb": {
-        "tr": "Arc A — çatı + çit",
-        "en": "Arc A — roof + fence"
+        "tr": "çatı — çatı + çit",
+        "en": "çatı — roof + fence"
       },
       "nextSpineTeaser": {
         "tr": "Sıradaki: (Peri ↔ uyku)",
@@ -575,8 +575,8 @@
       "spineCode": "",
       "nextQuestId": "mq_ledger_tray",
       "hudBlurb": {
-        "tr": "Arc B — gece sahnesi",
-        "en": "Arc B — night stage"
+        "tr": "gece — gece sahnesi",
+        "en": "gece — night stage"
       },
       "nextSpineTeaser": {
         "tr": "Sıradaki: Defter ve Tepsi (Tea Circle)",
@@ -742,8 +742,8 @@
       "spineCode": "",
       "nextQuestId": "mq_season_finale",
       "hudBlurb": {
-        "tr": "Arc C — demlik + tepsi",
-        "en": "Arc C — teapot + tray"
+        "tr": "defter — demlik + tepsi",
+        "en": "defter — teapot + tray"
       },
       "nextSpineTeaser": {
         "tr": "Sıradaki: Porch Cup Finali (ending kilidi)",
@@ -2243,8 +2243,8 @@
     "wc_kite_string_on_antenna": {
       "id": "wc_kite_string_on_antenna",
       "streetVisual": {
-        "tr": "Antende ince uçurtma ipi asılı — Arc A tohumu.",
-        "en": "Thin kite string on the antenna — Arc A seed."
+        "tr": "Antende ince uçurtma ipi asılı — çatı utanç tutuyor.",
+        "en": "Thin kite string on the antenna — roof holding a shame."
       }
     },
     "wc_cup1_gossip_board": {
@@ -2747,8 +2747,8 @@
       "questId": "mq_antenna_op",
       "arcId": "arc_kite_antenna",
       "label": {
-        "tr": "2 · Anten (Arc A)",
-        "en": "2 · Antenna (Arc A)"
+        "tr": "2 · Anten (çatı)",
+        "en": "2 · Antenna (çatı)"
       },
       "completeFlag": "arc_kite_antenna_complete",
       "branchFlags": [
@@ -2762,8 +2762,8 @@
       "questId": "mq_decibel_accord",
       "arcId": "arc_volume_war",
       "label": {
-        "tr": "3 · Desibel (Arc B)",
-        "en": "3 · Decibel (Arc B)"
+        "tr": "3 · Desibel (gece)",
+        "en": "3 · Decibel (gece)"
       },
       "completeFlag": "arc_volume_war_complete",
       "branchFlags": [
@@ -2777,8 +2777,8 @@
       "questId": "mq_ledger_tray",
       "arcId": "arc_tea_ledger",
       "label": {
-        "tr": "4 · Defter (Arc C)",
-        "en": "4 · Ledger (Arc C)"
+        "tr": "4 · Defter (defter)",
+        "en": "4 · Ledger (defter)"
       },
       "completeFlag": "arc_tea_ledger_complete",
       "branchFlags": [
@@ -2802,36 +2802,36 @@
     {
       "ifFlag": "flag_fence_and_kite",
       "line": {
-        "tr": "Anten bayrağı hâlâ orada — Arc A barış yazdı.",
-        "en": "Antenna flag still there — Arc A wrote peace."
+        "tr": "Anten bayrağı hâlâ orada — çatı barış yazdı.",
+        "en": "Antenna flag still there — çatı wrote peace."
       }
     },
     {
       "ifFlag": "flag_kite_chaos_buff",
       "line": {
-        "tr": "Çatıdaki tebeşir okları silinmedi — Arc A kaos seçti.",
-        "en": "Roof chalk arrows remain — Arc A chose chaos."
+        "tr": "Çatıdaki tebeşir okları silinmedi — çatı kaos seçti.",
+        "en": "Roof chalk arrows remain — çatı chose chaos."
       }
     },
     {
       "ifFlag": "flag_quiet_neon",
       "line": {
-        "tr": "Neon kısık; sessiz saatler yazılı — Arc B antlaşması.",
-        "en": "Neon low; quiet hours taped up — Arc B accord."
+        "tr": "Neon kısık; sessiz saatler yazılı — gece antlaşması.",
+        "en": "Neon low; quiet hours taped up — gece accord."
       }
     },
     {
       "ifFlag": "flag_peri_leaving_threat",
       "line": {
-        "tr": "Kulaklık kutusunda bilet taslağı — Arc B veda gerilimi.",
-        "en": "Ticket draft in the headphone box — Arc B leaving tension."
+        "tr": "Kulaklık kutusunda bilet taslağı — gece veda gerilimi.",
+        "en": "Ticket draft in the headphone box — gece leaving tension."
       }
     },
     {
       "ifFlag": "flag_ledger_closed_kind",
       "line": {
-        "tr": "Demlik + tepsi aynı ritim — Arc C zinciri açık.",
-        "en": "Teapot + tray in rhythm — Arc C chain is open."
+        "tr": "Demlik + tepsi aynı ritim — defter zinciri açık.",
+        "en": "Teapot + tray in rhythm — defter chain is open."
       }
     }
   ],
@@ -4460,8 +4460,8 @@
         },
         "tone": "spotlight",
         "eyebrow": {
-          "tr": "Canlı ark · Arc A",
-          "en": "Living arc · Arc A"
+          "tr": "Çatıda ip",
+          "en": "Line on the roof"
         },
         "title": {
           "tr": "devam ediyor",
@@ -4488,8 +4488,8 @@
         },
         "tone": "soft",
         "eyebrow": {
-          "tr": "Yankı · Arc A",
-          "en": "Aftermath · Arc A"
+          "tr": "Yankı · çatı",
+          "en": "Aftermath · çatı"
         },
         "title": {
           "tr": "Barış bayrağı — anten yumuşadı",
@@ -4514,8 +4514,8 @@
         },
         "tone": "sharp",
         "eyebrow": {
-          "tr": "Yankı · Arc A",
-          "en": "Aftermath · Arc A"
+          "tr": "Yankı · çatı",
+          "en": "Aftermath · çatı"
         },
         "title": {
           "tr": "Yüksek uçuş — harita serbest",
@@ -4679,8 +4679,8 @@
     "antennaOpQuestPanelBlurb": {
       "whenQuestId": "mq_antenna_op",
       "activeBlurb": {
-        "tr": "Arc A canlı: uçurtma ↔ anten. Bugünün beat'i panoda — sadece 2/4 sayacı değil.",
-        "en": "Arc A live: kite ↔ antenna. Today's beat is on the board — not just a 2/4 counter."
+        "tr": "çatı canlı: uçurtma ↔ anten. Bugünün beat'i panoda — sadece 2/4 sayacı değil.",
+        "en": "Uçurtma ↔ anten — kite ↔ antenna. Today's beat is on the board — not just a 2/4 counter."
       },
       "testId": "antenna-op-quest-blurb"
     },
@@ -4773,7 +4773,7 @@
     "kind": "story-quest-form",
     "formIndex": 8,
     "localeDefault": "tr",
-    "purpose": "Long-arc visibility parity: + beat banners/journal cards like ; journal drama for Arc B/C; props carry without spotlight.",
+    "purpose": "Long-arc visibility parity: + beat banners/journal cards like ; journal drama for gece/C; props carry without spotlight.",
     "integrator": {
       "owner": "code owner on cursor/rival-porch-slice-31f7",
       "noPrFromThisPackAuthor": true,
@@ -4786,7 +4786,7 @@
         "Evening/street: one live banner max — highest priority among active arcs (Antenna 95, Volume 94, Ledger 93)"
       ],
       "doNot": [
-        "Gate Arc B/C beats behind spend",
+        "Gate gece/C beats behind spend",
         "Make Day2 props depend on spotlight ack",
         "Replace form-7 Antenna cards — merge alongside"
       ]
@@ -4821,8 +4821,8 @@
         },
         "tone": "sharp",
         "eyebrow": {
-          "tr": "Canlı ark · Arc B",
-          "en": "Living arc · Arc B"
+          "tr": "Canlı ark · gece",
+          "en": "Living porch · gece"
         },
         "title": {
           "tr": "devam ediyor",
@@ -4847,8 +4847,8 @@
         },
         "tone": "soft",
         "eyebrow": {
-          "tr": "Yankı · Arc B",
-          "en": "Aftermath · Arc B"
+          "tr": "Yankı · gece",
+          "en": "Aftermath · gece"
         },
         "title": {
           "tr": "Sessiz neon — Peri kaldı",
@@ -4873,8 +4873,8 @@
         },
         "tone": "sharp",
         "eyebrow": {
-          "tr": "Yankı · Arc B",
-          "en": "Aftermath · Arc B"
+          "tr": "Yankı · gece",
+          "en": "Aftermath · gece"
         },
         "title": {
           "tr": "Veda gerilimi — kariyer yolu",
@@ -4905,8 +4905,8 @@
         },
         "tone": "soft",
         "eyebrow": {
-          "tr": "Canlı ark · Arc C",
-          "en": "Living arc · Arc C"
+          "tr": "Canlı ark · defter",
+          "en": "Living porch · defter"
         },
         "title": {
           "tr": "Defter ve Tepsi açık",
@@ -4931,8 +4931,8 @@
         },
         "tone": "soft",
         "eyebrow": {
-          "tr": "Yankı · Arc C",
-          "en": "Aftermath · Arc C"
+          "tr": "Yankı · defter",
+          "en": "Aftermath · defter"
         },
         "title": {
           "tr": "Borç = iyilik zinciri",
@@ -4957,8 +4957,8 @@
         },
         "tone": "soft",
         "eyebrow": {
-          "tr": "Yankı · Arc C",
-          "en": "Aftermath · Arc C"
+          "tr": "Yankı · defter",
+          "en": "Aftermath · defter"
         },
         "title": {
           "tr": "Defter kapalı — mahrem",
@@ -5290,16 +5290,16 @@
       {
         "whenQuestId": "mq_decibel_accord",
         "activeBlurb": {
-          "tr": "Arc B canlı: bas ↔ uyku. Bugünün beat'i panoda.",
-          "en": "Arc B live: bass ↔ sleep. Today's beat is on the board."
+          "tr": "gece canlı: bas ↔ uyku. Bugünün beat'i panoda.",
+          "en": "gece live: bass ↔ sleep. Today's beat is on the board."
         },
         "testId": "volume-op-quest-blurb"
       },
       {
         "whenQuestId": "mq_ledger_tray",
         "activeBlurb": {
-          "tr": "Arc C canlı: defter ↔ tepsi. Beat sahnesi checklist'ten önce.",
-          "en": "Arc C live: ledger ↔ tray. Scene before the checklist."
+          "tr": "defter canlı: defter ↔ tepsi. Beat sahnesi checklist'ten önce.",
+          "en": "defter live: ledger ↔ tray. Scene before the checklist."
         },
         "testId": "ledger-op-quest-blurb"
       }
@@ -5320,7 +5320,7 @@
       },
       {
         "id": "journal_still_drama_first",
-        "desc": "Arc B/C drama cards appear in Aftermath; recap stays collapsed log."
+        "desc": "gece/C drama cards appear in Aftermath; recap stays collapsed log."
       }
     ],
     "echoFollowUpsAppend": [
@@ -5346,8 +5346,8 @@
           "en": "Decibel — beat on the board"
         },
         "body": {
-          "tr": "Akşam bandında Arc B beat'i yazıyor. Defterde drama kartı.",
-          "en": "Evening banner names Arc B beat. Journal has the drama card."
+          "tr": "Akşam bandında gece beat'i yazıyor. Defterde drama kartı.",
+          "en": "Evening banner names gece beat. Journal has the drama card."
         },
         "cta": {
           "tr": "Sahneye git",
@@ -5376,8 +5376,8 @@
           "en": "Ledger — beat on the board"
         },
         "body": {
-          "tr": "Arc C canlı. Poğaça/defter sahnesi checklist'ten önce.",
-          "en": "Arc C live. Pastry/ledger scene before the checklist."
+          "tr": "defter canlı. Poğaça/defter sahnesi checklist'ten önce.",
+          "en": "defter live. Pastry/ledger scene before the checklist."
         },
         "cta": {
           "tr": "Sahneye git",
@@ -5409,7 +5409,7 @@
       "doNot": [
         "Stack spotlight + Antenna banner + cold prop on first Day2 street paint",
         "Require spotlight ack to show cold SVG",
-        "Leave Arc B/C street presence journal-only"
+        "Leave gece/C street presence journal-only"
       ]
     },
     "principles": {
@@ -7954,5 +7954,28 @@
       "note": "Soft gap: tray testid present but not screenshot-tall — enlarge winner tray"
     },
     "cssAppend": "\n/* story-form-20 — one MAIN chip on Day10; taller ledger tray */\nbody.rp-ledger-wins .rp-mq-street-chip,\nbody.rp-one-main-chip .rp-mq-street-chip,\nbody[data-day-index=\"10\"] .rp-mq-street-chip,\nbody[data-day-index=\"11\"] .rp-mq-street-chip,\nbody[data-day-index=\"12\"] .rp-mq-street-chip,\nbody.rp-ledger-wins [data-testid=\"mq-street-chip-volume\"],\nbody.rp-ledger-wins [data-testid=\"mq-street-chip-antenna\"] { display: none !important;\n}\nbody.rp-one-main-chip .rp-spine-cult-chip,\nbody.rp-ledger-wins .rp-spine-cult-chip { display: block;\n}\n/* taller tray for screenshot read */\nbody.rp-ledger-wins .rp-stage-prop--ledger-tray,\nbody.rp-ledger-wins .rp-stage-prop--ledger-tray-winner { left: 12%; width: 52%; top: 48%; height: 32%; z-index: 10;\n}\nbody.rp-ledger-wins .rp-stage-prop--ledger-tray-winner .rp-stage-prop__tag { font-size: 13px; padding: 0.3rem 0.55rem;\n}\n"
-  }
+  },
+  "defteriPorchChain": [
+    {
+      "questId": "mq_antenna_op",
+      "title": {
+        "tr": "Takılan Uçurtma",
+        "en": "The Snag"
+      }
+    },
+    {
+      "questId": "mq_decibel_accord",
+      "title": {
+        "tr": "01:12",
+        "en": "01:12"
+      }
+    },
+    {
+      "questId": "mq_ledger_tray",
+      "title": {
+        "tr": "Açık Defter",
+        "en": "Open Book"
+      }
+    }
+  ]
 }

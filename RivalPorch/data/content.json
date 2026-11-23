@@ -631,8 +631,8 @@
         "healPercentMaxHp": 0.04,
         "radius": "allied_grid",
         "description": {
-          "tr": "2+ Tea/Oven: her 4 sn müttefiklere hafif heal aura.",
-          "en": "2+ Tea/Oven: light heal aura on allies every 4s."
+          "tr": "Demlik + tepsi verandayı ayakta tutar — Merve + Can.",
+          "en": "Demlik + tray keep the porch standing — Merve + Can."
         }
       }
     },
@@ -654,8 +654,8 @@
         "hpThresholdPercent": 0.35,
         "damageBonusPercent": 0.25,
         "description": {
-          "tr": "2+ Rivalry/Chaos/Fence: düşük HP'de (+%25) hasar.",
-          "en": "2+ Rivalry/Chaos/Fence: +25% damage while under 35% HP."
+          "tr": "Köşeye sıkışınca düdük sertleşir — Cem + Orhan.",
+          "en": "Whistle tightens when someone’s cornered — Cem + Orhan."
         }
       }
     },
@@ -676,8 +676,8 @@
         "windowSec": 8,
         "dodgeChance": 0.2,
         "description": {
-          "tr": "2+ Neon/Chaos: ilk 8 sn %20 dodge şansı.",
-          "en": "2+ Neon/Chaos: 20% dodge chance for the first 8s."
+          "tr": "İlk şarkı neon — Peri + Leyla açılışı parlaktır.",
+          "en": "First song is neon — Peri + Leyla open flashy."
         }
       }
     }

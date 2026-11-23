@@ -102,20 +102,20 @@
   },
   "objectiveLabels": {
     "mq_welcome_o1": {
-      "tr": "Merve ile sabah çayı",
-      "en": "Share morning tea with Merve"
+      "tr": "Kapıdaki utancı dinle",
+      "en": "Hear the shame at the door"
     },
     "mq_welcome_o2": {
-      "tr": "Üç kapıyı tanı",
-      "en": "Meet three doors on the block"
+      "tr": "Bir çatı tarafı seç — mahalle baksın",
+      "en": "Pick a roof side — let the street watch"
     },
     "mq_welcome_o3": {
-      "tr": "Çatıdaki ipi gör",
-      "en": "See the line on the roof"
+      "tr": "Yarın sokağın hatırasını gör",
+      "en": "See what the street remembers tomorrow"
     },
     "mq_welcome_o4": {
-      "tr": "Verandada ilk Cup",
-      "en": "First Cup on the porch"
+      "tr": "Cup’ta utancı yankıla",
+      "en": "Echo the shame in a Cup"
     }
   },
   "skipGates": {

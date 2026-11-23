@@ -156,7 +156,7 @@
       ],
       "lines": {
         "tr": "Çay + Fırın = Çay Çemberi. Her 4 saniyede mahalle yudumlar — heal aura.",
-        "en": "Tea + Oven = Tea Circle. Every 4s the porch sips — heal aura."
+        "en": "Tea + Oven = Tea Circle. every little while, a shared pour."
       },
       "confirmLabel": {
         "tr": "Çemberi kurdum",
@@ -199,7 +199,7 @@
       ],
       "lines": {
         "tr": "Neon + Kaos = Neon Gece. İlk 8 saniye dodge şansı. Leyla pivot — dikkat.",
-        "en": "Neon + Chaos = Neon Night. Dodge chance for the first 8s. Leyla is the pivot — careful."
+        "en": "First song is neon — opening flash"
       },
       "confirmLabel": {
         "tr": "Neon'u kurdum",
@@ -265,7 +265,7 @@
         },
         "body": {
           "tr": "2+ Çay veya Fırın etiketi. Her 4 sn müttefiklere max HP'nin %4'ü heal.",
-          "en": "2+ Tea or Oven tags. Every 4s heal allies for 4% max HP."
+          "en": "2+ Tea or Oven tags. every little while, a shared pour."
         },
         "firesWhen": {
           "tr": "Sinerji aktifken sürekli (4 sn tick).",
@@ -283,7 +283,7 @@
         },
         "body": {
           "tr": "2+ Rekabet / Kaos / Çit. HP %35 altına inince hasar +%25.",
-          "en": "2+ Rivalry / Chaos / Fence. Under 35% HP → +25% damage."
+          "en": "2+ Rivalry / Chaos / Fence. When someone’s hurt bad, the whistle gets mean."
         },
         "firesWhen": {
           "tr": "Bir müttefik eşik altına indiğinde.",
@@ -300,8 +300,8 @@
           "en": "Neon Night"
         },
         "body": {
-          "tr": "2+ Neon veya Kaos. İlk 8 sn %20 dodge şansı.",
-          "en": "2+ Neon or Chaos. 20% dodge for the first 8s."
+          "tr": "2+ Neon veya Kaos. İlk 8 sn Açılış parıltısı — ritmi kaçırır.",
+          "en": "2+ Neon or Chaos. Opening flash — harder to catch."
         },
         "firesWhen": {
           "tr": "Maç başı — 8 sn sonra söner.",
@@ -407,7 +407,7 @@
         },
         "blurb": {
           "tr": "Herkese 6 sn +%12 ATK — güvenli tempo.",
-          "en": "All allies +12% ATK for 6s — safe tempo."
+          "en": "All allies ATK for 6s — safe tempo."
         },
         "effect": {
           "type": "ally_atk_buff",
@@ -469,7 +469,7 @@
         },
         "blurb": {
           "tr": "En düşük HP müttefike anında %22 heal.",
-          "en": "Instant 22% heal on lowest-HP ally."
+          "en": "Demlik + tray keep the porch standing"
         },
         "effect": {
           "type": "instant_heal_lowest_ally",
@@ -526,7 +526,7 @@
         },
         "blurb": {
           "tr": "4 sn +%15 dodge (Neon lean).",
-          "en": "+15% dodge for 4s (Neon lean)."
+          "en": "First song is neon — opening flash"
         },
         "effect": {
           "type": "ally_dodge_buff",
@@ -583,7 +583,7 @@
         },
         "blurb": {
           "tr": "Gerideyken 5 sn +%20 DEF.",
-          "en": "+20% DEF for 5s while behind."
+          "en": "DEF for 5s while behind."
         },
         "effect": {
           "type": "ally_def_buff",
@@ -1382,7 +1382,7 @@
     },
     "coach.ready_locked": {
       "tr": "Hazır kilitli — sinerjiyi kur",
-      "en": "Ready locked — form the synergy"
+      "en": "Ready locked — lock the gossip"
     },
     "pill.fires_when": {
       "tr": "ateş: {when}",
@@ -1460,7 +1460,7 @@
         "synergyId": "syn_rivalry",
         "ruleOneLiner": {
           "tr": "HP %35 altı → +%25 hasar",
-          "en": "Under 35% HP → +25% damage"
+          "en": "When someone’s hurt bad, the whistle gets mean"
         },
         "firesWhen": {
           "tr": "eşik altına düşen müttefik her vuruşta",
@@ -1476,7 +1476,7 @@
         "synergyId": "syn_tea_circle",
         "ruleOneLiner": {
           "tr": "Her 4 sn %4 max HP aura",
-          "en": "Every 4s heal aura 4% max HP"
+          "en": "every little while, a shared pour"
         },
         "firesWhen": {
           "tr": "sinerji aktifken 4 sn nabız",
@@ -1490,8 +1490,8 @@
       {
         "synergyId": "syn_neon_night",
         "ruleOneLiner": {
-          "tr": "İlk 8 sn %20 dodge",
-          "en": "First 8s → 20% dodge"
+          "tr": "İlk 8 sn Açılış parıltısı — ritmi kaçırır",
+          "en": "Opening flash — harder to catch"
         },
         "firesWhen": {
           "tr": "dövüş açılışı (8 sn pencere)",
@@ -1525,7 +1525,7 @@
       "showMeAutoPickStillAllowed": true,
       "readyLockedCopy": {
         "tr": "Hazır kilitli — önce sinerjiyi kur (veya Göster).",
-        "en": "Ready locked — form the synergy first (or Show me)."
+        "en": "Ready locked — lock the gossip first (or Show me)."
       },
       "pillMustUpdateLiveOnDraft": true
     },
@@ -2477,5 +2477,52 @@
       "tr": "Veranda dedikodusu",
       "en": "Porch gossip"
     }
-  }
+  },
+  "synergyStakes": [
+    {
+      "synergyId": "syn_rivalry",
+      "headline": {
+        "tr": "Köşeye sıkışınca düdük sertleşir",
+        "en": "Whistle tightens when someone’s cornered"
+      },
+      "body": {
+        "tr": "Cem’in düdüğü + Orhan’ın çiti: biri kötü yaralanınca imza vuruş sertleşir.",
+        "en": "Cem’s whistle + Orhan’s fence: when someone’s hurt bad, their signature gets mean."
+      },
+      "fireVoice": {
+        "tr": "Sıkışınca",
+        "en": "When cornered"
+      }
+    },
+    {
+      "synergyId": "syn_tea_circle",
+      "headline": {
+        "tr": "Demlik + tepsi verandayı ayakta tutar",
+        "en": "Demlik + tray keep the porch standing"
+      },
+      "body": {
+        "tr": "Merve döker, Can ısıtır — ikisi ayaktayken hat düşmez.",
+        "en": "Merve pours, Can warms — the line holds while both stand."
+      },
+      "fireVoice": {
+        "tr": "Paylaşılan demlik",
+        "en": "Shared pour"
+      }
+    },
+    {
+      "synergyId": "syn_neon_night",
+      "headline": {
+        "tr": "İlk şarkı neon",
+        "en": "First song is neon"
+      },
+      "body": {
+        "tr": "Peri + Leyla açılışı parlaktır; vuruşlar ritmi kaçırır.",
+        "en": "Peri + Leyla open flashy; hits miss the vibe."
+      },
+      "fireVoice": {
+        "tr": "Açılış parıltısı",
+        "en": "Opening flash"
+      }
+    }
+  ]
 }

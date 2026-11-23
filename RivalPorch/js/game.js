@@ -15,6 +15,8 @@ import * as Density from "./density.js";
 import * as EndEvening from "./endEvening.js";
 import * as Ux4 from "./uxSession4Nuclear.js";
 import * as UxFirst from "./uxFirstSession.js";
+import { spreadPorchNiches } from "./porchNiches.js";
+import { mountAffinityToast } from "./uxToasts.js";
 
 const DAY1_BUSTS = {
   n1: "assets/rival-porch/bust-n1-aunt-merve.png",
@@ -154,13 +156,19 @@ function stickyFightToast(msg, testId, minMs = 1200) {
 }
 
 function toast(msg, ms = 2400) {
+  const text = String(msg || "");
+  // ux-rewrite-3: affinity/bond deltas park above dock, TTL <1.5s, never steal dock taps
+  if (/[+]\s*\d+/.test(text) && /(Leyla|Orhan|Merve|Cem|Peri|Can|Mediator|affinity|İlişki|Bond|Hediye|Gift|\+\d)/i.test(text)) {
+    mountAffinityToast(text);
+    return;
+  }
   let node = document.querySelector(".toast");
   if (!node) {
     node = document.createElement("div");
     node.className = "toast";
     el.app.appendChild(node);
   }
-  node.textContent = msg;
+  node.textContent = text;
   node.classList.add("show");
   clearTimeout(node._hide);
   node._hide = setTimeout(() => node.classList.remove("show"), Math.max(800, ms));
@@ -694,6 +702,12 @@ function bumpAffinity(id, delta) {
   ensureNeighborState(id);
   Story.bumpAffinity(state.save, state.stories, id, delta);
   Story.applyStoryUnlocks(state.stories, state.save);
+  if (delta) {
+    const n = neighborById(id);
+    const name = n ? loc(n.name) : id;
+    const signed = delta > 0 ? `+${delta}` : String(delta);
+    mountAffinityToast(`${name} ${signed}`);
+  }
 }
 
 function applyEffects(effects, neighborId) {
@@ -913,11 +927,16 @@ function hudHtml() {
     </header>`;
 }
 
+function porchStakeFor(synId) {
+  const row = (state.combatPack?.synergyStakes || []).find((s) => s.synergyId === synId);
+  if (!row) return null;
+  return { headline: loc(row.headline), body: loc(row.body), fire: loc(row.fireVoice) };
+}
+
 function synergyCoachHtml(pickedIds = []) {
   const tr = state.locale === "tr";
   const tags = pickedIds.map((id) => neighborById(id)?.synergyTag).filter(Boolean);
   const active = activeSynergies(tags);
-  // Teach order: Rivalry → Tea → Neon (combat juice pack)
   const order = ["syn_rivalry", "syn_tea_circle", "syn_neon_night"];
   const defs = order
     .map((id) => (state.content.synergies || []).find((s) => s.id === id))
@@ -933,19 +952,23 @@ function synergyCoachHtml(pickedIds = []) {
       .join(" · ");
     const on = active.some((a) => a.id === s.id);
     const focus = nextTeach?.id === s.id && !on;
+    const stake = porchStakeFor(s.id);
+    const body = stake?.body || loc(s.rules?.description) || "";
+    const title = stake?.headline || loc(s.name);
     return `<div class="syn-coach-card ${on ? "on" : ""} ${focus ? "focus" : ""}">
-      <div class="syn-coach-title">${on ? "✓ " : focus ? "★ " : ""}${loc(s.name)} <span class="chip ${s.tagsRequired[0].toLowerCase()}">${s.tagsRequired.join("+")}</span></div>
-      <p>${loc(s.rules?.description)}</p>
-      <p class="muted">${tr ? "Örnek:" : "Try:"} ${examples || "—"}</p>
+      <div class="syn-coach-title">${on ? "✓ " : focus ? "★ " : ""}${title}</div>
+      <p>${body}</p>
+      <p class="muted">${tr ? "Kim:" : "Who:"} ${examples || "—"}</p>
     </div>`;
   };
+  const nextStake = nextTeach ? porchStakeFor(nextTeach.id) : null;
   const head = nextTeach
     ? tr
-      ? `Önce bunu kur: ${loc(nextTeach.name)}`
-      : `Form this first: ${loc(nextTeach.name)}`
+      ? `Önce bu dedikodu: ${nextStake?.headline || loc(nextTeach.name)}`
+      : `Lock this gossip first: ${nextStake?.headline || loc(nextTeach.name)}`
     : tr
-      ? "Tea heal · Rivalry düşük HP hasarı · Neon açılış dodge"
-      : "Tea heals · Rivalry low-HP damage · Neon opening dodge";
+      ? "Düdük sıkışınca · demlik ayakta · neon açılış"
+      : "Whistle when cornered · pot keeps standing · neon opening";
   return `<div class="syn-coach">
     <h3 class="section-label">${tr ? "Veranda dedikodusu" : "Porch gossip"}</h3>
     <p class="muted">${head}</p>
@@ -1055,6 +1078,29 @@ function worldCupLines() {
     .slice(-3);
 }
 
+
+function defteriPorchChainHtml() {
+  const tr = state.locale === "tr";
+  const chain = state.questPack?.defteriPorchChain || [
+    { questId: "mq_antenna_op", title: { tr: "Takılan Uçurtma", en: "The Snag" } },
+    { questId: "mq_decibel_accord", title: { tr: "01:12", en: "01:12" } },
+    { questId: "mq_ledger_tray", title: { tr: "Açık Defter", en: "Open Book" } },
+  ];
+  Quests.ensureQuestSave(state.save);
+  const bits = chain.map((row) => {
+    const e = state.save.quests?.entries?.[row.questId];
+    const def = Quests.questDef(state.questPack, row.questId);
+    let st = "locked";
+    if (e?.status === "complete" || e?.status === "done" || e?.status === "completed") st = "done";
+    else if (e?.status === "active") st = "active";
+    else if (def && Quests.availableQuests(state.questPack, state.save).some((q) => q.id === row.questId)) st = "available";
+    const title = loc(row.title) || loc(def?.title) || row.questId;
+    const mark = st === "done" ? "✓" : st === "active" ? "●" : st === "available" ? "○" : "·";
+    return `<span class="rp-porch-chain__item is-${st}" data-quest="${row.questId}" data-state="${st}">${mark} ${title}</span>`;
+  });
+  return `<div class="rp-porch-chain" data-testid="defteri-porch-chain">${bits.join('<span class="rp-porch-chain__arrow">→</span>')}</div>`;
+}
+
 function renderQuestLog() {
   const screen = document.getElementById("screen-quests");
   const tr = state.locale === "tr";
@@ -1147,7 +1193,8 @@ function renderQuestLog() {
         <div class="topbar"><h2>${tr ? "Görev Defteri" : "Quest Log"}</h2>
           <button class="btn btn-secondary" type="button" data-action="goto-evening">${t("common.back")}</button>
         </div>
-        <p class="evening-cup-tease">${tr ? "Kabul et · ilerle · tamamla. Arklar buradan yaşar." : "Accept · progress · complete. Arcs live here."}</p>
+        <p class="evening-cup-tease">${tr ? "Kabul et · sokakta kanıtla · mahalle hatırlasın." : "Accept · prove it on the street · let the block remember."}</p>
+        ${defteriPorchChainHtml()}
         <div class="tab-row">${tabBtns}</div>
       </div>
     </div>
@@ -2527,6 +2574,7 @@ function renderStreet() {
   syncColdYieldBodyClass();
   // visual-rewrite-2: mid-stage porch niches via data-n (CSS owns %). No gold toolbar.
   const NICHE = { n1: 1, n2: 2, n3: 3, n4: 4, n5: 5, n6: 6 };
+  const NICHE_XY = { n1: [5, 40], n2: [21, 36], n3: [37, 38], n4: [53, 36], n5: [69, 38], n6: [84, 40] };
   const roster = unlockedNeighbors().length
     ? unlockedNeighbors()
     : allNeighbors().filter((n) => ["n1", "n2", "n3", "n4", "n5", "n6"].includes(n.id));
@@ -2534,7 +2582,8 @@ function renderStreet() {
     const done = state.save.evening.visits.includes(n.id);
     const avail = !done;
     const dn = NICHE[n.id] || 1;
-    const base = `<button class="rp-hotspot ${done ? "visited" : ""} ${avail ? "is-available" : ""}" data-n="${dn}" type="button" data-action="open-neighbor" data-id="${n.id}" aria-label="${loc(n.name)}">
+    const xy = NICHE_XY[n.id] || [50, 40];
+    const base = `<button class="rp-hotspot ${done ? "visited" : ""} ${avail ? "is-available" : ""}" data-n="${dn}" style="--x:${xy[0]}%;--y:${xy[1]}%;left:${xy[0]}%;top:${xy[1]}%" type="button" data-action="open-neighbor" data-id="${n.id}" aria-label="${loc(n.name)}">
         <img class="rp-hotspot__bust" src="${goldBust(n.id)}" alt="" width="52" height="52" onerror="this.src='${MESHY_BUSTS.n1 || ART.busts.n1}'" />
         <span class="rp-hotspot__name">${loc(n.name)}${done ? " ✓" : ""}</span>
       </button>`;
@@ -2611,7 +2660,10 @@ function renderStreet() {
       <button class="rp-btn" type="button" data-action="open-quests">${state.locale === "tr" ? "Görevler" : "Quests"}</button>
       ${!storyFlag("practice_cup_done") ? `<button class="rp-btn" type="button" data-action="goto-cup">${state.locale === "tr" ? "Prova ★" : "Practice ★"}</button>` : ""}
     </footer>`;
-  requestAnimationFrame(() => armMech15DecibelLived());
+  requestAnimationFrame(() => {
+    armMech15DecibelLived();
+    spreadPorchNiches(document);
+  });
 }
 
 
@@ -2674,8 +2726,8 @@ function renderNeighbor(id) {
       ${n.drama ? `<button class="btn btn-ember" type="button" data-action="drama" data-id="${id}">${t("neighbor.drama")}</button>` : ""}
     </div>
     <p class="muted action-hints">${state.locale === "tr"
-      ? "Sahne: ilişki · Hediye: poğaça/çay · Konuş: hızlı bağ · Drama: mahalle dedikodusu"
-      : "Scene: bond · Gift: pastry/tea · Talk: quick bond · Drama: porch gossip"}</p>`;
+      ? "Sahne: utanç · Hediye: barış denemesi · Konuş: hızlı nabız"
+      : "Scene: the shame · Gift: a peace attempt · Talk: a quick pulse"}</p>`;
 }
 
 function startStory(id) {
@@ -3350,7 +3402,8 @@ function renderCupLobby() {
         firesWhen: loc(meta.firesWhen),
       });
     }
-    return loc(s.rules?.description) || loc(s.name);
+    const stake = porchStakeFor(s.id);
+    return stake?.body || loc(s.rules?.description) || loc(s.name);
   };
   // mechanics-fix-2: footer shows matched/min for ALL synergies from draft picks
   const preview = footerRows
@@ -4842,9 +4895,11 @@ function renderFight(battle) {
   if (battle.allySyn.length) state.save.storyFlags.synergy_school_seen = true;
   saveNow();
   const teachLine = (s) => {
-    if (s.id === "syn_rivalry") return tr ? "Rekabet! Düşük HP → sert vuruş" : "Rivalry! Low HP → harder hits";
-    if (s.id === "syn_tea_circle") return tr ? "Çay Çemberi — heal aura" : "Tea Circle — heal aura";
-    if (s.id === "syn_neon_night") return tr ? "Neon Gece — 8 sn dodge penceresi" : "Neon Night — 8s dodge window";
+    const stake = porchStakeFor(s.id);
+    if (stake?.fire) return stake.fire;
+    if (s.id === "syn_rivalry") return tr ? "Sıkışınca" : "When cornered";
+    if (s.id === "syn_tea_circle") return tr ? "Paylaşılan demlik" : "Shared pour";
+    if (s.id === "syn_neon_night") return tr ? "Açılış parıltısı" : "Opening flash";
     return loc(s.name);
   };
   const coachBanner = battle.allySyn.length

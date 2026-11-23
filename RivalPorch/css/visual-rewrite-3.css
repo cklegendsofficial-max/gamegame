@@ -1,0 +1,165 @@
+/* Rival Porch — visual-REWRITE-3
+   Auditor deae887 overall 6.2 / visual 5.9.
+   PF#1: Spread 6 porch niches across stage X (stop stacking left≈167).
+   Mid Y keep (~310). Six distinct porches, names readable.
+   Paste AFTER visual-rewrite-2.css. Packs only — no push.
+*/
+
+.rp-screen--street {
+  --rp-niche-y: 36%;
+  --rp-niche-y-alt: 39%;
+  --rp-niche-w: 56px;
+}
+
+/* ── Reset anything that collapses niches to one pile ─────────────────────── */
+
+.rp-screen--street .rp-hotspots,
+.rp-screen--street .rp-bust-rail {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  transform: none !important;
+  pointer-events: none;
+}
+
+.rp-screen--street .rp-hotspot {
+  position: absolute !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: var(--rp-niche-w) !important;
+  min-width: 52px !important;
+  min-height: 72px !important;
+  height: 80px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  /* Kill stacking transforms / shared --x */
+  transform: none !important;
+  translate: none !important;
+  right: auto !important;
+  bottom: auto !important;
+  --x: unset !important;
+  --y: unset !important;
+  --rp-x: unset !important;
+  --rp-y: unset !important;
+  pointer-events: auto;
+  z-index: 3;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.rp-screen--street .rp-hotspot__bust {
+  width: 52px !important;
+  height: 52px !important;
+  min-height: 48px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  display: block !important;
+}
+
+.rp-screen--street .rp-hotspot__name {
+  display: block !important;
+  font-size: 9px !important;
+  font-weight: 650;
+  color: var(--tea-cream, #f2e6d8);
+  text-shadow: 0 1px 2px var(--mud-night, #1a1612);
+  max-width: 4.4rem;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 1 !important;
+}
+
+/* ── HARD X spread — px on 390-wide + % fallback (beat inline left:167) ─────
+   6 porches L→R. Gap ≥48px between left edges. Mid Y retained. */
+
+.rp-screen--street .rp-hotspot[data-n="1"],
+.rp-screen--street .rp-hotspot[data-neighbor="n1"],
+.rp-screen--street .rp-hotspot[data-id="n1"],
+.rp-screen--street .rp-hotspots > .rp-hotspot:nth-of-type(1) {
+  left: max(8px, 3vw) !important;
+  top: var(--rp-niche-y-alt) !important;
+}
+
+.rp-screen--street .rp-hotspot[data-n="2"],
+.rp-screen--street .rp-hotspot[data-neighbor="n2"],
+.rp-screen--street .rp-hotspot[data-id="n2"],
+.rp-screen--street .rp-hotspots > .rp-hotspot:nth-of-type(2) {
+  left: max(68px, 18vw) !important;
+  top: var(--rp-niche-y) !important;
+}
+
+.rp-screen--street .rp-hotspot[data-n="3"],
+.rp-screen--street .rp-hotspot[data-neighbor="n3"],
+.rp-screen--street .rp-hotspot[data-id="n3"],
+.rp-screen--street .rp-hotspots > .rp-hotspot:nth-of-type(3) {
+  left: max(128px, 33vw) !important;
+  top: var(--rp-niche-y-alt) !important;
+}
+
+.rp-screen--street .rp-hotspot[data-n="4"],
+.rp-screen--street .rp-hotspot[data-neighbor="n4"],
+.rp-screen--street .rp-hotspot[data-id="n4"],
+.rp-screen--street .rp-hotspots > .rp-hotspot:nth-of-type(4) {
+  left: max(188px, 48vw) !important;
+  top: var(--rp-niche-y) !important;
+}
+
+.rp-screen--street .rp-hotspot[data-n="5"],
+.rp-screen--street .rp-hotspot[data-neighbor="n5"],
+.rp-screen--street .rp-hotspot[data-id="n5"],
+.rp-screen--street .rp-hotspots > .rp-hotspot:nth-of-type(5) {
+  left: max(248px, 63vw) !important;
+  top: var(--rp-niche-y-alt) !important;
+}
+
+.rp-screen--street .rp-hotspot[data-n="6"],
+.rp-screen--street .rp-hotspot[data-neighbor="n6"],
+.rp-screen--street .rp-hotspot[data-id="n6"],
+.rp-screen--street .rp-hotspots > .rp-hotspot:nth-of-type(6) {
+  left: max(308px, 78vw) !important;
+  top: var(--rp-niche-y) !important;
+}
+
+/* If JS still writes style.left, attribute selector last-resort shove by index
+   via grid fallback when [data-spread="x"] is set on .rp-hotspots */
+.rp-screen--street .rp-hotspots[data-spread="x"] {
+  display: grid !important;
+  grid-template-columns: repeat(6, 1fr) !important;
+  align-content: start !important;
+  top: 34% !important;
+  left: 4% !important;
+  right: 4% !important;
+  bottom: auto !important;
+  width: 92% !important;
+  height: auto !important;
+  inset: auto !important;
+  gap: 4px !important;
+  pointer-events: none;
+}
+
+.rp-screen--street .rp-hotspots[data-spread="x"] > .rp-hotspot {
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  width: 100% !important;
+  pointer-events: auto;
+}
+
+/* Affinity toast — don't cover niches or dock (visual gap; UX owns full PF) */
+.rp-screen--street .rp-affinity-toast,
+.rp-screen--street .rp-synergy-toast,
+.rp-screen--street [data-testid="affinity-toast"],
+.rp-screen--street [data-testid="street-synergy-chip"] {
+  position: fixed !important;
+  left: 12px !important;
+  right: 12px !important;
+  top: auto !important;
+  bottom: calc(76px + var(--rp-safe-bottom, 0px)) !important;
+  z-index: 5 !important;
+  max-height: 36px !important;
+  transform: none !important;
+}
