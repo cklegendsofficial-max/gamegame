@@ -1973,17 +1973,17 @@ h2,
   will-change: transform;
 }
 
-/* Street: content strip ~31% of square height — zoom past black void */
+/* Wave3 phone-bleed composites — mild overscan only */
 .rp-stage[data-stage="street"] .rp-stage__img {
-  object-position: 47% 54%;
-  transform: translate(-50%, -50%) scale(3.25);
+  object-position: 50% 48%;
+  transform: translate(-50%, -50%) scale(1.12);
   transform-origin: center center;
 }
 
-/* Arena: content ~64% height — milder zoom, keep footlights + pads */
+/* Arena: keep footlights + pads readable */
 .rp-stage[data-stage="arena"] .rp-stage__img {
-  object-position: 47.5% 58%;
-  transform: translate(-50%, -50%) scale(1.85);
+  object-position: 50% 58%;
+  transform: translate(-50%, -50%) scale(1.18);
   transform-origin: center center;
 }
 
@@ -2254,3 +2254,18 @@ h2,
   max-width: 14rem;
 }
 #screen-fight .topbar h2 { font-size: 0.95rem; opacity: 0.7; }
+
+.porch-call-prop {
+  width: 36px; height: 36px; object-fit: contain; border-radius: 8px;
+  background: rgba(26,22,18,0.35); margin-bottom: 2px;
+}
+.syn-rivalry-vfx {
+  position: absolute; left: 50%; top: 42%; width: 120px; height: 120px;
+  transform: translate(-50%,-50%); pointer-events: none; z-index: 6; opacity: 0.85;
+  animation: rp-vfx-pop 700ms ease-out forwards;
+}
+@keyframes rp-vfx-pop {
+  0% { opacity: 0; transform: translate(-50%,-50%) scale(0.7); }
+  40% { opacity: 0.9; transform: translate(-50%,-50%) scale(1.05); }
+  100% { opacity: 0; transform: translate(-50%,-50%) scale(1.2); }
+}

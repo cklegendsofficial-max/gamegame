@@ -32,14 +32,24 @@ const MESHY_BUSTS = {
 };
 
 const ART = {
-  // Meshy clay environments as primary stage — gold busts stay for face readability on cards
+  // Wave3 Meshy phone-bleed stages + busts (gold Day1 as fallback)
   streetHero: "assets/rival-porch/meshy/env-street-block.png",
   streetHeroFallback: "assets/rival-porch/street-hero.png",
   arenaStage: "assets/rival-porch/meshy/env-arena-stage.png",
   arenaStageFallback: "assets/rival-porch/arena-stage.png",
-  busts: { ...DAY1_BUSTS },
+  busts: { ...MESHY_BUSTS },
   meshyBusts: { ...MESHY_BUSTS },
+  goldBusts: { ...DAY1_BUSTS },
   meshyRoot: "assets/rival-porch/meshy/",
+  props: {
+    demlik: "assets/rival-porch/meshy/props/prop-hero-demlik.png",
+    duduk: "assets/rival-porch/meshy/props/prop-hero-duduk.png",
+    gazete: "assets/rival-porch/meshy/props/prop-hero-gazete.png",
+    kulaklik: "assets/rival-porch/meshy/props/prop-hero-kulaklik.png",
+    tepsi: "assets/rival-porch/meshy/props/prop-hero-tepsi.png",
+    ucurtma: "assets/rival-porch/meshy/props/prop-hero-ucurtma.png",
+  },
+  vfxRivalry: "assets/rival-porch/meshy/vfx-rivalry-still.png",
 };
 
 const UNIT_STATS = {
@@ -512,7 +522,18 @@ function stageLayer(kind = "street", dim = false) {
 }
 
 function goldBust(id) {
-  return ART.busts[id] || bust(id);
+  return ART.busts[id] || ART.goldBusts?.[id] || bust(id);
+}
+
+function porchCallProp(opt) {
+  const id = opt?.id || "";
+  if (id.includes("tea") || id.includes("oven")) return ART.props.demlik;
+  if (id.includes("whistle")) return ART.props.duduk;
+  if (id.includes("neon")) return ART.props.kulaklik;
+  if (id.includes("chaos") || id.includes("kite")) return ART.props.ucurtma;
+  if (id.includes("fence") || id.includes("hold")) return ART.props.gazete;
+  if (id.includes("cheer")) return ART.props.tepsi;
+  return ART.props.duduk;
 }
 
 function noteQuestHits(hits) {
@@ -2243,7 +2264,9 @@ function showFightActions(battle) {
     const swing = o.hpSwingDisplay
       ? (tr ? `≈ %${o.hpSwingDisplay.minPercent}–${o.hpSwingDisplay.maxPercent} takım HP` : `≈ ${o.hpSwingDisplay.minPercent}–${o.hpSwingDisplay.maxPercent}% team HP`)
       : "";
+    const prop = porchCallProp(o);
     return `<button class="porch-call-card btn ${cat === "safe" ? "btn-teal" : cat === "swingy" ? "btn-ember" : "btn-primary"}" type="button" data-action="porch-call" data-id="${o.id}">
+      <img class="porch-call-prop" src="${prop}" alt="" width="36" height="36" />
       <span class="porch-call-chip">${chip}</span>
       <strong>${loc(o.label)}</strong>
       <em>${loc(o.blurb)}</em>
@@ -2510,6 +2533,22 @@ function showSynProc(text) {
   node.classList.remove("pop");
   void node.offsetWidth;
   node.classList.add("pop");
+  const rivalry = /rivalry|rekabet/i.test(String(text || ""));
+  if (rivalry && ART.vfxRivalry) {
+    let vfx = stage.querySelector(".syn-rivalry-vfx");
+    if (!vfx) {
+      vfx = document.createElement("img");
+      vfx.className = "syn-rivalry-vfx";
+      vfx.alt = "";
+      stage.appendChild(vfx);
+    }
+    vfx.src = ART.vfxRivalry;
+    vfx.classList.remove("pop");
+    void vfx.offsetWidth;
+    vfx.classList.add("pop");
+    clearTimeout(vfx._t);
+    vfx._t = setTimeout(() => vfx.remove(), 750);
+  }
 }
 
 function applyDamage(target, dmg, attacker, battle, rivalryProc = false) {
