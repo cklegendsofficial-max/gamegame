@@ -737,8 +737,8 @@
         "beat": 1,
         "id": "comic_kickoff",
         "textTemplate": {
-          "tr": "Porch Cup başlar. {winner} sırası yanıyor.",
-          "en": "Porch Cup kicks off. {winner}'s porch is lit."
+          "tr": "Porch Cup başlar. {winner} sahneyi yakıyor.",
+          "en": "Porch Cup kicks off. {winner} lights the stage."
         }
       },
       {

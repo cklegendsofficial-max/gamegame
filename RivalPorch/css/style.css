@@ -590,6 +590,8 @@ h2,
 
 .bench-unit.selected {
   border-color: var(--neon-teal);
+  box-shadow: 0 0 0 3px rgba(46, 196, 182, 0.35);
+  transform: translateY(-2px);
 }
 
 .bench-unit.placed {
@@ -635,11 +637,22 @@ h2,
 }
 
 .unit-slot {
+  position: relative;
   background: rgba(26, 22, 18, 0.55);
   border-radius: 12px;
   padding: 0.3rem;
-  border: 1px solid rgba(242, 230, 216, 0.15);
+  border: 2px solid rgba(242, 230, 216, 0.15);
   text-align: center;
+}
+
+.unit-slot.ally {
+  border-color: rgba(46, 196, 182, 0.65);
+  box-shadow: 0 0 0 1px rgba(46, 196, 182, 0.2);
+}
+
+.unit-slot.enemy {
+  border-color: rgba(255, 107, 74, 0.7);
+  box-shadow: 0 0 0 1px rgba(255, 107, 74, 0.2);
 }
 
 .unit-slot.dead {
@@ -659,9 +672,18 @@ h2,
   display: block;
 }
 
+.unit-name {
+  font-size: 0.62rem;
+  font-weight: 800;
+  margin-bottom: 0.15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .hp-track {
   margin-top: 0.25rem;
-  height: 6px;
+  height: 8px;
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.45);
   overflow: hidden;
@@ -678,6 +700,70 @@ h2,
   background: linear-gradient(90deg, var(--neon-sign), #ff8f74);
 }
 
+.hp-num {
+  font-size: 0.58rem;
+  font-weight: 700;
+  opacity: 0.85;
+  margin-top: 0.1rem;
+}
+
+.dmg-floater {
+  position: absolute;
+  top: 28%;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #ffd2c4;
+  font-weight: 800;
+  font-size: 0.85rem;
+  text-shadow: 0 1px 2px #000;
+  animation: dmg-rise 0.8s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes dmg-rise {
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -18px);
+  }
+}
+
+.fight-vs {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--lamp-bloom);
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+}
+
+.fight-side-label {
+  position: relative;
+  z-index: 1;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.fight-side-label.enemy-label {
+  color: #ff8f74;
+}
+
+.fight-side-label.ally-label {
+  color: var(--neon-teal);
+}
+
+.fight-log {
+  min-height: 1.2rem;
+  font-size: 0.72rem;
+  margin: 0.35rem 0 0;
+}
+
 .fight-hud {
   position: relative;
   z-index: 1;
@@ -686,6 +772,69 @@ h2,
   gap: 0.5rem;
   font-weight: 800;
   font-size: 0.85rem;
+}
+
+.hud-ally {
+  color: var(--neon-teal);
+}
+
+.hud-enemy {
+  color: #ff8f74;
+}
+
+.grid-side.ally-side .cell {
+  outline: 1px solid rgba(46, 196, 182, 0.35);
+}
+
+.grid-side.enemy-side .cell {
+  outline: 1px solid rgba(255, 107, 74, 0.35);
+}
+
+.choice-feedback {
+  margin: 0.4rem 0 0.6rem;
+  color: var(--lamp-bloom);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.reward-breakdown {
+  margin: 0.25rem 0 0.75rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 10px;
+  background: rgba(46, 196, 182, 0.12);
+  border: 1px solid rgba(46, 196, 182, 0.3);
+  font-weight: 700;
+  color: var(--lamp-bloom);
+}
+
+.agenda-hint {
+  opacity: 0.65;
+  font-size: 0.78em;
+  font-weight: 600;
+}
+
+.evening-cup-tease {
+  margin: 0.45rem 0 0;
+  color: var(--porch-lamp);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.meta-currencies em {
+  font-style: normal;
+  font-size: 0.65rem;
+  opacity: 0.75;
+  font-weight: 700;
+}
+
+.action-hints {
+  margin-top: 0.5rem;
+  font-size: 0.72rem;
+}
+
+.title-sub {
+  margin-top: -0.35rem;
+  margin-bottom: 0.85rem;
 }
 
 .synergy-pills {

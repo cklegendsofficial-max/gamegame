@@ -333,6 +333,7 @@
     "shop.currency.tokens": { "tr": "Kil Jeton", "en": "Clay Tokens" },
     "shop.owned": { "tr": "Sahipsin", "en": "Owned" },
     "shop.buy": { "tr": "Al", "en": "Buy" },
+    "shop.claim": { "tr": "Topla", "en": "Claim" },
     "shop.equip": { "tr": "Tak", "en": "Equip" },
     "shop.preview": { "tr": "Önizle", "en": "Preview" },
     "shop.fairness_badge": { "tr": "Kazanmak için değil, görünmek için", "en": "For looks, not wins" },

@@ -63,17 +63,32 @@ export function formatPrice(price, economy, locale) {
   return `${price.amount} ${names[price.currency] || price.currency}`;
 }
 
+function prettyItemId(id = "") {
+  return String(id)
+    .replace(/^(skin_|pose_|frame_|emote_|tint_|decor_)/, "")
+    .replace(/_/g, " ");
+}
+
 export function rewardLabel(reward, locale) {
   if (!reward) return "—";
+  const names = {
+    porch_coins: locale === "tr" ? "Veranda Jetonu" : "Porch Coins",
+    neon_thread: locale === "tr" ? "Neon İplik" : "Neon Thread",
+    clay_tokens: locale === "tr" ? "Kil Jeton" : "Clay Tokens",
+  };
   if (reward.type === "currency") {
-    return `${reward.amount} ${reward.currency}`;
+    return `${reward.amount} ${names[reward.currency] || reward.currency}`;
   }
   if (reward.type === "bundle") {
     return (reward.items || [])
-      .map((i) => (i.currency ? `${i.amount} ${i.currency}` : i.itemId || i.type))
+      .map((i) =>
+        i.currency
+          ? `${i.amount} ${names[i.currency] || i.currency}`
+          : prettyItemId(i.itemId || i.type)
+      )
       .join(" + ");
   }
-  return reward.itemId || reward.type;
+  return prettyItemId(reward.itemId || reward.type);
 }
 
 export function applyDailyEarn(save, economy, action) {
@@ -113,13 +128,46 @@ export function applyDailyEarn(save, economy, action) {
 
 export function applyCupEarn(save, economy, { won, hadSynergy, shared }) {
   const cup = economy.earnRates?.cup || {};
-  if (won) grant(save, cup.win || {});
-  else grant(save, cup.loss || {});
-  if (hadSynergy && cup.synergySpotlight) grant(save, cup.synergySpotlight);
+  const before = { ...(save.currencies || {}) };
+  const parts = [];
+  if (won) {
+    grant(save, cup.win || {});
+    parts.push({ label: "win", bag: cup.win || {} });
+  } else {
+    grant(save, cup.loss || {});
+    parts.push({ label: "loss", bag: cup.loss || {} });
+  }
+  if (hadSynergy && cup.synergySpotlight) {
+    grant(save, cup.synergySpotlight);
+    parts.push({ label: "synergy", bag: cup.synergySpotlight });
+  }
   if (shared && cup.shareComicFirstPerCup && !save.dailyEarn.shareClaimed) {
     grant(save, cup.shareComicFirstPerCup);
     save.dailyEarn.shareClaimed = true;
+    parts.push({ label: "share", bag: cup.shareComicFirstPerCup });
   }
+  const delta = {};
+  for (const k of Object.keys(save.currencies || {})) {
+    const d = (save.currencies[k] || 0) - (before[k] || 0);
+    if (d) delta[k] = d;
+  }
+  return { delta, parts };
+}
+
+export function formatCurrencyDelta(delta, economy, locale) {
+  if (!delta) return "";
+  return Object.entries(delta)
+    .filter(([, v]) => v)
+    .map(([k, v]) => {
+      const name =
+        k === "porch_coins"
+          ? econT(economy, locale, "shop.currency.coins")
+          : k === "neon_thread"
+            ? econT(economy, locale, "shop.currency.thread")
+            : econT(economy, locale, "shop.currency.tokens");
+      return `${v > 0 ? "+" : ""}${v} ${name}`;
+    })
+    .join(" · ");
 }
 
 export function addPassXp(save, amount = 1) {

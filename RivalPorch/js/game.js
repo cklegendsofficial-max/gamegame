@@ -1,7 +1,8 @@
 import { loadSave, persistSave, clearSave, defaultSave } from "./save.js";
 import {
   econT, grant, canPay, pay, bestAffordablePrice, ownCosmetic, owns,
-  formatPrice, rewardLabel, applyDailyEarn, applyCupEarn, addPassXp, claimPassReward,
+  formatPrice, rewardLabel, applyDailyEarn, applyCupEarn, formatCurrencyDelta,
+  addPassXp, claimPassReward,
 } from "./wallet.js";
 import * as Story from "./story.js";
 
@@ -242,6 +243,10 @@ function eveningStats() {
   };
 }
 
+function currencyName(id) {
+  return shopStr(`shop.currency.${id === "porch_coins" ? "coins" : id === "neon_thread" ? "thread" : "tokens"}`);
+}
+
 function hudHtml() {
   const s = state.save;
   const dayLine = fillTemplate(t("day.label"), { day: s.dayIndex, week: weekNumber() });
@@ -249,9 +254,9 @@ function hudHtml() {
     <div class="meta-hud">
       <div class="meta-day">${dayLine}</div>
       <div class="meta-currencies">
-        <span title="porch_coins">🪙 ${s.currencies.porch_coins||0}</span>
-        <span title="neon_thread">🧵 ${s.currencies.neon_thread||0}</span>
-        <span title="clay_tokens">🧱 ${s.currencies.clay_tokens||0}</span>
+        <span title="${currencyName("porch_coins")}">🪙 ${s.currencies.porch_coins||0} <em>${currencyName("porch_coins")}</em></span>
+        <span title="${currencyName("neon_thread")}">🧵 ${s.currencies.neon_thread||0} <em>${currencyName("neon_thread")}</em></span>
+        <span title="${currencyName("clay_tokens")}">🧱 ${s.currencies.clay_tokens||0} <em>${currencyName("clay_tokens")}</em></span>
       </div>
     </div>`;
 }
@@ -277,13 +282,17 @@ function renderTitle() {
   const screen = document.getElementById("screen-title");
   screen.style.backgroundImage = `url("${ART.streetHero}")`;
   const hasSave = state.save.dayIndex > 1 || state.save.evening.checkin || state.save.cupHistory.length;
+  const stake = state.locale === "tr"
+    ? "Karşı Sırt bu Cumartesi Cup'a geliyor. Bu akşam üç kapı, bir seçim, bir sahne."
+    : "Rival Ridge brings Cup on Saturday. Tonight: three doors, one choice, one stage.";
   screen.innerHTML = `
     <div class="title-panel">
-      <button class="btn btn-secondary lang-toggle" type="button" data-action="toggle-lang">${state.locale === "tr" ? "EN" : "TR"}</button>
+      <button class="btn btn-secondary lang-toggle" type="button" data-action="toggle-lang" aria-label="Language">EN | TR · ${state.locale.toUpperCase()}</button>
       <h1 class="brand">${t("app.title")}</h1>
-      <p class="title-tag">${state.locale === "tr"
-        ? "Uzun akşamlar, demlenen ilişkiler, sezonluk Porch Cup."
-        : "Long evenings, brewing bonds, seasonal Porch Cup."}</p>
+      <p class="title-tag">${stake}</p>
+      <p class="muted title-sub">${state.locale === "tr"
+        ? "Kil diorama mahalle · demlenen ilişkiler · sezonluk Porch Cup"
+        : "Clay-diorama street · brewing bonds · seasonal Porch Cup"}</p>
       ${hasSave ? `<button class="btn btn-primary" type="button" data-action="continue-save">${t("common.continue_save")} — ${fillTemplate(t("day.label"), { day: state.save.dayIndex, week: weekNumber() })}</button>` : ""}
       <button class="btn ${hasSave ? "btn-secondary" : "btn-primary"}" type="button" data-action="new-game">${hasSave ? t("common.new_game") : t("boot.tap_to_start")}</button>
       <button class="btn btn-secondary" type="button" data-action="open-shop">${t("shop.title")}</button>
@@ -296,26 +305,61 @@ function renderEvening() {
   const week = Story.weekDef(state.stories, state.save.dayIndex);
   const arcBeat = Story.nextArcBeat(state.stories, state.save);
   const dom = Story.dominantRep(state.save);
+  const errandLabel = state.locale === "tr"
+    ? "Hediye veya dükkân (zorunlu)"
+    : "Gift or shop (required)";
   const items = [
-    { ok: st.checkin, label: t("street.porch_checkin") },
-    { ok: st.visits >= st.needVisits, label: `${t("evening.visit_need")} ${st.visits}/${st.needVisits}` },
-    { ok: st.streetEvent, label: t("street.event") },
-    { ok: st.errand, label: loc(state.depthMeta.eveningAgenda.requiredActions.find((a) => a.id === "errand").label) },
+    { ok: st.checkin, label: t("street.porch_checkin"), hint: state.locale === "tr" ? "+jeton, streak" : "+coins, streak" },
+    { ok: st.visits >= st.needVisits, label: `${t("evening.visit_need")} ${st.visits}/${st.needVisits}`, hint: state.locale === "tr" ? "3 derin sahne" : "3 deep scenes" },
+    { ok: st.streetEvent, label: t("street.event"), hint: state.locale === "tr" ? "günlük seçim" : "daily choice" },
+    { ok: st.errand, label: errandLabel, hint: state.locale === "tr" ? "hediye / alışveriş" : "gift / purchase" },
   ];
-  if (st.cupRequired) items.push({ ok: st.cupDone, label: t("cup.season_night") });
+  if (st.cupRequired) items.push({ ok: st.cupDone, label: t("cup.season_night"), hint: "Cup" });
+
+  const dayHooks = {
+    1: {
+      tr: "İlk akşam: üç kapı çal, bir sır öğren. Cumartesi Cup seni bekliyor.",
+      en: "Night one: knock three doors, learn one secret. Saturday Cup is watching.",
+    },
+    2: {
+      tr: "İkinci gece: dünkü seçimin yankılanır. Uçurtma ipi henüz çözülmedi.",
+      en: "Night two: yesterday's choice echoes. The kite string isn't done with you.",
+    },
+    3: {
+      tr: "Mahalle seni ölçüyor. Bir hediye, bir olay, bir sahne — sonra uyku.",
+      en: "The block is measuring you. One gift, one event, one scene — then sleep.",
+    },
+  };
+  let hook = dayHooks[state.save.dayIndex] || week?.cup?.tone || {
+    tr: "Cumartesi yaklaşıyor. Bağları demle, formasyonu kur.",
+    en: "Saturday closes in. Brew bonds, set the formation.",
+  };
+  // Personalize from last story note when available
+  const lastNote = (state.save.storyRecap || [])[0];
+  if (state.save.dayIndex >= 2 && lastNote?.text) {
+    const short = lastNote.text.length > 70 ? `${lastNote.text.slice(0, 68)}…` : lastNote.text;
+    hook = {
+      tr: `Dünden kalan: ${short}`,
+      en: `Carried from yesterday: ${short}`,
+    };
+  }
+  const cupTease = `<p class="evening-cup-tease">${loc(hook)}</p>`;
 
   screen.innerHTML = `
     ${hudHtml()}
     <div class="topbar"><h2>${t("evening.title")}</h2>
       <button class="btn btn-secondary" type="button" data-action="open-ladder">${t("meta.ladder")}</button>
     </div>
-    <p class="muted">${fillTemplate(t("day.streak"), { n: state.save.checkinStreak })} · ${state.save.moodLabel || "mood"} · rep ${dom || "—"}</p>
-    <div class="dialog-box" style="min-height:auto;margin-bottom:0.5rem">
+    <p class="muted">${fillTemplate(t("day.streak"), { n: state.save.checkinStreak })} · ${state.save.moodLabel || "calm"}${dom ? ` · ${Story.repLabel(dom, state.locale)}` : ""}</p>
+    <div class="dialog-box evening-hook" style="min-height:auto;margin-bottom:0.5rem">
       <p class="prompt" style="margin:0 0 0.35rem">${loc(week?.title)} — ${loc(week?.focus)}</p>
-      ${arcBeat ? `<p class="muted" style="margin:0">🎭 ${loc(arcBeat.arc.title)}: ${loc(arcBeat.beat.prompt)}</p>` : `<p class="muted" style="margin:0">${state.locale === "tr" ? "Aktif arc beat yok — günlük olay / sır kapıları" : "No active arc beat — daily events / secret doors"}</p>`}
+      ${arcBeat
+        ? `<p class="muted" style="margin:0">🎭 ${loc(arcBeat.arc.title)}: ${loc(arcBeat.beat.prompt)} <span class="chip tea">${(arcBeat.arc.neighbors || []).map((id) => loc(neighborById(id)?.name) || id).slice(0, 3).join(" · ")}</span></p>`
+        : `<p class="muted" style="margin:0">${state.locale === "tr" ? "Kapıları gez — her komşunun kendi sahnesi var." : "Walk the doors — each neighbor has their own scene."}</p>`}
+      ${cupTease}
     </div>
     <ul class="agenda-list">
-      ${items.map((i) => `<li class="${i.ok ? "done" : ""}">${i.ok ? "✓" : "○"} ${i.label}</li>`).join("")}
+      ${items.map((i) => `<li class="${i.ok ? "done" : ""}">${i.ok ? "✓" : "○"} ${i.label}${i.hint && !i.ok ? ` <span class="agenda-hint">${i.hint}</span>` : ""}</li>`).join("")}
     </ul>
     <div class="btn-row">
       <button class="btn btn-primary" type="button" data-action="goto-street">${t("street.header")}</button>
@@ -323,7 +367,7 @@ function renderEvening() {
       <button class="btn btn-ember" type="button" data-action="goto-cup">${isCupNight() ? t("cup.season_night") : t("cup.practice")}</button>
     </div>
     <div class="btn-row">
-      <button class="btn btn-secondary" type="button" data-action="open-story-log">${state.locale === "tr" ? "Hikâye / ending" : "Story / ending"}</button>
+      <button class="btn btn-secondary" type="button" data-action="open-story-log">${state.locale === "tr" ? "Hikâye defteri" : "Story ledger"}</button>
       <button class="btn btn-rose" type="button" data-action="end-evening" ${st.complete ? "" : "disabled"}>${t("evening.end")}</button>
     </div>
     ${st.complete ? "" : `<p class="street-hint">${t("evening.locked")}</p>`}
@@ -379,7 +423,20 @@ function renderNeighbor(id) {
       ? loc(offer.arc.title) + " · " + loc(offer.beat.prompt)
       : offer.kind === "secret"
         ? state.locale === "tr" ? "Sır kapısı aralandı…" : "A secret door creaks…"
-        : state.locale === "tr" ? "Cup eve sohbeti" : "Cup-eve chatter"
+        : offer.kind === "cup_eve"
+          ? state.locale === "tr" ? "Cup öncesi sohbet" : "Cup-eve chatter"
+          : (() => {
+              const free = offer.tree || Story.freePorchTree(id);
+              const root = free ? Story.getNode(free, free.start) : null;
+              const tease = root ? loc(root.text) : "";
+              return tease
+                ? tease.length > 96
+                  ? `${tease.slice(0, 94)}…`
+                  : tease
+                : state.locale === "tr"
+                  ? `${loc(n.name)} verandası — senin sahnen`
+                  : `${loc(n.name)}'s porch — your scene`;
+            })()
     : "";
   screen.innerHTML = `
     ${hudHtml()}
@@ -398,41 +455,39 @@ function renderNeighbor(id) {
       </div>
     </div>
     <div class="dialog-box" id="neighbor-dialog">
-      ${visited ? t("story.done") : offerHint || (state.locale === "tr" ? "Sahne, hediye veya konuşma." : "Scene, gift, or talk.")}
+      ${visited && !offer ? t("story.done") : offerHint || (state.locale === "tr" ? "Sahne, hediye veya konuşma." : "Scene, gift, or talk.")}
     </div>
     <div class="btn-row" id="neighbor-actions">
-      <button class="btn btn-primary" type="button" data-action="start-story" data-id="${id}" ${visited && !offer ? "disabled" : ""}>${t("story.scene")}</button>
+      <button class="btn btn-primary" type="button" data-action="start-story" data-id="${id}" ${visited && offer?.kind === "free" ? "disabled" : ""}>${t("story.scene")}</button>
       <button class="btn btn-teal" type="button" data-action="gift" data-id="${id}">${t("neighbor.gift")}</button>
       <button class="btn btn-secondary" type="button" data-action="talk" data-id="${id}">${t("neighbor.talk")}</button>
       ${n.drama ? `<button class="btn btn-ember" type="button" data-action="drama" data-id="${id}">${t("neighbor.drama")}</button>` : ""}
-    </div>`;
+    </div>
+    <p class="muted action-hints">${state.locale === "tr"
+      ? "Sahne: ilişki + hikâye · Hediye: gündem errand · Konuş: hızlı bağ · Drama: trait"
+      : "Scene: bond + story · Gift: agenda errand · Talk: quick bond · Drama: traits"}</p>`;
 }
 
 function startStory(id) {
   const offer = Story.dialogueForNeighborVisit(state.stories, state.save, id);
-  if (!offer?.tree) {
-    // fallback: use first available tree mentioning neighbor via speaker in root
-    const fallback = (state.stories.dialogueTrees || []).find((tr) =>
-      (tr.nodes || []).some((n) => n.speaker === id)
-    );
-    if (!fallback) {
-      toast(state.locale === "tr" ? "Bugün yeni sahne yok — olay veya hediye dene" : "No scene today — try event or gift");
-      return;
-    }
-    state.dialogue = { tree: fallback, nodeId: fallback.start, ctx: { kind: "free", neighborId: id } };
-  } else {
-    if (offer.kind === "arc") {
-      Story.markBeatStarted(state.save, offer.beat);
-      for (const f of offer.beat.setFlags || []) {
-        if (!String(f).includes("complete")) Story.setFlag(state.save, f);
-      }
-    }
-    state.dialogue = {
-      tree: offer.tree,
-      nodeId: offer.tree.start,
-      ctx: { kind: offer.kind, neighborId: id, arc: offer.arc, beat: offer.beat },
-    };
+  const free = Story.freePorchTree(id, state.save);
+  if (!offer?.tree && !free) {
+    toast(state.locale === "tr" ? "Bugün yeni sahne yok — olay veya hediye dene" : "No scene today — try event or gift");
+    return;
   }
+  if (offer?.kind === "arc") {
+    Story.markBeatStarted(state.save, offer.beat);
+    for (const f of offer.beat.setFlags || []) {
+      if (!String(f).includes("complete")) Story.setFlag(state.save, f);
+    }
+  }
+  const tree = offer?.tree || free;
+  state.dialogue = {
+    tree,
+    nodeId: tree.start,
+    ctx: { kind: offer?.kind || "free", neighborId: id, arc: offer?.arc, beat: offer?.beat },
+    feedbackLog: [],
+  };
   const node = Story.getNode(state.dialogue.tree, state.dialogue.nodeId);
   Story.applyNodeArrival(state.save, node);
   saveNow();
@@ -450,16 +505,27 @@ function renderDialogue() {
   }
   const speaker = node.speaker ? neighborById(node.speaker) : neighborById(ctx.neighborId);
   const sid = speaker?.id || ctx.neighborId || "n1";
+  const kindLabel =
+    ctx.kind === "arc"
+      ? loc(ctx.arc?.title)
+      : ctx.kind === "secret"
+        ? state.locale === "tr" ? "Sır" : "Secret"
+        : ctx.kind === "cup_eve"
+          ? state.locale === "tr" ? "Cup öncesi" : "Cup eve"
+          : t("story.scene");
+  const lastFb = state.dialogue?.lastFeedback || "";
   if (node.ends && !(node.choices && node.choices.length)) {
-    // terminal narration with continue
     screen.innerHTML = `
       ${hudHtml()}
-      <div class="topbar"><h2>${ctx.arc ? loc(ctx.arc.title) : t("story.scene")}</h2></div>
+      <div class="topbar"><h2>${kindLabel}</h2>
+        <button class="btn btn-secondary" type="button" data-action="open-neighbor" data-id="${ctx.neighborId}">${t("common.back")}</button>
+      </div>
       <div class="neighbor-hero compact">
         <div class="bust-frame"><img src="${bust(sid)}" alt="" onerror="this.src='${DAY1_BUSTS.n1}'" /></div>
         <div><h2>${loc(speaker?.name) || ""}</h2><p class="muted">${ctx.beat ? loc(ctx.beat.prompt) : ""}</p></div>
       </div>
       <div class="dialog-box"><p class="prompt">${loc(node.text)}</p>
+        ${lastFb ? `<p class="choice-feedback">${lastFb}</p>` : ""}
         <div class="choice-stack">
           <button class="btn btn-primary" type="button" data-action="dialogue-end">${t("common.continue")}</button>
         </div>
@@ -468,14 +534,15 @@ function renderDialogue() {
   }
   screen.innerHTML = `
     ${hudHtml()}
-    <div class="topbar"><h2>${ctx.arc ? loc(ctx.arc.title) : t("story.scene")}</h2>
+    <div class="topbar"><h2>${kindLabel}</h2>
       <button class="btn btn-secondary" type="button" data-action="open-neighbor" data-id="${ctx.neighborId}">${t("common.back")}</button>
     </div>
     <div class="neighbor-hero compact">
       <div class="bust-frame"><img src="${bust(sid)}" alt="" onerror="this.src='${DAY1_BUSTS.n1}'" /></div>
-      <div><h2>${loc(speaker?.name) || ""}</h2><p class="muted">${ctx.beat ? loc(ctx.beat.prompt) : (ctx.kind || "")}</p></div>
+      <div><h2>${loc(speaker?.name) || ""}</h2><p class="muted">${ctx.beat ? loc(ctx.beat.prompt) : ""}</p></div>
     </div>
     <div class="dialog-box"><p class="prompt">${loc(node.text)}</p>
+      ${lastFb ? `<p class="choice-feedback">${lastFb}</p>` : ""}
       <div class="choice-stack">
         ${(node.choices || [])
           .map(
@@ -492,7 +559,14 @@ function storyChoice(cid) {
   const node = Story.getNode(tree, nodeId);
   const choice = (node.choices || []).find((c) => c.id === cid);
   if (!choice) return;
-  Story.applyChoicePayload(state.save, state.stories, choice, ctx.neighborId || node.speaker);
+  const summary = Story.applyChoicePayload(state.save, state.stories, choice, ctx.neighborId || node.speaker);
+  const fb = Story.formatChoiceSummary(summary, state.locale, (nid) => loc(neighborById(nid)?.name));
+  state.dialogue.lastFeedback = fb;
+  state.dialogue.lastChoiceLabel = loc(choice.label);
+  if (fb) {
+    state.dialogue.feedbackLog = [...(state.dialogue.feedbackLog || []), fb];
+    toast(fb);
+  }
   Story.applyStoryUnlocks(state.stories, state.save);
   if (!choice.next) {
     finishDialogue();
@@ -502,15 +576,11 @@ function storyChoice(cid) {
   const next = Story.getNode(tree, choice.next);
   Story.applyNodeArrival(state.save, next);
   saveNow();
-  if (next?.ends && !(next.choices && next.choices.length)) {
-    renderDialogue();
-    return;
-  }
   renderDialogue();
 }
 
 function finishDialogue() {
-  const { tree, ctx, nodeId } = state.dialogue || {};
+  const { tree, ctx, nodeId, feedbackLog } = state.dialogue || {};
   const node = Story.getNode(tree, nodeId);
   Story.applyNodeArrival(state.save, node);
   if (tree?.id && !state.save.completedTrees.includes(tree.id)) state.save.completedTrees.push(tree.id);
@@ -528,10 +598,25 @@ function finishDialogue() {
   if (ctx?.neighborId && !state.save.evening.visits.includes(ctx.neighborId)) {
     state.save.evening.visits.push(ctx.neighborId);
   }
+  // Remember plain-language beats for story ledger
+  if (!state.save.storyRecap) state.save.storyRecap = [];
+  const who = loc(neighborById(ctx?.neighborId)?.name) || "";
+  const choiceNote = state.dialogue?.lastChoiceLabel;
+  const line = choiceNote
+    ? `${who}: “${choiceNote}”${feedbackLog?.length ? ` → ${feedbackLog[feedbackLog.length - 1]}` : ""}`
+    : feedbackLog?.length
+      ? `${who}: ${feedbackLog[feedbackLog.length - 1]}`
+      : who
+        ? state.locale === "tr" ? `${who} ile konuştun.` : `You spoke with ${who}.`
+        : "";
+  if (line) {
+    state.save.storyRecap.unshift({ day: state.save.dayIndex, text: line });
+    state.save.storyRecap = state.save.storyRecap.slice(0, 24);
+  }
   Story.applyStoryUnlocks(state.stories, state.save);
   addPassXp(state.save, 0.4);
   saveNow();
-  toast(t("story.done"));
+  toast(feedbackLog?.length ? feedbackLog[feedbackLog.length - 1] : t("story.done"));
   if (ctx?.neighborId) {
     renderNeighbor(ctx.neighborId);
     showScreen("screen-neighbor");
@@ -563,7 +648,11 @@ function doGift(id) {
   addPassXp(state.save, 0.2);
   saveNow();
   renderNeighbor(id);
-  document.getElementById("neighbor-dialog").innerHTML = `<p>${loc(line.text)}</p><p class="muted">-${affordable.cost.porch_coins} 🪙 · ${loc(affordable.name)}</p>`;
+  const gain = (line.affinityDelta || affordable.affinityDelta || 1) * 3;
+  document.getElementById("neighbor-dialog").innerHTML = `<p>${loc(line.text)}</p>
+    <p class="choice-feedback">-${affordable.cost.porch_coins} 🪙 · ${loc(affordable.name)} · ${t("neighbor.affinity")} +${gain}</p>
+    <p class="muted">${state.locale === "tr" ? "Hediye errandı tamam." : "Gift errand complete."}</p>`;
+  toast(state.locale === "tr" ? `Hediye verildi · ilişki +${gain}` : `Gift given · bond +${gain}`);
 }
 
 function doTalk(id) {
@@ -604,12 +693,15 @@ function resolveDrama(nid, cid) {
     state.save.traits[nid][trait] = (state.save.traits[nid][trait] || 0) + delta;
   }
   state.save.dramaFlags[n.drama.id] = cid;
-  state.save.evening.errand = true;
   applyDailyEarn(state.save, state.economy, "drama");
   addPassXp(state.save, 0.35);
   saveNow();
   renderNeighbor(nid);
-  document.getElementById("neighbor-dialog").innerHTML = `<p>${loc(choice.label)} ✓</p>`;
+  const traitBits = Object.entries(choice.traitDeltas || {})
+    .map(([k, v]) => `${k} ${v > 0 ? "+" : ""}${v}`)
+    .join(" · ");
+  document.getElementById("neighbor-dialog").innerHTML = `<p>${loc(choice.label)}</p>
+    <p class="choice-feedback">${state.locale === "tr" ? "İlişki" : "Bond"} ${(choice.affinityDelta || 0) * 3 > 0 ? "+" : ""}${(choice.affinityDelta || 0) * 3}${traitBits ? ` · ${traitBits}` : ""}</p>`;
 }
 
 function porchCheckin() {
@@ -633,17 +725,14 @@ function porchCheckin() {
 
 function openStreetEvent() {
   if (state.save.evening.streetEvent) return;
-  // Prefer active arc beat as "forced" street drama if available and not visited
-  const next = Story.nextArcBeat(state.stories, state.save);
-  if (next?.beat && !state.save.evening.visits.length) {
-    // nudge player — still allow random event
-  }
   const ev = Story.pickDailyEvent(state.stories, state.save);
   state.streetEvent = ev;
   const screen = document.getElementById("screen-event");
   screen.innerHTML = `
     ${hudHtml()}
-    <div class="topbar"><h2>${loc(ev.title) || t("street.event")}</h2></div>
+    <div class="topbar"><h2>${loc(ev.title) || t("street.event")}</h2>
+      <button class="btn btn-secondary" type="button" data-action="goto-street">${t("common.back")}</button>
+    </div>
     <div class="dialog-box">
       <p class="prompt">${loc(ev.prompt)}</p>
       <div class="choice-stack">
@@ -661,9 +750,8 @@ function openStreetEvent() {
 function resolveEvent(cid) {
   const ev = state.streetEvent;
   const choice = (ev.choices || []).find((c) => c.id === cid);
-  Story.applyChoicePayload(state.save, state.stories, choice, null);
+  const summary = Story.applyChoicePayload(state.save, state.stories, choice, null);
   if (choice?.traitDeltas) {
-    // apply to a featured neighbor if tagged, else n1
     const nid = (ev.tags || []).includes("neon") ? "n5" : "n1";
     ensureNeighborState(nid);
     for (const [k, v] of Object.entries(choice.traitDeltas)) {
@@ -674,10 +762,28 @@ function resolveEvent(cid) {
   if (!state.save.seenDailyEvents.includes(ev.id)) state.save.seenDailyEvents.push(ev.id);
   Story.applyStoryUnlocks(state.stories, state.save);
   addPassXp(state.save, 0.25);
+  if (!state.save.storyRecap) state.save.storyRecap = [];
+  state.save.storyRecap.unshift({
+    day: state.save.dayIndex,
+    text: `${loc(ev.title)} → ${loc(choice.label)}`,
+  });
+  state.save.storyRecap = state.save.storyRecap.slice(0, 24);
   saveNow();
-  toast(loc(choice.label));
-  renderEvening();
-  showScreen("screen-evening");
+  const fb = Story.formatChoiceSummary(summary, state.locale, (nid) => loc(neighborById(nid)?.name));
+  const screen = document.getElementById("screen-event");
+  screen.innerHTML = `
+    ${hudHtml()}
+    <div class="topbar"><h2>${loc(ev.title) || t("street.event")}</h2></div>
+    <div class="dialog-box">
+      <p class="prompt">${loc(choice.label)}</p>
+      ${fb ? `<p class="choice-feedback">${fb}</p>` : ""}
+      <p class="muted">${state.locale === "tr" ? "Sokak bunu hatırlayacak." : "The street will remember that."}</p>
+      <div class="choice-stack">
+        <button class="btn btn-primary" type="button" data-action="goto-evening">${t("common.continue")}</button>
+      </div>
+    </div>`;
+  toast(fb || loc(choice.label));
+  showScreen("screen-event");
 }
 
 function endEvening() {
@@ -730,12 +836,13 @@ function endEvening() {
 function renderEnding() {
   const ending = (state.stories.endings || []).find((e) => e.id === state.save.endingId) || Story.evaluateEndings(state.stories, state.save);
   const screen = document.getElementById("screen-story");
+  const dom = Story.dominantRep(state.save);
   screen.innerHTML = `
     ${hudHtml()}
     <div class="topbar"><h2>${loc(state.stories.season1?.title) || "Season 1"}</h2></div>
     <p class="result-banner win">${loc(ending?.title) || "—"}</p>
     <div class="dialog-box"><p>${loc(ending?.summary)}</p>
-      <p class="muted">rep: ${Story.dominantRep(state.save)}</p>
+      <p class="muted">${dom ? Story.repLabel(dom, state.locale) : ""}</p>
     </div>
     <div class="btn-row">
       <button class="btn btn-primary" type="button" data-action="goto-evening">${t("common.continue")}</button>
@@ -744,34 +851,48 @@ function renderEnding() {
 
 function renderStoryLog() {
   const screen = document.getElementById("screen-story");
-  const flags = Object.keys(state.save.storyFlags || {}).filter((f) => state.save.storyFlags[f]);
   const ending = state.save.endingId
     ? (state.stories.endings || []).find((e) => e.id === state.save.endingId)
-    : Story.evaluateEndings(state.stories, state.save);
+    : null;
   const unlocks = state.save.storyUnlocks || { skins: [], unitMods: [] };
   const arcs = (state.stories.arcs || [])
     .map((a) => {
       const st = state.save.arcs?.[a.id];
-      return `<li class="${st?.complete ? "done" : ""}">${st?.complete ? "✓" : "○"} ${loc(a.title)}</li>`;
+      const status = st?.complete
+        ? state.locale === "tr" ? "bitti" : "done"
+        : st
+          ? state.locale === "tr" ? "devam" : "open"
+          : state.locale === "tr" ? "kilitli" : "locked";
+      return `<li class="${st?.complete ? "done" : ""}">${st?.complete ? "✓" : st ? "●" : "○"} ${loc(a.title)} <span class="agenda-hint">${status}</span></li>`;
     })
     .join("");
+  const repLine = Object.entries(state.save.reputation || {})
+    .filter(([, v]) => v)
+    .map(([k, v]) => `${Story.repLabel(k, state.locale)} ${v}`)
+    .join(" · ") || "—";
+  const recap = (state.save.storyRecap || [])
+    .map((r) => `<li>Day ${r.day}: ${r.text}</li>`)
+    .join("") || `<li class="muted">${state.locale === "tr" ? "Henüz not yok — sahneleri oyna." : "No notes yet — play scenes."}</li>`;
+  const unlockBits = [
+    ...(unlocks.skins || []).map((id) => id.replace(/^skin_/, "")),
+    ...(unlocks.unitMods || []).map((id) => id.replace(/^mod_/, "")),
+  ];
   screen.innerHTML = `
     ${hudHtml()}
     <div class="topbar"><h2>${state.locale === "tr" ? "Hikâye defteri" : "Story ledger"}</h2>
       <button class="btn btn-secondary" type="button" data-action="goto-evening">${t("common.back")}</button>
     </div>
-    <h3 class="section-label">Arcs</h3>
+    <h3 class="section-label">${state.locale === "tr" ? "Arklar" : "Arcs"}</h3>
     <ul class="agenda-list">${arcs}</ul>
-    <h3 class="section-label">Rep</h3>
-    <p class="muted">${Object.entries(state.save.reputation || {}).map(([k, v]) => `${k}:${v}`).join(" · ")}</p>
-    <h3 class="section-label">Flags (${flags.length})</h3>
-    <p class="muted" style="max-height:8rem;overflow:auto">${flags.slice(0, 40).join(", ") || "—"}</p>
-    <h3 class="section-label">Unlocks</h3>
-    <p class="muted">skins: ${unlocks.skins.join(", ") || "—"}</p>
-    <p class="muted">mods: ${unlocks.unitMods.join(", ") || "—"}</p>
-    <h3 class="section-label">Ending</h3>
-    <p>${ending ? loc(ending.title) : state.locale === "tr" ? "Henüz kilitlenmedi" : "Not locked yet"}</p>
-    ${ending ? `<p class="muted">${loc(ending.summary)}</p>` : ""}`;
+    <h3 class="section-label">${state.locale === "tr" ? "Mahalle ünü" : "Street rep"}</h3>
+    <p class="muted">${repLine}</p>
+    <h3 class="section-label">${state.locale === "tr" ? "Son notlar" : "Recent notes"}</h3>
+    <ul class="agenda-list recap-list">${recap}</ul>
+    <h3 class="section-label">${state.locale === "tr" ? "Hikâye ödülleri" : "Story unlocks"}</h3>
+    <p class="muted">${unlockBits.length ? unlockBits.join(", ") : state.locale === "tr" ? "Henüz yok" : "None yet"}</p>
+    <h3 class="section-label">${state.locale === "tr" ? "Sezon sonu" : "Season end"}</h3>
+    <p class="muted">${ending ? loc(ending.title) : state.locale === "tr" ? "28. günden sonra kilitlenir" : "Locks after day 28"}</p>
+    ${ending ? `<p>${loc(ending.summary)}</p>` : ""}`;
   showScreen("screen-story");
 }
 
@@ -804,9 +925,16 @@ function renderCupLobby() {
     .join("");
   const ready = state.cupPicks.length === state.pickCount;
   const tags = state.cupPicks.map((id) => neighborById(id).synergyTag);
-  const preview = activeSynergies(tags)
-    .map((s) => `<span class="chip ${s.tagsRequired[0].toLowerCase()}">${loc(s.name)}</span>`)
+  const syns = activeSynergies(tags);
+  const synDesc = (s) => loc(s.rules?.description) || loc(s.name);
+  const preview = syns
+    .map((s) => `<span class="chip ${s.tagsRequired[0].toLowerCase()}" title="${synDesc(s)}">${loc(s.name)}</span>`)
     .join("") || `<span class="muted">${t("synergy.active")}: —</span>`;
+  const synHint = syns.length
+    ? syns.map(synDesc).join(" · ")
+    : state.locale === "tr"
+      ? "Aynı etiketlerden 2+ seç → sinerji"
+      : "Pick 2+ matching tags → synergy";
 
   screen.innerHTML = `
     ${hudHtml()}
@@ -819,6 +947,7 @@ function renderCupLobby() {
     <p class="street-hint">${fillTemplate(t("cup.picks"), { n: state.pickCount })} (${list.length} ${state.locale === "tr" ? "açık" : "unlocked"})</p>
     <div class="pick-grid pick-grid-dense">${cards}</div>
     <div class="synergy-pills" style="justify-content:center">${preview}</div>
+    <p class="muted synergy-hint">${synHint}</p>
     <p class="pick-status">${state.cupPicks.length}/${state.pickCount}</p>
     <div class="btn-row">
       <button class="btn btn-primary" type="button" data-action="goto-draft" ${ready ? "" : "disabled"}>${t("cup.start")}</button>
@@ -837,7 +966,8 @@ function renderDraft() {
   const slots = 6;
   if (state.placement.length !== slots) state.placement = Array(slots).fill(null);
   const bot = state.content.botCupRoster;
-  const enemyIds = bot.defaultLineup;
+  if (!state.enemyLineup?.length) state.enemyLineup = pickEnemyLineup(state.cupPicks);
+  const enemyIds = state.enemyLineup;
   const allyCells = state.placement
     .map((pid, idx) => {
       const filled = pid ? `<img src="${bust(pid)}" alt="" onerror="this.src='${DAY1_BUSTS.n1}'" />` : "";
@@ -866,12 +996,13 @@ function renderDraft() {
     <div class="topbar"><h2>${t("draft.title")}</h2>
       <button class="btn btn-secondary" type="button" data-action="goto-cup">${t("common.back")}</button>
     </div>
-    <p class="street-hint">${t("draft.hint")}</p>
+    <p class="street-hint">${t("draft.hint")} · ${state.locale === "tr" ? "Ön sıra / arka sıra" : "Front row / back row"}</p>
     <div class="placement-board">
-      <div><div class="grid-label">${state.locale === "tr" ? "Sen" : "You"}</div><div class="grid-side">${allyCells}</div></div>
-      <div><div class="grid-label">${loc(bot.label)}</div><div class="grid-side">${enemyHtml}</div></div>
+      <div><div class="grid-label">${state.locale === "tr" ? "Sen (ön→arka)" : "You (front→back)"}</div><div class="grid-side ally-side">${allyCells}</div></div>
+      <div><div class="grid-label">${loc(bot.label)}</div><div class="grid-side enemy-side">${enemyHtml}</div></div>
     </div>
     <div class="bench">${bench}</div>
+    <p class="muted">${state.selectedBench ? (state.locale === "tr" ? "Şimdi bir hücreye dokun" : "Now tap a cell") : (state.locale === "tr" ? "Önce tepside birim seç" : "Pick a unit from the tray first")}</p>
     <div class="btn-row">
       <button class="btn btn-secondary" type="button" data-action="auto-place">${state.locale === "tr" ? "Otomatik" : "Auto"}</button>
       <button class="btn btn-primary" type="button" data-action="start-fight" ${placedCount === state.cupPicks.length ? "" : "disabled"}>${t("draft.confirm")}</button>
@@ -900,9 +1031,21 @@ function placeCell(idx) {
 }
 function autoPlace() {
   state.placement = Array(6).fill(null);
-  state.cupPicks.forEach((id, i) => {
-    state.placement[i] = id;
-  });
+  const rank = (id) => {
+    const role = (neighborById(id)?.role || "").toLowerCase();
+    if (/tank|bruiser/.test(role)) return 0;
+    if (/support/.test(role)) return 1;
+    if (/heal/.test(role)) return 2;
+    if (/burst|aoe|assassin/.test(role)) return 3;
+    return 2;
+  };
+  // 2×3 grid: prefer front row (0,1) then back (3,4) — never dump supports in pure front forever
+  const slots = [0, 1, 3, 4, 2, 5];
+  [...state.cupPicks]
+    .sort((a, b) => rank(a) - rank(b))
+    .forEach((id, i) => {
+      state.placement[slots[i] ?? i] = id;
+    });
   state.selectedBench = null;
   renderDraft();
 }
@@ -959,12 +1102,38 @@ function makeBotFighter(botUnit, slot, mult) {
   };
 }
 
+function pickEnemyLineup(allyIds) {
+  const bot = state.content.botCupRoster;
+  const mirrored = new Set(allyIds.map((id) => `bot_${id}`));
+  const pool = (bot.units || []).filter((u) => !mirrored.has(u.id));
+  const picks = [];
+  const preferred = (bot.defaultLineup || []).filter((id) => !mirrored.has(id));
+  for (const id of preferred) {
+    if (picks.length >= 3) break;
+    if (!picks.includes(id)) picks.push(id);
+  }
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  for (const u of shuffled) {
+    if (picks.length >= 3) break;
+    if (!picks.includes(u.id)) picks.push(u.id);
+  }
+  while (picks.length < 3) {
+    const fallback = (bot.units || []).find((u) => !picks.includes(u.id));
+    if (!fallback) break;
+    picks.push(fallback.id);
+  }
+  return picks.slice(0, 3);
+}
+
 function startFight() {
   if (state.fightTimer) clearInterval(state.fightTimer);
   const allyIds = state.placement.filter(Boolean);
   const bot = state.content.botCupRoster;
-  const mult = state.botMult || 1;
-  const enemies = bot.defaultLineup.map((id, i) => makeBotFighter(bot.units.find((x) => x.id === id), i, mult));
+  // Practice Cup bots fight harder so placement matters; season nights use ladder mult
+  const mult = (state.botMult || 1) * (isCupNight() ? 1 : 1.22);
+  const enemyIds = state.enemyLineup?.length ? state.enemyLineup : pickEnemyLineup(allyIds);
+  state.enemyLineup = enemyIds;
+  const enemies = enemyIds.map((id, i) => makeBotFighter(bot.units.find((x) => x.id === id), i, mult));
   const allies = allyIds.map((id, i) => makeFighter(id, "ally", i));
   const battle = {
     allies,
@@ -973,10 +1142,12 @@ function startFight() {
     enemySyn: activeSynergies(enemies.map((a) => a.synergyTag)),
     elapsed: 0,
     finished: false,
+    log: [],
+    floaters: [],
   };
   renderFight(battle);
   showScreen("screen-fight");
-  const tickMs = 400;
+  const tickMs = 700;
   const uiMs = 100;
   let combatAcc = 0;
   const startedAt = performance.now();
@@ -988,6 +1159,8 @@ function startFight() {
       combatAcc -= tickMs;
       combatTick(battle);
     }
+    // prune floaters
+    battle.floaters = (battle.floaters || []).filter((f) => battle.elapsed - f.t < 0.85);
     updateFightUI(battle);
     if (battle.elapsed >= 75 || !battle.allies.some((u) => u.alive) || !battle.enemies.some((u) => u.alive)) {
       endFight(battle);
@@ -1023,8 +1196,8 @@ function combatTick(battle) {
     if (chaos && Math.random() < chaos.rules.critChance) dmg = Math.floor(dmg * (chaos.rules.critMult || 1.5));
 
     if (attacker.role === "AoE" || /AoE|Burst/i.test(attacker.role || "")) {
-      for (const f of foes) applyDamage(f, f === target ? dmg : Math.max(1, Math.floor(dmg * 0.35)), attacker);
-    } else applyDamage(target, dmg, attacker);
+      for (const f of foes) applyDamage(f, f === target ? dmg : Math.max(1, Math.floor(dmg * 0.35)), attacker, battle);
+    } else applyDamage(target, dmg, attacker, battle);
 
     if (/Healer|heal/i.test(attacker.role || "") || attacker.synergyTag === "Oven") {
       const friends = attacker.side === "ally" ? battle.allies : battle.enemies;
@@ -1049,9 +1222,16 @@ function combatTick(battle) {
   }
 }
 
-function applyDamage(target, dmg, attacker) {
+function applyDamage(target, dmg, attacker, battle) {
   target.hp -= dmg;
   attacker.damageDealt += dmg;
+  if (battle) {
+    battle.floaters = battle.floaters || [];
+    battle.floaters.push({ side: target.side, slot: target.slot, dmg, t: battle.elapsed });
+    battle.log = battle.log || [];
+    battle.log.unshift(`${attacker.name} → ${target.name} −${dmg}`);
+    battle.log = battle.log.slice(0, 4);
+  }
   if (target.hp <= 0) {
     target.hp = 0;
     target.alive = false;
@@ -1075,22 +1255,33 @@ function renderFight(battle) {
       <button class="btn btn-secondary" type="button" data-action="skip-fight">${t("fight.skip")}</button>
     </div>
     <div class="fight-hud" style="margin-bottom:0.35rem">
-      <span id="ally-hp-total"></span><span id="fight-timer">0.0s</span><span id="enemy-hp-total"></span>
+      <span id="ally-hp-total" class="hud-ally"></span><span id="fight-timer">0.0s</span><span id="enemy-hp-total" class="hud-enemy"></span>
     </div>
     <div class="fight-stage" style="background-image:url('${ART.arenaStage}')">
+      <div class="fight-side-label enemy-label">${state.locale === "tr" ? "Rakip" : "Rival"}</div>
       <div class="fight-row" id="enemy-row"></div>
+      <div class="fight-vs">VS</div>
       <div class="fight-row" id="ally-row"></div>
+      <div class="fight-side-label ally-label">${state.locale === "tr" ? "Senin porch" : "Your porch"}</div>
     </div>
-    <div class="synergy-pills">${synPills}</div>`;
+    <div class="synergy-pills">${synPills}</div>
+    <p class="fight-log muted" id="fight-log"></p>`;
   screen._battle = battle;
   updateFightUI(battle);
 }
 
-function unitCard(u, side) {
+function unitCard(u, side, floaters = []) {
   const pct = Math.max(0, Math.round((u.hp / u.maxHp) * 100));
-  return `<div class="unit-slot ${side === "enemy" ? "enemy" : ""} ${u.alive ? "" : "dead"}" data-side="${side}" data-slot="${u.slot}">
+  const floater = floaters
+    .filter((f) => f.side === side && f.slot === u.slot)
+    .map((f) => `<span class="dmg-floater">−${f.dmg}</span>`)
+    .join("");
+  return `<div class="unit-slot ${side === "enemy" ? "enemy" : "ally"} ${u.alive ? "" : "dead"}" data-side="${side}" data-slot="${u.slot}">
+    <div class="unit-name">${u.name}</div>
     <img src="${bust(u.mirrorOf || u.id)}" alt="${u.name}" onerror="this.src='${DAY1_BUSTS.n1}'" />
     <div class="hp-track"><div class="hp-fill" style="width:${pct}%"></div></div>
+    <div class="hp-num">${Math.max(0, Math.round(u.hp))}/${u.maxHp}</div>
+    ${floater}
   </div>`;
 }
 
@@ -1098,13 +1289,16 @@ function updateFightUI(battle) {
   const enemyRow = document.getElementById("enemy-row");
   const allyRow = document.getElementById("ally-row");
   if (!enemyRow || !allyRow) return;
-  enemyRow.innerHTML = battle.enemies.map((u) => unitCard(u, "enemy")).join("");
-  allyRow.innerHTML = battle.allies.map((u) => unitCard(u, "ally")).join("");
+  const floaters = battle.floaters || [];
+  enemyRow.innerHTML = battle.enemies.map((u) => unitCard(u, "enemy", floaters)).join("");
+  allyRow.innerHTML = battle.allies.map((u) => unitCard(u, "ally", floaters)).join("");
   const allyHp = battle.allies.reduce((s, u) => s + Math.max(0, u.hp), 0);
   const enemyHp = battle.enemies.reduce((s, u) => s + Math.max(0, u.hp), 0);
   document.getElementById("ally-hp-total").textContent = `${state.locale === "tr" ? "Sen" : "You"} ${allyHp}`;
   document.getElementById("enemy-hp-total").textContent = `Bot ${enemyHp}`;
   document.getElementById("fight-timer").textContent = `${battle.elapsed.toFixed(1)}s`;
+  const log = document.getElementById("fight-log");
+  if (log) log.textContent = (battle.log || []).join(" · ");
 }
 
 function endFight(battle) {
@@ -1131,7 +1325,20 @@ function endFight(battle) {
   };
   state.save.totalCups += 1;
   if (won) state.save.totalWins += 1;
-  applyCupEarn(state.save, state.economy, { won, hadSynergy: !!syn, shared: false });
+  let earn = applyCupEarn(state.save, state.economy, { won, hadSynergy: !!syn, shared: false });
+  // Practice Cup pays half soft currency so Day-1 economy isn't warped
+  if (!isCupNight() && earn?.delta) {
+    for (const [k, v] of Object.entries(earn.delta)) {
+      if (v > 0 && (k === "porch_coins" || k === "neon_thread")) {
+        const cut = Math.floor(v / 2);
+        state.save.currencies[k] = Math.max(0, (state.save.currencies[k] || 0) - cut);
+        earn.delta[k] = v - cut;
+      }
+    }
+    earn.delta = Object.fromEntries(Object.entries(earn.delta).filter(([, v]) => v));
+  }
+  state.lastResult.rewards = earn?.delta || {};
+  state.lastResult.rewardLine = formatCurrencyDelta(earn?.delta, state.economy, state.locale);
   addPassXp(state.save, isCupNight() ? 1.2 : 0.6);
   state.save.cupHistory.unshift({
     day: state.save.dayIndex,
@@ -1143,7 +1350,6 @@ function endFight(battle) {
   });
   state.save.cupHistory = state.save.cupHistory.slice(0, 20);
   if (isCupNight()) state.save.evening.cupDone = true;
-  else state.save.evening.errand = true;
   unlockNeighborsIfReady();
   saveNow();
   renderComic();
@@ -1180,7 +1386,8 @@ function renderComic() {
       <button class="btn btn-secondary" type="button" data-action="goto-evening">${t("common.continue")}</button>
     </div>
     <p class="result-banner ${r.won ? "win" : "lose"}">${r.won ? t("common.win") : t("common.lose")}</p>
-    <p class="street-hint muted">${t("fight.hp_total")}: ${r.allyHp} vs ${r.enemyHp}</p>
+    <p class="street-hint muted">${t("fight.hp_total")}: ${r.allyHp} vs ${r.enemyHp} · MVP ${r.mvp}</p>
+    ${r.rewardLine ? `<p class="reward-breakdown">${state.locale === "tr" ? "Ödül" : "Rewards"}: ${r.rewardLine}</p>` : ""}
     <div class="comic-panels">${panels}</div>
     <div class="btn-row">
       <button class="btn btn-primary" type="button" data-action="share-copy" data-text="${encodeURIComponent(shareText)}">${t("comic.copy_text")}</button>
@@ -1216,36 +1423,78 @@ function exportShareImage() {
   if (!r) return;
   const canvas = el.canvas;
   const ctx = canvas.getContext("2d");
+  const finish = () => {
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "rival-porch-cup.png";
+      a.click();
+      URL.revokeObjectURL(url);
+      toast(state.locale === "tr" ? "Görsel indirildi" : "Image downloaded");
+    });
+  };
   ctx.fillStyle = "#1A1612";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   const arena = new Image();
   arena.onload = () => {
-    ctx.drawImage(arena, 0, 0, canvas.width, Math.floor(canvas.height * 0.42));
+    ctx.drawImage(arena, 0, 0, canvas.width, Math.floor(canvas.height * 0.38));
+    ctx.fillStyle = "rgba(26,22,18,0.45)";
+    ctx.fillRect(0, 0, canvas.width, Math.floor(canvas.height * 0.38));
     ctx.fillStyle = "#F2E6D8";
     ctx.font = "bold 64px Fraunces, serif";
-    ctx.fillText(t("app.title"), 64, 120);
+    ctx.fillText(t("app.title"), 64, 110);
+    ctx.font = "bold 48px Nunito, sans-serif";
+    ctx.fillStyle = r.won ? "#2EC4B6" : "#FF6B4A";
+    ctx.fillText(r.won ? t("common.win") : t("common.lose"), 64, 180);
+    ctx.fillStyle = "#F5C878";
+    ctx.font = "32px Nunito, sans-serif";
+    ctx.fillText(`${r.allyHp} vs ${r.enemyHp} · MVP ${r.mvp}`, 64, 230);
+    ctx.fillText(`${r.synergy}`, 64, 275);
+    if (r.rewardLine) {
+      ctx.fillStyle = "#F2E6D8";
+      ctx.font = "28px Nunito, sans-serif";
+      ctx.fillText(r.rewardLine, 64, 320);
+    }
     let loaded = 0;
-    r.team.forEach((id, i) => {
+    const team = r.team.slice(0, 3);
+    if (!team.length) {
+      finish();
+      return;
+    }
+    team.forEach((id, i) => {
       const img = new Image();
       img.onload = () => {
-        ctx.drawImage(img, 80 + i * 300, 520, 260, 260);
+        const x = 80 + i * 320;
+        const y = 420;
+        ctx.drawImage(img, x, y, 280, 280);
+        ctx.fillStyle = "#F2E6D8";
+        ctx.font = "26px Nunito, sans-serif";
+        const name = loc(neighborById(id)?.name) || id;
+        ctx.fillText(name, x, y + 320);
+        const comic = state.content.matchComic;
+        const panel = comic.panels[Math.min(i, comic.panels.length - 1)];
+        const caption = fillTemplate(loc(panel.textTemplate), {
+          winner: r.winner,
+          synergy: r.synergy,
+          mvp: r.mvp,
+        });
+        ctx.font = "22px Nunito, sans-serif";
+        ctx.fillStyle = "#E8A045";
+        const lines = caption.length > 42 ? [caption.slice(0, 42), caption.slice(42, 84)] : [caption];
+        lines.forEach((ln, li) => ctx.fillText(ln, x, y + 360 + li * 28));
         loaded += 1;
-        if (loaded === r.team.length) {
-          canvas.toBlob((blob) => {
-            if (!blob) return;
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "rival-porch-cup.png";
-            a.click();
-            URL.revokeObjectURL(url);
-            toast(state.locale === "tr" ? "Görsel indirildi" : "Image downloaded");
-          });
-        }
+        if (loaded === team.length) finish();
+      };
+      img.onerror = () => {
+        loaded += 1;
+        if (loaded === team.length) finish();
       };
       img.src = bust(id);
     });
   };
+  arena.onerror = finish;
   arena.src = ART.arenaStage;
 }
 
@@ -1322,7 +1571,7 @@ function renderShop() {
           .join("");
         return `<div class="shop-card rarity-${item.rarity || "common"}">
           <div class="name">${loc(item.name)}</div>
-          <div class="muted">${shopStr("shop.fairness_badge")} · power:false</div>
+          <div class="muted">${shopStr("shop.fairness_badge")}</div>
           ${owned
             ? `<button class="btn btn-secondary" type="button" data-action="equip-cosmetic" data-kind="${kind}" data-id="${item.id}" ${equipped ? "disabled" : ""}>${equipped ? shopStr("shop.owned") : shopStr("shop.equip")}</button>`
             : priceOpts || `<span class="muted">${shopStr("shop.empty_soon")}</span>`}
@@ -1334,8 +1583,8 @@ function renderShop() {
   const iap = (state.economy.iaps?.recommendedFirst3 || [])
     .map(
       (i) =>
-        `<div class="shop-card iap-card"><div class="name">${loc(i.name)}</div><div class="muted">~${i.priceBandUsd} USD · stub</div>
-        <button class="btn btn-ember" type="button" data-action="iap-stub" data-sku="${i.sku}">${shopStr("shop.buy")} (stub)</button></div>`
+        `<div class="shop-card iap-card"><div class="name">${loc(i.name)}</div><div class="muted">~${i.priceBandUsd} USD · ${state.locale === "tr" ? "önizleme" : "preview"}</div>
+        <button class="btn btn-ember" type="button" data-action="iap-stub" data-sku="${i.sku}">${shopStr("shop.buy")}</button></div>`
     )
     .join("");
 
@@ -1349,7 +1598,7 @@ function renderShop() {
     <p class="muted">${shopStr("shop.ads_off")} · ${shopStr("iap.story_clear")}</p>
     <div class="tab-row">${tabBtns}</div>
     <div class="shop-grid">${body}</div>
-    ${tab === "skins" ? `<h3 class="section-label">IAP stubs</h3><div class="shop-grid">${iap}</div><p class="muted">${shopStr("iap.disclaimer")}</p>` : ""}
+    ${tab === "skins" ? `<h3 class="section-label">${state.locale === "tr" ? "Destek paketleri" : "Support packs"}</h3><div class="shop-grid">${iap}</div><p class="muted">${shopStr("iap.disclaimer")}</p>` : ""}
   `;
 }
 
@@ -1366,24 +1615,35 @@ function renderPassTrackHtml() {
         <div class="pass-cell free">
           <div class="muted">${shopStr("pass.free")}</div>
           <div>${rewardLabel(r.free, state.locale)}</div>
-          <button class="btn btn-secondary" type="button" data-action="claim-pass" data-track="free" data-level="${r.level}" ${unlocked && !freeClaimed ? "" : "disabled"}>${freeClaimed ? "✓" : shopStr("shop.buy")}</button>
+          <button class="btn btn-secondary" type="button" data-action="claim-pass" data-track="free" data-level="${r.level}" ${unlocked && !freeClaimed ? "" : "disabled"}>${freeClaimed ? "✓" : shopStr("shop.claim")}</button>
         </div>
         <div class="pass-cell paid">
           <div class="muted">${shopStr("pass.paid")}</div>
           <div>${rewardLabel(r.paid, state.locale)}</div>
-          <button class="btn btn-ember" type="button" data-action="claim-pass" data-track="paid" data-level="${r.level}" ${unlocked && state.save.passPaidUnlocked && !paidClaimed ? "" : "disabled"}>${paidClaimed ? "✓" : "🔒"}</button>
+          <button class="btn btn-ember" type="button" data-action="claim-pass" data-track="paid" data-level="${r.level}" ${unlocked && state.save.passPaidUnlocked && !paidClaimed ? "" : "disabled"}>${paidClaimed ? "✓" : state.save.passPaidUnlocked ? shopStr("shop.claim") : "🔒"}</button>
         </div>
       </div>`;
     })
     .join("");
   const beat = (pass.storyWeekMap || []).find((b) => state.save.dayIndex >= b.days[0] && state.save.dayIndex <= b.days[1]);
+  const beatLabel = {
+    meet_the_block: { tr: "Mahalle tanışması", en: "Meet the block" },
+    rivalries_heat: { tr: "Rekabet ısınıyor", en: "Rivalries heat up" },
+    neon_nights: { tr: "Neon geceler", en: "Neon nights" },
+    festival_cup_prep: { tr: "Festival Cup hazırlığı", en: "Festival Cup prep" },
+    street_finale: { tr: "Sokak finali", en: "Street finale" },
+  };
+  const xpShown = Number(state.save.passXp || 0).toFixed(1).replace(/\.0$/, "");
   return `
     <div class="pass-header">
       <h3>${loc(pass.name)}</h3>
       <p class="muted">${shopStr("pass.xp_hint")}</p>
-      <p>${shopStr("pass.story_sync")}${beat ? ` · ${beat.beat}` : ""}</p>
-      <p class="pick-status">Lv ${level}/30 · XP ${state.save.passXp||0}</p>
-      <button class="btn btn-ember" type="button" data-action="unlock-pass-stub" ${state.save.passPaidUnlocked ? "disabled" : ""}>${state.save.passPaidUnlocked ? shopStr("shop.owned") : shopStr("pass.unlock_cta")} (read-only stub)</button>
+      <p>${shopStr("pass.story_sync")}${beat ? ` · ${loc(beatLabel[beat.beat] || { en: String(beat.beat).replace(/_/g, " ") })}` : ""}</p>
+      <p class="muted">${state.locale === "tr"
+        ? "Ücretsiz yol herkese açık. Kil yol sadece kozmetik — hikâyeyi kilitlemez."
+        : "Free track for everyone. Clay track is cosmetics only — never gates story."}</p>
+      <p class="pick-status">Lv ${level}/30 · XP ${xpShown}</p>
+      <button class="btn btn-ember" type="button" data-action="unlock-pass-stub" ${state.save.passPaidUnlocked ? "disabled" : ""}>${state.save.passPaidUnlocked ? shopStr("shop.owned") : shopStr("pass.unlock_cta")}</button>
       <p class="muted">${shopStr("iap.story_clear")}</p>
     </div>
     <div class="pass-track">${rows}</div>`;
@@ -1480,7 +1740,9 @@ function onAction(action, target) {
       break;
     case "new-game":
       state.save = defaultSave(state.economy, state.depthMeta);
+      state.save.locale = state.locale;
       for (const n of state.content.neighbors) ensureNeighborState(n.id);
+      Story.syncWeekArcs(state.stories, state.save);
       saveNow();
       renderEvening();
       showScreen("screen-evening");
@@ -1507,14 +1769,14 @@ function onAction(action, target) {
       renderShop();
       break;
     case "unlock-pass-stub":
-      // Read-only progress UI: stub unlock for preview only — does not gate story
+      // Preview unlock for Clay track cosmetics — never gates story
       state.save.passPaidUnlocked = true;
       saveNow();
-      toast(shopStr("pass.unlock_cta") + " (stub)");
+      toast(state.locale === "tr" ? "Kil yol açıldı (önizleme)" : "Clay track unlocked (preview)");
       renderShop();
       break;
     case "iap-stub":
-      toast((state.locale === "tr" ? "IAP stub: " : "IAP stub: ") + target.dataset.sku);
+      toast((state.locale === "tr" ? "Önizleme: " : "Preview: ") + target.dataset.sku);
       if (target.dataset.sku === "iap_porch_week_pass") {
         state.save.passPaidUnlocked = true;
         saveNow();
@@ -1543,12 +1805,14 @@ function onAction(action, target) {
       break;
     case "goto-cup":
       state.cupPicks = [];
+      state.enemyLineup = null;
       renderCupLobby();
       showScreen("screen-cup");
       break;
     case "goto-draft":
       state.placement = Array(6).fill(null);
       state.selectedBench = null;
+      state.enemyLineup = pickEnemyLineup(state.cupPicks);
       renderDraft();
       showScreen("screen-draft");
       break;
@@ -1659,8 +1923,12 @@ async function boot() {
     state.depthMeta = depthMeta;
     // Merge economy uiStrings over content placeholders for shop/pass
     state.content.uiStrings = { ...state.content.uiStrings, ...economy.uiStrings };
+    const hadSave = !!localStorage.getItem("rivalPorch.save.v4");
     state.save = loadSave(economy, depthMeta);
-    state.locale = state.save.locale || content.localeDefault || stories.localeDefault || "tr";
+    const navLang = (navigator.language || "").toLowerCase().startsWith("tr") ? "tr" : "en";
+    // Fresh profiles follow the browser; existing saves keep their locale.
+    if (!hadSave) state.save.locale = navLang;
+    state.locale = state.save.locale || navLang;
     for (const n of content.neighbors) ensureNeighborState(n.id);
     Story.syncWeekArcs(state.stories, state.save);
     Story.applyStoryUnlocks(state.stories, state.save);
