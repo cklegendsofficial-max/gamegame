@@ -6540,7 +6540,11 @@ body:not([data-audit-cold="1"]) [data-testid="practice-settle-wrap"] {
   align-items: center;
 }
 .rp-sig-whistle::after,
-.rp-sig-bass::after {
+.rp-sig-bass::after,
+.rp-sig-kite::after,
+.rp-sig-fence::after,
+.rp-sig-pour::after,
+.rp-sig-warm::after {
   content: "";
   position: absolute;
   inset: -4px;
@@ -6549,6 +6553,9 @@ body:not([data-audit-cold="1"]) [data-testid="practice-settle-wrap"] {
   pointer-events: none;
   animation: rp-lamp-breathe 1.2s ease-in-out 2;
 }
+.rp-sig-pour::after { border-color: #c4a574; }
+.rp-sig-kite::after { border-color: #7eb8c9; }
+.rp-sig-fence::after { border-color: #a67c52; }
 @keyframes rp-lamp-breathe {
   0%,100% { opacity: .35; }
   50% { opacity: 1; }
@@ -6556,4 +6563,221 @@ body:not([data-audit-cold="1"]) [data-testid="practice-settle-wrap"] {
 /* Hide recommend/cult through mid on first session */
 body:not(.rp-after-share) .rp-recommend-tonight-bar {
   display: none !important;
+}
+
+.rp-sig-pip {
+  position: absolute;
+  top: 0.2rem;
+  right: 0.25rem;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--porch-lamp, #e8a045);
+  box-shadow: 0 0 0 2px rgba(26,22,18,.55);
+  z-index: 3;
+  animation: rp-lamp-breathe 1s ease-in-out infinite;
+}
+.rp-pad { position: relative; }
+
+/* ux-rewrite-3 — affinity toast clear of dock */
+:root {
+  --rp-dock-h: 88px;
+  --rp-toast-gap: 12px;
+}
+.rp-dock { position: relative; z-index: 6; pointer-events: auto; }
+.rp-toast,
+.rp-toast--affinity,
+[data-testid="affinity-toast"],
+[data-affinity-toast] {
+  position: fixed !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  bottom: calc(var(--rp-dock-h) + var(--rp-toast-gap) + env(safe-area-inset-bottom, 0px)) !important;
+  top: auto !important;
+  z-index: 5 !important;
+  max-width: min(92vw, 340px);
+  pointer-events: none !important;
+  margin: 0 !important;
+  padding: 0.45rem 0.75rem;
+  border-radius: 8px;
+  background: rgba(26,22,18,.88);
+  color: #f2e6d8;
+  font: 650 12px/1.3 "DM Sans", sans-serif;
+  border: 1px solid rgba(232,160,69,.35);
+}
+.rp-dock .rp-toast,
+.rp-dock [data-testid="affinity-toast"] { display: none !important; }
+
+.rp-porch-chain {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.35rem;
+  margin: 0.35rem 0 0.5rem; font-size: 12px; color: #f2e6d8;
+}
+.rp-porch-chain__item.is-locked { opacity: 0.55; }
+.rp-porch-chain__item.is-active { font-weight: 700; color: #e8a045; }
+.rp-porch-chain__item.is-done { opacity: 0.85; }
+.rp-porch-chain__arrow { opacity: 0.5; }
+
+/* ux-rewrite-4 — lamp primary + street text link */
+.rp-cta-lamp {
+  background: #e8a045 !important;
+  color: #1a1612 !important;
+  border: 0 !important;
+  min-height: 44px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+.rp-link-street {
+  background: none;
+  border: 0;
+  color: #f2e6d8;
+  text-decoration: underline;
+  font-size: 0.9rem;
+  padding: 0.35rem 0.5rem;
+  cursor: pointer;
+}
+body[data-first10="1"] .rp-dock .rp-btn.rp-btn--ember:not(.rp-cta-lamp),
+body[data-first10="1"] .rp-dock [data-testid="practice-match"] {
+  display: none !important;
+}
+.rp-snag-day1 {
+  position: absolute; left: 10%; right: 10%; top: 58%; z-index: 5;
+  padding: 0.45rem 0.6rem; background: rgba(12,8,6,.78);
+  border: 1px solid rgba(196,165,116,.45); color: #f2e6d8; font-size: 12px;
+}
+.rp-snag-day1__prop {
+  display: block; width: 28px; height: 28px; margin-bottom: 0.25rem;
+  border: 2px solid #c4a574; border-radius: 4px 4px 2px 2px;
+  background: linear-gradient(180deg, rgba(232,160,69,.25), transparent);
+}
+/* mechanics-rewrite-4 board mutations */
+.rp-pad.pad-marked { outline: 2px solid #e8a045; outline-offset: 2px; }
+.rp-pad.pad-taunt::after {
+  content: ""; position: absolute; inset: -3px; border: 2px dashed #a67c52;
+  border-radius: 10px; pointer-events: none;
+}
+.rp-pad.pad-swapped { animation: rp-kite-swap 0.8s ease; }
+@keyframes rp-kite-swap {
+  0% { transform: translateY(0); }
+  40% { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
+}
+.rp-arena[data-kit-board-change] { box-shadow: inset 0 0 0 1px rgba(232,160,69,.35); }
+
+/* mechanics-rewrite-5 — screenshot-proof kit prop */
+.rp-kit-prop-beat {
+  position: absolute;
+  left: 50%;
+  top: 12%;
+  transform: translateX(-50%);
+  width: 52px;
+  height: 52px;
+  min-width: 48px;
+  min-height: 48px;
+  object-fit: contain;
+  z-index: 6;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
+  animation: rp-kit-prop-pulse 1.5s ease;
+}
+.rp-kit-prop-beat.is-live { opacity: 1; }
+@keyframes rp-kit-prop-pulse {
+  0% { transform: translateX(-50%) scale(0.7); opacity: 0; }
+  30% { transform: translateX(-50%) scale(1.08); opacity: 1; }
+  100% { transform: translateX(-50%) scale(1); opacity: 1; }
+}
+.rp-pad.pad-taunt,
+.rp-pad.pad-marked,
+.rp-pad.pad-swapped {
+  position: relative;
+  outline: 3px solid #5a4332;
+  outline-offset: 2px;
+}
+
+/* story-rewrite-5 — Snag choice + residue */
+.rp-snag-choice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+}
+.rp-snag-choice .rp-btn {
+  flex: 1 1 40%;
+  min-height: 40px;
+  font-size: 12px;
+}
+.rp-snag-residue { display: flex; gap: 0.45rem; align-items: flex-start; }
+.rp-snag-day1__prop.is-coiled {
+  border-color: #c45c3e;
+  background: radial-gradient(circle at 40% 40%, #c45c3e, transparent 70%);
+}
+.rp-snag-day1__prop.is-cut {
+  border-color: #8a7a68;
+  background: linear-gradient(135deg, #c45c3e 40%, transparent 41%);
+}
+
+/* ux-rewrite-5 — toast under HUD / lamp above toast */
+.rp-toast--affinity {
+  z-index: 4 !important;
+  pointer-events: none !important;
+}
+.rp-cta-lamp,
+[data-testid="evening-primary"],
+[data-testid="street-primary"] {
+  position: relative;
+  z-index: 5;
+}
+.rp-dock--street {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  justify-content: center;
+}
+.rp-dock--street .rp-cta-lamp {
+  flex: 1 1 60%;
+}
+
+/* ux-rewrite-6 — Snag line wraps; never mid-word ellipsis */
+[data-testid="snag-day1-beat"],
+.rp-snag-line,
+.rp-snag-prompt,
+[data-testid="snag-day1-beat"] p {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: none;
+  max-width: min(100%, 22rem);
+  line-height: 1.35;
+  -webkit-line-clamp: unset;
+  display: block;
+}
+.rp-snag-day1 {
+  max-height: none;
+  overflow: visible;
+}
+.rp-open-book-day1 {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 72%;
+  z-index: 6;
+  padding: 0.45rem 0.6rem;
+  background: rgba(12, 8, 6, 0.82);
+  border: 1px solid rgba(196, 165, 116, 0.45);
+  color: #f2e6d8;
+  font-size: 12px;
+}
+.rp-defteri-snag-echo {
+  margin: 0.35rem 0 0;
+  font-size: 12px;
+  color: #f2e6d8;
+}
+.comic-remember--snag {
+  margin: 0.5rem 0;
+  padding: 0.5rem 0.65rem;
+  background: rgba(18, 12, 8, 0.85);
+  border: 1px solid rgba(232, 160, 69, 0.35);
+  color: #f2e6d8;
 }

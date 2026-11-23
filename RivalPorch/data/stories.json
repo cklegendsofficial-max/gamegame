@@ -16,10 +16,10 @@
       "01:12",
       "Ledger & Tray",
       "MAIN",
-      "Omurga",
+      "",
       "Talk about the night",
       "the tangled line",
-      "Spine",
+      "",
       "the line still holds",
       "check-in",
       "child-romance",
@@ -468,7 +468,7 @@
     {
       "id": "arc_kite_antenna",
       "title": {
-        "tr": "Anten Operasyonu",
+        "tr": "Takılan Uçurtma",
         "en": "The Snag"
       },
       "neighbors": [
@@ -2643,8 +2643,8 @@
           "id": "e_merve",
           "speaker": "n1",
           "text": {
-            "tr": "Karşı Sırt'ın tankı önde dururmuş. Ben uydurmadım… belki.",
-            "en": "Rival Ridge leads with their tank. I didn't invent that… maybe."
+            "tr": "Karşı Sırt'ın çit nöbeti önde dururmuş. Ben uydurmadım… belki.",
+            "en": "Rival Ridge leads with their fence sit. I didn't invent that… maybe."
           },
           "ends": true
         },
@@ -3018,8 +3018,8 @@
           "id": "psl_leave_end",
           "speaker": "n5",
           "text": {
-            "tr": "Bilet taslağı duruyor. Belki yanar, belki yanmaz. Arenada AoE… vedaya benzer.",
-            "en": "Ticket draft stays. Maybe it burns, maybe not. Arena AoE… already sounds like goodbye."
+            "tr": "Bilet taslağı duruyor. Belki yanar, belki yanmaz. Verandada bas… vedaya benzer.",
+            "en": "Ticket draft stays. Maybe it burns, maybe not. porch bass… already sounds like goodbye."
           },
           "setFlags": [
             "react_peri_resolution_seen",
@@ -3204,8 +3204,8 @@
           "id": "fsm_root",
           "speaker": "narrator",
           "text": {
-            "tr": "Cuma kulis. Final Cup yarın. Omurga tamamlanmak üzere — sokak hangi satırları sakladı?",
-            "en": "Friday backstage. Final Cup tomorrow. Spine almost locked — which lines did the street keep?"
+            "tr": "Cuma kulis. Final Cup yarın. tamamlanmak üzere — sokak hangi satırları sakladı?",
+            "en": "Friday backstage. Final Cup tomorrow. almost locked — which lines did the street keep?"
           },
           "choices": [
             {
@@ -3264,8 +3264,8 @@
               "ifFlag": "flag_kite_chaos_buff",
               "speaker": "n3",
               "text": {
-                "tr": "Harita serbest! Glass cannon yarın cam değil, rüzgâr olur.",
-                "en": "Map unrestricted! Tomorrow the glass cannon is wind, not glass."
+                "tr": "Harita serbest! kite line yarın cam değil, rüzgâr olur.",
+                "en": "Map unrestricted! Tomorrow the kite line is wind, not glass."
               }
             }
           ],
@@ -3294,8 +3294,8 @@
               "ifFlag": "flag_peri_leaving_threat",
               "speaker": "n5",
               "text": {
-                "tr": "Kulaklıklar veda gibi. Belki son şov — o yüzden AoE daha geniş.",
-                "en": "Headphones like goodbye. Maybe a last show — so the AoE runs wider."
+                "tr": "Kulaklıklar veda gibi. Belki son şov — o yüzden bass daha geniş.",
+                "en": "Headphones like goodbye. Maybe a last show — so the bass runs wider."
               }
             }
           ],
@@ -4087,7 +4087,7 @@
           "id": "b",
           "label": {
             "tr": "Konuştur (arc tohumu)",
-            "en": "Make them talk (arc seed)"
+            "en": "Make them talk on the roof"
           },
           "setFlags": [
             "arc_kite_antenna_seed"
@@ -5997,6 +5997,22 @@
     ],
     "comicEchoRules": [
       {
+        "ifFlag": "flag_snag_untangle",
+        "line": {
+          "tr": "Orhan: İpi birlikte çektik. Bu maçta gazetem geç kapandı.",
+          "en": "Orhan: We pulled the line together. My paper closed late for this match."
+        },
+        "panelTestId": "comic-echo-snag-untangle"
+      },
+      {
+        "ifFlag": "flag_snag_cut",
+        "line": {
+          "tr": "Leyla: KESTİN. Arenada rüzgârım öfkeli.",
+          "en": "Leyla: You CUT it. My wind in the arena is angry."
+        },
+        "panelTestId": "comic-echo-snag-cut"
+      },
+      {
         "ifFlag": "flag_fence_and_kite",
         "line": {
           "tr": "Bayrak hâlâ antende sallanıyordu.",
@@ -6094,8 +6110,8 @@
           "en": "New Porch"
         },
         "focus": {
-          "tr": "Tanışma; Arc A tohumu; öğretici Cup.",
-          "en": "Meet-cute; Arc A seed; tutorial Cup."
+          "tr": "Tanışma; çatı utanç tutuyor; öğretici Cup.",
+          "en": "Meet-cute; roof holding a shame; tutorial Cup."
         },
         "arcSeeds": [
           "arc_kite_antenna_seed"
@@ -6133,8 +6149,8 @@
           "en": "Antenna & Line"
         },
         "focus": {
-          "tr": "Arc A zirve; Cem diz ipucu; Chaos/Fence Cup.",
-          "en": "Arc A peak; Cem knee hint; Chaos/Fence Cup."
+          "tr": "çatı zirve; Cem diz ipucu; Chaos/Fence Cup.",
+          "en": "çatı peak; Cem knee hint; Chaos/Fence Cup."
         },
         "activeArc": "arc_kite_antenna",
         "cup": {
@@ -6163,8 +6179,8 @@
           "en": "Night & Decibel"
         },
         "focus": {
-          "tr": "Arc B zirve; Peri teklifi; Neon Night Cup.",
-          "en": "Arc B peak; Peri offer; Neon Night Cup."
+          "tr": "gece zirve; Peri teklifi; Neon Night Cup.",
+          "en": "gece peak; Peri offer; Neon Night Cup."
         },
         "activeArc": "arc_volume_war",
         "cup": {
@@ -6192,8 +6208,8 @@
           "en": "Ledger Closing"
         },
         "focus": {
-          "tr": "Arc C + sezon finali; itibar kilidi; final Cup.",
-          "en": "Arc C + season finale; reputation lock; final Cup."
+          "tr": "defter + sezon finali; itibar kilidi; final Cup.",
+          "en": "defter + season finale; reputation lock; final Cup."
         },
         "activeArc": "arc_tea_ledger",
         "cup": {
@@ -6243,7 +6259,7 @@
           "id": "wc_welcome_three_doors_open",
           "streetVisual": {
             "tr": "Üç komşu kapısı aralık; selam animasyonu.",
-            "en": "Three neighbor doors ajar; greeting idle."
+            "en": ""
           }
         }
       },
@@ -6258,8 +6274,8 @@
         "worldConsequence": {
           "id": "wc_kite_string_on_antenna",
           "streetVisual": {
-            "tr": "Antende ince uçurtma ipi asılı — Arc A tohumu.",
-            "en": "Thin kite string on the antenna — Arc A seed."
+            "tr": "Antende ince uçurtma ipi asılı — çatı utanç tutuyor.",
+            "en": "Thin kite string on the antenna — roof holding a shame."
           }
         }
       },
@@ -6380,8 +6396,8 @@
         ]
       },
       "summary": {
-        "tr": "Peri gider; Cup AoE boşluğu kalır. Bittersweet veda seti.",
-        "en": "Peri leaves; Cup AoE gap remains. A bittersweet farewell set."
+        "tr": "Peri gider; Cup bass boşluğu kalır. Bittersweet veda seti.",
+        "en": "Peri leaves; Cup bass gap remains. A bittersweet farewell set."
       }
     },
     {
@@ -6465,8 +6481,8 @@
         "type": "unit_mod",
         "neighborId": "n5",
         "label": {
-          "tr": "Kulüp AoE",
-          "en": "Club AoE"
+          "tr": "Kulüp bass",
+          "en": "Bass set"
         },
         "requiresFlags": [
           "unlock_unit_mod_peri_club_aoe"
@@ -6668,7 +6684,7 @@
           "react_peri_resolution_seen"
         ]
       },
-      "uiHint": "Street talk day after Decibel resolves; makes Arc B visible before Ledger."
+      "uiHint": "Street talk day after Decibel resolves; makes gece visible before Ledger."
     },
     {
       "dialogueTreeId": "dlg_react_ledger_hears_neon",
@@ -6687,7 +6703,7 @@
           "arc_tea_ledger_complete"
         ]
       },
-      "uiHint": "Early Ledger week evening — Arc B bleeds into Arc C tea tone."
+      "uiHint": "Early Ledger week evening — gece bleeds into defter tea tone."
     },
     {
       "dialogueTreeId": "dlg_react_finale_street_memory",

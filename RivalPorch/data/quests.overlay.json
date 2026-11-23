@@ -67,12 +67,12 @@
       "id": "mq_welcome_porch",
       "type": "main",
       "title": {
-        "tr": "Omurga 1/5 — Yeni Veranda",
-        "en": "Spine 1/5 — New Porch"
+        "tr": "Yeni Veranda",
+        "en": "New Porch"
       },
       "summary": {
-        "tr": "ANA GÖREV. Aşağı Sırt seni ölçüyor: çay check-in → üç kapı → uçurtma tohumu → Cup 1. Bitince omurga 2 (Anten Operasyonu) açılır.",
-        "en": "MAIN QUEST. Lower Ridge is measuring you: tea check-in → three doors → kite seed → Cup 1. Completing unlocks spine 2 (Antenna Op)."
+        "tr": "Leyla ile Orhan’ın utancı kapıda. Bir taraf tut — sokak unutmaz.",
+        "en": "Leyla and Orhan’s shame is at your door. Take a side — the street won’t forget."
       },
       "giver": "n1",
       "week": 1,
@@ -93,8 +93,8 @@
           "order": 1,
           "kind": "checkin",
           "label": {
-            "tr": "1/4 · Sabah çay check-in (omurga başlar)",
-            "en": "1/4 · Morning tea check-in (spine starts)"
+            "tr": "Kapıdaki utancı dinle",
+            "en": "Hear the shame at the door"
           },
           "track": {
             "type": "action",
@@ -113,8 +113,8 @@
           "order": 2,
           "kind": "talk",
           "label": {
-            "tr": "2/4 · Üç komşuyla konuş (affinity ≥ 10)",
-            "en": "2/4 · Talk to three neighbors (affinity ≥ 10)"
+            "tr": "Bir çatı tarafı seç — mahalle baksın",
+            "en": "Pick a roof side — let the street watch"
           },
           "track": {
             "type": "affinityAny",
@@ -131,8 +131,8 @@
           "order": 3,
           "kind": "drama",
           "label": {
-            "tr": "3/4 · Uçurtma tohumu — Arc A kapısı",
-            "en": "3/4 · Kite seed — Arc A doorway"
+            "tr": "Yarın sokağın hatırasını gör",
+            "en": "See what the street remembers tomorrow"
           },
           "track": {
             "type": "flag",
@@ -149,8 +149,8 @@
           "order": 4,
           "kind": "cup",
           "label": {
-            "tr": "4/4 · Cup 1 · sonra omurga 2 açılır",
-            "en": "4/4 · Cup 1 · then spine 2 unlocks"
+            "tr": "Cup’ta utancı yankıla",
+            "en": "Echo the shame in a Cup"
           },
           "track": {
             "type": "cupComplete",
@@ -197,42 +197,44 @@
       },
       "spineIndex": 1,
       "spineOf": 5,
-      "spineCode": "MAIN 1/5",
+      "spineCode": "",
       "nextQuestId": "mq_antenna_op",
       "hudBlurb": {
-        "tr": "Omurga 1/5 · Mahalleye adını yaz",
-        "en": "Spine 1/5 · Write your name on the block"
+        "tr": "Mahalleye adını yaz",
+        "en": "Write your name on the block"
       },
       "nextSpineTeaser": {
-        "tr": "Sıradaki: Anten Operasyonu (Leyla ↔ Orhan)",
-        "en": "Next: Antenna Op (Leyla ↔ Orhan)"
+        "tr": "Sıradaki: (Leyla ↔ Orhan)",
+        "en": "Next: (Leyla ↔ Orhan)"
       },
       "blurb": {
-        "tr": "ANA GÖREV. Aşağı Sırt seni ölçüyor: çay check-in → üç kapı → uçurtma tohumu → Cup 1. Bitince omurga 2 (Anten Operasyonu) açılır.",
-        "en": "MAIN QUEST. Lower Ridge is measuring you: tea check-in → three doors → kite seed → Cup 1. Completing unlocks spine 2 (Antenna Op)."
+        "tr": "Leyla ile Orhan’ın utancı kapıda. Bir taraf tut — sokak unutmaz.",
+        "en": "Leyla and Orhan’s shame is at your door. Take a side — the street won’t forget."
       }
     },
     {
       "id": "mq_antenna_op",
       "type": "main",
       "title": {
-        "tr": "Omurga 2/5 — Anten Operasyonu",
-        "en": "Spine 2/5 — Antenna Op"
+        "tr": "Takılan Uçurtma",
+        "en": "The Snag"
       },
       "summary": {
-        "tr": "ANA GÖREV · Arc A. Leyla'nın ipi ↔ Orhan'ın anteni. Dört beat, iki son: bayraklı barış veya yüksek kaos. Cup 2 bu seçimi comic'e yazar; omurga 3 (Desibel) bayrağa göre yumuşak/sert açılır.",
-        "en": "MAIN QUEST · Arc A. Leyla's line ↔ Orhan's antenna. Four beats, two endings: peace flag or high chaos. Cup 2 echoes the choice; spine 3 (Decibel) opens softer or sharper from that flag."
+        "tr": "Leyla’nın ipi Orhan’ın anteninde. Çatı ikiye ayrılmadan çöz.",
+        "en": "Leyla’s kite is in Orhan’s aerial. Fix it before the roof splits the block."
       },
       "giver": "n3",
       "week": 2,
       "dayWindow": {
-        "start": 8,
+        "start": 1,
         "end": 14
       },
       "unlockRequires": {
         "flagsAny": [
-          "quest_welcome_complete",
-          "arc_kite_antenna_seed_resolved"
+          "cold_open_mediate",
+          "cold_open_instigate",
+          "cold_open_stage",
+          "quest_welcome_o1_done"
         ]
       },
       "setsFlagsOnStart": [
@@ -245,8 +247,8 @@
           "order": 1,
           "kind": "arc_beat",
           "label": {
-            "tr": "Beat 1/4 · Takılan uçurtmayı çöz",
-            "en": "Beat 1/4 · Untangle the snagged kite"
+            "tr": "Çatıdaki ipi göster",
+            "en": "Show the line on the roof"
           },
           "track": {
             "type": "flag",
@@ -264,8 +266,8 @@
           "order": 2,
           "kind": "arc_beat",
           "label": {
-            "tr": "Beat 2/4 · Cem'in ip disiplinini dinle",
-            "en": "Beat 2/4 · Hear Cem's line-tension drill"
+            "tr": "Cem ipi bir kez saysın",
+            "en": "Let Cem count the line once"
           },
           "track": {
             "type": "flag",
@@ -284,8 +286,8 @@
           "order": 3,
           "kind": "arc_beat",
           "label": {
-            "tr": "Beat 3/4 · Merve'nin iki versiyonundan birini doğrula",
-            "en": "Beat 3/4 · Confirm one of Merve's two versions"
+            "tr": "Merve'nin iki versiyonundan birini doğrula",
+            "en": "Confirm one of Merve's two versions"
           },
           "track": {
             "type": "flag",
@@ -303,8 +305,8 @@
           "order": 4,
           "kind": "arc_beat",
           "label": {
-            "tr": "Beat 4/4 · Barış bayrağı VEYA daha yüksek uçuş",
-            "en": "Beat 4/4 · Peace flag OR fly higher"
+            "tr": "Barış bayrağı VEYA daha yüksek uçuş",
+            "en": "Peace flag OR fly higher"
           },
           "track": {
             "type": "flagAny",
@@ -373,31 +375,37 @@
       },
       "spineIndex": 2,
       "spineOf": 5,
-      "spineCode": "MAIN 2/5",
+      "spineCode": "",
       "nextQuestId": "mq_decibel_accord",
       "hudBlurb": {
-        "tr": "Omurga 2/5 · Arc A — çatı + çit",
-        "en": "Spine 2/5 · Arc A — roof + fence"
+        "tr": "çatı — çatı + çit",
+        "en": "çatı — roof + fence"
       },
       "nextSpineTeaser": {
-        "tr": "Sıradaki: Desibel Antlaşması (Peri ↔ uyku)",
-        "en": "Next: Decibel Accord (Peri ↔ sleep)"
+        "tr": "Sıradaki: (Peri ↔ uyku)",
+        "en": "Next: (Peri ↔ sleep)"
       },
       "blurb": {
-        "tr": "ANA GÖREV · Arc A. Leyla'nın ipi ↔ Orhan'ın anteni. Dört beat, iki son: bayraklı barış veya yüksek kaos. Cup 2 bu seçimi comic'e yazar; omurga 3 (Desibel) bayrağa göre yumuşak/sert açılır.",
-        "en": "MAIN QUEST · Arc A. Leyla's line ↔ Orhan's antenna. Four beats, two endings: peace flag or high chaos. Cup 2 echoes the choice; spine 3 (Decibel) opens softer or sharper from that flag."
-      }
+        "tr": "Leyla’nın ipi Orhan’ın anteninde. Çatı ikiye ayrılmadan çöz.",
+        "en": "Leyla’s kite is in Orhan’s aerial. Fix it before the roof splits the block."
+      },
+      "acceptDayMin": 1,
+      "autoAcceptOnFlagsAny": [
+        "cold_open_mediate",
+        "cold_open_instigate",
+        "cold_open_stage"
+      ]
     },
     {
       "id": "mq_decibel_accord",
       "type": "main",
       "title": {
-        "tr": "Omurga 3/5 — Desibel Antlaşması",
-        "en": "Spine 3/5 — Decibel Accord"
+        "tr": "01:12",
+        "en": "01:12"
       },
       "summary": {
-        "tr": "ANA GÖREV · Arc B. Peri'nin seti, Orhan'ın uykusu, Merve'nin mahalle oyu. Kal (sessiz neon) veya kariyer (veda gerilimi). Anten omurgasındaki bayrak/kaos bu haftanın diyalog tonunu değiştirir.",
-        "en": "MAIN QUEST · Arc B. Peri's set, Orhan's sleep, Merve's block vote. Stay (quiet neon) or career (leaving threat). Antenna peace/chaos flags retint this week's dialogue."
+        "tr": "Peri’nin seti, Orhan’ın uykusu. Geceye kural koy — ya da bırak gitsin.",
+        "en": "Peri’s set, Orhan’s sleep. Rule the night — or let her leave."
       },
       "giver": "n5",
       "week": 3,
@@ -422,8 +430,8 @@
           "order": 1,
           "kind": "arc_beat",
           "label": {
-            "tr": "Beat 1/5 · 01:12 bas şoku",
-            "en": "Beat 1/5 · 01:12 bass shock"
+            "tr": "01:12’de cam titrerken orada ol",
+            "en": "Be there when the glass shakes at 01:12"
           },
           "track": {
             "type": "flag",
@@ -441,8 +449,8 @@
           "order": 2,
           "kind": "arc_beat",
           "label": {
-            "tr": "Beat 2/5 · KULAKLIK notunu yanıtla",
-            "en": "Beat 2/5 · Answer the HEADPHONES note"
+            "tr": "Peri’nin kapısındaki notu oku",
+            "en": "Read the scrap on Peri’s door"
           },
           "track": {
             "type": "flag",
@@ -460,8 +468,8 @@
           "order": 3,
           "kind": "arc_beat",
           "label": {
-            "tr": "Beat 3/5 · Gece poğaça diplomasisi",
-            "en": "Beat 3/5 · Midnight pastry diplomacy"
+            "tr": "Gece poğaça diplomasisi",
+            "en": "Midnight pastry diplomacy"
           },
           "track": {
             "type": "flag",
@@ -480,8 +488,8 @@
           "order": 4,
           "kind": "arc_beat",
           "label": {
-            "tr": "Beat 4/5 · Peri'nin teklif sırrını duy",
-            "en": "Beat 4/5 · Hear Peri's offer secret"
+            "tr": "Peri'nin teklif sırrını duy",
+            "en": "Hear Peri's offer secret"
           },
           "track": {
             "type": "flag",
@@ -500,8 +508,8 @@
           "order": 5,
           "kind": "arc_beat",
           "label": {
-            "tr": "Beat 5/5 · Antlaşma VEYA kariyer yolu",
-            "en": "Beat 5/5 · Accord OR career path"
+            "tr": "Antlaşma VEYA kariyer yolu",
+            "en": "Accord OR career path"
           },
           "track": {
             "type": "flagAny",
@@ -572,31 +580,31 @@
       },
       "spineIndex": 3,
       "spineOf": 5,
-      "spineCode": "MAIN 3/5",
+      "spineCode": "",
       "nextQuestId": "mq_ledger_tray",
       "hudBlurb": {
-        "tr": "Omurga 3/5 · Arc B — gece sahnesi",
-        "en": "Spine 3/5 · Arc B — night stage"
+        "tr": "gece — gece sahnesi",
+        "en": "gece — night stage"
       },
       "nextSpineTeaser": {
         "tr": "Sıradaki: Defter ve Tepsi (Tea Circle)",
-        "en": "Next: Ledger & Tray (Tea Circle)"
+        "en": "Next: (Tea Circle)"
       },
       "blurb": {
-        "tr": "ANA GÖREV · Arc B. Peri'nin seti, Orhan'ın uykusu, Merve'nin mahalle oyu. Kal (sessiz neon) veya kariyer (veda gerilimi). Anten omurgasındaki bayrak/kaos bu haftanın diyalog tonunu değiştirir.",
-        "en": "MAIN QUEST · Arc B. Peri's set, Orhan's sleep, Merve's block vote. Stay (quiet neon) or career (leaving threat). Antenna peace/chaos flags retint this week's dialogue."
+        "tr": "Peri’nin seti, Orhan’ın uykusu. Geceye kural koy — ya da bırak gitsin.",
+        "en": "Peri’s set, Orhan’s sleep. Rule the night — or let her leave."
       }
     },
     {
       "id": "mq_ledger_tray",
       "type": "main",
       "title": {
-        "tr": "Omurga 4/5 — Defter ve Tepsi",
-        "en": "Spine 4/5 — Ledger & Tray"
+        "tr": "Açık Defter",
+        "en": "Open Book"
       },
       "summary": {
-        "tr": "ANA GÖREV · Arc C. Merve'nin defteri + Can'ın gururu = Tea Circle'ın gerçek anlamı. Peri kaldıysa neon kısık eşlik eder; gidiyorsa tepsi 'son gece' tadı alır. Final Cup'tan önceki son omurga.",
-        "en": "MAIN QUEST · Arc C. Merve's ledger + Can's pride = what Tea Circle really means. If Peri stayed, quiet neon rides along; if leaving, the tray tastes like a last night. Last spine beat before Final Cup."
+        "tr": "Merve’nin defteri + tepsi. Bir satır sızarsa Neon duyar.",
+        "en": "Merve’s book and tray. One leaked line and Neon hears."
       },
       "giver": "n6",
       "week": 4,
@@ -621,8 +629,8 @@
           "order": 1,
           "kind": "arc_beat",
           "label": {
-            "tr": "Beat 1/4 · Poğaça kıtlığını yönet",
-            "en": "Beat 1/4 · Manage the pastry shortage"
+            "tr": "Poğaça kıtlığını yönet",
+            "en": "Manage the pastry shortage"
           },
           "track": {
             "type": "flag",
@@ -640,8 +648,8 @@
           "order": 2,
           "kind": "arc_beat",
           "label": {
-            "tr": "Beat 2/4 · Merve'nin 'ben biliyorum' duvarını aş",
-            "en": "Beat 2/4 · Crack Merve's 'I know' wall"
+            "tr": "Merve'nin 'ben biliyorum' duvarını aş",
+            "en": "Crack Merve's 'I know' wall"
           },
           "track": {
             "type": "flag",
@@ -659,8 +667,8 @@
           "order": 3,
           "kind": "arc_beat",
           "label": {
-            "tr": "Beat 3/4 · Can'a yardım et (gurur veya güven)",
-            "en": "Beat 3/4 · Help Can (pride or trust)"
+            "tr": "Can'a yardım et (gurur veya güven)",
+            "en": "Help Can (pride or trust)"
           },
           "track": {
             "type": "flag",
@@ -679,8 +687,8 @@
           "order": 4,
           "kind": "arc_beat",
           "label": {
-            "tr": "Beat 4/4 · Defteri aç — borç = iyilik zinciri",
-            "en": "Beat 4/4 · Open the ledger — debt = favor chain"
+            "tr": "Defteri aç — borç = iyilik zinciri",
+            "en": "Open the ledger — debt = favor chain"
           },
           "track": {
             "type": "flag",
@@ -739,31 +747,31 @@
       },
       "spineIndex": 4,
       "spineOf": 5,
-      "spineCode": "MAIN 4/5",
+      "spineCode": "",
       "nextQuestId": "mq_season_finale",
       "hudBlurb": {
-        "tr": "Omurga 4/5 · Arc C — demlik + tepsi",
-        "en": "Spine 4/5 · Arc C — teapot + tray"
+        "tr": "defter — demlik + tepsi",
+        "en": "defter — teapot + tray"
       },
       "nextSpineTeaser": {
         "tr": "Sıradaki: Porch Cup Finali (ending kilidi)",
         "en": "Next: Porch Cup Final (ending lock)"
       },
       "blurb": {
-        "tr": "ANA GÖREV · Arc C. Merve'nin defteri + Can'ın gururu = Tea Circle'ın gerçek anlamı. Peri kaldıysa neon kısık eşlik eder; gidiyorsa tepsi 'son gece' tadı alır. Final Cup'tan önceki son omurga.",
-        "en": "MAIN QUEST · Arc C. Merve's ledger + Can's pride = what Tea Circle really means. If Peri stayed, quiet neon rides along; if leaving, the tray tastes like a last night. Last spine beat before Final Cup."
+        "tr": "Merve’nin defteri + tepsi. Bir satır sızarsa Neon duyar.",
+        "en": "Merve’s book and tray. One leaked line and Neon hears."
       }
     },
     {
       "id": "mq_season_finale",
       "type": "main",
       "title": {
-        "tr": "Omurga 5/5 — Porch Cup Finali",
-        "en": "Spine 5/5 — Porch Cup Final"
+        "tr": "Son Işık",
+        "en": "Final Light"
       },
       "summary": {
-        "tr": "ANA GÖREV · Sezon kilidi. Üç arc'ın artçıları (bayrak/kaos, kal/git, defter/zincir) Final Cup comic'ine ve ending track'ine yazılır. Bu omurganın son halkası.",
-        "en": "MAIN QUEST · Season lock. Aftershocks of all three arcs (flag/chaos, stay/leave, ledger/chain) write into Final Cup comic and your ending track. Last link of the spine."
+        "tr": "Mahalle karar verir. Üç utanç Cup’ta buluşur.",
+        "en": "The street decides. Three shames meet on the Cup."
       },
       "giver": "system",
       "week": 4,
@@ -862,19 +870,19 @@
       },
       "spineIndex": 5,
       "spineOf": 5,
-      "spineCode": "MAIN 5/5",
+      "spineCode": "",
       "nextQuestId": null,
       "hudBlurb": {
-        "tr": "Omurga 5/5 · Final — sokak seni hatırlar",
-        "en": "Spine 5/5 · Final — the street remembers you"
+        "tr": "Final — sokak seni hatırlar",
+        "en": "Final — the street remembers you"
       },
       "nextSpineTeaser": {
-        "tr": "Omurga tamam — ending branch'ini gör",
-        "en": "Spine complete — see your ending branch"
+        "tr": "tamam — ending branch'ini gör",
+        "en": "Season closed — see your ending branch"
       },
       "blurb": {
-        "tr": "ANA GÖREV · Sezon kilidi. Üç arc'ın artçıları (bayrak/kaos, kal/git, defter/zincir) Final Cup comic'ine ve ending track'ine yazılır. Bu omurganın son halkası.",
-        "en": "MAIN QUEST · Season lock. Aftershocks of all three arcs (flag/chaos, stay/leave, ledger/chain) write into Final Cup comic and your ending track. Last link of the spine."
+        "tr": "Mahalle karar verir. Üç utanç Cup’ta buluşur.",
+        "en": "The street decides. Three shames meet on the Cup."
       }
     },
     {
@@ -2055,8 +2063,8 @@
       "id": "sq_day2_echo_mediate",
       "type": "side",
       "title": {
-        "tr": "Yankı: Ortak İp",
-        "en": "Echo: Shared String"
+        "tr": "Yankı: Ortak Çekim",
+        "en": "Echo: Shared Pull"
       },
       "summary": {
         "tr": "cold_open_mediate → sokakta ortak ip + Orhan satırı.",
@@ -2237,14 +2245,14 @@
       "id": "wc_welcome_three_doors_open",
       "streetVisual": {
         "tr": "Üç komşu kapısı aralık; selam animasyonu.",
-        "en": "Three neighbor doors ajar; greeting idle."
+        "en": ""
       }
     },
     "wc_kite_string_on_antenna": {
       "id": "wc_kite_string_on_antenna",
       "streetVisual": {
-        "tr": "Antende ince uçurtma ipi asılı — Arc A tohumu.",
-        "en": "Thin kite string on the antenna — Arc A seed."
+        "tr": "Antende ince uçurtma ipi asılı — çatı utanç tutuyor.",
+        "en": "Thin kite string on the antenna — roof holding a shame."
       }
     },
     "wc_cup1_gossip_board": {
@@ -2642,7 +2650,7 @@
       },
       "streetBanner": {
         "tr": "◈ Ortak ip — arabuluculuk sokakta",
-        "en": "◈ Shared string — mediation on the block"
+        "en": "◈ shared pull — mediation on the block"
       },
       "cupLobby": null,
       "sfxHint": "teapot"
@@ -2747,8 +2755,8 @@
       "questId": "mq_antenna_op",
       "arcId": "arc_kite_antenna",
       "label": {
-        "tr": "2 · Anten (Arc A)",
-        "en": "2 · Antenna (Arc A)"
+        "tr": "2 · Anten (çatı)",
+        "en": "2 · Antenna (çatı)"
       },
       "completeFlag": "arc_kite_antenna_complete",
       "branchFlags": [
@@ -2762,8 +2770,8 @@
       "questId": "mq_decibel_accord",
       "arcId": "arc_volume_war",
       "label": {
-        "tr": "3 · Desibel (Arc B)",
-        "en": "3 · Decibel (Arc B)"
+        "tr": "3 · Desibel (gece)",
+        "en": "3 · Decibel (gece)"
       },
       "completeFlag": "arc_volume_war_complete",
       "branchFlags": [
@@ -2777,8 +2785,8 @@
       "questId": "mq_ledger_tray",
       "arcId": "arc_tea_ledger",
       "label": {
-        "tr": "4 · Defter (Arc C)",
-        "en": "4 · Ledger (Arc C)"
+        "tr": "4 · Defter (defter)",
+        "en": "4 · Ledger (defter)"
       },
       "completeFlag": "arc_tea_ledger_complete",
       "branchFlags": [
@@ -2802,36 +2810,36 @@
     {
       "ifFlag": "flag_fence_and_kite",
       "line": {
-        "tr": "Anten bayrağı hâlâ orada — Arc A barış yazdı.",
-        "en": "Antenna flag still there — Arc A wrote peace."
+        "tr": "Anten bayrağı hâlâ orada — çatı barış yazdı.",
+        "en": "Antenna flag still there — çatı wrote peace."
       }
     },
     {
       "ifFlag": "flag_kite_chaos_buff",
       "line": {
-        "tr": "Çatıdaki tebeşir okları silinmedi — Arc A kaos seçti.",
-        "en": "Roof chalk arrows remain — Arc A chose chaos."
+        "tr": "Çatıdaki tebeşir okları silinmedi — çatı kaos seçti.",
+        "en": "Roof chalk arrows remain — çatı chose chaos."
       }
     },
     {
       "ifFlag": "flag_quiet_neon",
       "line": {
-        "tr": "Neon kısık; sessiz saatler yazılı — Arc B antlaşması.",
-        "en": "Neon low; quiet hours taped up — Arc B accord."
+        "tr": "Neon kısık; sessiz saatler yazılı — gece antlaşması.",
+        "en": "Neon low; quiet hours taped up — gece accord."
       }
     },
     {
       "ifFlag": "flag_peri_leaving_threat",
       "line": {
-        "tr": "Kulaklık kutusunda bilet taslağı — Arc B veda gerilimi.",
-        "en": "Ticket draft in the headphone box — Arc B leaving tension."
+        "tr": "Kulaklık kutusunda bilet taslağı — gece veda gerilimi.",
+        "en": "Ticket draft in the headphone box — gece leaving tension."
       }
     },
     {
       "ifFlag": "flag_ledger_closed_kind",
       "line": {
-        "tr": "Demlik + tepsi aynı ritim — Arc C zinciri açık.",
-        "en": "Teapot + tray in rhythm — Arc C chain is open."
+        "tr": "Demlik + tepsi aynı ritim — defter zinciri açık.",
+        "en": "Teapot + tray in rhythm — defter chain is open."
       }
     }
   ],
@@ -2951,7 +2959,7 @@
         "repTrack": "rep_mediator",
         "title": {
           "tr": "Yankı · Arabulucu — Ortak ip",
-          "en": "Consequence · Mediator — Shared string"
+          "en": "Consequence · Mediator — shared pull"
         },
         "body": {
           "tr": "İlk kapıda birlikte çektiniz. Day 2'de anten ile verandayı bir ip bağlıyor; Orhan gazetesi yumuşadı, Leyla ipi bırakmadı. Mahalle seni Arabulucu diye okuyor.",
@@ -3073,7 +3081,7 @@
           "cssClass": "rp-prop-shared-string",
           "label": {
             "tr": "Ortak ip",
-            "en": "Shared string"
+            "en": "shared pull"
           }
         },
         "npcLine": {
@@ -3309,7 +3317,7 @@
       "bodyByFlag": {
         "cold_open_mediate": {
           "tr": "Ortak ip comic'e sızdı — Arabulucu izi.",
-          "en": "Shared string leaked into the comic — Mediator mark."
+          "en": "shared pull leaked into the comic — Mediator mark."
         },
         "cold_open_instigate": {
           "tr": "Yüksek uçuş comic'e sızdı — Kışkırtıcı izi.",
@@ -3438,7 +3446,7 @@
         ],
         "propLabel": {
           "tr": "Ortak ip",
-          "en": "Shared string"
+          "en": "shared pull"
         },
         "npcLine": {
           "speakerId": "n4",
@@ -3600,11 +3608,11 @@
           "renderOvernight() with overnightColdConsequences block visible",
           "Set flag overnight_story_prove_used"
         ],
-        "pseudo": "\nfunction forceOvernightStoryProve() {\n  const flags = state.save.storyFlags || {};\n  const cold = ['cold_open_mediate','cold_open_instigate','cold_open_stage'].some(f => flags[f]);\n  if (!cold) { toast('No cold_open_* flag'); return; }\n  if ((state.save.dayIndex||1) !== 1) { renderOvernight(); return; }\n  // Day advance WITHOUT End-evening gate\n  state.save.dayIndex = 2;\n  state.save.weekNumber = weekNumber();\n  state.save.evening = { checkin:false, visits:[], streetEvent:false, errand:false, secondBeat:false, cupDone:false, cupEveDone:false, complete:false };\n  state.save.visitedArcToday = {};\n  state.save.storyFlags.overnight_story_prove_used = true;\n  applyDay2ColdRewrite();\n  saveNow();\n  renderOvernight({ lines: [], tease: '' });\n}\n"
+        "pseudo": "\nfunction forceOvernightStoryProve() { const flags = state.save.storyFlags || {}; const cold = ['cold_open_mediate','cold_open_instigate','cold_open_stage'].some(f => flags[f]); if (!cold) { toast('No cold_open_* flag'); return; } if ((state.save.dayIndex||1) !== 1) { renderOvernight(); return; } // Day advance WITHOUT End-evening gate state.save.dayIndex = 2; state.save.weekNumber = weekNumber(); state.save.evening = { checkin:false, visits:[], streetEvent:false, errand:false, secondBeat:false, cupDone:false, cupEveDone:false, complete:false }; state.save.visitedArcToday = {}; state.save.storyFlags.overnight_story_prove_used = true; applyDay2ColdRewrite(); saveNow(); renderOvernight({ lines: [], tease: '' });\n}\n"
       },
       "renderOvernightPatch": {
         "id": "renderOvernightPatch",
-        "pseudo": "\nfunction renderOvernight(payoff) {\n  applyDay2ColdRewrite(); // NEW — dayIndex already 2 after endEvening OR forceOvernight\n  const cold = pickOvernightColdConsequence(state.questPack?.storyForm4);\n  // ...existing teaser/echo...\n  screen.innerHTML = `\n    ${stageLayer(\"street\", true)}\n    ${streetPropOverlayHtml(\"overnight\")}\n    <div class=\"rp-overnight\">\n      ...\n      ${cold ? overnightColdHtml(cold) : \"\"}\n      <ul class=\"rp-ticks\">...</ul>\n      ...\n    </div>`;\n}\n"
+        "pseudo": "\nfunction renderOvernight(payoff) { applyDay2ColdRewrite(); // NEW — dayIndex already 2 after endEvening OR forceOvernight const cold = pickOvernightColdConsequence(state.questPack?.storyForm4); // ...existing teaser/echo... screen.innerHTML = ` ${stageLayer(\"street\", true)} ${streetPropOverlayHtml(\"overnight\")} <div class=\"rp-overnight\"> ... ${cold ? overnightColdHtml(cold) : \"\"} <ul class=\"rp-ticks\">...</ul> ... </div>`;\n}\n"
       }
     },
     "runtimeFlags": {
@@ -3659,7 +3667,7 @@
         },
         "title": {
           "tr": "Sabah · Ortak ip",
-          "en": "Morning · Shared string"
+          "en": "Morning · shared pull"
         },
         "lines": [
           {
@@ -3669,7 +3677,7 @@
         ],
         "tomorrowHook": {
           "tr": "Sokakta Ortak ip + Orhan satırını gör.",
-          "en": "See Shared string + Orhan's line on the street."
+          "en": "See shared pull + Orhan's line on the street."
         },
         "worldConsequenceId": "wc_day2_mediate_shared_string"
       },
@@ -3743,8 +3751,8 @@
         "testId": "story-day2-mediate-string",
         "anchor": "street_stage",
         "zIndex": 6,
-        "html": "\n<div class=\"rp-stage-prop rp-stage-prop--shared-string\" data-testid=\"story-day2-mediate-string\" data-prop=\"mediate-shared-string\" aria-label=\"Shared string\">\n  <svg class=\"rp-string-svg\" viewBox=\"0 0 100 40\" preserveAspectRatio=\"none\" aria-hidden=\"true\">\n    <path class=\"rp-string-path\" d=\"M 18 22 C 32 8, 48 8, 58 20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-linecap=\"round\"/>\n    <circle class=\"rp-string-knot\" cx=\"18\" cy=\"22\" r=\"1.1\"/>\n    <circle class=\"rp-string-knot\" cx=\"58\" cy=\"20\" r=\"1.1\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Shared string</span>\n</div>\n",
-        "htmlTr": "\n<div class=\"rp-stage-prop rp-stage-prop--shared-string\" data-testid=\"story-day2-mediate-string\" data-prop=\"mediate-shared-string\" aria-label=\"Ortak ip\">\n  <svg class=\"rp-string-svg\" viewBox=\"0 0 100 40\" preserveAspectRatio=\"none\" aria-hidden=\"true\">\n    <path class=\"rp-string-path\" d=\"M 18 22 C 32 8, 48 8, 58 20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-linecap=\"round\"/>\n    <circle class=\"rp-string-knot\" cx=\"18\" cy=\"22\" r=\"1.1\"/>\n    <circle class=\"rp-string-knot\" cx=\"58\" cy=\"20\" r=\"1.1\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Ortak ip</span>\n</div>\n",
+        "html": "\n<div class=\"rp-stage-prop rp-stage-prop--shared-string\" data-testid=\"story-day2-mediate-string\" data-prop=\"mediate-shared-string\" aria-label=\"shared pull\"> <svg class=\"rp-string-svg\" viewBox=\"0 0 100 40\" preserveAspectRatio=\"none\" aria-hidden=\"true\"> <path class=\"rp-string-path\" d=\"M 18 22 C 32 8, 48 8, 58 20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-linecap=\"round\"/> <circle class=\"rp-string-knot\" cx=\"18\" cy=\"22\" r=\"1.1\"/> <circle class=\"rp-string-knot\" cx=\"58\" cy=\"20\" r=\"1.1\"/> </svg> <span class=\"rp-stage-prop__tag\">shared pull</span>\n</div>\n",
+        "htmlTr": "\n<div class=\"rp-stage-prop rp-stage-prop--shared-string\" data-testid=\"story-day2-mediate-string\" data-prop=\"mediate-shared-string\" aria-label=\"Ortak ip\"> <svg class=\"rp-string-svg\" viewBox=\"0 0 100 40\" preserveAspectRatio=\"none\" aria-hidden=\"true\"> <path class=\"rp-string-path\" d=\"M 18 22 C 32 8, 48 8, 58 20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-linecap=\"round\"/> <circle class=\"rp-string-knot\" cx=\"18\" cy=\"22\" r=\"1.1\"/> <circle class=\"rp-string-knot\" cx=\"58\" cy=\"20\" r=\"1.1\"/> </svg> <span class=\"rp-stage-prop__tag\">Ortak ip</span>\n</div>\n",
         "geometryNote": "SVG path spans ~Leyla (n3 ~46%) toward Orhan (n4 ~58%) antenna side — matches visual-form hotspot map.",
         "distinctFromDay1Seeds": [
           "Day1 has no .rp-stage-prop--shared-string",
@@ -3766,8 +3774,8 @@
         "worldConsequenceId": "wc_day2_instigate_kite_dare",
         "testId": "story-day2-instigate-kite",
         "secondaryTestId": "story-day2-forbidden-zone",
-        "html": "<div class=\"rp-stage-prop rp-stage-prop--kite-high\" data-testid=\"story-day2-instigate-kite\" data-prop=\"instigate-high-kite\" aria-label=\"High flight\">\n  <svg class=\"rp-kite-svg\" viewBox=\"0 0 100 50\" preserveAspectRatio=\"xMidYMin meet\" aria-hidden=\"true\">\n    <!-- antenna mast -->\n    <line x1=\"52\" y1=\"18\" x2=\"52\" y2=\"48\" stroke=\"#8a7a68\" stroke-width=\"0.8\"/>\n    <line x1=\"46\" y1=\"22\" x2=\"58\" y2=\"22\" stroke=\"#8a7a68\" stroke-width=\"0.6\"/>\n    <!-- kite ABOVE antenna -->\n    <path class=\"rp-kite-body\" d=\"M 62 6 L 72 14 L 62 22 L 52 14 Z\" fill=\"#c45c3e\" stroke=\"#f2e6d8\" stroke-width=\"0.5\"/>\n    <line class=\"rp-kite-tail\" x1=\"72\" y1=\"14\" x2=\"88\" y2=\"28\" stroke=\"#e8c9a0\" stroke-width=\"0.5\" stroke-dasharray=\"1.2 0.8\"/>\n    <circle cx=\"88\" cy=\"28\" r=\"0.9\" fill=\"#e8c9a0\"/>\n    <!-- line from kite down past antenna tip (chaos) -->\n    <path d=\"M 62 14 Q 58 20 52 18\" fill=\"none\" stroke=\"#f0d2a8\" stroke-width=\"0.45\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">High flight</span>\n  <span class=\"rp-door-chalk\" data-testid=\"story-day2-forbidden-zone\" data-neighbor=\"n4\">FORBIDDEN ZONE</span>\n</div>",
-        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--kite-high\" data-testid=\"story-day2-instigate-kite\" data-prop=\"instigate-high-kite\" aria-label=\"Yüksek uçuş\">\n  <svg class=\"rp-kite-svg\" viewBox=\"0 0 100 50\" preserveAspectRatio=\"xMidYMin meet\" aria-hidden=\"true\">\n    <line x1=\"52\" y1=\"18\" x2=\"52\" y2=\"48\" stroke=\"#8a7a68\" stroke-width=\"0.8\"/>\n    <line x1=\"46\" y1=\"22\" x2=\"58\" y2=\"22\" stroke=\"#8a7a68\" stroke-width=\"0.6\"/>\n    <path class=\"rp-kite-body\" d=\"M 62 6 L 72 14 L 62 22 L 52 14 Z\" fill=\"#c45c3e\" stroke=\"#f2e6d8\" stroke-width=\"0.5\"/>\n    <line class=\"rp-kite-tail\" x1=\"72\" y1=\"14\" x2=\"88\" y2=\"28\" stroke=\"#e8c9a0\" stroke-width=\"0.5\" stroke-dasharray=\"1.2 0.8\"/>\n    <circle cx=\"88\" cy=\"28\" r=\"0.9\" fill=\"#e8c9a0\"/>\n    <path d=\"M 62 14 Q 58 20 52 18\" fill=\"none\" stroke=\"#f0d2a8\" stroke-width=\"0.45\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Yüksek uçuş</span>\n  <span class=\"rp-door-chalk\" data-testid=\"story-day2-forbidden-zone\" data-neighbor=\"n4\">YASAK BÖLGE</span>\n</div>",
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--kite-high\" data-testid=\"story-day2-instigate-kite\" data-prop=\"instigate-high-kite\" aria-label=\"High flight\"> <svg class=\"rp-kite-svg\" viewBox=\"0 0 100 50\" preserveAspectRatio=\"xMidYMin meet\" aria-hidden=\"true\"> <!-- antenna mast --> <line x1=\"52\" y1=\"18\" x2=\"52\" y2=\"48\" stroke=\"#8a7a68\" stroke-width=\"0.8\"/> <line x1=\"46\" y1=\"22\" x2=\"58\" y2=\"22\" stroke=\"#8a7a68\" stroke-width=\"0.6\"/> <!-- kite ABOVE antenna --> <path class=\"rp-kite-body\" d=\"M 62 6 L 72 14 L 62 22 L 52 14 Z\" fill=\"#c45c3e\" stroke=\"#f2e6d8\" stroke-width=\"0.5\"/> <line class=\"rp-kite-tail\" x1=\"72\" y1=\"14\" x2=\"88\" y2=\"28\" stroke=\"#e8c9a0\" stroke-width=\"0.5\" stroke-dasharray=\"1.2 0.8\"/> <circle cx=\"88\" cy=\"28\" r=\"0.9\" fill=\"#e8c9a0\"/> <!-- line from kite down past antenna tip (chaos) --> <path d=\"M 62 14 Q 58 20 52 18\" fill=\"none\" stroke=\"#f0d2a8\" stroke-width=\"0.45\"/> </svg> <span class=\"rp-stage-prop__tag\">High flight</span> <span class=\"rp-door-chalk\" data-testid=\"story-day2-forbidden-zone\" data-neighbor=\"n4\">FORBIDDEN ZONE</span>\n</div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--kite-high\" data-testid=\"story-day2-instigate-kite\" data-prop=\"instigate-high-kite\" aria-label=\"Yüksek uçuş\"> <svg class=\"rp-kite-svg\" viewBox=\"0 0 100 50\" preserveAspectRatio=\"xMidYMin meet\" aria-hidden=\"true\"> <line x1=\"52\" y1=\"18\" x2=\"52\" y2=\"48\" stroke=\"#8a7a68\" stroke-width=\"0.8\"/> <line x1=\"46\" y1=\"22\" x2=\"58\" y2=\"22\" stroke=\"#8a7a68\" stroke-width=\"0.6\"/> <path class=\"rp-kite-body\" d=\"M 62 6 L 72 14 L 62 22 L 52 14 Z\" fill=\"#c45c3e\" stroke=\"#f2e6d8\" stroke-width=\"0.5\"/> <line class=\"rp-kite-tail\" x1=\"72\" y1=\"14\" x2=\"88\" y2=\"28\" stroke=\"#e8c9a0\" stroke-width=\"0.5\" stroke-dasharray=\"1.2 0.8\"/> <circle cx=\"88\" cy=\"28\" r=\"0.9\" fill=\"#e8c9a0\"/> <path d=\"M 62 14 Q 58 20 52 18\" fill=\"none\" stroke=\"#f0d2a8\" stroke-width=\"0.45\"/> </svg> <span class=\"rp-stage-prop__tag\">Yüksek uçuş</span> <span class=\"rp-door-chalk\" data-testid=\"story-day2-forbidden-zone\" data-neighbor=\"n4\">YASAK BÖLGE</span>\n</div>",
         "distinctFromMediate": "Kite ABOVE antenna + FORBIDDEN ZONE chalk — no shared-string path",
         "distinctFromDay1Seeds": [
           "Day1 has no story-day2-instigate-kite",
@@ -3787,8 +3795,8 @@
         },
         "worldConsequenceId": "wc_day2_stage_cup_chalk",
         "testId": "story-day2-stage-chalk",
-        "html": "<div class=\"rp-stage-prop rp-stage-prop--chalk-cup\" data-testid=\"story-day2-stage-chalk\" data-prop=\"stage-chalk-cup\" aria-label=\"Chalk Cup\">\n  <svg class=\"rp-chalk-svg\" viewBox=\"0 0 100 36\" preserveAspectRatio=\"xMidYMid meet\" aria-hidden=\"true\">\n    <!-- three rehearsal circles: antenna / kite / whistle -->\n    <circle class=\"rp-chalk-ring\" cx=\"22\" cy=\"18\" r=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-dasharray=\"1.4 1.1\"/>\n    <circle class=\"rp-chalk-ring\" cx=\"50\" cy=\"18\" r=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-dasharray=\"1.4 1.1\"/>\n    <circle class=\"rp-chalk-ring\" cx=\"78\" cy=\"18\" r=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-dasharray=\"1.4 1.1\"/>\n    <text x=\"22\" y=\"20\" text-anchor=\"middle\" font-size=\"3.2\" fill=\"currentColor\" opacity=\"0.85\">A</text>\n    <text x=\"50\" y=\"20\" text-anchor=\"middle\" font-size=\"3.2\" fill=\"currentColor\" opacity=\"0.85\">K</text>\n    <text x=\"78\" y=\"20\" text-anchor=\"middle\" font-size=\"3.2\" fill=\"currentColor\" opacity=\"0.85\">W</text>\n    <!-- whistle glyph near Cem -->\n    <rect x=\"86\" y=\"6\" width=\"8\" height=\"3.2\" rx=\"1\" fill=\"#e8c9a0\" opacity=\"0.9\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Chalk Cup</span>\n</div>",
-        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--chalk-cup\" data-testid=\"story-day2-stage-chalk\" data-prop=\"stage-chalk-cup\" aria-label=\"Tebeşir Cup\">\n  <svg class=\"rp-chalk-svg\" viewBox=\"0 0 100 36\" preserveAspectRatio=\"xMidYMid meet\" aria-hidden=\"true\">\n    <circle class=\"rp-chalk-ring\" cx=\"22\" cy=\"18\" r=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-dasharray=\"1.4 1.1\"/>\n    <circle class=\"rp-chalk-ring\" cx=\"50\" cy=\"18\" r=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-dasharray=\"1.4 1.1\"/>\n    <circle class=\"rp-chalk-ring\" cx=\"78\" cy=\"18\" r=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-dasharray=\"1.4 1.1\"/>\n    <text x=\"22\" y=\"20\" text-anchor=\"middle\" font-size=\"3.2\" fill=\"currentColor\" opacity=\"0.85\">A</text>\n    <text x=\"50\" y=\"20\" text-anchor=\"middle\" font-size=\"3.2\" fill=\"currentColor\" opacity=\"0.85\">U</text>\n    <text x=\"78\" y=\"20\" text-anchor=\"middle\" font-size=\"3.2\" fill=\"currentColor\" opacity=\"0.85\">D</text>\n    <rect x=\"86\" y=\"6\" width=\"8\" height=\"3.2\" rx=\"1\" fill=\"#e8c9a0\" opacity=\"0.9\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Tebeşir Cup</span>\n</div>",
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--chalk-cup\" data-testid=\"story-day2-stage-chalk\" data-prop=\"stage-chalk-cup\" aria-label=\"Chalk Cup\"> <svg class=\"rp-chalk-svg\" viewBox=\"0 0 100 36\" preserveAspectRatio=\"xMidYMid meet\" aria-hidden=\"true\"> <!-- three rehearsal circles: antenna / kite / whistle --> <circle class=\"rp-chalk-ring\" cx=\"22\" cy=\"18\" r=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-dasharray=\"1.4 1.1\"/> <circle class=\"rp-chalk-ring\" cx=\"50\" cy=\"18\" r=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-dasharray=\"1.4 1.1\"/> <circle class=\"rp-chalk-ring\" cx=\"78\" cy=\"18\" r=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-dasharray=\"1.4 1.1\"/> <text x=\"22\" y=\"20\" text-anchor=\"middle\" font-size=\"3.2\" fill=\"currentColor\" opacity=\"0.85\">A</text> <text x=\"50\" y=\"20\" text-anchor=\"middle\" font-size=\"3.2\" fill=\"currentColor\" opacity=\"0.85\">K</text> <text x=\"78\" y=\"20\" text-anchor=\"middle\" font-size=\"3.2\" fill=\"currentColor\" opacity=\"0.85\">W</text> <!-- whistle glyph near Cem --> <rect x=\"86\" y=\"6\" width=\"8\" height=\"3.2\" rx=\"1\" fill=\"#e8c9a0\" opacity=\"0.9\"/> </svg> <span class=\"rp-stage-prop__tag\">Chalk Cup</span>\n</div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--chalk-cup\" data-testid=\"story-day2-stage-chalk\" data-prop=\"stage-chalk-cup\" aria-label=\"Tebeşir Cup\"> <svg class=\"rp-chalk-svg\" viewBox=\"0 0 100 36\" preserveAspectRatio=\"xMidYMid meet\" aria-hidden=\"true\"> <circle class=\"rp-chalk-ring\" cx=\"22\" cy=\"18\" r=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-dasharray=\"1.4 1.1\"/> <circle class=\"rp-chalk-ring\" cx=\"50\" cy=\"18\" r=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-dasharray=\"1.4 1.1\"/> <circle class=\"rp-chalk-ring\" cx=\"78\" cy=\"18\" r=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-dasharray=\"1.4 1.1\"/> <text x=\"22\" y=\"20\" text-anchor=\"middle\" font-size=\"3.2\" fill=\"currentColor\" opacity=\"0.85\">A</text> <text x=\"50\" y=\"20\" text-anchor=\"middle\" font-size=\"3.2\" fill=\"currentColor\" opacity=\"0.85\">U</text> <text x=\"78\" y=\"20\" text-anchor=\"middle\" font-size=\"3.2\" fill=\"currentColor\" opacity=\"0.85\">D</text> <rect x=\"86\" y=\"6\" width=\"8\" height=\"3.2\" rx=\"1\" fill=\"#e8c9a0\" opacity=\"0.9\"/> </svg> <span class=\"rp-stage-prop__tag\">Tebeşir Cup</span>\n</div>",
         "distinctFromMediate": "Three dashed chalk circles on cobbles + whistle — no antenna string",
         "distinctFromDay1Seeds": [
           "Day1 has no story-day2-stage-chalk",
@@ -3810,8 +3818,8 @@
           "rp-hotspot--mediate"
         ],
         "nameSuffix": {
-          "tr": " · ip",
-          "en": " · string"
+          "tr": "ip",
+          "en": "string"
         },
         "speechBubble": {
           "tr": "İpi birlikte çektik. Gazetem bir milimetre açık.",
@@ -3841,8 +3849,8 @@
           "rp-hotspot--instigate"
         ],
         "nameSuffix": {
-          "tr": " · yasak",
-          "en": " · forbid"
+          "tr": "yasak",
+          "en": "forbid"
         },
         "speechBubble": {
           "tr": "YASAK BÖLGE yazdım. Uçurtma yüksek — gazetem kalkan.",
@@ -3872,8 +3880,8 @@
           "rp-hotspot--stage"
         ],
         "nameSuffix": {
-          "tr": " · prova",
-          "en": " · rehearse"
+          "tr": "prova",
+          "en": "rehearse"
         },
         "speechBubble": {
           "tr": "Üç daire. Anten / uçurtma / düdük. Prova — düdük hazır.",
@@ -3890,7 +3898,7 @@
         }
       }
     },
-    "cssAppend": "\n/* story-form-5 — Day2 lived props (not chip-only) */\n.rp-stage-prop {\n  position: absolute;\n  left: 12%;\n  right: 28%;\n  top: 28%;\n  height: 22%;\n  pointer-events: none;\n  z-index: 6;\n  color: #f2e6d8;\n  filter: drop-shadow(0 1px 2px rgba(0,0,0,.75));\n}\n.rp-stage-prop--shared-string { color: #e8c9a0; }\n.rp-string-svg { width: 100%; height: 100%; display: block; }\n.rp-string-path { stroke: #f0d2a8; opacity: 0.95; }\n.rp-string-knot { fill: #c45c3e; }\n.rp-stage-prop__tag {\n  position: absolute;\n  left: 42%;\n  top: -0.4rem;\n  font: 600 11px/1.2 \"IBM Plex Sans\", system-ui, sans-serif;\n  letter-spacing: 0.04em;\n  text-transform: uppercase;\n  background: rgba(20,12,8,.72);\n  padding: 0.2rem 0.45rem;\n  border-radius: 4px;\n}\n.rp-hotspot--mediate,\n.rp-hotspot--remember {\n  outline: 2px solid rgba(232, 180, 120, 0.85);\n  outline-offset: 2px;\n}\n.rp-hotspot__bubble {\n  position: absolute;\n  left: 50%;\n  bottom: calc(100% + 6px);\n  transform: translateX(-50%);\n  min-width: 9rem;\n  max-width: 12rem;\n  padding: 0.35rem 0.5rem;\n  border-radius: 8px;\n  background: rgba(18,12,8,.88);\n  color: #f2e6d8;\n  font-size: 11px;\n  line-height: 1.25;\n  z-index: 8;\n  pointer-events: none;\n}\n.rp-stage-prop--kite-high { top: 14%; left: 50%; width: 20%; height: 18%; }\n.rp-kite-glyph { font-size: 2rem; text-align: center; }\n.rp-door-chalk {\n  position: absolute;\n  left: 56%;\n  top: 48%;\n  font: 700 10px/1 monospace;\n  color: #f4f0e4;\n  background: rgba(40,30,20,.7);\n  padding: 0.15rem 0.35rem;\n  transform: rotate(-4deg);\n}\n.rp-stage-prop--chalk-cup { top: 58%; left: 30%; width: 40%; height: 16%; color: #dce6f0; }\n",
+    "cssAppend": "\n/* story-form-5 — Day2 lived props (not chip-only) */\n.rp-stage-prop { position: absolute; left: 12%; right: 28%; top: 28%; height: 22%; pointer-events: none; z-index: 6; color: #f2e6d8; filter: drop-shadow(0 1px 2px rgba(0,0,0,.75));\n}\n.rp-stage-prop--shared-string { color: #e8c9a0; }\n.rp-string-svg { width: 100%; height: 100%; display: block; }\n.rp-string-path { stroke: #f0d2a8; opacity: 0.95; }\n.rp-string-knot { fill: #c45c3e; }\n.rp-stage-prop__tag { position: absolute; left: 42%; top: -0.4rem; font: 600 11px/1.2 \"IBM Plex Sans\", system-ui, sans-serif; letter-spacing: 0.04em; text-transform: uppercase; background: rgba(20,12,8,.72); padding: 0.2rem 0.45rem; border-radius: 4px;\n}\n.rp-hotspot--mediate,\n.rp-hotspot--remember { outline: 2px solid rgba(232, 180, 120, 0.85); outline-offset: 2px;\n}\n.rp-hotspot__bubble { position: absolute; left: 50%; bottom: calc(100% + 6px); transform: translateX(-50%); min-width: 9rem; max-width: 12rem; padding: 0.35rem 0.5rem; border-radius: 8px; background: rgba(18,12,8,.88); color: #f2e6d8; font-size: 11px; line-height: 1.25; z-index: 8; pointer-events: none;\n}\n.rp-stage-prop--kite-high { top: 14%; left: 50%; width: 20%; height: 18%; }\n.rp-kite-glyph { font-size: 2rem; text-align: center; }\n.rp-door-chalk { position: absolute; left: 56%; top: 48%; font: 700 10px/1 monospace; color: #f4f0e4; background: rgba(40,30,20,.7); padding: 0.15rem 0.35rem; transform: rotate(-4deg);\n}\n.rp-stage-prop--chalk-cup { top: 58%; left: 30%; width: 40%; height: 16%; color: #dce6f0; }\n",
     "day2EnterSpotlight": {
       "id": "day2_enter_spotlight",
       "when": {
@@ -4004,7 +4012,7 @@
     "integratorSnippet": {
       "language": "js",
       "comment": "Paste into renderStreet — lived prop + Orhan bubble (mediate). Do not use chip-only.",
-      "pseudo": "\nfunction day2StreetStageHtml() {\n  const form = state.questPack?.storyForm5 || state.storyForm5;\n  const day = state.save.dayIndex || 1;\n  if (!form || day < 2) return \"\";\n  const props = form.day2StreetStageProps || {};\n  const pick = storyFlag(\"cold_open_mediate\") ? props.mediate\n    : storyFlag(\"cold_open_instigate\") ? props.instigate\n    : storyFlag(\"cold_open_stage\") ? props.stage : null;\n  if (!pick) return \"\";\n  return (state.locale === \"tr\" && pick.htmlTr) ? pick.htmlTr : pick.html;\n}\n\nfunction mutateHotspotHtml(n, baseBtnHtml) {\n  const form = state.questPack?.storyForm5 || state.storyForm5;\n  const muts = form?.hotspotMutations || {};\n  const mut = Object.values(muts).find(m =>\n    (m.when?.dayIndexMin || 2) <= (state.save.dayIndex||1) &&\n    (m.when?.flagsAll||[]).every(f => storyFlag(f)) &&\n    (m.neighborId === n.id || m.alsoNeighborId === n.id)\n  );\n  if (!mut) return baseBtnHtml;\n  const bubble = mut.neighborId === n.id ? mut.speechBubble\n    : mut.alsoNeighborId === n.id ? mut.alsoSpeechBubble : null;\n  const cls = mut.neighborId === n.id ? (mut.addClass||[]) : (mut.alsoAddClass||[]);\n  const tid = mut.neighborId === n.id ? mut.testId : \"\";\n  const bub = bubble ? `<span class=\"rp-hotspot__bubble\" ${tid?`data-testid=\"${tid}\"`:\"\"}>${loc(bubble)}</span>` : \"\";\n  return baseBtnHtml.replace('class=\"rp-hotspot', `class=\"rp-hotspot ${cls.join(\" \")}`).replace(\"</button>\", `${bub}</button>`);\n}\n\n// renderStreet: after stageLayer(\"street\") insert day2StreetStageHtml()\n// wrap each hotspot through mutateHotspotHtml\n"
+      "pseudo": "\nfunction day2StreetStageHtml() { const form = state.questPack?.storyForm5 || state.storyForm5; const day = state.save.dayIndex || 1; if (!form || day < 2) return \"\"; const props = form.day2StreetStageProps || {}; const pick = storyFlag(\"cold_open_mediate\") ? props.mediate : storyFlag(\"cold_open_instigate\") ? props.instigate : storyFlag(\"cold_open_stage\") ? props.stage : null; if (!pick) return \"\"; return (state.locale === \"tr\" && pick.htmlTr) ? pick.htmlTr : pick.html;\n} function mutateHotspotHtml(n, baseBtnHtml) { const form = state.questPack?.storyForm5 || state.storyForm5; const muts = form?.hotspotMutations || {}; const mut = Object.values(muts).find(m => (m.when?.dayIndexMin || 2) <= (state.save.dayIndex||1) && (m.when?.flagsAll||[]).every(f => storyFlag(f)) && (m.neighborId === n.id || m.alsoNeighborId === n.id) ); if (!mut) return baseBtnHtml; const bubble = mut.neighborId === n.id ? mut.speechBubble : mut.alsoNeighborId === n.id ? mut.alsoSpeechBubble : null; const cls = mut.neighborId === n.id ? (mut.addClass||[]) : (mut.alsoAddClass||[]); const tid = mut.neighborId === n.id ? mut.testId : \"\"; const bub = bubble ? `<span class=\"rp-hotspot__bubble\" ${tid?`data-testid=\"${tid}\"`:\"\"}>${loc(bubble)}</span>` : \"\"; return baseBtnHtml.replace('class=\"rp-hotspot', `class=\"rp-hotspot ${cls.join(\" \")}`).replace(\"</button>\", `${bub}</button>`);\n} // renderStreet: after stageLayer(\"street\") insert day2StreetStageHtml()\n// wrap each hotspot through mutateHotspotHtml\n"
     },
     "runtimeFlags": {
       "mediate": "cold_open_mediate",
@@ -4144,8 +4152,8 @@
         "worldConsequenceId": "wc_day2_instigate_kite_dare",
         "testId": "story-day2-instigate-kite",
         "secondaryTestId": "story-day2-forbidden-zone",
-        "html": "<div class=\"rp-stage-prop rp-stage-prop--kite-high\" data-testid=\"story-day2-instigate-kite\" data-prop=\"instigate-high-kite\" aria-label=\"High flight\">\n  <svg class=\"rp-kite-svg\" viewBox=\"0 0 100 50\" preserveAspectRatio=\"xMidYMin meet\" aria-hidden=\"true\">\n    <!-- antenna mast -->\n    <line x1=\"52\" y1=\"18\" x2=\"52\" y2=\"48\" stroke=\"#8a7a68\" stroke-width=\"0.8\"/>\n    <line x1=\"46\" y1=\"22\" x2=\"58\" y2=\"22\" stroke=\"#8a7a68\" stroke-width=\"0.6\"/>\n    <!-- kite ABOVE antenna -->\n    <path class=\"rp-kite-body\" d=\"M 62 6 L 72 14 L 62 22 L 52 14 Z\" fill=\"#c45c3e\" stroke=\"#f2e6d8\" stroke-width=\"0.5\"/>\n    <line class=\"rp-kite-tail\" x1=\"72\" y1=\"14\" x2=\"88\" y2=\"28\" stroke=\"#e8c9a0\" stroke-width=\"0.5\" stroke-dasharray=\"1.2 0.8\"/>\n    <circle cx=\"88\" cy=\"28\" r=\"0.9\" fill=\"#e8c9a0\"/>\n    <!-- line from kite down past antenna tip (chaos) -->\n    <path d=\"M 62 14 Q 58 20 52 18\" fill=\"none\" stroke=\"#f0d2a8\" stroke-width=\"0.45\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">High flight</span>\n  <span class=\"rp-door-chalk\" data-testid=\"story-day2-forbidden-zone\" data-neighbor=\"n4\">FORBIDDEN ZONE</span>\n</div>",
-        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--kite-high\" data-testid=\"story-day2-instigate-kite\" data-prop=\"instigate-high-kite\" aria-label=\"Yüksek uçuş\">\n  <svg class=\"rp-kite-svg\" viewBox=\"0 0 100 50\" preserveAspectRatio=\"xMidYMin meet\" aria-hidden=\"true\">\n    <line x1=\"52\" y1=\"18\" x2=\"52\" y2=\"48\" stroke=\"#8a7a68\" stroke-width=\"0.8\"/>\n    <line x1=\"46\" y1=\"22\" x2=\"58\" y2=\"22\" stroke=\"#8a7a68\" stroke-width=\"0.6\"/>\n    <path class=\"rp-kite-body\" d=\"M 62 6 L 72 14 L 62 22 L 52 14 Z\" fill=\"#c45c3e\" stroke=\"#f2e6d8\" stroke-width=\"0.5\"/>\n    <line class=\"rp-kite-tail\" x1=\"72\" y1=\"14\" x2=\"88\" y2=\"28\" stroke=\"#e8c9a0\" stroke-width=\"0.5\" stroke-dasharray=\"1.2 0.8\"/>\n    <circle cx=\"88\" cy=\"28\" r=\"0.9\" fill=\"#e8c9a0\"/>\n    <path d=\"M 62 14 Q 58 20 52 18\" fill=\"none\" stroke=\"#f0d2a8\" stroke-width=\"0.45\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Yüksek uçuş</span>\n  <span class=\"rp-door-chalk\" data-testid=\"story-day2-forbidden-zone\" data-neighbor=\"n4\">YASAK BÖLGE</span>\n</div>",
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--kite-high\" data-testid=\"story-day2-instigate-kite\" data-prop=\"instigate-high-kite\" aria-label=\"High flight\"> <svg class=\"rp-kite-svg\" viewBox=\"0 0 100 50\" preserveAspectRatio=\"xMidYMin meet\" aria-hidden=\"true\"> <!-- antenna mast --> <line x1=\"52\" y1=\"18\" x2=\"52\" y2=\"48\" stroke=\"#8a7a68\" stroke-width=\"0.8\"/> <line x1=\"46\" y1=\"22\" x2=\"58\" y2=\"22\" stroke=\"#8a7a68\" stroke-width=\"0.6\"/> <!-- kite ABOVE antenna --> <path class=\"rp-kite-body\" d=\"M 62 6 L 72 14 L 62 22 L 52 14 Z\" fill=\"#c45c3e\" stroke=\"#f2e6d8\" stroke-width=\"0.5\"/> <line class=\"rp-kite-tail\" x1=\"72\" y1=\"14\" x2=\"88\" y2=\"28\" stroke=\"#e8c9a0\" stroke-width=\"0.5\" stroke-dasharray=\"1.2 0.8\"/> <circle cx=\"88\" cy=\"28\" r=\"0.9\" fill=\"#e8c9a0\"/> <!-- line from kite down past antenna tip (chaos) --> <path d=\"M 62 14 Q 58 20 52 18\" fill=\"none\" stroke=\"#f0d2a8\" stroke-width=\"0.45\"/> </svg> <span class=\"rp-stage-prop__tag\">High flight</span> <span class=\"rp-door-chalk\" data-testid=\"story-day2-forbidden-zone\" data-neighbor=\"n4\">FORBIDDEN ZONE</span>\n</div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--kite-high\" data-testid=\"story-day2-instigate-kite\" data-prop=\"instigate-high-kite\" aria-label=\"Yüksek uçuş\"> <svg class=\"rp-kite-svg\" viewBox=\"0 0 100 50\" preserveAspectRatio=\"xMidYMin meet\" aria-hidden=\"true\"> <line x1=\"52\" y1=\"18\" x2=\"52\" y2=\"48\" stroke=\"#8a7a68\" stroke-width=\"0.8\"/> <line x1=\"46\" y1=\"22\" x2=\"58\" y2=\"22\" stroke=\"#8a7a68\" stroke-width=\"0.6\"/> <path class=\"rp-kite-body\" d=\"M 62 6 L 72 14 L 62 22 L 52 14 Z\" fill=\"#c45c3e\" stroke=\"#f2e6d8\" stroke-width=\"0.5\"/> <line class=\"rp-kite-tail\" x1=\"72\" y1=\"14\" x2=\"88\" y2=\"28\" stroke=\"#e8c9a0\" stroke-width=\"0.5\" stroke-dasharray=\"1.2 0.8\"/> <circle cx=\"88\" cy=\"28\" r=\"0.9\" fill=\"#e8c9a0\"/> <path d=\"M 62 14 Q 58 20 52 18\" fill=\"none\" stroke=\"#f0d2a8\" stroke-width=\"0.45\"/> </svg> <span class=\"rp-stage-prop__tag\">Yüksek uçuş</span> <span class=\"rp-door-chalk\" data-testid=\"story-day2-forbidden-zone\" data-neighbor=\"n4\">YASAK BÖLGE</span>\n</div>",
         "distinctFromMediate": "Kite ABOVE antenna + FORBIDDEN ZONE chalk — no shared-string path",
         "distinctFromDay1Seeds": [
           "Day1 has no story-day2-instigate-kite",
@@ -4165,8 +4173,8 @@
         },
         "worldConsequenceId": "wc_day2_stage_cup_chalk",
         "testId": "story-day2-stage-chalk",
-        "html": "<div class=\"rp-stage-prop rp-stage-prop--chalk-cup\" data-testid=\"story-day2-stage-chalk\" data-prop=\"stage-chalk-cup\" aria-label=\"Chalk Cup\">\n  <svg class=\"rp-chalk-svg\" viewBox=\"0 0 100 36\" preserveAspectRatio=\"xMidYMid meet\" aria-hidden=\"true\">\n    <!-- three rehearsal circles: antenna / kite / whistle -->\n    <circle class=\"rp-chalk-ring\" cx=\"22\" cy=\"18\" r=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-dasharray=\"1.4 1.1\"/>\n    <circle class=\"rp-chalk-ring\" cx=\"50\" cy=\"18\" r=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-dasharray=\"1.4 1.1\"/>\n    <circle class=\"rp-chalk-ring\" cx=\"78\" cy=\"18\" r=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-dasharray=\"1.4 1.1\"/>\n    <text x=\"22\" y=\"20\" text-anchor=\"middle\" font-size=\"3.2\" fill=\"currentColor\" opacity=\"0.85\">A</text>\n    <text x=\"50\" y=\"20\" text-anchor=\"middle\" font-size=\"3.2\" fill=\"currentColor\" opacity=\"0.85\">K</text>\n    <text x=\"78\" y=\"20\" text-anchor=\"middle\" font-size=\"3.2\" fill=\"currentColor\" opacity=\"0.85\">W</text>\n    <!-- whistle glyph near Cem -->\n    <rect x=\"86\" y=\"6\" width=\"8\" height=\"3.2\" rx=\"1\" fill=\"#e8c9a0\" opacity=\"0.9\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Chalk Cup</span>\n</div>",
-        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--chalk-cup\" data-testid=\"story-day2-stage-chalk\" data-prop=\"stage-chalk-cup\" aria-label=\"Tebeşir Cup\">\n  <svg class=\"rp-chalk-svg\" viewBox=\"0 0 100 36\" preserveAspectRatio=\"xMidYMid meet\" aria-hidden=\"true\">\n    <circle class=\"rp-chalk-ring\" cx=\"22\" cy=\"18\" r=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-dasharray=\"1.4 1.1\"/>\n    <circle class=\"rp-chalk-ring\" cx=\"50\" cy=\"18\" r=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-dasharray=\"1.4 1.1\"/>\n    <circle class=\"rp-chalk-ring\" cx=\"78\" cy=\"18\" r=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-dasharray=\"1.4 1.1\"/>\n    <text x=\"22\" y=\"20\" text-anchor=\"middle\" font-size=\"3.2\" fill=\"currentColor\" opacity=\"0.85\">A</text>\n    <text x=\"50\" y=\"20\" text-anchor=\"middle\" font-size=\"3.2\" fill=\"currentColor\" opacity=\"0.85\">U</text>\n    <text x=\"78\" y=\"20\" text-anchor=\"middle\" font-size=\"3.2\" fill=\"currentColor\" opacity=\"0.85\">D</text>\n    <rect x=\"86\" y=\"6\" width=\"8\" height=\"3.2\" rx=\"1\" fill=\"#e8c9a0\" opacity=\"0.9\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Tebeşir Cup</span>\n</div>",
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--chalk-cup\" data-testid=\"story-day2-stage-chalk\" data-prop=\"stage-chalk-cup\" aria-label=\"Chalk Cup\"> <svg class=\"rp-chalk-svg\" viewBox=\"0 0 100 36\" preserveAspectRatio=\"xMidYMid meet\" aria-hidden=\"true\"> <!-- three rehearsal circles: antenna / kite / whistle --> <circle class=\"rp-chalk-ring\" cx=\"22\" cy=\"18\" r=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-dasharray=\"1.4 1.1\"/> <circle class=\"rp-chalk-ring\" cx=\"50\" cy=\"18\" r=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-dasharray=\"1.4 1.1\"/> <circle class=\"rp-chalk-ring\" cx=\"78\" cy=\"18\" r=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-dasharray=\"1.4 1.1\"/> <text x=\"22\" y=\"20\" text-anchor=\"middle\" font-size=\"3.2\" fill=\"currentColor\" opacity=\"0.85\">A</text> <text x=\"50\" y=\"20\" text-anchor=\"middle\" font-size=\"3.2\" fill=\"currentColor\" opacity=\"0.85\">K</text> <text x=\"78\" y=\"20\" text-anchor=\"middle\" font-size=\"3.2\" fill=\"currentColor\" opacity=\"0.85\">W</text> <!-- whistle glyph near Cem --> <rect x=\"86\" y=\"6\" width=\"8\" height=\"3.2\" rx=\"1\" fill=\"#e8c9a0\" opacity=\"0.9\"/> </svg> <span class=\"rp-stage-prop__tag\">Chalk Cup</span>\n</div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--chalk-cup\" data-testid=\"story-day2-stage-chalk\" data-prop=\"stage-chalk-cup\" aria-label=\"Tebeşir Cup\"> <svg class=\"rp-chalk-svg\" viewBox=\"0 0 100 36\" preserveAspectRatio=\"xMidYMid meet\" aria-hidden=\"true\"> <circle class=\"rp-chalk-ring\" cx=\"22\" cy=\"18\" r=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-dasharray=\"1.4 1.1\"/> <circle class=\"rp-chalk-ring\" cx=\"50\" cy=\"18\" r=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-dasharray=\"1.4 1.1\"/> <circle class=\"rp-chalk-ring\" cx=\"78\" cy=\"18\" r=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"0.7\" stroke-dasharray=\"1.4 1.1\"/> <text x=\"22\" y=\"20\" text-anchor=\"middle\" font-size=\"3.2\" fill=\"currentColor\" opacity=\"0.85\">A</text> <text x=\"50\" y=\"20\" text-anchor=\"middle\" font-size=\"3.2\" fill=\"currentColor\" opacity=\"0.85\">U</text> <text x=\"78\" y=\"20\" text-anchor=\"middle\" font-size=\"3.2\" fill=\"currentColor\" opacity=\"0.85\">D</text> <rect x=\"86\" y=\"6\" width=\"8\" height=\"3.2\" rx=\"1\" fill=\"#e8c9a0\" opacity=\"0.9\"/> </svg> <span class=\"rp-stage-prop__tag\">Tebeşir Cup</span>\n</div>",
         "distinctFromMediate": "Three dashed chalk circles on cobbles + whistle — no antenna string",
         "distinctFromDay1Seeds": [
           "Day1 has no story-day2-stage-chalk",
@@ -4188,8 +4196,8 @@
           "rp-hotspot--instigate"
         ],
         "nameSuffix": {
-          "tr": " · yasak",
-          "en": " · forbid"
+          "tr": "yasak",
+          "en": "forbid"
         },
         "speechBubble": {
           "tr": "YASAK BÖLGE yazdım. Uçurtma yüksek — gazetem kalkan.",
@@ -4219,8 +4227,8 @@
           "rp-hotspot--stage"
         ],
         "nameSuffix": {
-          "tr": " · prova",
-          "en": " · rehearse"
+          "tr": "prova",
+          "en": "rehearse"
         },
         "speechBubble": {
           "tr": "Üç daire. Anten / uçurtma / düdük. Prova — düdük hazır.",
@@ -4371,7 +4379,7 @@
       "day2_instigate_spotlight_ack",
       "day2_stage_spotlight_ack"
     ],
-    "cssAppend": "\n/* story-form-6 — instigate/stage parity with mediate SVG */\n.rp-stage-prop--kite-high {\n  left: 40%;\n  right: 8%;\n  top: 10%;\n  height: 36%;\n  color: #f2e6d8;\n}\n.rp-kite-svg { width: 100%; height: 100%; display: block; }\n.rp-kite-body { filter: drop-shadow(0 1px 2px rgba(0,0,0,.6)); }\n.rp-door-chalk {\n  position: absolute;\n  left: 8%;\n  top: 72%;\n  font: 700 10px/1.1 \"IBM Plex Mono\", ui-monospace, monospace;\n  letter-spacing: 0.06em;\n  color: #f4f0e4;\n  background: rgba(40, 28, 18, 0.82);\n  padding: 0.25rem 0.4rem;\n  border: 1px solid rgba(242, 230, 216, 0.35);\n  transform: rotate(-5deg);\n  white-space: nowrap;\n}\n.rp-stage-prop--chalk-cup {\n  left: 28%;\n  right: 28%;\n  top: 58%;\n  height: 18%;\n  color: #dce6f0;\n}\n.rp-chalk-svg { width: 100%; height: 100%; display: block; opacity: 0.95; }\n.rp-hotspot--instigate { outline: 2px solid rgba(196, 92, 62, 0.9); outline-offset: 2px; }\n.rp-hotspot--stage { outline: 2px solid rgba(120, 180, 200, 0.9); outline-offset: 2px; }\n",
+    "cssAppend": "\n/* story-form-6 — instigate/stage parity with mediate SVG */\n.rp-stage-prop--kite-high { left: 40%; right: 8%; top: 10%; height: 36%; color: #f2e6d8;\n}\n.rp-kite-svg { width: 100%; height: 100%; display: block; }\n.rp-kite-body { filter: drop-shadow(0 1px 2px rgba(0,0,0,.6)); }\n.rp-door-chalk { position: absolute; left: 8%; top: 72%; font: 700 10px/1.1 \"IBM Plex Mono\", ui-monospace, monospace; letter-spacing: 0.06em; color: #f4f0e4; background: rgba(40, 28, 18, 0.82); padding: 0.25rem 0.4rem; border: 1px solid rgba(242, 230, 216, 0.35); transform: rotate(-5deg); white-space: nowrap;\n}\n.rp-stage-prop--chalk-cup { left: 28%; right: 28%; top: 58%; height: 18%; color: #dce6f0;\n}\n.rp-chalk-svg { width: 100%; height: 100%; display: block; opacity: 0.95; }\n.rp-hotspot--instigate { outline: 2px solid rgba(196, 92, 62, 0.9); outline-offset: 2px; }\n.rp-hotspot--stage { outline: 2px solid rgba(120, 180, 200, 0.9); outline-offset: 2px; }\n",
     "testIdMatrix": {
       "mediate_already_shipped": {
         "prop": "story-day2-mediate-string",
@@ -4413,13 +4421,13 @@
     "integratorSnippet": {
       "language": "js",
       "comment": "Merge form6 instigate/stage over form5 stubs; keep mediate from form5.",
-      "pseudo": "\nfunction storyForm6() {\n  return state.questPack?.storyForm6 || state.storyForm6 || null;\n}\n\nfunction day2StreetStagePropsMerged() {\n  const f5 = storyForm5()?.day2StreetStageProps || {};\n  const f6 = storyForm6()?.day2StreetStageProps || {};\n  return { ...f5, ...f6 }; // form6 wins instigate+stage\n}\n\nfunction day2HotspotMutationsMerged() {\n  const f5 = storyForm5()?.hotspotMutations || {};\n  const f6 = storyForm6()?.hotspotMutations || {};\n  return { ...f5, ...f6 };\n}\n\nfunction day2StreetStageHtml() {\n  const day = state.save.dayIndex || 1;\n  if (day < 2) return \"\";\n  const props = day2StreetStagePropsMerged();\n  const pick = storyFlag(\"cold_open_mediate\") ? props.mediate\n    : storyFlag(\"cold_open_instigate\") ? props.instigate\n    : storyFlag(\"cold_open_stage\") ? props.stage : null;\n  if (!pick || !whenFlagsOk(pick.when || { dayIndexMin: 2 })) return \"\";\n  return state.locale === \"tr\" && pick.htmlTr ? pick.htmlTr : (pick.html || \"\");\n}\n\n// mutateHotspotHtml: use day2HotspotMutationsMerged() instead of storyForm5().hotspotMutations\n// alsoNeighbor bubble: if mut.alsoTestId && also neighbor, set data-testid on also bubble\n"
+      "pseudo": "\nfunction storyForm6() { return state.questPack?.storyForm6 || state.storyForm6 || null;\n} function day2StreetStagePropsMerged() { const f5 = storyForm5()?.day2StreetStageProps || {}; const f6 = storyForm6()?.day2StreetStageProps || {}; return { ...f5, ...f6 }; // form6 wins instigate+stage\n} function day2HotspotMutationsMerged() { const f5 = storyForm5()?.hotspotMutations || {}; const f6 = storyForm6()?.hotspotMutations || {}; return { ...f5, ...f6 };\n} function day2StreetStageHtml() { const day = state.save.dayIndex || 1; if (day < 2) return \"\"; const props = day2StreetStagePropsMerged(); const pick = storyFlag(\"cold_open_mediate\") ? props.mediate : storyFlag(\"cold_open_instigate\") ? props.instigate : storyFlag(\"cold_open_stage\") ? props.stage : null; if (!pick || !whenFlagsOk(pick.when || { dayIndexMin: 2 })) return \"\"; return state.locale === \"tr\" && pick.htmlTr ? pick.htmlTr : (pick.html || \"\");\n} // mutateHotspotHtml: use day2HotspotMutationsMerged() instead of storyForm5().hotspotMutations\n// alsoNeighbor bubble: if mut.alsoTestId && also neighbor, set data-testid on also bubble\n"
     }
   },
   "storyForm7": {
     "schemaVersion": 1,
     "packId": "story-form-7",
-    "purpose": "Journal reads as drama (not a log); Antenna Op arc beats are visible in evening/street/journal UI — not buried in checklist text.",
+    "purpose": "Journal reads as drama (not a log); arc beats are visible in evening/street/journal UI — not buried in checklist text.",
     "journalLayout": {
       "id": "journal_drama_first",
       "sectionOrder": [
@@ -4460,12 +4468,12 @@
         },
         "tone": "spotlight",
         "eyebrow": {
-          "tr": "Canlı ark · Arc A",
-          "en": "Living arc · Arc A"
+          "tr": "Çatıda ip",
+          "en": "Line on the roof"
         },
         "title": {
-          "tr": "Anten Operasyonu devam ediyor",
-          "en": "Antenna Op is live"
+          "tr": "devam ediyor",
+          "en": "is live"
         },
         "body": {
           "tr": "Bu bir checklist değil — çatıda uçurtma, verandada gazete. Aşağıda bugünün beat'ini oku; sokağa çıkıp konuş.",
@@ -4488,8 +4496,8 @@
         },
         "tone": "soft",
         "eyebrow": {
-          "tr": "Yankı · Arc A",
-          "en": "Aftermath · Arc A"
+          "tr": "Yankı · çatı",
+          "en": "Aftermath · çatı"
         },
         "title": {
           "tr": "Barış bayrağı — anten yumuşadı",
@@ -4514,8 +4522,8 @@
         },
         "tone": "sharp",
         "eyebrow": {
-          "tr": "Yankı · Arc A",
-          "en": "Aftermath · Arc A"
+          "tr": "Yankı · çatı",
+          "en": "Aftermath · çatı"
         },
         "title": {
           "tr": "Yüksek uçuş — harita serbest",
@@ -4538,8 +4546,8 @@
         "objectiveId": "mq_antenna_o1",
         "order": 1,
         "title": {
-          "tr": "Beat 1 — Takılan uçurtma",
-          "en": "Beat 1 — Snagged kite"
+          "tr": "Takılan uçurtma",
+          "en": "Snagged kite"
         },
         "scene": {
           "tr": "Leyla'nın ipi Orhan'ın antenine dolandı. Gazete sert kapandı. Mahalle nefesini tuttu.",
@@ -4562,8 +4570,8 @@
         "objectiveId": "mq_antenna_o2",
         "order": 2,
         "title": {
-          "tr": "Beat 2 — İp disiplini",
-          "en": "Beat 2 — Line-tension drill"
+          "tr": "İp disiplini",
+          "en": "Line-tension drill"
         },
         "scene": {
           "tr": "Cem 'ip gerdirme disiplini' diyor. Leyla güler: uçurtma plan dinlemez. Sen ortadasın.",
@@ -4589,8 +4597,8 @@
         "objectiveId": "mq_antenna_o3",
         "order": 3,
         "title": {
-          "tr": "Beat 3 — İki versiyon",
-          "en": "Beat 3 — Two versions"
+          "tr": "İki versiyon",
+          "en": "Two versions"
         },
         "scene": {
           "tr": "Merve iki afiş anlatıyor. Hangisini doğrularsan sokak onu 'gerçek' sayacak.",
@@ -4617,8 +4625,8 @@
         "objectiveId": "mq_antenna_o4",
         "order": 4,
         "title": {
-          "tr": "Beat 4 — Bayrak veya kaos",
-          "en": "Beat 4 — Flag or chaos"
+          "tr": "Bayrak veya kaos",
+          "en": "Flag or chaos"
         },
         "scene": {
           "tr": "Çatıda ip, verandada gazete. Son seçim: ortak bayrak + özür, ya da daha yüksek uçuş.",
@@ -4664,11 +4672,11 @@
       },
       "pick": "first antennaOpJournalBeatCards entry whose requiresFlags met and doneFlag not set",
       "template": {
-        "tr": "Anten Operasyonu · {beatTitle} — {sceneShort}",
-        "en": "Antenna Op · {beatTitle} — {sceneShort}"
+        "tr": "{beatTitle} — {sceneShort}",
+        "en": "{beatTitle} — {sceneShort}"
       },
       "cta": {
-        "tr": "Beat'i oyna",
+        "tr": "Sahneye git",
         "en": "Play the beat"
       },
       "ctaAction": "open-neighbor",
@@ -4679,8 +4687,8 @@
     "antennaOpQuestPanelBlurb": {
       "whenQuestId": "mq_antenna_op",
       "activeBlurb": {
-        "tr": "Arc A canlı: uçurtma ↔ anten. Bugünün beat'i panoda — sadece 2/4 sayacı değil.",
-        "en": "Arc A live: kite ↔ antenna. Today's beat is on the board — not just a 2/4 counter."
+        "tr": "çatı canlı: uçurtma ↔ anten. Bugünün beat'i panoda — sadece 2/4 sayacı değil.",
+        "en": "Uçurtma ↔ anten — kite ↔ antenna. Today's beat is on the board — not just a 2/4 counter."
       },
       "testId": "antenna-op-quest-blurb"
     },
@@ -4696,20 +4704,20 @@
       },
       "linesByBeat": {
         "arc_kite_antenna_beat1": {
-          "tr": "◈ Anten Operasyonu Beat 1: uçurtma antene dolandı",
-          "en": "◈ Antenna Op Beat 1: kite snagged on antenna"
+          "tr": "◈ uçurtma antene dolandı",
+          "en": "◈ kite snagged on antenna"
         },
         "arc_kite_antenna_beat2": {
-          "tr": "◈ Beat 2 bekliyor: Cem'in ip disiplini",
-          "en": "◈ Beat 2 waiting: Cem's line-tension drill"
+          "tr": "◈ bekliyor: Cem'in ip disiplini",
+          "en": "◈ waiting: Cem's line-tension drill"
         },
         "arc_kite_antenna_beat3": {
-          "tr": "◈ Beat 3: Merve'nin iki versiyonu",
-          "en": "◈ Beat 3: Merve's two versions"
+          "tr": "◈ Merve'nin iki versiyonu",
+          "en": "◈ Merve's two versions"
         },
         "arc_kite_antenna_beat4": {
-          "tr": "◈ Beat 4: bayrak mı, yüksek uçuş mu?",
-          "en": "◈ Beat 4: peace flag or fly higher?"
+          "tr": "◈ bayrak mı, yüksek uçuş mu?",
+          "en": "◈ peace flag or fly higher?"
         }
       },
       "testId": "antenna-op-street-whisper"
@@ -4733,21 +4741,21 @@
         },
         "speakerId": "n3",
         "headline": {
-          "tr": "Anten Operasyonu — beat panoda",
-          "en": "Antenna Op — beat on the board"
+          "tr": "beat panoda",
+          "en": "beat on the board"
         },
         "body": {
           "tr": "Akşam/sokak bandında bugünün beat'i yazıyor. Defterde de drama kartı — log satırı değil.",
           "en": "Evening/street banner names today's beat. Journal has a drama card — not a log line."
         },
         "cta": {
-          "tr": "Beat'e git",
+          "tr": "Sahneye git",
           "en": "Go to beat"
         }
       }
     ],
     "newStoryFlags": [],
-    "cssAppend": "\n/* story-form-7 — journal drama + Antenna Op beat UI */\n.journal-drama-list { display: grid; gap: 0.75rem; margin: 0.5rem 0 1rem; }\n.journal-drama {\n  padding: 0.85rem 1rem;\n  border-radius: 10px;\n  background: linear-gradient(135deg, rgba(40,24,16,.92), rgba(20,14,10,.88));\n  border: 1px solid rgba(232,180,120,.35);\n  color: #f2e6d8;\n}\n.journal-drama.soft { border-color: rgba(180,200,160,.4); }\n.journal-drama.sharp { border-color: rgba(196,92,62,.55); }\n.journal-drama.spotlight { box-shadow: 0 0 0 1px rgba(232,180,120,.25), 0 8px 24px rgba(0,0,0,.35); }\n.journal-drama .rp-kicker { margin: 0 0 0.25rem; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.8; }\n.journal-drama h3 { margin: 0 0 0.35rem; font-size: 1.05rem; }\n.antenna-beat-card {\n  padding: 0.75rem 0.9rem;\n  margin: 0.4rem 0;\n  border-left: 3px solid #e8b478;\n  background: rgba(18,12,8,.75);\n  color: #f2e6d8;\n}\n.antenna-beat-card.is-done { opacity: 0.65; border-left-color: #7a9a6a; }\n.antenna-beat-card.is-live { border-left-color: #c45c3e; box-shadow: inset 0 0 0 1px rgba(196,92,62,.35); }\n.antenna-beat-card h4 { margin: 0 0 0.25rem; font-size: 0.95rem; }\n.rp-arc-beat-banner {\n  position: relative;\n  z-index: 7;\n  margin: 0.4rem 0.75rem;\n  padding: 0.55rem 0.75rem;\n  border-radius: 8px;\n  background: rgba(18,12,8,.88);\n  color: #f2e6d8;\n  border: 1px solid rgba(232,180,120,.45);\n  display: flex;\n  gap: 0.5rem;\n  align-items: center;\n  justify-content: space-between;\n  flex-wrap: wrap;\n}\n.recap-list.is-collapsed { max-height: 0; overflow: hidden; opacity: 0; }\ndetails.journal-log-fold > summary {\n  cursor: pointer;\n  color: rgba(242,230,216,.7);\n  font-size: 0.85rem;\n}\n",
+    "cssAppend": "\n/* story-form-7 — journal drama + beat UI */\n.journal-drama-list { display: grid; gap: 0.75rem; margin: 0.5rem 0 1rem; }\n.journal-drama { padding: 0.85rem 1rem; border-radius: 10px; background: linear-gradient(135deg, rgba(40,24,16,.92), rgba(20,14,10,.88)); border: 1px solid rgba(232,180,120,.35); color: #f2e6d8;\n}\n.journal-drama.soft { border-color: rgba(180,200,160,.4); }\n.journal-drama.sharp { border-color: rgba(196,92,62,.55); }\n.journal-drama.spotlight { box-shadow: 0 0 0 1px rgba(232,180,120,.25), 0 8px 24px rgba(0,0,0,.35); }\n.journal-drama .rp-kicker { margin: 0 0 0.25rem; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.8; }\n.journal-drama h3 { margin: 0 0 0.35rem; font-size: 1.05rem; }\n.antenna-beat-card { padding: 0.75rem 0.9rem; margin: 0.4rem 0; border-left: 3px solid #e8b478; background: rgba(18,12,8,.75); color: #f2e6d8;\n}\n.antenna-beat-card.is-done { opacity: 0.65; border-left-color: #7a9a6a; }\n.antenna-beat-card.is-live { border-left-color: #c45c3e; box-shadow: inset 0 0 0 1px rgba(196,92,62,.35); }\n.antenna-beat-card h4 { margin: 0 0 0.25rem; font-size: 0.95rem; }\n.rp-arc-beat-banner { position: relative; z-index: 7; margin: 0.4rem 0.75rem; padding: 0.55rem 0.75rem; border-radius: 8px; background: rgba(18,12,8,.88); color: #f2e6d8; border: 1px solid rgba(232,180,120,.45); display: flex; gap: 0.5rem; align-items: center; justify-content: space-between; flex-wrap: wrap;\n}\n.recap-list.is-collapsed { max-height: 0; overflow: hidden; opacity: 0; }\ndetails.journal-log-fold > summary { cursor: pointer; color: rgba(242,230,216,.7); font-size: 0.85rem;\n}\n",
     "acceptanceChecks": [
       {
         "id": "journal_drama_first",
@@ -4755,7 +4763,7 @@
       },
       {
         "id": "antenna_beats_in_journal",
-        "desc": "While Antenna Op active, journal lists 4 beat cards (antenna-beat-1..4) with scene prose; live beat marked is-live + CTA."
+        "desc": "While active, journal lists 4 beat cards (antenna-beat-1..4) with scene prose; live beat marked is-live + CTA."
       },
       {
         "id": "antenna_banner_evening_street",
@@ -4763,7 +4771,7 @@
       },
       {
         "id": "not_checklist_only",
-        "desc": "Player can identify current Antenna Op beat without opening dialogue — banner or journal card alone suffices."
+        "desc": "Player can identify current beat without opening dialogue — banner or journal card alone suffices."
       }
     ]
   },
@@ -4773,7 +4781,7 @@
     "kind": "story-quest-form",
     "formIndex": 8,
     "localeDefault": "tr",
-    "purpose": "Long-arc visibility parity: Decibel Accord + Ledger & Tray beat banners/journal cards like Antenna Op; journal drama for Arc B/C; props carry without spotlight.",
+    "purpose": "Long-arc visibility parity: + beat banners/journal cards like ; journal drama for gece/C; props carry without spotlight.",
     "integrator": {
       "owner": "code owner on cursor/rival-porch-slice-31f7",
       "noPrFromThisPackAuthor": true,
@@ -4786,7 +4794,7 @@
         "Evening/street: one live banner max — highest priority among active arcs (Antenna 95, Volume 94, Ledger 93)"
       ],
       "doNot": [
-        "Gate Arc B/C beats behind spend",
+        "Gate gece/C beats behind spend",
         "Make Day2 props depend on spotlight ack",
         "Replace form-7 Antenna cards — merge alongside"
       ]
@@ -4821,16 +4829,16 @@
         },
         "tone": "sharp",
         "eyebrow": {
-          "tr": "Canlı ark · Arc B",
-          "en": "Living arc · Arc B"
+          "tr": "Canlı ark · gece",
+          "en": "Living porch · gece"
         },
         "title": {
-          "tr": "Desibel Antlaşması devam ediyor",
-          "en": "Decibel Accord is live"
+          "tr": "devam ediyor",
+          "en": "is live"
         },
         "body": {
           "tr": "01:12 bas, KULAKLIK notu, gece poğaçası — checklist değil, gece dramı. Beat panoda.",
-          "en": "01:12 bass, HEADPHONES note, midnight pastry — not a checklist, night drama. Beat on the board."
+          "en": "01:12 bass, HEADPHONES note, midnight pastry — not a checklist, night drama. Scene on the board."
         },
         "cta": {
           "tr": "Sokağa / beat'e git",
@@ -4847,8 +4855,8 @@
         },
         "tone": "soft",
         "eyebrow": {
-          "tr": "Yankı · Arc B",
-          "en": "Aftermath · Arc B"
+          "tr": "Yankı · gece",
+          "en": "Aftermath · gece"
         },
         "title": {
           "tr": "Sessiz neon — Peri kaldı",
@@ -4873,16 +4881,16 @@
         },
         "tone": "sharp",
         "eyebrow": {
-          "tr": "Yankı · Arc B",
-          "en": "Aftermath · Arc B"
+          "tr": "Yankı · gece",
+          "en": "Aftermath · gece"
         },
         "title": {
           "tr": "Veda gerilimi — kariyer yolu",
           "en": "Leaving tension — career path"
         },
         "body": {
-          "tr": "Bilet taslağı duruyor. AoE veda gibi. Log satırı değil — mahalle fısıltısı.",
-          "en": "Ticket draft stays. AoE like goodbye. Not a log line — a block whisper."
+          "tr": "Bilet taslağı duruyor. bas veda gibi. Log satırı değil — mahalle fısıltısı.",
+          "en": "Ticket draft stays. bass like goodbye. Not a log line — a block whisper."
         },
         "cta": {
           "tr": "Sokağı gör",
@@ -4905,19 +4913,19 @@
         },
         "tone": "soft",
         "eyebrow": {
-          "tr": "Canlı ark · Arc C",
-          "en": "Living arc · Arc C"
+          "tr": "Canlı ark · defter",
+          "en": "Living porch · defter"
         },
         "title": {
           "tr": "Defter ve Tepsi açık",
-          "en": "Ledger & Tray is open"
+          "en": "is open"
         },
         "body": {
           "tr": "Poğaça kıtlığı, Merve'nin duvarı, Can'ın gururu — Tea Circle'ın gerçek anlamı burada yazılıyor.",
           "en": "Pastry shortage, Merve's wall, Can's pride — Tea Circle's real meaning is being written here."
         },
         "cta": {
-          "tr": "Beat'e git",
+          "tr": "Sahneye git",
           "en": "Go to beat"
         },
         "testId": "journal-drama-ledger-live"
@@ -4931,8 +4939,8 @@
         },
         "tone": "soft",
         "eyebrow": {
-          "tr": "Yankı · Arc C",
-          "en": "Aftermath · Arc C"
+          "tr": "Yankı · defter",
+          "en": "Aftermath · defter"
         },
         "title": {
           "tr": "Borç = iyilik zinciri",
@@ -4957,8 +4965,8 @@
         },
         "tone": "soft",
         "eyebrow": {
-          "tr": "Yankı · Arc C",
-          "en": "Aftermath · Arc C"
+          "tr": "Yankı · defter",
+          "en": "Aftermath · defter"
         },
         "title": {
           "tr": "Defter kapalı — mahrem",
@@ -4981,8 +4989,8 @@
         "objectiveId": "mq_volume_o1",
         "order": 1,
         "title": {
-          "tr": "Beat 1 — 01:12 bas",
-          "en": "Beat 1 — 01:12 bass"
+          "tr": "01:12 bas",
+          "en": "01:12 bass"
         },
         "scene": {
           "tr": "Duvar titredi. Orhan'ın ışığı yandı. Gece artık sessiz değil.",
@@ -5005,8 +5013,8 @@
         "objectiveId": "mq_volume_o2",
         "order": 2,
         "title": {
-          "tr": "Beat 2 — KULAKLIK notu",
-          "en": "Beat 2 — HEADPHONES note"
+          "tr": "KULAKLIK notu",
+          "en": "HEADPHONES note"
         },
         "scene": {
           "tr": "Peri'nin kapısında gazete mürekkebiyle KULAKLIK. Büyük harf, büyük sınır.",
@@ -5032,8 +5040,8 @@
         "objectiveId": "mq_volume_o3",
         "order": 3,
         "title": {
-          "tr": "Beat 3 — Gece poğaçası",
-          "en": "Beat 3 — Midnight pastry"
+          "tr": "Gece poğaçası",
+          "en": "Midnight pastry"
         },
         "scene": {
           "tr": "Can kapı kapı Soft diplomasi. Poğaça, barışın sıcak dili.",
@@ -5060,8 +5068,8 @@
         "objectiveId": "mq_volume_o4",
         "order": 4,
         "title": {
-          "tr": "Beat 4 — Teklif sırrı",
-          "en": "Beat 4 — Offer secret"
+          "tr": "Teklif sırrı",
+          "en": "Offer secret"
         },
         "scene": {
           "tr": "Peri kulüp mektubunu neredeyse ağzından kaçırır. Tren bileti taslağı cebinde.",
@@ -5086,8 +5094,8 @@
         "objectiveId": "mq_volume_o5",
         "order": 5,
         "title": {
-          "tr": "Beat 5 — Antlaşma veya kariyer",
-          "en": "Beat 5 — Accord or career"
+          "tr": "Antlaşma veya kariyer",
+          "en": "Accord or career"
         },
         "scene": {
           "tr": "Masada sessiz saatler + Cumartesi Neon Night, ya da veda gerilimi.",
@@ -5119,8 +5127,8 @@
         "objectiveId": "mq_ledger_o1",
         "order": 1,
         "title": {
-          "tr": "Beat 1 — Poğaça kıtlığı",
-          "en": "Beat 1 — Pastry shortage"
+          "tr": "Poğaça kıtlığı",
+          "en": "Pastry shortage"
         },
         "scene": {
           "tr": "Tepsi yetmiyor. Cup kadrosu mu, bütün sokak mı?",
@@ -5143,8 +5151,8 @@
         "objectiveId": "mq_ledger_o2",
         "order": 2,
         "title": {
-          "tr": "Beat 2 — Ben biliyorum",
-          "en": "Beat 2 — I know"
+          "tr": "Ben biliyorum",
+          "en": "I know"
         },
         "scene": {
           "tr": "Merve: 'Ben biliyorum.' Demlik çalar; defter gizli kalır.",
@@ -5169,8 +5177,8 @@
         "objectiveId": "mq_ledger_o3",
         "order": 3,
         "title": {
-          "tr": "Beat 3 — Gurur veya güven",
-          "en": "Beat 3 — Pride or trust"
+          "tr": "Gurur veya güven",
+          "en": "Pride or trust"
         },
         "scene": {
           "tr": "Can'a yardım: gururu zedeler misin, yoksa güven mi örersin?",
@@ -5196,8 +5204,8 @@
         "objectiveId": "mq_ledger_o4",
         "order": 4,
         "title": {
-          "tr": "Beat 4 — İyilik zinciri",
-          "en": "Beat 4 — Favor chain"
+          "tr": "İyilik zinciri",
+          "en": "Favor chain"
         },
         "scene": {
           "tr": "Defter açılır: borç aslında zincir. Tea Circle anlam kazanır.",
@@ -5249,7 +5257,7 @@
           "en": "Decibel · {beatTitle} — {sceneShort}"
         },
         "cta": {
-          "tr": "Beat'i oyna",
+          "tr": "Sahneye git",
           "en": "Play the beat"
         },
         "testId": "volume-op-live-banner"
@@ -5280,7 +5288,7 @@
           "en": "Ledger · {beatTitle} — {sceneShort}"
         },
         "cta": {
-          "tr": "Beat'i oyna",
+          "tr": "Sahneye git",
           "en": "Play the beat"
         },
         "testId": "ledger-op-live-banner"
@@ -5290,21 +5298,21 @@
       {
         "whenQuestId": "mq_decibel_accord",
         "activeBlurb": {
-          "tr": "Arc B canlı: bas ↔ uyku. Bugünün beat'i panoda.",
-          "en": "Arc B live: bass ↔ sleep. Today's beat is on the board."
+          "tr": "gece canlı: bas ↔ uyku. Bugünün beat'i panoda.",
+          "en": "gece live: bass ↔ sleep. Today's beat is on the board."
         },
         "testId": "volume-op-quest-blurb"
       },
       {
         "whenQuestId": "mq_ledger_tray",
         "activeBlurb": {
-          "tr": "Arc C canlı: defter ↔ tepsi. Beat sahnesi checklist'ten önce.",
-          "en": "Arc C live: ledger ↔ tray. Beat scene before the checklist."
+          "tr": "defter canlı: defter ↔ tepsi. Beat sahnesi checklist'ten önce.",
+          "en": "defter live: ledger ↔ tray. Scene before the checklist."
         },
         "testId": "ledger-op-quest-blurb"
       }
     ],
-    "cssAppend": "\n/* story-form-8 — Volume/Ledger beat parity (extends form-7 drama styles) */\n.volume-beat-card, .ledger-beat-card {\n  padding: 0.75rem 0.9rem;\n  margin: 0.4rem 0;\n  border-left: 3px solid #7eb6c9;\n  background: rgba(18,12,8,.75);\n  color: #f2e6d8;\n}\n.ledger-beat-card { border-left-color: #c4a574; }\n.volume-beat-card.is-live, .ledger-beat-card.is-live {\n  box-shadow: inset 0 0 0 1px rgba(196,92,62,.35);\n  border-left-color: #c45c3e;\n}\n.volume-beat-card.is-done, .ledger-beat-card.is-done { opacity: 0.65; }\n",
+    "cssAppend": "\n/* story-form-8 — Volume/Ledger beat parity (extends form-7 drama styles) */\n.volume-beat-card, .ledger-beat-card { padding: 0.75rem 0.9rem; margin: 0.4rem 0; border-left: 3px solid #7eb6c9; background: rgba(18,12,8,.75); color: #f2e6d8;\n}\n.ledger-beat-card { border-left-color: #c4a574; }\n.volume-beat-card.is-live, .ledger-beat-card.is-live { box-shadow: inset 0 0 0 1px rgba(196,92,62,.35); border-left-color: #c45c3e;\n}\n.volume-beat-card.is-done, .ledger-beat-card.is-done { opacity: 0.65; }\n",
     "acceptanceChecks": [
       {
         "id": "volume_banner_and_journal",
@@ -5320,7 +5328,7 @@
       },
       {
         "id": "journal_still_drama_first",
-        "desc": "Arc B/C drama cards appear in Aftermath; recap stays collapsed log."
+        "desc": "gece/C drama cards appear in Aftermath; recap stays collapsed log."
       }
     ],
     "echoFollowUpsAppend": [
@@ -5346,11 +5354,11 @@
           "en": "Decibel — beat on the board"
         },
         "body": {
-          "tr": "Akşam bandında Arc B beat'i yazıyor. Defterde drama kartı.",
-          "en": "Evening banner names Arc B beat. Journal has the drama card."
+          "tr": "Akşam bandında gece beat'i yazıyor. Defterde drama kartı.",
+          "en": "Evening banner names gece beat. Journal has the drama card."
         },
         "cta": {
-          "tr": "Beat'e git",
+          "tr": "Sahneye git",
           "en": "Go to beat"
         }
       },
@@ -5376,11 +5384,11 @@
           "en": "Ledger — beat on the board"
         },
         "body": {
-          "tr": "Arc C canlı. Poğaça/defter sahnesi checklist'ten önce.",
-          "en": "Arc C live. Pastry/ledger scene before the checklist."
+          "tr": "defter canlı. Poğaça/defter sahnesi checklist'ten önce.",
+          "en": "defter live. Pastry/ledger scene before the checklist."
         },
         "cta": {
-          "tr": "Beat'e git",
+          "tr": "Sahneye git",
           "en": "Go to beat"
         }
       }
@@ -5409,7 +5417,7 @@
       "doNot": [
         "Stack spotlight + Antenna banner + cold prop on first Day2 street paint",
         "Require spotlight ack to show cold SVG",
-        "Leave Arc B/C street presence journal-only"
+        "Leave gece/C street presence journal-only"
       ]
     },
     "principles": {
@@ -5483,8 +5491,8 @@
         "screens": [
           "street"
         ],
-        "html": "<div class=\"rp-stage-prop rp-stage-prop--antenna-snag\" data-testid=\"story-street-antenna-snag\" data-arc=\"arc_kite_antenna\" aria-label=\"Snagged kite\">\n  <svg class=\"rp-snag-svg\" viewBox=\"0 0 100 40\" preserveAspectRatio=\"none\" aria-hidden=\"true\">\n    <line x1=\"55\" y1=\"8\" x2=\"55\" y2=\"36\" stroke=\"#8a7a68\" stroke-width=\"0.9\"/>\n    <path d=\"M 40 12 Q 48 6 55 10 Q 62 16 70 10\" fill=\"none\" stroke=\"#c45c3e\" stroke-width=\"0.85\"/>\n    <path d=\"M 70 10 L 78 4 L 74 14 Z\" fill=\"#c45c3e\" stroke=\"#f2e6d8\" stroke-width=\"0.4\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Antenna Op · snag</span>\n</div>",
-        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--antenna-snag\" data-testid=\"story-street-antenna-snag\" data-arc=\"arc_kite_antenna\" aria-label=\"Takılan uçurtma\">\n  <svg class=\"rp-snag-svg\" viewBox=\"0 0 100 40\" preserveAspectRatio=\"none\" aria-hidden=\"true\">\n    <line x1=\"55\" y1=\"8\" x2=\"55\" y2=\"36\" stroke=\"#8a7a68\" stroke-width=\"0.9\"/>\n    <path d=\"M 40 12 Q 48 6 55 10 Q 62 16 70 10\" fill=\"none\" stroke=\"#c45c3e\" stroke-width=\"0.85\"/>\n    <path d=\"M 70 10 L 78 4 L 74 14 Z\" fill=\"#c45c3e\" stroke=\"#f2e6d8\" stroke-width=\"0.4\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Anten · takılma</span>\n</div>",
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--antenna-snag\" data-testid=\"story-street-antenna-snag\" data-arc=\"arc_kite_antenna\" aria-label=\"Snagged kite\"> <svg class=\"rp-snag-svg\" viewBox=\"0 0 100 40\" preserveAspectRatio=\"none\" aria-hidden=\"true\"> <line x1=\"55\" y1=\"8\" x2=\"55\" y2=\"36\" stroke=\"#8a7a68\" stroke-width=\"0.9\"/> <path d=\"M 40 12 Q 48 6 55 10 Q 62 16 70 10\" fill=\"none\" stroke=\"#c45c3e\" stroke-width=\"0.85\"/> <path d=\"M 70 10 L 78 4 L 74 14 Z\" fill=\"#c45c3e\" stroke=\"#f2e6d8\" stroke-width=\"0.4\"/> </svg> <span class=\"rp-stage-prop__tag\"> · snag</span>\n</div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--antenna-snag\" data-testid=\"story-street-antenna-snag\" data-arc=\"arc_kite_antenna\" aria-label=\"Takılan uçurtma\"> <svg class=\"rp-snag-svg\" viewBox=\"0 0 100 40\" preserveAspectRatio=\"none\" aria-hidden=\"true\"> <line x1=\"55\" y1=\"8\" x2=\"55\" y2=\"36\" stroke=\"#8a7a68\" stroke-width=\"0.9\"/> <path d=\"M 40 12 Q 48 6 55 10 Q 62 16 70 10\" fill=\"none\" stroke=\"#c45c3e\" stroke-width=\"0.85\"/> <path d=\"M 70 10 L 78 4 L 74 14 Z\" fill=\"#c45c3e\" stroke=\"#f2e6d8\" stroke-width=\"0.4\"/> </svg> <span class=\"rp-stage-prop__tag\">Anten · takılma</span>\n</div>",
         "testId": "story-street-antenna-snag",
         "npcLine": {
           "speakerId": "n4",
@@ -5514,8 +5522,8 @@
         "screens": [
           "street"
         ],
-        "html": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-headphones-note\" data-arc=\"arc_volume_war\" aria-label=\"HEADPHONES note\">\n  <div class=\"rp-note-door\">\n    <span class=\"rp-note-caps\">HEADPHONES</span>\n  </div>\n  <span class=\"rp-stage-prop__tag\">Decibel · note</span>\n</div>",
-        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-headphones-note\" data-arc=\"arc_volume_war\" aria-label=\"KULAKLIK notu\">\n  <div class=\"rp-note-door\">\n    <span class=\"rp-note-caps\">KULAKLIK</span>\n  </div>\n  <span class=\"rp-stage-prop__tag\">Desibel · not</span>\n</div>",
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-headphones-note\" data-arc=\"arc_volume_war\" aria-label=\"HEADPHONES note\"> <div class=\"rp-note-door\"> <span class=\"rp-note-caps\">HEADPHONES</span> </div> <span class=\"rp-stage-prop__tag\">Decibel · note</span>\n</div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-headphones-note\" data-arc=\"arc_volume_war\" aria-label=\"KULAKLIK notu\"> <div class=\"rp-note-door\"> <span class=\"rp-note-caps\">KULAKLIK</span> </div> <span class=\"rp-stage-prop__tag\">Desibel · not</span>\n</div>",
         "testId": "story-street-headphones-note",
         "npcLine": {
           "speakerId": "n5",
@@ -5544,8 +5552,8 @@
         "screens": [
           "street"
         ],
-        "html": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" aria-label=\"Ledger & tray\">\n  <svg class=\"rp-ledger-svg\" viewBox=\"0 0 80 28\" aria-hidden=\"true\">\n    <ellipse cx=\"22\" cy=\"16\" rx=\"14\" ry=\"6\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/>\n    <rect x=\"42\" y=\"6\" width=\"22\" height=\"16\" rx=\"1.5\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n    <line x1=\"46\" y1=\"10\" x2=\"60\" y2=\"10\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"14\" x2=\"58\" y2=\"14\" stroke=\"#c45c3e\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"18\" x2=\"60\" y2=\"18\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Ledger · tray</span>\n</div>",
-        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" aria-label=\"Defter ve tepsi\">\n  <svg class=\"rp-ledger-svg\" viewBox=\"0 0 80 28\" aria-hidden=\"true\">\n    <ellipse cx=\"22\" cy=\"16\" rx=\"14\" ry=\"6\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/>\n    <rect x=\"42\" y=\"6\" width=\"22\" height=\"16\" rx=\"1.5\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n    <line x1=\"46\" y1=\"10\" x2=\"60\" y2=\"10\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"14\" x2=\"58\" y2=\"14\" stroke=\"#c45c3e\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"18\" x2=\"60\" y2=\"18\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Defter · tepsi</span>\n</div>",
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" aria-label=\"Ledger & tray\"> <svg class=\"rp-ledger-svg\" viewBox=\"0 0 80 28\" aria-hidden=\"true\"> <ellipse cx=\"22\" cy=\"16\" rx=\"14\" ry=\"6\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/> <rect x=\"42\" y=\"6\" width=\"22\" height=\"16\" rx=\"1.5\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/> <line x1=\"46\" y1=\"10\" x2=\"60\" y2=\"10\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/> <line x1=\"46\" y1=\"14\" x2=\"58\" y2=\"14\" stroke=\"#c45c3e\" stroke-width=\"0.5\"/> <line x1=\"46\" y1=\"18\" x2=\"60\" y2=\"18\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/> </svg> <span class=\"rp-stage-prop__tag\">Ledger · tray</span>\n</div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" aria-label=\"Defter ve tepsi\"> <svg class=\"rp-ledger-svg\" viewBox=\"0 0 80 28\" aria-hidden=\"true\"> <ellipse cx=\"22\" cy=\"16\" rx=\"14\" ry=\"6\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/> <rect x=\"42\" y=\"6\" width=\"22\" height=\"16\" rx=\"1.5\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/> <line x1=\"46\" y1=\"10\" x2=\"60\" y2=\"10\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/> <line x1=\"46\" y1=\"14\" x2=\"58\" y2=\"14\" stroke=\"#c45c3e\" stroke-width=\"0.5\"/> <line x1=\"46\" y1=\"18\" x2=\"60\" y2=\"18\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/> </svg> <span class=\"rp-stage-prop__tag\">Defter · tepsi</span>\n</div>",
         "testId": "story-street-ledger-tray",
         "npcLine": {
           "speakerId": "n1",
@@ -5593,7 +5601,7 @@
         "Single NPC bubble only (Orhan or Cem) — no dual bubble stack on first paint"
       ]
     },
-    "cssAppend": "\n/* story-form-9 — one layer wins; arc street props; no spotlight dependency */\n.rp-stage-prop { z-index: 8; }\n.rp-day2-spotlight { display: none !important; } /* cold Day2: chrome off by default via class on body */\nbody.rp-cold-day2 .rp-day2-spotlight { display: none !important; }\nbody.rp-cold-day2 .rp-arc-beat-banner { display: none; }\nbody.rp-cold-day2 .rp-arc-chip { display: inline-flex; }\n\n.rp-arc-chip {\n  display: none;\n  position: absolute;\n  left: 50%;\n  bottom: 5.5rem;\n  transform: translateX(-50%);\n  z-index: 7;\n  padding: 0.35rem 0.65rem;\n  border-radius: 999px;\n  background: rgba(18,12,8,.82);\n  color: #f2e6d8;\n  font-size: 12px;\n  border: 1px solid rgba(232,180,120,.4);\n  max-width: 90%;\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n\n/* Larger cold props — clean stage read */\n.rp-stage-prop--shared-string { left: 10%; right: 22%; top: 24%; height: 26%; }\n.rp-stage-prop--kite-high { left: 36%; right: 4%; top: 6%; height: 42%; }\n.rp-stage-prop--chalk-cup { left: 22%; right: 22%; top: 54%; height: 22%; color: #e8f0f8; }\n.rp-door-chalk {\n  font-size: 12px !important;\n  padding: 0.35rem 0.5rem !important;\n  background: rgba(20,12,8,.9) !important;\n  border: 1px solid #f2e6d8 !important;\n}\n.rp-stage-prop__tag {\n  font-size: 12px !important;\n  padding: 0.25rem 0.5rem !important;\n  background: rgba(12,8,6,.88) !important;\n}\n\n/* Long-arc street props */\n.rp-stage-prop--antenna-snag { left: 40%; right: 15%; top: 16%; height: 28%; color: #f0d2a8; z-index: 7; }\n.rp-snag-svg { width: 100%; height: 100%; display: block; }\n.rp-stage-prop--headphones-note { left: 62%; width: 28%; top: 34%; height: auto; z-index: 7; }\n.rp-note-door {\n  background: #f4f0e4;\n  color: #1a120c;\n  padding: 0.55rem 0.65rem;\n  transform: rotate(-3deg);\n  box-shadow: 0 4px 12px rgba(0,0,0,.45);\n  border: 2px solid #1a120c;\n}\n.rp-note-caps { font: 800 13px/1.1 \"IBM Plex Mono\", ui-monospace, monospace; letter-spacing: 0.08em; }\n.rp-stage-prop--ledger-tray { left: 18%; width: 36%; top: 60%; height: 18%; z-index: 7; color: #e8c9a0; }\n.rp-ledger-svg { width: 100%; height: 100%; display: block; }\n\n/* One bubble max readability */\n.rp-hotspot__bubble { z-index: 9; max-width: 11rem; }\nbody.rp-cold-day2 .rp-hotspot--mediate-leyla .rp-hotspot__bubble,\nbody.rp-cold-day2 .rp-hotspot--instigate-leyla .rp-hotspot__bubble,\nbody.rp-cold-day2 .rp-hotspot--stage-leyla .rp-hotspot__bubble { display: none; }\n",
+    "cssAppend": "\n/* story-form-9 — one layer wins; arc street props; no spotlight dependency */\n.rp-stage-prop { z-index: 8; }\n.rp-day2-spotlight { display: none !important; } /* cold Day2: chrome off by default via class on body */\nbody.rp-cold-day2 .rp-day2-spotlight { display: none !important; }\nbody.rp-cold-day2 .rp-arc-beat-banner { display: none; }\nbody.rp-cold-day2 .rp-arc-chip { display: inline-flex; } .rp-arc-chip { display: none; position: absolute; left: 50%; bottom: 5.5rem; transform: translateX(-50%); z-index: 7; padding: 0.35rem 0.65rem; border-radius: 999px; background: rgba(18,12,8,.82); color: #f2e6d8; font-size: 12px; border: 1px solid rgba(232,180,120,.4); max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;\n} /* Larger cold props — clean stage read */\n.rp-stage-prop--shared-string { left: 10%; right: 22%; top: 24%; height: 26%; }\n.rp-stage-prop--kite-high { left: 36%; right: 4%; top: 6%; height: 42%; }\n.rp-stage-prop--chalk-cup { left: 22%; right: 22%; top: 54%; height: 22%; color: #e8f0f8; }\n.rp-door-chalk { font-size: 12px !important; padding: 0.35rem 0.5rem !important; background: rgba(20,12,8,.9) !important; border: 1px solid #f2e6d8 !important;\n}\n.rp-stage-prop__tag { font-size: 12px !important; padding: 0.25rem 0.5rem !important; background: rgba(12,8,6,.88) !important;\n} /* Long-arc street props */\n.rp-stage-prop--antenna-snag { left: 40%; right: 15%; top: 16%; height: 28%; color: #f0d2a8; z-index: 7; }\n.rp-snag-svg { width: 100%; height: 100%; display: block; }\n.rp-stage-prop--headphones-note { left: 62%; width: 28%; top: 34%; height: auto; z-index: 7; }\n.rp-note-door { background: #f4f0e4; color: #1a120c; padding: 0.55rem 0.65rem; transform: rotate(-3deg); box-shadow: 0 4px 12px rgba(0,0,0,.45); border: 2px solid #1a120c;\n}\n.rp-note-caps { font: 800 13px/1.1 \"IBM Plex Mono\", ui-monospace, monospace; letter-spacing: 0.08em; }\n.rp-stage-prop--ledger-tray { left: 18%; width: 36%; top: 60%; height: 18%; z-index: 7; color: #e8c9a0; }\n.rp-ledger-svg { width: 100%; height: 100%; display: block; } /* One bubble max readability */\n.rp-hotspot__bubble { z-index: 9; max-width: 11rem; }\nbody.rp-cold-day2 .rp-hotspot--mediate-leyla .rp-hotspot__bubble,\nbody.rp-cold-day2 .rp-hotspot--instigate-leyla .rp-hotspot__bubble,\nbody.rp-cold-day2 .rp-hotspot--stage-leyla .rp-hotspot__bubble { display: none; }\n",
     "acceptanceChecks": [
       {
         "id": "cold_without_spotlight",
@@ -5605,7 +5613,7 @@
       },
       {
         "id": "antenna_street_prop",
-        "desc": "While Antenna Op active (pre-resolution) and NOT cold Day2 kite conflict: story-street-antenna-snag on street stage."
+        "desc": "While active (pre-resolution) and NOT cold Day2 kite conflict: story-street-antenna-snag on street stage."
       },
       {
         "id": "volume_street_prop",
@@ -5739,8 +5747,8 @@
           "arc_volume_war_seed"
         ],
         "stageProp": {
-          "html": "<div class=\"rp-stage-prop rp-stage-prop--av-handoff\" data-testid=\"story-street-av-handoff\" data-handoff=\"antenna_to_volume\" aria-label=\"Antenna to Volume handoff\">\n  <svg class=\"rp-av-handoff-svg\" viewBox=\"0 0 120 48\" preserveAspectRatio=\"none\" aria-hidden=\"true\">\n    <!-- fading snag scar -->\n    <line x1=\"28\" y1=\"10\" x2=\"28\" y2=\"38\" stroke=\"#6a5a48\" stroke-width=\"0.7\" opacity=\"0.55\"/>\n    <path d=\"M 18 14 Q 24 8 28 12\" fill=\"none\" stroke=\"#c45c3e\" stroke-width=\"0.6\" opacity=\"0.45\" stroke-dasharray=\"2 1.5\"/>\n    <!-- arrow / pulse toward Orhan door -->\n    <path d=\"M 40 24 L 62 24\" stroke=\"#e8b478\" stroke-width=\"1.1\" marker-end=\"url(#avh)\"/>\n    <defs><marker id=\"avh\" markerWidth=\"6\" markerHeight=\"6\" refX=\"5\" refY=\"3\" orient=\"auto\"><path d=\"M0,0 L6,3 L0,6 Z\" fill=\"#e8b478\"/></marker></defs>\n    <!-- bass rings -->\n    <circle cx=\"88\" cy=\"24\" r=\"6\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.9\" opacity=\"0.9\"/>\n    <circle cx=\"88\" cy=\"24\" r=\"11\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.55\" opacity=\"0.45\"/>\n    <circle cx=\"88\" cy=\"24\" r=\"16\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.35\" opacity=\"0.25\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Antenna → Volume</span>\n</div>",
-          "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--av-handoff\" data-testid=\"story-street-av-handoff\" data-handoff=\"antenna_to_volume\" aria-label=\"Anten → Desibel geçişi\">\n  <svg class=\"rp-av-handoff-svg\" viewBox=\"0 0 120 48\" preserveAspectRatio=\"none\" aria-hidden=\"true\">\n    <!-- fading snag scar -->\n    <line x1=\"28\" y1=\"10\" x2=\"28\" y2=\"38\" stroke=\"#6a5a48\" stroke-width=\"0.7\" opacity=\"0.55\"/>\n    <path d=\"M 18 14 Q 24 8 28 12\" fill=\"none\" stroke=\"#c45c3e\" stroke-width=\"0.6\" opacity=\"0.45\" stroke-dasharray=\"2 1.5\"/>\n    <!-- arrow / pulse toward Orhan door -->\n    <path d=\"M 40 24 L 62 24\" stroke=\"#e8b478\" stroke-width=\"1.1\" marker-end=\"url(#avh)\"/>\n    <defs><marker id=\"avh\" markerWidth=\"6\" markerHeight=\"6\" refX=\"5\" refY=\"3\" orient=\"auto\"><path d=\"M0,0 L6,3 L0,6 Z\" fill=\"#e8b478\"/></marker></defs>\n    <!-- bass rings -->\n    <circle cx=\"88\" cy=\"24\" r=\"6\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.9\" opacity=\"0.9\"/>\n    <circle cx=\"88\" cy=\"24\" r=\"11\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.55\" opacity=\"0.45\"/>\n    <circle cx=\"88\" cy=\"24\" r=\"16\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.35\" opacity=\"0.25\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Anten → Desibel</span>\n</div>",
+          "html": "<div class=\"rp-stage-prop rp-stage-prop--av-handoff\" data-testid=\"story-street-av-handoff\" data-handoff=\"antenna_to_volume\" aria-label=\"Antenna to Volume handoff\"> <svg class=\"rp-av-handoff-svg\" viewBox=\"0 0 120 48\" preserveAspectRatio=\"none\" aria-hidden=\"true\"> <!-- fading snag scar --> <line x1=\"28\" y1=\"10\" x2=\"28\" y2=\"38\" stroke=\"#6a5a48\" stroke-width=\"0.7\" opacity=\"0.55\"/> <path d=\"M 18 14 Q 24 8 28 12\" fill=\"none\" stroke=\"#c45c3e\" stroke-width=\"0.6\" opacity=\"0.45\" stroke-dasharray=\"2 1.5\"/> <!-- arrow / pulse toward Orhan door --> <path d=\"M 40 24 L 62 24\" stroke=\"#e8b478\" stroke-width=\"1.1\" marker-end=\"url(#avh)\"/> <defs><marker id=\"avh\" markerWidth=\"6\" markerHeight=\"6\" refX=\"5\" refY=\"3\" orient=\"auto\"><path d=\"M0,0 L6,3 L0,6 Z\" fill=\"#e8b478\"/></marker></defs> <!-- bass rings --> <circle cx=\"88\" cy=\"24\" r=\"6\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.9\" opacity=\"0.9\"/> <circle cx=\"88\" cy=\"24\" r=\"11\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.55\" opacity=\"0.45\"/> <circle cx=\"88\" cy=\"24\" r=\"16\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.35\" opacity=\"0.25\"/> </svg> <span class=\"rp-stage-prop__tag\">Antenna → Volume</span>\n</div>",
+          "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--av-handoff\" data-testid=\"story-street-av-handoff\" data-handoff=\"antenna_to_volume\" aria-label=\"Anten → Desibel geçişi\"> <svg class=\"rp-av-handoff-svg\" viewBox=\"0 0 120 48\" preserveAspectRatio=\"none\" aria-hidden=\"true\"> <!-- fading snag scar --> <line x1=\"28\" y1=\"10\" x2=\"28\" y2=\"38\" stroke=\"#6a5a48\" stroke-width=\"0.7\" opacity=\"0.55\"/> <path d=\"M 18 14 Q 24 8 28 12\" fill=\"none\" stroke=\"#c45c3e\" stroke-width=\"0.6\" opacity=\"0.45\" stroke-dasharray=\"2 1.5\"/> <!-- arrow / pulse toward Orhan door --> <path d=\"M 40 24 L 62 24\" stroke=\"#e8b478\" stroke-width=\"1.1\" marker-end=\"url(#avh)\"/> <defs><marker id=\"avh\" markerWidth=\"6\" markerHeight=\"6\" refX=\"5\" refY=\"3\" orient=\"auto\"><path d=\"M0,0 L6,3 L0,6 Z\" fill=\"#e8b478\"/></marker></defs> <!-- bass rings --> <circle cx=\"88\" cy=\"24\" r=\"6\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.9\" opacity=\"0.9\"/> <circle cx=\"88\" cy=\"24\" r=\"11\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.55\" opacity=\"0.45\"/> <circle cx=\"88\" cy=\"24\" r=\"16\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.35\" opacity=\"0.25\"/> </svg> <span class=\"rp-stage-prop__tag\">Anten → Desibel</span>\n</div>",
           "testId": "story-street-av-handoff"
         },
         "alsoShowVolumeNote": {
@@ -5779,8 +5787,8 @@
         "eveningBeat": {
           "testId": "evening-av-handoff",
           "headline": {
-            "tr": "Geçiş: Anten Operasyonu → Desibel Antlaşması",
-            "en": "Handoff: Antenna Op → Decibel Accord"
+            "tr": "Geçiş: →",
+            "en": "Handoff: →"
           },
           "body": {
             "tr": "Day2 soğuk seçim sokakta kaldı. Şimdi uzun ark çekiyor: bas, not, antlaşma.",
@@ -5840,8 +5848,8 @@
           "arc_tea_ledger_seed"
         ],
         "stageProp": {
-          "html": "<div class=\"rp-stage-prop rp-stage-prop--vl-handoff\" data-testid=\"story-street-vl-handoff\" data-handoff=\"volume_to_ledger\" aria-label=\"Volume to Ledger handoff\">\n  <svg class=\"rp-vl-handoff-svg\" viewBox=\"0 0 120 40\" aria-hidden=\"true\">\n    <circle cx=\"28\" cy=\"20\" r=\"5\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.8\" opacity=\"0.5\"/>\n    <path d=\"M 40 20 L 62 20\" stroke=\"#e8b478\" stroke-width=\"1\"/>\n    <ellipse cx=\"88\" cy=\"22\" rx=\"12\" ry=\"5\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/>\n    <rect x=\"78\" y=\"8\" width=\"16\" height=\"12\" rx=\"1\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.6\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Volume → Ledger</span>\n</div>",
-          "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--vl-handoff\" data-testid=\"story-street-vl-handoff\" data-handoff=\"volume_to_ledger\" aria-label=\"Desibel → Defter geçişi\">\n  <svg class=\"rp-vl-handoff-svg\" viewBox=\"0 0 120 40\" aria-hidden=\"true\">\n    <circle cx=\"28\" cy=\"20\" r=\"5\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.8\" opacity=\"0.5\"/>\n    <path d=\"M 40 20 L 62 20\" stroke=\"#e8b478\" stroke-width=\"1\"/>\n    <ellipse cx=\"88\" cy=\"22\" rx=\"12\" ry=\"5\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/>\n    <rect x=\"78\" y=\"8\" width=\"16\" height=\"12\" rx=\"1\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.6\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Desibel → Defter</span>\n</div>",
+          "html": "<div class=\"rp-stage-prop rp-stage-prop--vl-handoff\" data-testid=\"story-street-vl-handoff\" data-handoff=\"volume_to_ledger\" aria-label=\"Volume to Ledger handoff\"> <svg class=\"rp-vl-handoff-svg\" viewBox=\"0 0 120 40\" aria-hidden=\"true\"> <circle cx=\"28\" cy=\"20\" r=\"5\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.8\" opacity=\"0.5\"/> <path d=\"M 40 20 L 62 20\" stroke=\"#e8b478\" stroke-width=\"1\"/> <ellipse cx=\"88\" cy=\"22\" rx=\"12\" ry=\"5\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/> <rect x=\"78\" y=\"8\" width=\"16\" height=\"12\" rx=\"1\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.6\"/> </svg> <span class=\"rp-stage-prop__tag\">Volume → Ledger</span>\n</div>",
+          "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--vl-handoff\" data-testid=\"story-street-vl-handoff\" data-handoff=\"volume_to_ledger\" aria-label=\"Desibel → Defter geçişi\"> <svg class=\"rp-vl-handoff-svg\" viewBox=\"0 0 120 40\" aria-hidden=\"true\"> <circle cx=\"28\" cy=\"20\" r=\"5\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.8\" opacity=\"0.5\"/> <path d=\"M 40 20 L 62 20\" stroke=\"#e8b478\" stroke-width=\"1\"/> <ellipse cx=\"88\" cy=\"22\" rx=\"12\" ry=\"5\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/> <rect x=\"78\" y=\"8\" width=\"16\" height=\"12\" rx=\"1\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.6\"/> </svg> <span class=\"rp-stage-prop__tag\">Desibel → Defter</span>\n</div>",
           "testId": "story-street-vl-handoff"
         },
         "npcLine": {
@@ -5883,7 +5891,7 @@
       ],
       "acceptance": "Player can name next arc from street screenshot without opening journal."
     },
-    "cssAppend": "\n/* story-form-10 — Antenna→Volume street handoff */\n.rp-stage-prop--av-handoff {\n  left: 12%; right: 12%; top: 28%; height: 32%;\n  z-index: 8; color: #e8b478;\n  animation: rp-av-pulse 2.4s ease-in-out infinite;\n}\n.rp-av-handoff-svg, .rp-vl-handoff-svg { width: 100%; height: 100%; display: block; }\n@keyframes rp-av-pulse {\n  0%, 100% { opacity: 0.92; }\n  50% { opacity: 1; filter: drop-shadow(0 0 6px rgba(126,184,212,.35)); }\n}\n.rp-stage-prop--vl-handoff {\n  left: 18%; right: 18%; top: 52%; height: 22%;\n  z-index: 8; color: #e8c9a0;\n}\n.rp-handoff-banner {\n  position: absolute; left: 50%; bottom: 5.2rem;\n  transform: translateX(-50%);\n  z-index: 8;\n  max-width: min(92%, 22rem);\n  padding: 0.45rem 0.7rem;\n  background: rgba(14,10,8,.88);\n  border: 1px solid rgba(232,180,120,.45);\n  border-radius: 10px;\n  color: #f2e6d8;\n  font-size: 12px;\n  line-height: 1.35;\n}\n.rp-handoff-banner__h { font-weight: 700; margin: 0 0 0.15rem; }\n.rp-handoff-banner__cta {\n  margin-top: 0.35rem;\n  display: inline-block;\n  padding: 0.25rem 0.55rem;\n  border: 1px solid #e8b478;\n  border-radius: 6px;\n  background: transparent;\n  color: #e8b478;\n  font-size: 11px;\n}\n/* one handoff layer: hide full arc banners while handoff banner up */\nbody.rp-handoff-av .rp-arc-beat-banner,\nbody.rp-handoff-vl .rp-arc-beat-banner { display: none; }\n",
+    "cssAppend": "\n/* story-form-10 — Antenna→Volume street handoff */\n.rp-stage-prop--av-handoff { left: 12%; right: 12%; top: 28%; height: 32%; z-index: 8; color: #e8b478; animation: rp-av-pulse 2.4s ease-in-out infinite;\n}\n.rp-av-handoff-svg, .rp-vl-handoff-svg { width: 100%; height: 100%; display: block; }\n@keyframes rp-av-pulse { 0%, 100% { opacity: 0.92; } 50% { opacity: 1; filter: drop-shadow(0 0 6px rgba(126,184,212,.35)); }\n}\n.rp-stage-prop--vl-handoff { left: 18%; right: 18%; top: 52%; height: 22%; z-index: 8; color: #e8c9a0;\n}\n.rp-handoff-banner { position: absolute; left: 50%; bottom: 5.2rem; transform: translateX(-50%); z-index: 8; max-width: min(92%, 22rem); padding: 0.45rem 0.7rem; background: rgba(14,10,8,.88); border: 1px solid rgba(232,180,120,.45); border-radius: 10px; color: #f2e6d8; font-size: 12px; line-height: 1.35;\n}\n.rp-handoff-banner__h { font-weight: 700; margin: 0 0 0.15rem; }\n.rp-handoff-banner__cta { margin-top: 0.35rem; display: inline-block; padding: 0.25rem 0.55rem; border: 1px solid #e8b478; border-radius: 6px; background: transparent; color: #e8b478; font-size: 11px;\n}\n/* one handoff layer: hide full arc banners while handoff banner up */\nbody.rp-handoff-av .rp-arc-beat-banner,\nbody.rp-handoff-vl .rp-arc-beat-banner { display: none; }\n",
     "echoFollowUpsAppend": [
       {
         "id": "echo_form10_av_street",
@@ -5908,8 +5916,8 @@
           "en": "Long arc pulls on the street"
         },
         "body": {
-          "tr": "Anten izi sönüyor; bas halkaları Orhan'a gidiyor. Desibel Antlaşması burada başlar.",
-          "en": "Antenna scar fades; bass rings walk to Orhan. Decibel Accord starts here."
+          "tr": "Anten izi sönüyor; bas halkaları Orhan'a gidiyor. burada başlar.",
+          "en": "Antenna scar fades; bass rings walk to Orhan. starts here."
         },
         "cta": {
           "tr": "Geçişi gör",
@@ -6084,7 +6092,7 @@
           ]
         },
         "testId": "story-street-volume-bass",
-        "html": "<div class=\"rp-stage-prop rp-stage-prop--volume-bass\" data-testid=\"story-street-volume-bass\" aria-label=\"01:12 bass rings\">\n  <svg class=\"rp-vol-svg\" viewBox=\"0 0 100 40\" aria-hidden=\"true\">\n        <circle cx=\"70\" cy=\"20\" r=\"5\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"1\"/>\n        <circle cx=\"70\" cy=\"20\" r=\"10\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.6\" opacity=\"0.55\"/>\n        <circle cx=\"70\" cy=\"20\" r=\"15\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.35\" opacity=\"0.3\"/>\n        <text x=\"8\" y=\"24\" fill=\"#e8b478\" font-size=\"8\" font-family=\"monospace\">01:12</text>\n      </svg>\n  <span class=\"rp-stage-prop__tag\">Volume · 01:12</span>\n</div>",
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--volume-bass\" data-testid=\"story-street-volume-bass\" aria-label=\"01:12 bass rings\"> <svg class=\"rp-vol-svg\" viewBox=\"0 0 100 40\" aria-hidden=\"true\"> <circle cx=\"70\" cy=\"20\" r=\"5\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"1\"/> <circle cx=\"70\" cy=\"20\" r=\"10\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.6\" opacity=\"0.55\"/> <circle cx=\"70\" cy=\"20\" r=\"15\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.35\" opacity=\"0.3\"/> <text x=\"8\" y=\"24\" fill=\"#e8b478\" font-size=\"8\" font-family=\"monospace\">01:12</text> </svg> <span class=\"rp-stage-prop__tag\">Volume · 01:12</span>\n</div>",
         "npcLine": {
           "speakerId": "n3",
           "text": {
@@ -6092,7 +6100,7 @@
             "en": "Wall shook at 01:12. Not Antenna — Decibel."
           }
         },
-        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--volume-bass\" data-testid=\"story-street-volume-bass\" aria-label=\"01:12 bas halkaları\">\n  <svg class=\"rp-vol-svg\" viewBox=\"0 0 100 40\" aria-hidden=\"true\">\n        <circle cx=\"70\" cy=\"20\" r=\"5\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"1\"/>\n        <circle cx=\"70\" cy=\"20\" r=\"10\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.6\" opacity=\"0.55\"/>\n        <circle cx=\"70\" cy=\"20\" r=\"15\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.35\" opacity=\"0.3\"/>\n        <text x=\"8\" y=\"24\" fill=\"#e8b478\" font-size=\"8\" font-family=\"monospace\">01:12</text>\n      </svg>\n  <span class=\"rp-stage-prop__tag\">Desibel · 01:12</span>\n</div>"
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--volume-bass\" data-testid=\"story-street-volume-bass\" aria-label=\"01:12 bas halkaları\"> <svg class=\"rp-vol-svg\" viewBox=\"0 0 100 40\" aria-hidden=\"true\"> <circle cx=\"70\" cy=\"20\" r=\"5\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"1\"/> <circle cx=\"70\" cy=\"20\" r=\"10\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.6\" opacity=\"0.55\"/> <circle cx=\"70\" cy=\"20\" r=\"15\" fill=\"none\" stroke=\"#7eb8d4\" stroke-width=\"0.35\" opacity=\"0.3\"/> <text x=\"8\" y=\"24\" fill=\"#e8b478\" font-size=\"8\" font-family=\"monospace\">01:12</text> </svg> <span class=\"rp-stage-prop__tag\">Desibel · 01:12</span>\n</div>"
       },
       {
         "id": "volume_street_beat2_note",
@@ -6108,8 +6116,8 @@
         },
         "testId": "story-street-volume-note",
         "reuseForm9": "street_prop_volume_headphones",
-        "html": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-volume-note\" aria-label=\"HEADPHONES note\">\n  <div class=\"rp-note-door\"><span class=\"rp-note-caps\">HEADPHONES</span></div>\n  <span class=\"rp-stage-prop__tag\">Volume · note</span>\n</div>",
-        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-volume-note\" aria-label=\"KULAKLIK notu\">\n  <div class=\"rp-note-door\"><span class=\"rp-note-caps\">KULAKLIK</span></div>\n  <span class=\"rp-stage-prop__tag\">Desibel · not</span>\n</div>",
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-volume-note\" aria-label=\"HEADPHONES note\"> <div class=\"rp-note-door\"><span class=\"rp-note-caps\">HEADPHONES</span></div> <span class=\"rp-stage-prop__tag\">Volume · note</span>\n</div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-volume-note\" aria-label=\"KULAKLIK notu\"> <div class=\"rp-note-door\"><span class=\"rp-note-caps\">KULAKLIK</span></div> <span class=\"rp-stage-prop__tag\">Desibel · not</span>\n</div>",
         "npcLine": {
           "speakerId": "n5",
           "text": {
@@ -6131,7 +6139,7 @@
           ]
         },
         "testId": "story-street-volume-pastry",
-        "html": "<div class=\"rp-stage-prop rp-stage-prop--volume-pastry\" data-testid=\"story-street-volume-pastry\" aria-label=\"Midnight pastry bag\">\n  <svg class=\"rp-vol-svg\" viewBox=\"0 0 80 36\" aria-hidden=\"true\">\n        <path d=\"M20 28 L28 10 L52 10 L60 28 Z\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.9\"/>\n        <ellipse cx=\"40\" cy=\"28\" rx=\"20\" ry=\"4\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.6\"/>\n      </svg>\n  <span class=\"rp-stage-prop__tag\">Volume · pastry</span>\n</div>",
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--volume-pastry\" data-testid=\"story-street-volume-pastry\" aria-label=\"Midnight pastry bag\"> <svg class=\"rp-vol-svg\" viewBox=\"0 0 80 36\" aria-hidden=\"true\"> <path d=\"M20 28 L28 10 L52 10 L60 28 Z\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.9\"/> <ellipse cx=\"40\" cy=\"28\" rx=\"20\" ry=\"4\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.6\"/> </svg> <span class=\"rp-stage-prop__tag\">Volume · pastry</span>\n</div>",
         "npcLine": {
           "speakerId": "n2",
           "text": {
@@ -6139,7 +6147,7 @@
             "en": "Pastry bag — Soft diplomacy on the street."
           }
         },
-        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--volume-pastry\" data-testid=\"story-street-volume-pastry\" aria-label=\"Gece poğaçası\">\n  <svg class=\"rp-vol-svg\" viewBox=\"0 0 80 36\" aria-hidden=\"true\">\n        <path d=\"M20 28 L28 10 L52 10 L60 28 Z\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.9\"/>\n        <ellipse cx=\"40\" cy=\"28\" rx=\"20\" ry=\"4\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.6\"/>\n      </svg>\n  <span class=\"rp-stage-prop__tag\">Desibel · poğaça</span>\n</div>"
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--volume-pastry\" data-testid=\"story-street-volume-pastry\" aria-label=\"Gece poğaçası\"> <svg class=\"rp-vol-svg\" viewBox=\"0 0 80 36\" aria-hidden=\"true\"> <path d=\"M20 28 L28 10 L52 10 L60 28 Z\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.9\"/> <ellipse cx=\"40\" cy=\"28\" rx=\"20\" ry=\"4\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.6\"/> </svg> <span class=\"rp-stage-prop__tag\">Desibel · poğaça</span>\n</div>"
       },
       {
         "id": "volume_street_beat4_offer",
@@ -6154,7 +6162,7 @@
           ]
         },
         "testId": "story-street-volume-offer",
-        "html": "<div class=\"rp-stage-prop rp-stage-prop--volume-offer\" data-testid=\"story-street-volume-offer\" aria-label=\"Club offer slip\">\n  <svg class=\"rp-vol-svg\" viewBox=\"0 0 70 36\" aria-hidden=\"true\">\n        <rect x=\"18\" y=\"6\" width=\"34\" height=\"24\" rx=\"1.5\" fill=\"none\" stroke=\"#f2e6d8\" stroke-width=\"0.8\"/>\n        <line x1=\"24\" y1=\"12\" x2=\"46\" y2=\"12\" stroke=\"#7eb8d4\" stroke-width=\"0.5\"/>\n        <line x1=\"24\" y1=\"17\" x2=\"42\" y2=\"17\" stroke=\"#e8b478\" stroke-width=\"0.5\"/>\n        <line x1=\"24\" y1=\"22\" x2=\"44\" y2=\"22\" stroke=\"#e8b478\" stroke-width=\"0.5\"/>\n      </svg>\n  <span class=\"rp-stage-prop__tag\">Volume · offer</span>\n</div>",
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--volume-offer\" data-testid=\"story-street-volume-offer\" aria-label=\"Club offer slip\"> <svg class=\"rp-vol-svg\" viewBox=\"0 0 70 36\" aria-hidden=\"true\"> <rect x=\"18\" y=\"6\" width=\"34\" height=\"24\" rx=\"1.5\" fill=\"none\" stroke=\"#f2e6d8\" stroke-width=\"0.8\"/> <line x1=\"24\" y1=\"12\" x2=\"46\" y2=\"12\" stroke=\"#7eb8d4\" stroke-width=\"0.5\"/> <line x1=\"24\" y1=\"17\" x2=\"42\" y2=\"17\" stroke=\"#e8b478\" stroke-width=\"0.5\"/> <line x1=\"24\" y1=\"22\" x2=\"44\" y2=\"22\" stroke=\"#e8b478\" stroke-width=\"0.5\"/> </svg> <span class=\"rp-stage-prop__tag\">Volume · offer</span>\n</div>",
         "npcLine": {
           "speakerId": "n5",
           "text": {
@@ -6162,7 +6170,7 @@
             "en": "The letter leaked. Train ticket feels pocketed."
           }
         },
-        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--volume-offer\" data-testid=\"story-street-volume-offer\" aria-label=\"Kulüp teklif notu\">\n  <svg class=\"rp-vol-svg\" viewBox=\"0 0 70 36\" aria-hidden=\"true\">\n        <rect x=\"18\" y=\"6\" width=\"34\" height=\"24\" rx=\"1.5\" fill=\"none\" stroke=\"#f2e6d8\" stroke-width=\"0.8\"/>\n        <line x1=\"24\" y1=\"12\" x2=\"46\" y2=\"12\" stroke=\"#7eb8d4\" stroke-width=\"0.5\"/>\n        <line x1=\"24\" y1=\"17\" x2=\"42\" y2=\"17\" stroke=\"#e8b478\" stroke-width=\"0.5\"/>\n        <line x1=\"24\" y1=\"22\" x2=\"44\" y2=\"22\" stroke=\"#e8b478\" stroke-width=\"0.5\"/>\n      </svg>\n  <span class=\"rp-stage-prop__tag\">Desibel · teklif</span>\n</div>"
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--volume-offer\" data-testid=\"story-street-volume-offer\" aria-label=\"Kulüp teklif notu\"> <svg class=\"rp-vol-svg\" viewBox=\"0 0 70 36\" aria-hidden=\"true\"> <rect x=\"18\" y=\"6\" width=\"34\" height=\"24\" rx=\"1.5\" fill=\"none\" stroke=\"#f2e6d8\" stroke-width=\"0.8\"/> <line x1=\"24\" y1=\"12\" x2=\"46\" y2=\"12\" stroke=\"#7eb8d4\" stroke-width=\"0.5\"/> <line x1=\"24\" y1=\"17\" x2=\"42\" y2=\"17\" stroke=\"#e8b478\" stroke-width=\"0.5\"/> <line x1=\"24\" y1=\"22\" x2=\"44\" y2=\"22\" stroke=\"#e8b478\" stroke-width=\"0.5\"/> </svg> <span class=\"rp-stage-prop__tag\">Desibel · teklif</span>\n</div>"
       },
       {
         "id": "volume_street_beat5_accord",
@@ -6179,8 +6187,8 @@
           ]
         },
         "testId": "story-street-volume-accord",
-        "html": "<div class=\"rp-stage-prop rp-stage-prop--volume-accord\" data-testid=\"story-street-volume-accord\" aria-label=\"Accord chalk\">\n  <div class=\"rp-accord-chalk\">QUIET HRS · NEON NIGHT</div>\n  <span class=\"rp-stage-prop__tag\">Volume · accord</span>\n</div>",
-        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--volume-accord\" data-testid=\"story-street-volume-accord\" aria-label=\"Antlaşma tebeşiri\">\n  <div class=\"rp-accord-chalk\">SESSİZ SAAT · NEON NIGHT</div>\n  <span class=\"rp-stage-prop__tag\">Desibel · antlaşma</span>\n</div>",
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--volume-accord\" data-testid=\"story-street-volume-accord\" aria-label=\"Accord chalk\"> <div class=\"rp-accord-chalk\">QUIET HRS · NEON NIGHT</div> <span class=\"rp-stage-prop__tag\">Volume · accord</span>\n</div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--volume-accord\" data-testid=\"story-street-volume-accord\" aria-label=\"Antlaşma tebeşiri\"> <div class=\"rp-accord-chalk\">SESSİZ SAAT · NEON NIGHT</div> <span class=\"rp-stage-prop__tag\">Desibel · antlaşma</span>\n</div>",
         "npcLine": {
           "speakerId": "n3",
           "text": {
@@ -6206,8 +6214,8 @@
           ]
         },
         "chip": {
-          "tr": "MAIN 2/5 · Anten Operasyonu",
-          "en": "MAIN 2/5 · Antenna Op"
+          "tr": "",
+          "en": ""
         },
         "testId": "mq-street-chip-antenna"
       },
@@ -6227,8 +6235,8 @@
           ]
         },
         "chip": {
-          "tr": "MAIN 3/5 · Desibel Antlaşması",
-          "en": "MAIN 3/5 · Decibel Accord"
+          "tr": "",
+          "en": ""
         },
         "testId": "mq-street-chip-volume"
       },
@@ -6247,8 +6255,8 @@
           ]
         },
         "chip": {
-          "tr": "MAIN 4/5 · Defter & Tepsi",
-          "en": "MAIN 4/5 · Ledger & Tray"
+          "tr": "Defter & Tepsi",
+          "en": ""
         },
         "testId": "mq-street-chip-ledger"
       }
@@ -6267,8 +6275,8 @@
           "en": "Antenna scar faded. Bass rings walked to Orhan. Decibel is on the street."
         },
         "captionTag": {
-          "tr": "MAIN 2→3",
-          "en": "MAIN 2→3"
+          "tr": "Cup next",
+          "en": "Cup next"
         },
         "testId": "comic-echo-av-handoff"
       },
@@ -6286,13 +6294,13 @@
           "en": "Chalk: QUIET HRS · NEON NIGHT. Accord or career — the street chose."
         },
         "captionTag": {
-          "tr": "Desibel Beat 5",
-          "en": "Decibel Beat 5"
+          "tr": "Desibel",
+          "en": "Decibel"
         },
         "testId": "comic-echo-volume-accord"
       }
     ],
-    "cssAppend": "\n/* story-form-11 — one story signal; Volume beat street props; MQ chip */\nbody.rp-story-one-signal .rp-arc-beat-banner { display: none; }\nbody.rp-story-one-signal .rp-day2-spotlight { display: none !important; }\n\n.rp-mq-street-chip {\n  position: absolute;\n  top: 0.55rem; left: 50%;\n  transform: translateX(-50%);\n  z-index: 6;\n  padding: 0.28rem 0.6rem;\n  border-radius: 6px;\n  background: rgba(12,8,6,.82);\n  border: 1px solid rgba(232,180,120,.4);\n  color: #f2e6d8;\n  font-size: 11px;\n  letter-spacing: 0.04em;\n  white-space: nowrap;\n  max-width: 92%;\n  overflow: hidden;\n  text-overflow: ellipsis;\n}\n\n.rp-stage-prop--volume-bass { left: 48%; right: 8%; top: 30%; height: 28%; z-index: 8; }\n.rp-stage-prop--volume-pastry { left: 28%; width: 32%; top: 58%; height: 18%; z-index: 8; color: #e8c9a0; }\n.rp-stage-prop--volume-offer { left: 58%; width: 28%; top: 36%; height: 22%; z-index: 8; }\n.rp-stage-prop--volume-accord { left: 22%; right: 22%; top: 56%; height: auto; z-index: 8; }\n.rp-accord-chalk {\n  font: 700 11px/1.2 \"IBM Plex Mono\", ui-monospace, monospace;\n  letter-spacing: 0.06em;\n  padding: 0.4rem 0.55rem;\n  background: rgba(20,14,10,.9);\n  border: 1px dashed #e8b478;\n  color: #f2e6d8;\n  text-align: center;\n}\n.rp-vol-svg { width: 100%; height: 100%; display: block; }\n",
+    "cssAppend": "\n/* story-form-11 — one story signal; Volume beat street props; MQ chip */\nbody.rp-story-one-signal .rp-arc-beat-banner { display: none; }\nbody.rp-story-one-signal .rp-day2-spotlight { display: none !important; } .rp-mq-street-chip { position: absolute; top: 0.55rem; left: 50%; transform: translateX(-50%); z-index: 6; padding: 0.28rem 0.6rem; border-radius: 6px; background: rgba(12,8,6,.82); border: 1px solid rgba(232,180,120,.4); color: #f2e6d8; font-size: 11px; letter-spacing: 0.04em; white-space: nowrap; max-width: 92%; overflow: hidden; text-overflow: ellipsis;\n} .rp-stage-prop--volume-bass { left: 48%; right: 8%; top: 30%; height: 28%; z-index: 8; }\n.rp-stage-prop--volume-pastry { left: 28%; width: 32%; top: 58%; height: 18%; z-index: 8; color: #e8c9a0; }\n.rp-stage-prop--volume-offer { left: 58%; width: 28%; top: 36%; height: 22%; z-index: 8; }\n.rp-stage-prop--volume-accord { left: 22%; right: 22%; top: 56%; height: auto; z-index: 8; }\n.rp-accord-chalk { font: 700 11px/1.2 \"IBM Plex Mono\", ui-monospace, monospace; letter-spacing: 0.06em; padding: 0.4rem 0.55rem; background: rgba(20,14,10,.9); border: 1px dashed #e8b478; color: #f2e6d8; text-align: center;\n}\n.rp-vol-svg { width: 100%; height: 100%; display: block; }\n",
     "echoFollowUpsAppend": [
       {
         "id": "echo_form11_volume_street",
@@ -6321,7 +6329,7 @@
           "en": "Bass → note → pastry → letter → chalk. Each beat is a stage prop; journal is backup."
         },
         "cta": {
-          "tr": "Beat prop'unu gör",
+          "tr": "Street prop'unu gör",
           "en": "See the beat prop"
         }
       }
@@ -6337,7 +6345,7 @@
       },
       {
         "id": "mq_chip",
-        "desc": "While Volume active post-handoff: mq-street-chip-volume shows MAIN 3/5."
+        "desc": "While Volume active post-handoff: mq-street-chip-volume shows ."
       },
       {
         "id": "comic_handoff",
@@ -6501,8 +6509,8 @@
             }
           ]
         },
-        "html": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-headphones-note\" data-arc=\"arc_volume_war\" data-unlock=\"natural\" aria-label=\"HEADPHONES note\">\n  <div class=\"rp-note-door\">\n    <span class=\"rp-note-caps\">HEADPHONES</span>\n  </div>\n  <span class=\"rp-stage-prop__tag\">Decibel · note</span>\n</div>",
-        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-headphones-note\" data-arc=\"arc_volume_war\" data-unlock=\"natural\" aria-label=\"KULAKLIK notu\">\n  <div class=\"rp-note-door\">\n    <span class=\"rp-note-caps\">KULAKLIK</span>\n  </div>\n  <span class=\"rp-stage-prop__tag\">Desibel · not</span>\n</div>",
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-headphones-note\" data-arc=\"arc_volume_war\" data-unlock=\"natural\" aria-label=\"HEADPHONES note\"> <div class=\"rp-note-door\"> <span class=\"rp-note-caps\">HEADPHONES</span> </div> <span class=\"rp-stage-prop__tag\">Decibel · note</span>\n</div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-headphones-note\" data-arc=\"arc_volume_war\" data-unlock=\"natural\" aria-label=\"KULAKLIK notu\"> <div class=\"rp-note-door\"> <span class=\"rp-note-caps\">KULAKLIK</span> </div> <span class=\"rp-stage-prop__tag\">Desibel · not</span>\n</div>",
         "testId": "story-street-headphones-note",
         "npcLine": {
           "speakerId": "n5",
@@ -6549,8 +6557,8 @@
             }
           ]
         },
-        "html": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" data-unlock=\"natural\" aria-label=\"Ledger & tray\">\n  <svg class=\"rp-ledger-svg\" viewBox=\"0 0 80 28\" aria-hidden=\"true\">\n    <ellipse cx=\"22\" cy=\"16\" rx=\"14\" ry=\"6\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/>\n    <rect x=\"42\" y=\"6\" width=\"22\" height=\"16\" rx=\"1.5\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n    <line x1=\"46\" y1=\"10\" x2=\"60\" y2=\"10\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"14\" x2=\"58\" y2=\"14\" stroke=\"#c45c3e\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"18\" x2=\"60\" y2=\"18\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Ledger · tray</span>\n</div>",
-        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" data-unlock=\"natural\" aria-label=\"Defter ve tepsi\">\n  <svg class=\"rp-ledger-svg\" viewBox=\"0 0 80 28\" aria-hidden=\"true\">\n    <ellipse cx=\"22\" cy=\"16\" rx=\"14\" ry=\"6\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/>\n    <rect x=\"42\" y=\"6\" width=\"22\" height=\"16\" rx=\"1.5\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n    <line x1=\"46\" y1=\"10\" x2=\"60\" y2=\"10\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"14\" x2=\"58\" y2=\"14\" stroke=\"#c45c3e\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"18\" x2=\"60\" y2=\"18\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Defter · tepsi</span>\n</div>",
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" data-unlock=\"natural\" aria-label=\"Ledger & tray\"> <svg class=\"rp-ledger-svg\" viewBox=\"0 0 80 28\" aria-hidden=\"true\"> <ellipse cx=\"22\" cy=\"16\" rx=\"14\" ry=\"6\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/> <rect x=\"42\" y=\"6\" width=\"22\" height=\"16\" rx=\"1.5\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/> <line x1=\"46\" y1=\"10\" x2=\"60\" y2=\"10\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/> <line x1=\"46\" y1=\"14\" x2=\"58\" y2=\"14\" stroke=\"#c45c3e\" stroke-width=\"0.5\"/> <line x1=\"46\" y1=\"18\" x2=\"60\" y2=\"18\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/> </svg> <span class=\"rp-stage-prop__tag\">Ledger · tray</span>\n</div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" data-unlock=\"natural\" aria-label=\"Defter ve tepsi\"> <svg class=\"rp-ledger-svg\" viewBox=\"0 0 80 28\" aria-hidden=\"true\"> <ellipse cx=\"22\" cy=\"16\" rx=\"14\" ry=\"6\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/> <rect x=\"42\" y=\"6\" width=\"22\" height=\"16\" rx=\"1.5\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/> <line x1=\"46\" y1=\"10\" x2=\"60\" y2=\"10\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/> <line x1=\"46\" y1=\"14\" x2=\"58\" y2=\"14\" stroke=\"#c45c3e\" stroke-width=\"0.5\"/> <line x1=\"46\" y1=\"18\" x2=\"60\" y2=\"18\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/> </svg> <span class=\"rp-stage-prop__tag\">Defter · tepsi</span>\n</div>",
         "testId": "story-street-ledger-tray",
         "npcLine": {
           "speakerId": "n1",
@@ -6598,7 +6606,7 @@
         "OR after Antenna UI-complete + day>=3: headphones-note present"
       ]
     },
-    "cssAppend": "\n/* story-form-12 — natural Volume/Ledger street props (same visuals, unlock tag) */\n.rp-stage-prop--headphones-note[data-unlock=\"natural\"],\n.rp-stage-prop--ledger-tray[data-unlock=\"natural\"] {\n  z-index: 8;\n}\n.rp-stage-prop--headphones-note {\n  left: 62%; width: 28%; top: 34%; height: auto;\n}\n.rp-note-door {\n  background: #f4f0e4;\n  color: #1a120c;\n  padding: 0.55rem 0.65rem;\n  transform: rotate(-3deg);\n  box-shadow: 0 4px 12px rgba(0,0,0,.45);\n  border: 2px solid #1a120c;\n}\n.rp-note-caps { font: 800 13px/1.1 \"IBM Plex Mono\", ui-monospace, monospace; letter-spacing: 0.08em; }\n.rp-stage-prop--ledger-tray {\n  left: 18%; width: 36%; top: 60%; height: 18%; color: #e8c9a0;\n}\n.rp-ledger-svg { width: 100%; height: 100%; display: block; }\n",
+    "cssAppend": "\n/* story-form-12 — natural Volume/Ledger street props (same visuals, unlock tag) */\n.rp-stage-prop--headphones-note[data-unlock=\"natural\"],\n.rp-stage-prop--ledger-tray[data-unlock=\"natural\"] { z-index: 8;\n}\n.rp-stage-prop--headphones-note { left: 62%; width: 28%; top: 34%; height: auto;\n}\n.rp-note-door { background: #f4f0e4; color: #1a120c; padding: 0.55rem 0.65rem; transform: rotate(-3deg); box-shadow: 0 4px 12px rgba(0,0,0,.45); border: 2px solid #1a120c;\n}\n.rp-note-caps { font: 800 13px/1.1 \"IBM Plex Mono\", ui-monospace, monospace; letter-spacing: 0.08em; }\n.rp-stage-prop--ledger-tray { left: 18%; width: 36%; top: 60%; height: 18%; color: #e8c9a0;\n}\n.rp-ledger-svg { width: 100%; height: 100%; display: block; }\n",
     "echoFollowUpsAppend": [
       {
         "id": "echo_form12_natural_street",
@@ -6810,8 +6818,8 @@
             }
           ]
         },
-        "html": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-headphones-note\" data-arc=\"arc_volume_war\" data-unlock=\"natural\" aria-label=\"HEADPHONES note\">\n  <div class=\"rp-note-door\"><span class=\"rp-note-caps\">HEADPHONES</span></div>\n  <span class=\"rp-stage-prop__tag\">Decibel · note</span>\n</div>",
-        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-headphones-note\" data-arc=\"arc_volume_war\" data-unlock=\"natural\" aria-label=\"KULAKLIK notu\">\n  <div class=\"rp-note-door\"><span class=\"rp-note-caps\">KULAKLIK</span></div>\n  <span class=\"rp-stage-prop__tag\">Desibel · not</span>\n</div>",
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-headphones-note\" data-arc=\"arc_volume_war\" data-unlock=\"natural\" aria-label=\"HEADPHONES note\"> <div class=\"rp-note-door\"><span class=\"rp-note-caps\">HEADPHONES</span></div> <span class=\"rp-stage-prop__tag\">Decibel · note</span>\n</div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--headphones-note\" data-testid=\"story-street-headphones-note\" data-arc=\"arc_volume_war\" data-unlock=\"natural\" aria-label=\"KULAKLIK notu\"> <div class=\"rp-note-door\"><span class=\"rp-note-caps\">KULAKLIK</span></div> <span class=\"rp-stage-prop__tag\">Desibel · not</span>\n</div>",
         "testId": "story-street-headphones-note"
       },
       {
@@ -6840,8 +6848,8 @@
             }
           ]
         },
-        "html": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" data-unlock=\"natural\" aria-label=\"Ledger & tray\">\n  <svg class=\"rp-ledger-svg\" viewBox=\"0 0 80 28\" aria-hidden=\"true\">\n    <ellipse cx=\"22\" cy=\"16\" rx=\"14\" ry=\"6\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/>\n    <rect x=\"42\" y=\"6\" width=\"22\" height=\"16\" rx=\"1.5\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n    <line x1=\"46\" y1=\"10\" x2=\"60\" y2=\"10\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"14\" x2=\"58\" y2=\"14\" stroke=\"#c45c3e\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"18\" x2=\"60\" y2=\"18\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Ledger · tray</span>\n</div>",
-        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" data-unlock=\"natural\" aria-label=\"Defter ve tepsi\">\n  <svg class=\"rp-ledger-svg\" viewBox=\"0 0 80 28\" aria-hidden=\"true\">\n    <ellipse cx=\"22\" cy=\"16\" rx=\"14\" ry=\"6\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/>\n    <rect x=\"42\" y=\"6\" width=\"22\" height=\"16\" rx=\"1.5\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n    <line x1=\"46\" y1=\"10\" x2=\"60\" y2=\"10\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"14\" x2=\"58\" y2=\"14\" stroke=\"#c45c3e\" stroke-width=\"0.5\"/>\n    <line x1=\"46\" y1=\"18\" x2=\"60\" y2=\"18\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">Defter · tepsi</span>\n</div>",
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" data-unlock=\"natural\" aria-label=\"Ledger & tray\"> <svg class=\"rp-ledger-svg\" viewBox=\"0 0 80 28\" aria-hidden=\"true\"> <ellipse cx=\"22\" cy=\"16\" rx=\"14\" ry=\"6\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/> <rect x=\"42\" y=\"6\" width=\"22\" height=\"16\" rx=\"1.5\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/> <line x1=\"46\" y1=\"10\" x2=\"60\" y2=\"10\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/> <line x1=\"46\" y1=\"14\" x2=\"58\" y2=\"14\" stroke=\"#c45c3e\" stroke-width=\"0.5\"/> <line x1=\"46\" y1=\"18\" x2=\"60\" y2=\"18\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/> </svg> <span class=\"rp-stage-prop__tag\">Ledger · tray</span>\n</div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" data-unlock=\"natural\" aria-label=\"Defter ve tepsi\"> <svg class=\"rp-ledger-svg\" viewBox=\"0 0 80 28\" aria-hidden=\"true\"> <ellipse cx=\"22\" cy=\"16\" rx=\"14\" ry=\"6\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.8\"/> <rect x=\"42\" y=\"6\" width=\"22\" height=\"16\" rx=\"1.5\" fill=\"none\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/> <line x1=\"46\" y1=\"10\" x2=\"60\" y2=\"10\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/> <line x1=\"46\" y1=\"14\" x2=\"58\" y2=\"14\" stroke=\"#c45c3e\" stroke-width=\"0.5\"/> <line x1=\"46\" y1=\"18\" x2=\"60\" y2=\"18\" stroke=\"#e8c9a0\" stroke-width=\"0.5\"/> </svg> <span class=\"rp-stage-prop__tag\">Defter · tepsi</span>\n</div>",
         "testId": "story-street-ledger-tray"
       }
     ],
@@ -6935,8 +6943,8 @@
         "en": "Antenna done → Decibel opens"
       },
       "body": {
-        "tr": "MAIN 3/5. Sokakta KULAKLIK notu. Volume'u kabul et veya sokağa bak.",
-        "en": "MAIN 3/5. HEADPHONES note is on the street. Accept Volume or look outside."
+        "tr": ". Sokakta KULAKLIK notu. Volume'u kabul et veya sokağa bak.",
+        "en": ". HEADPHONES note is on the street. Accept Volume or look outside."
       },
       "ctaAccept": {
         "tr": "Volume'u aç",
@@ -6958,11 +6966,11 @@
       },
       "matchesOvernightSpine": true,
       "spineLine": {
-        "tr": "Spine 2/5 · Antenna → Volume → Ledger",
-        "en": "Spine 2/5 · Antenna → Volume → Ledger"
+        "tr": "Antenna → Volume → Ledger",
+        "en": "Antenna → Volume → Ledger"
       }
     },
-    "cssAppend": "\n/* story-form-13 — cold yield; Volume evening CTA */\nbody.rp-cold-yielded .rp-stage-prop--shared-string,\nbody.rp-cold-yielded .rp-stage-prop--kite-high,\nbody.rp-cold-yielded .rp-stage-prop--chalk-cup { display: none !important; }\n.rp-evening-volume-accept {\n  margin: 0.75rem 0;\n  padding: 0.75rem 0.9rem;\n  background: rgba(14,10,8,.9);\n  border: 1px solid rgba(232,180,120,.5);\n  border-radius: 10px;\n  color: #f2e6d8;\n}\n.rp-evening-volume-accept__h { font-weight: 700; margin: 0 0 0.35rem; }\n.rp-evening-volume-accept__actions { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.55rem; }\n.rp-evening-volume-accept__cta {\n  padding: 0.4rem 0.7rem;\n  border-radius: 8px;\n  border: 1px solid #e8b478;\n  background: #e8b478;\n  color: #1a120c;\n  font-weight: 700;\n  font-size: 13px;\n}\n.rp-evening-volume-accept__cta--ghost {\n  background: transparent;\n  color: #e8b478;\n}\n",
+    "cssAppend": "\n/* story-form-13 — cold yield; Volume evening CTA */\nbody.rp-cold-yielded .rp-stage-prop--shared-string,\nbody.rp-cold-yielded .rp-stage-prop--kite-high,\nbody.rp-cold-yielded .rp-stage-prop--chalk-cup { display: none !important; }\n.rp-evening-volume-accept { margin: 0.75rem 0; padding: 0.75rem 0.9rem; background: rgba(14,10,8,.9); border: 1px solid rgba(232,180,120,.5); border-radius: 10px; color: #f2e6d8;\n}\n.rp-evening-volume-accept__h { font-weight: 700; margin: 0 0 0.35rem; }\n.rp-evening-volume-accept__actions { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.55rem; }\n.rp-evening-volume-accept__cta { padding: 0.4rem 0.7rem; border-radius: 8px; border: 1px solid #e8b478; background: #e8b478; color: #1a120c; font-weight: 700; font-size: 13px;\n}\n.rp-evening-volume-accept__cta--ghost { background: transparent; color: #e8b478;\n}\n",
     "acceptanceChecks": [
       {
         "id": "cold_yields_day7",
@@ -7082,7 +7090,7 @@
         "priority": 98
       }
     ],
-    "cssAppend": "\n/* story-form-14 — CSS kill-switch if JS cold monopoly regresses */\nbody.rp-cold-yielded .rp-stage-prop--shared-string,\nbody.rp-cold-yielded .rp-stage-prop--kite-high,\nbody.rp-cold-yielded .rp-stage-prop--chalk-cup,\nbody[data-day-index=\"7\"] .rp-stage-prop--shared-string,\nbody[data-day-index=\"8\"] .rp-stage-prop--shared-string,\nbody[data-day-index=\"9\"] .rp-stage-prop--shared-string,\nbody[data-day-index=\"10\"] .rp-stage-prop--shared-string,\nbody[data-day-index=\"7\"] .rp-stage-prop--kite-high,\nbody[data-day-index=\"8\"] .rp-stage-prop--kite-high,\nbody[data-day-index=\"9\"] .rp-stage-prop--kite-high,\nbody[data-day-index=\"10\"] .rp-stage-prop--kite-high,\nbody[data-day-index=\"7\"] .rp-stage-prop--chalk-cup,\nbody[data-day-index=\"8\"] .rp-stage-prop--chalk-cup,\nbody[data-day-index=\"9\"] .rp-stage-prop--chalk-cup,\nbody[data-day-index=\"10\"] .rp-stage-prop--chalk-cup {\n  display: none !important;\n}\n/* Prefer headphones/ledger visibility */\nbody.rp-cold-yielded .rp-stage-prop--headphones-note,\nbody.rp-cold-yielded .rp-stage-prop--ledger-tray {\n  display: block;\n  z-index: 9;\n}\nbody[data-day-index=\"10\"] .rp-stage-prop--headphones-note {\n  /* ledger wins day 10+ when both present */\n  opacity: 0.35;\n}\n",
+    "cssAppend": "\n/* story-form-14 — CSS kill-switch if JS cold monopoly regresses */\nbody.rp-cold-yielded .rp-stage-prop--shared-string,\nbody.rp-cold-yielded .rp-stage-prop--kite-high,\nbody.rp-cold-yielded .rp-stage-prop--chalk-cup,\nbody[data-day-index=\"7\"] .rp-stage-prop--shared-string,\nbody[data-day-index=\"8\"] .rp-stage-prop--shared-string,\nbody[data-day-index=\"9\"] .rp-stage-prop--shared-string,\nbody[data-day-index=\"10\"] .rp-stage-prop--shared-string,\nbody[data-day-index=\"7\"] .rp-stage-prop--kite-high,\nbody[data-day-index=\"8\"] .rp-stage-prop--kite-high,\nbody[data-day-index=\"9\"] .rp-stage-prop--kite-high,\nbody[data-day-index=\"10\"] .rp-stage-prop--kite-high,\nbody[data-day-index=\"7\"] .rp-stage-prop--chalk-cup,\nbody[data-day-index=\"8\"] .rp-stage-prop--chalk-cup,\nbody[data-day-index=\"9\"] .rp-stage-prop--chalk-cup,\nbody[data-day-index=\"10\"] .rp-stage-prop--chalk-cup { display: none !important;\n}\n/* Prefer headphones/ledger visibility */\nbody.rp-cold-yielded .rp-stage-prop--headphones-note,\nbody.rp-cold-yielded .rp-stage-prop--ledger-tray { display: block; z-index: 9;\n}\nbody[data-day-index=\"10\"] .rp-stage-prop--headphones-note { /* ledger wins day 10+ when both present */ opacity: 0.35;\n}\n",
     "smokeDayLadder": {
       "id": "smoke_cold_yield_ladder",
       "noFlagInject": true,
@@ -7238,8 +7246,8 @@
         ]
       },
       "html": {
-        "en": "<section class=\"rp-evening-volume-accept\" data-testid=\"evening-volume-accept-cta\" data-form=\"15\">\n  <p class=\"rp-evening-volume-accept__h\">Antenna done → Decibel opens</p>\n  <p>MAIN 3/5. HEADPHONES note is on the street. Accept Volume or look outside.</p>\n  <div class=\"rp-evening-volume-accept__actions\">\n    <button class=\"rp-evening-volume-accept__cta\" type=\"button\" data-action=\"accept-volume-quest\" data-testid=\"evening-open-volume\">Open Volume</button>\n    <button class=\"rp-evening-volume-accept__cta rp-evening-volume-accept__cta--ghost\" type=\"button\" data-action=\"go-street\" data-testid=\"evening-volume-see-headphones\">See HEADPHONES note</button>\n  </div>\n</section>",
-        "tr": "<section class=\"rp-evening-volume-accept\" data-testid=\"evening-volume-accept-cta\" data-form=\"15\">\n  <p class=\"rp-evening-volume-accept__h\">Anten bitti → Desibel açılıyor</p>\n  <p>MAIN 3/5. Sokakta KULAKLIK notu. Volume'u kabul et veya sokağa bak.</p>\n  <div class=\"rp-evening-volume-accept__actions\">\n    <button class=\"rp-evening-volume-accept__cta\" type=\"button\" data-action=\"accept-volume-quest\" data-testid=\"evening-open-volume\">Volume'u aç</button>\n    <button class=\"rp-evening-volume-accept__cta rp-evening-volume-accept__cta--ghost\" type=\"button\" data-action=\"go-street\" data-testid=\"evening-volume-see-headphones\">KULAKLIK notuna bak</button>\n  </div>\n</section>"
+        "en": "<section class=\"rp-evening-volume-accept\" data-testid=\"evening-volume-accept-cta\" data-form=\"15\"> <p class=\"rp-evening-volume-accept__h\">Antenna done → Decibel opens</p> <p>. HEADPHONES note is on the street. Accept Volume or look outside.</p> <div class=\"rp-evening-volume-accept__actions\"> <button class=\"rp-evening-volume-accept__cta\" type=\"button\" data-action=\"accept-volume-quest\" data-testid=\"evening-open-volume\">Open Volume</button> <button class=\"rp-evening-volume-accept__cta rp-evening-volume-accept__cta--ghost\" type=\"button\" data-action=\"go-street\" data-testid=\"evening-volume-see-headphones\">See HEADPHONES note</button> </div>\n</section>",
+        "tr": "<section class=\"rp-evening-volume-accept\" data-testid=\"evening-volume-accept-cta\" data-form=\"15\"> <p class=\"rp-evening-volume-accept__h\">Anten bitti → Desibel açılıyor</p> <p>. Sokakta KULAKLIK notu. Volume'u kabul et veya sokağa bak.</p> <div class=\"rp-evening-volume-accept__actions\"> <button class=\"rp-evening-volume-accept__cta\" type=\"button\" data-action=\"accept-volume-quest\" data-testid=\"evening-open-volume\">Volume'u aç</button> <button class=\"rp-evening-volume-accept__cta rp-evening-volume-accept__cta--ghost\" type=\"button\" data-action=\"go-street\" data-testid=\"evening-volume-see-headphones\">KULAKLIK notuna bak</button> </div>\n</section>"
       },
       "antennaFailsafeOnEvening": {
         "note": "If day>=4 and still no antenna complete on cold path, set natural complete without flag inject from harness",
@@ -7253,7 +7261,7 @@
         ]
       }
     },
-    "cssAppend": "\n/* story-form-15 hotfix — force cold SVG off at day≥7 */\nbody.rp-cold-yielded .rp-stage-prop--shared-string,\nbody.rp-cold-yielded .rp-stage-prop--kite-high,\nbody.rp-cold-yielded .rp-stage-prop--chalk-cup,\nbody[data-day-index=\"7\"] .rp-stage-prop--shared-string,\nbody[data-day-index=\"8\"] .rp-stage-prop--shared-string,\nbody[data-day-index=\"9\"] .rp-stage-prop--shared-string,\nbody[data-day-index=\"10\"] .rp-stage-prop--shared-string,\nbody[data-day-index=\"7\"] .rp-stage-prop--kite-high,\nbody[data-day-index=\"8\"] .rp-stage-prop--kite-high,\nbody[data-day-index=\"9\"] .rp-stage-prop--kite-high,\nbody[data-day-index=\"10\"] .rp-stage-prop--kite-high,\nbody[data-day-index=\"7\"] .rp-stage-prop--chalk-cup,\nbody[data-day-index=\"8\"] .rp-stage-prop--chalk-cup,\nbody[data-day-index=\"9\"] .rp-stage-prop--chalk-cup,\nbody[data-day-index=\"10\"] .rp-stage-prop--chalk-cup {\n  display: none !important;\n}\n.rp-evening-volume-accept {\n  margin: 0.75rem 0; padding: 0.75rem 0.9rem;\n  background: rgba(14,10,8,.9); border: 1px solid rgba(232,180,120,.5);\n  border-radius: 10px; color: #f2e6d8;\n}\n.rp-evening-volume-accept__h { font-weight: 700; margin: 0 0 0.35rem; }\n.rp-evening-volume-accept__actions { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.55rem; }\n.rp-evening-volume-accept__cta {\n  padding: 0.4rem 0.7rem; border-radius: 8px; border: 1px solid #e8b478;\n  background: #e8b478; color: #1a120c; font-weight: 700; font-size: 13px;\n}\n.rp-evening-volume-accept__cta--ghost { background: transparent; color: #e8b478; }\n.rp-stage-prop--headphones-note { left: 62%; width: 28%; top: 34%; z-index: 9; }\n.rp-note-door {\n  background: #f4f0e4; color: #1a120c; padding: 0.55rem 0.65rem;\n  transform: rotate(-3deg); box-shadow: 0 4px 12px rgba(0,0,0,.45); border: 2px solid #1a120c;\n}\n.rp-note-caps { font: 800 13px/1.1 \"IBM Plex Mono\", ui-monospace, monospace; letter-spacing: 0.08em; }\n.rp-stage-prop--ledger-tray { left: 18%; width: 36%; top: 60%; height: 18%; z-index: 9; color: #e8c9a0; }\n",
+    "cssAppend": "\n/* story-form-15 hotfix — force cold SVG off at day≥7 */\nbody.rp-cold-yielded .rp-stage-prop--shared-string,\nbody.rp-cold-yielded .rp-stage-prop--kite-high,\nbody.rp-cold-yielded .rp-stage-prop--chalk-cup,\nbody[data-day-index=\"7\"] .rp-stage-prop--shared-string,\nbody[data-day-index=\"8\"] .rp-stage-prop--shared-string,\nbody[data-day-index=\"9\"] .rp-stage-prop--shared-string,\nbody[data-day-index=\"10\"] .rp-stage-prop--shared-string,\nbody[data-day-index=\"7\"] .rp-stage-prop--kite-high,\nbody[data-day-index=\"8\"] .rp-stage-prop--kite-high,\nbody[data-day-index=\"9\"] .rp-stage-prop--kite-high,\nbody[data-day-index=\"10\"] .rp-stage-prop--kite-high,\nbody[data-day-index=\"7\"] .rp-stage-prop--chalk-cup,\nbody[data-day-index=\"8\"] .rp-stage-prop--chalk-cup,\nbody[data-day-index=\"9\"] .rp-stage-prop--chalk-cup,\nbody[data-day-index=\"10\"] .rp-stage-prop--chalk-cup { display: none !important;\n}\n.rp-evening-volume-accept { margin: 0.75rem 0; padding: 0.75rem 0.9rem; background: rgba(14,10,8,.9); border: 1px solid rgba(232,180,120,.5); border-radius: 10px; color: #f2e6d8;\n}\n.rp-evening-volume-accept__h { font-weight: 700; margin: 0 0 0.35rem; }\n.rp-evening-volume-accept__actions { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.55rem; }\n.rp-evening-volume-accept__cta { padding: 0.4rem 0.7rem; border-radius: 8px; border: 1px solid #e8b478; background: #e8b478; color: #1a120c; font-weight: 700; font-size: 13px;\n}\n.rp-evening-volume-accept__cta--ghost { background: transparent; color: #e8b478; }\n.rp-stage-prop--headphones-note { left: 62%; width: 28%; top: 34%; z-index: 9; }\n.rp-note-door { background: #f4f0e4; color: #1a120c; padding: 0.55rem 0.65rem; transform: rotate(-3deg); box-shadow: 0 4px 12px rgba(0,0,0,.45); border: 2px solid #1a120c;\n}\n.rp-note-caps { font: 800 13px/1.1 \"IBM Plex Mono\", ui-monospace, monospace; letter-spacing: 0.08em; }\n.rp-stage-prop--ledger-tray { left: 18%; width: 36%; top: 60%; height: 18%; z-index: 9; color: #e8c9a0; }\n",
     "smokeProve": {
       "noFlagInject": true,
       "steps": [
@@ -7340,8 +7348,8 @@
         "en": "Antenna done → Decibel opens"
       },
       "body": {
-        "tr": "MAIN 3/5. Sokakta KULAKLIK notu. Volume'u kabul et veya sokağa bak.",
-        "en": "MAIN 3/5. HEADPHONES note is on the street. Accept Volume or look outside."
+        "tr": ". Sokakta KULAKLIK notu. Volume'u kabul et veya sokağa bak.",
+        "en": ". HEADPHONES note is on the street. Accept Volume or look outside."
       },
       "ctaAccept": {
         "tr": "Volume'u aç",
@@ -7353,8 +7361,8 @@
       }
     },
     "inlineEveningHtml": {
-      "en": "<div class=\"rp-evening-volume-accept\" data-testid=\"evening-volume-accept-cta\" data-form=\"16\">\n  <p class=\"rp-evening-volume-accept__h\">Antenna done → Decibel opens</p>\n  <p>MAIN 3/5. HEADPHONES note is on the street. Accept Volume or look outside.</p>\n  <div class=\"rp-evening-volume-accept__actions\">\n    <button class=\"rp-evening-volume-accept__cta\" type=\"button\" data-action=\"accept-volume\" data-testid=\"evening-open-volume\">Open Volume</button>\n    <button class=\"rp-btn rp-btn--ghost\" type=\"button\" data-action=\"goto-street\" data-testid=\"evening-volume-see-headphones\">See HEADPHONES note</button>\n  </div>\n</div>",
-      "tr": "<div class=\"rp-evening-volume-accept\" data-testid=\"evening-volume-accept-cta\" data-form=\"16\">\n  <p class=\"rp-evening-volume-accept__h\">Anten bitti → Desibel açılıyor</p>\n  <p>MAIN 3/5. Sokakta KULAKLIK notu. Volume'u kabul et veya sokağa bak.</p>\n  <div class=\"rp-evening-volume-accept__actions\">\n    <button class=\"rp-evening-volume-accept__cta\" type=\"button\" data-action=\"accept-volume\" data-testid=\"evening-open-volume\">Volume'u aç</button>\n    <button class=\"rp-btn rp-btn--ghost\" type=\"button\" data-action=\"goto-street\" data-testid=\"evening-volume-see-headphones\">KULAKLIK notuna bak</button>\n  </div>\n</div>"
+      "en": "<div class=\"rp-evening-volume-accept\" data-testid=\"evening-volume-accept-cta\" data-form=\"16\"> <p class=\"rp-evening-volume-accept__h\">Antenna done → Decibel opens</p> <p>. HEADPHONES note is on the street. Accept Volume or look outside.</p> <div class=\"rp-evening-volume-accept__actions\"> <button class=\"rp-evening-volume-accept__cta\" type=\"button\" data-action=\"accept-volume\" data-testid=\"evening-open-volume\">Open Volume</button> <button class=\"rp-btn rp-btn--ghost\" type=\"button\" data-action=\"goto-street\" data-testid=\"evening-volume-see-headphones\">See HEADPHONES note</button> </div>\n</div>",
+      "tr": "<div class=\"rp-evening-volume-accept\" data-testid=\"evening-volume-accept-cta\" data-form=\"16\"> <p class=\"rp-evening-volume-accept__h\">Anten bitti → Desibel açılıyor</p> <p>. Sokakta KULAKLIK notu. Volume'u kabul et veya sokağa bak.</p> <div class=\"rp-evening-volume-accept__actions\"> <button class=\"rp-evening-volume-accept__cta\" type=\"button\" data-action=\"accept-volume\" data-testid=\"evening-open-volume\">Volume'u aç</button> <button class=\"rp-btn rp-btn--ghost\" type=\"button\" data-action=\"goto-street\" data-testid=\"evening-volume-see-headphones\">KULAKLIK notuna bak</button> </div>\n</div>"
     },
     "antennaFailsafe": {
       "id": "form16_antenna_failsafe",
@@ -7380,7 +7388,7 @@
       ],
       "callSite": "renderEvening start + overnight"
     },
-    "cssAppend": "\n/* story-form-16 — ensure evening Volume CTA readable */\n.rp-evening-volume-accept {\n  margin: 0.75rem 0;\n  padding: 0.75rem 0.9rem;\n  background: rgba(14,10,8,.9);\n  border: 1px solid rgba(232,180,120,.5);\n  border-radius: 10px;\n  color: #f2e6d8;\n}\n.rp-evening-volume-accept__h { font-weight: 700; margin: 0 0 0.35rem; }\n.rp-evening-volume-accept__actions { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.55rem; }\n.rp-evening-volume-accept__cta {\n  padding: 0.4rem 0.7rem; border-radius: 8px; border: 1px solid #e8b478;\n  background: #e8b478; color: #1a120c; font-weight: 700; font-size: 13px;\n}\n"
+    "cssAppend": "\n/* story-form-16 — ensure evening Volume CTA readable */\n.rp-evening-volume-accept { margin: 0.75rem 0; padding: 0.75rem 0.9rem; background: rgba(14,10,8,.9); border: 1px solid rgba(232,180,120,.5); border-radius: 10px; color: #f2e6d8;\n}\n.rp-evening-volume-accept__h { font-weight: 700; margin: 0 0 0.35rem; }\n.rp-evening-volume-accept__actions { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.55rem; }\n.rp-evening-volume-accept__cta { padding: 0.4rem 0.7rem; border-radius: 8px; border: 1px solid #e8b478; background: #e8b478; color: #1a120c; font-weight: 700; font-size: 13px;\n}\n"
   },
   "storyForm17": {
     "packId": "story-form-17",
@@ -7522,7 +7530,7 @@
       },
       "dependsOnForm16": "form-16 queues evening CTA bypass; form17 forbids sa_headphones until accept"
     },
-    "cssAppend": "\n/* story-form-17 — clear mediate echo after yield; Volume accept first */\nbody.rp-cold-yielded .rp-day2-line,\nbody.rp-cold-yielded .rp-npc-remember,\nbody.rp-cold-yielded [data-testid=\"story-day2-orhan-line\"],\nbody.rp-cold-yielded [data-testid=\"story-day2-orhan-forbidden\"],\nbody.rp-cold-yielded [data-testid=\"story-day2-cem-rehearsal\"],\nbody.rp-cold-yielded .rp-stage-prop--shared-string,\nbody.rp-cold-yielded .rp-stage-prop--kite-high,\nbody.rp-cold-yielded .rp-stage-prop--chalk-cup,\nbody.rp-cold-yielded .rp-hotspot__bubble[data-testid=\"story-day2-orhan-line\"],\nbody.rp-cold-yielded .rp-hotspot__bubble[data-testid=\"story-day2-orhan-forbidden\"],\nbody.rp-cold-yielded .rp-hotspot__bubble[data-testid=\"story-day2-cem-rehearsal\"] {\n  display: none !important;\n}\n/* Volume accept panel stacks above other evening CTAs */\n.rp-evening-volume-accept {\n  order: -1;\n  position: relative;\n  z-index: 5;\n}\nbody.rp-volume-pending-accept [data-testid=\"evening-headphones-street-job\"],\nbody.rp-volume-pending-accept [data-next=\"headphones\"] {\n  /* street job not primary until accept — demote if wrongly painted */\n  opacity: 0.55;\n  pointer-events: none;\n}\nbody.rp-volume-accepted [data-next=\"headphones\"],\nbody.rp-volume-accepted [data-testid=\"evening-headphones-street-job\"] {\n  opacity: 1;\n  pointer-events: auto;\n}\n",
+    "cssAppend": "\n/* story-form-17 — clear mediate echo after yield; Volume accept first */\nbody.rp-cold-yielded .rp-day2-line,\nbody.rp-cold-yielded .rp-npc-remember,\nbody.rp-cold-yielded [data-testid=\"story-day2-orhan-line\"],\nbody.rp-cold-yielded [data-testid=\"story-day2-orhan-forbidden\"],\nbody.rp-cold-yielded [data-testid=\"story-day2-cem-rehearsal\"],\nbody.rp-cold-yielded .rp-stage-prop--shared-string,\nbody.rp-cold-yielded .rp-stage-prop--kite-high,\nbody.rp-cold-yielded .rp-stage-prop--chalk-cup,\nbody.rp-cold-yielded .rp-hotspot__bubble[data-testid=\"story-day2-orhan-line\"],\nbody.rp-cold-yielded .rp-hotspot__bubble[data-testid=\"story-day2-orhan-forbidden\"],\nbody.rp-cold-yielded .rp-hotspot__bubble[data-testid=\"story-day2-cem-rehearsal\"] { display: none !important;\n}\n/* Volume accept panel stacks above other evening CTAs */\n.rp-evening-volume-accept { order: -1; position: relative; z-index: 5;\n}\nbody.rp-volume-pending-accept [data-testid=\"evening-headphones-street-job\"],\nbody.rp-volume-pending-accept [data-next=\"headphones\"] { /* street job not primary until accept — demote if wrongly painted */ opacity: 0.55; pointer-events: none;\n}\nbody.rp-volume-accepted [data-next=\"headphones\"],\nbody.rp-volume-accepted [data-testid=\"evening-headphones-street-job\"] { opacity: 1; pointer-events: auto;\n}\n",
     "echoFollowUpsAppend": [
       {
         "id": "echo_form17_yield_clear",
@@ -7561,12 +7569,12 @@
     "purgeSharedStringResidual": {
       "id": "purge_string_holds_after_yield",
       "bugSources": [
-        "storyForm3.streetPropOverlays → streetPropOverlayHtml (evening+street+overnight) — no coldEchoSuppressed check; paints label Shared string + npc 'String holds…'",
+        "storyForm3.streetPropOverlays → streetPropOverlayHtml (evening+street+overnight) — no coldEchoSuppressed check; paints label shared pull + npc 'String holds…'",
         "day2Branch.eveningBanner / eveningHook still preferred in renderEvening after yield",
-        "worldActive wc_day2_mediate_shared_string streetVisual '◈ Shared string — mediation on the block'"
+        "worldActive wc_day2_mediate_shared_string streetVisual '◈ shared pull — mediation on the block'"
       ],
       "bannedResidualPhrases": [
-        "Shared string",
+        "shared pull",
         "String holds",
         "shared string",
         "Ortak ip",
@@ -7624,7 +7632,7 @@
         }
       },
       "onYieldPurgeWorldActive": true,
-      "acceptance": "coldEchoSuppressed: zero Shared string labels and zero Orhan millimeter / String holds lines on evening or street"
+      "acceptance": "coldEchoSuppressed: zero shared pull labels and zero Orhan millimeter / String holds lines on evening or street"
     },
     "week2DecibelLedgerPull": {
       "id": "week2_decibel_to_ledger_lived",
@@ -7644,8 +7652,8 @@
         "evening"
       ],
       "stageProp": {
-        "html": "<div class=\"rp-stage-prop rp-stage-prop--decibel-ledger-pull\" data-testid=\"story-street-decibel-ledger-pull\" data-arc=\"arc_volume_to_ledger\" aria-label=\"Decibel to Ledger pull\">\n  <div class=\"rp-dl-stack\">\n    <span class=\"rp-dl-note\">HEADPHONES</span>\n    <span class=\"rp-dl-arrow\">→</span>\n    <span class=\"rp-dl-tray\">tray+ledger</span>\n  </div>\n  <span class=\"rp-stage-prop__tag\">Week-2 · Decibel→Ledger</span>\n</div>",
-        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--decibel-ledger-pull\" data-testid=\"story-street-decibel-ledger-pull\" data-arc=\"arc_volume_to_ledger\" aria-label=\"Desibel → Defter çekişi\">\n  <div class=\"rp-dl-stack\">\n    <span class=\"rp-dl-note\">KULAKLIK</span>\n    <span class=\"rp-dl-arrow\">→</span>\n    <span class=\"rp-dl-tray\">tepsi+defter</span>\n  </div>\n  <span class=\"rp-stage-prop__tag\">Hafta-2 · Desibel→Defter</span>\n</div>",
+        "html": "<div class=\"rp-stage-prop rp-stage-prop--decibel-ledger-pull\" data-testid=\"story-street-decibel-ledger-pull\" data-arc=\"arc_volume_to_ledger\" aria-label=\"Decibel to Ledger pull\"> <div class=\"rp-dl-stack\"> <span class=\"rp-dl-note\">HEADPHONES</span> <span class=\"rp-dl-arrow\">→</span> <span class=\"rp-dl-tray\">tray+ledger</span> </div> <span class=\"rp-stage-prop__tag\">Week-2 · Decibel→Ledger</span>\n</div>",
+        "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--decibel-ledger-pull\" data-testid=\"story-street-decibel-ledger-pull\" data-arc=\"arc_volume_to_ledger\" aria-label=\"Desibel → Defter çekişi\"> <div class=\"rp-dl-stack\"> <span class=\"rp-dl-note\">KULAKLIK</span> <span class=\"rp-dl-arrow\">→</span> <span class=\"rp-dl-tray\">tepsi+defter</span> </div> <span class=\"rp-stage-prop__tag\">Hafta-2 · Desibel→Defter</span>\n</div>",
         "testId": "story-street-decibel-ledger-pull"
       },
       "npcReactions": [
@@ -7709,8 +7717,8 @@
           "week2_decibel_ledger_seen"
         ],
         "label": {
-          "tr": "Omurga 3→4/5 · Desibel → Defter (yaşıyor)",
-          "en": "Spine 3→4/5 · Decibel → Ledger (lived)"
+          "tr": "3→4/5 · Desibel → Defter (yaşıyor)",
+          "en": "01:12 → Open Book (lived)"
         },
         "testId": "spine-cult-chip"
       },
@@ -7740,7 +7748,7 @@
       },
       "auditorNote": "wouldRecommendTonight candidacy if all cats ≥8.5 and overall ≥9 — bar surfaces lived Week-2 pull proof"
     },
-    "cssAppend": "\n/* story-form-18 — purge Shared string / String holds after yield */\nbody.rp-cold-yielded .rp-prop-overlay,\nbody.rp-cold-yielded .rp-prop-chip,\nbody.rp-cold-yielded .rp-prop-npc,\nbody.rp-cold-yielded .rp-wc-loud {\n  /* hide unless data-allow-after-yield */\n}\nbody.rp-cold-yielded .rp-prop-overlay[data-prop=\"prop_day2_mediate_string\"],\nbody.rp-cold-yielded .rp-prop-overlay[data-prop=\"prop_day2_instigate_high_kite\"],\nbody.rp-cold-yielded .rp-prop-overlay[data-prop=\"prop_day2_stage_chalk_cup\"],\nbody.rp-cold-yielded .rp-stage-prop--shared-string,\nbody.rp-cold-yielded [data-testid=\"story-day2-mediate-string\"],\nbody.rp-cold-yielded [data-testid=\"story-day2-orhan-line\"] {\n  display: none !important;\n}\n/* Week-2 Decibel→Ledger lived pull */\n.rp-stage-prop--decibel-ledger-pull {\n  left: 20%; right: 20%; top: 42%; z-index: 9;\n}\n.rp-dl-stack {\n  display: flex; align-items: center; justify-content: center; gap: 0.45rem;\n  padding: 0.45rem 0.65rem;\n  background: rgba(12,8,6,.88);\n  border: 1px solid rgba(232,180,120,.45);\n  border-radius: 8px;\n  color: #f2e6d8;\n  font: 700 12px/1.2 \"IBM Plex Mono\", ui-monospace, monospace;\n}\n.rp-dl-arrow { color: #e8b478; }\n.rp-stage-prop--ledger-invite {\n  left: 68%; top: 48%; width: 18%; z-index: 9;\n}\n.rp-invite-slip {\n  display: inline-block;\n  padding: 0.3rem 0.45rem;\n  background: #f4f0e4;\n  color: #1a120c;\n  border: 2px solid #1a120c;\n  transform: rotate(4deg);\n  font: 800 11px/1 \"IBM Plex Mono\", ui-monospace, monospace;\n  letter-spacing: 0.06em;\n}\n.rp-recommend-tonight-bar {\n  margin: 0.5rem 0;\n  padding: 0.45rem 0.7rem;\n  border-radius: 8px;\n  background: rgba(18,12,8,.9);\n  border: 1px solid rgba(126,184,212,.45);\n  color: #e8f0f8;\n  font-size: 12px;\n}\n.rp-recommend-tonight-bar[data-candidate=\"true\"] {\n  border-color: rgba(232,180,120,.65);\n  color: #f2e6d8;\n}\n"
+    "cssAppend": "\n/* story-form-18 — purge shared pull / String holds after yield */\nbody.rp-cold-yielded .rp-prop-overlay,\nbody.rp-cold-yielded .rp-prop-chip,\nbody.rp-cold-yielded .rp-prop-npc,\nbody.rp-cold-yielded .rp-wc-loud { /* hide unless data-allow-after-yield */\n}\nbody.rp-cold-yielded .rp-prop-overlay[data-prop=\"prop_day2_mediate_string\"],\nbody.rp-cold-yielded .rp-prop-overlay[data-prop=\"prop_day2_instigate_high_kite\"],\nbody.rp-cold-yielded .rp-prop-overlay[data-prop=\"prop_day2_stage_chalk_cup\"],\nbody.rp-cold-yielded .rp-stage-prop--shared-string,\nbody.rp-cold-yielded [data-testid=\"story-day2-mediate-string\"],\nbody.rp-cold-yielded [data-testid=\"story-day2-orhan-line\"] { display: none !important;\n}\n/* Week-2 Decibel→Ledger lived pull */\n.rp-stage-prop--decibel-ledger-pull { left: 20%; right: 20%; top: 42%; z-index: 9;\n}\n.rp-dl-stack { display: flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.45rem 0.65rem; background: rgba(12,8,6,.88); border: 1px solid rgba(232,180,120,.45); border-radius: 8px; color: #f2e6d8; font: 700 12px/1.2 \"IBM Plex Mono\", ui-monospace, monospace;\n}\n.rp-dl-arrow { color: #e8b478; }\n.rp-stage-prop--ledger-invite { left: 68%; top: 48%; width: 18%; z-index: 9;\n}\n.rp-invite-slip { display: inline-block; padding: 0.3rem 0.45rem; background: #f4f0e4; color: #1a120c; border: 2px solid #1a120c; transform: rotate(4deg); font: 800 11px/1 \"IBM Plex Mono\", ui-monospace, monospace; letter-spacing: 0.06em;\n}\n.rp-recommend-tonight-bar { margin: 0.5rem 0; padding: 0.45rem 0.7rem; border-radius: 8px; background: rgba(18,12,8,.9); border: 1px solid rgba(126,184,212,.45); color: #e8f0f8; font-size: 12px;\n}\n.rp-recommend-tonight-bar[data-candidate=\"true\"] { border-color: rgba(232,180,120,.65); color: #f2e6d8;\n}\n"
   },
   "storyForm19": {
     "packId": "story-form-19",
@@ -7756,12 +7764,12 @@
           "natural_ledger_street"
         ]
       },
-      "html": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray rp-stage-prop--ledger-tray-winner\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" data-unlock=\"natural\" data-winner=\"ledger_natural\" data-form=\"19\" aria-label=\"Ledger & tray\">\n  <svg class=\"rp-ledger-svg\" viewBox=\"0 0 100 36\" aria-hidden=\"true\">\n    <ellipse cx=\"26\" cy=\"22\" rx=\"16\" ry=\"7\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"1.1\"/>\n    <path d=\"M38 18 Q42 12 46 18\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.9\"/>\n    <rect x=\"48\" y=\"6\" width=\"36\" height=\"22\" rx=\"2\" fill=\"rgba(20,14,10,.55)\" stroke=\"#e8c9a0\" stroke-width=\"1\"/>\n    <line x1=\"54\" y1=\"12\" x2=\"78\" y2=\"12\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n    <line x1=\"54\" y1=\"17\" x2=\"74\" y2=\"17\" stroke=\"#c45c3e\" stroke-width=\"0.8\"/>\n    <line x1=\"54\" y1=\"22\" x2=\"78\" y2=\"22\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">MAIN 4/5 · Ledger · tray</span>\n</div>",
-      "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray rp-stage-prop--ledger-tray-winner\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" data-unlock=\"natural\" data-winner=\"ledger_natural\" data-form=\"19\" aria-label=\"Defter ve tepsi\">\n  <svg class=\"rp-ledger-svg\" viewBox=\"0 0 100 36\" aria-hidden=\"true\">\n    <ellipse cx=\"26\" cy=\"22\" rx=\"16\" ry=\"7\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"1.1\"/>\n    <path d=\"M38 18 Q42 12 46 18\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.9\"/>\n    <rect x=\"48\" y=\"6\" width=\"36\" height=\"22\" rx=\"2\" fill=\"rgba(20,14,10,.55)\" stroke=\"#e8c9a0\" stroke-width=\"1\"/>\n    <line x1=\"54\" y1=\"12\" x2=\"78\" y2=\"12\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n    <line x1=\"54\" y1=\"17\" x2=\"74\" y2=\"17\" stroke=\"#c45c3e\" stroke-width=\"0.8\"/>\n    <line x1=\"54\" y1=\"22\" x2=\"78\" y2=\"22\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/>\n  </svg>\n  <span class=\"rp-stage-prop__tag\">MAIN 4/5 · Defter · tepsi</span>\n</div>",
+      "html": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray rp-stage-prop--ledger-tray-winner\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" data-unlock=\"natural\" data-winner=\"ledger_natural\" data-form=\"19\" aria-label=\"Ledger & tray\"> <svg class=\"rp-ledger-svg\" viewBox=\"0 0 100 36\" aria-hidden=\"true\"> <ellipse cx=\"26\" cy=\"22\" rx=\"16\" ry=\"7\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"1.1\"/> <path d=\"M38 18 Q42 12 46 18\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.9\"/> <rect x=\"48\" y=\"6\" width=\"36\" height=\"22\" rx=\"2\" fill=\"rgba(20,14,10,.55)\" stroke=\"#e8c9a0\" stroke-width=\"1\"/> <line x1=\"54\" y1=\"12\" x2=\"78\" y2=\"12\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/> <line x1=\"54\" y1=\"17\" x2=\"74\" y2=\"17\" stroke=\"#c45c3e\" stroke-width=\"0.8\"/> <line x1=\"54\" y1=\"22\" x2=\"78\" y2=\"22\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/> </svg> <span class=\"rp-stage-prop__tag\">Ledger · tray</span>\n</div>",
+      "htmlTr": "<div class=\"rp-stage-prop rp-stage-prop--ledger-tray rp-stage-prop--ledger-tray-winner\" data-testid=\"story-street-ledger-tray\" data-arc=\"arc_tea_ledger\" data-unlock=\"natural\" data-winner=\"ledger_natural\" data-form=\"19\" aria-label=\"Defter ve tepsi\"> <svg class=\"rp-ledger-svg\" viewBox=\"0 0 100 36\" aria-hidden=\"true\"> <ellipse cx=\"26\" cy=\"22\" rx=\"16\" ry=\"7\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"1.1\"/> <path d=\"M38 18 Q42 12 46 18\" fill=\"none\" stroke=\"#c4a574\" stroke-width=\"0.9\"/> <rect x=\"48\" y=\"6\" width=\"36\" height=\"22\" rx=\"2\" fill=\"rgba(20,14,10,.55)\" stroke=\"#e8c9a0\" stroke-width=\"1\"/> <line x1=\"54\" y1=\"12\" x2=\"78\" y2=\"12\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/> <line x1=\"54\" y1=\"17\" x2=\"74\" y2=\"17\" stroke=\"#c45c3e\" stroke-width=\"0.8\"/> <line x1=\"54\" y1=\"22\" x2=\"78\" y2=\"22\" stroke=\"#e8c9a0\" stroke-width=\"0.7\"/> </svg> <span class=\"rp-stage-prop__tag\">Defter · tepsi</span>\n</div>",
       "hideHeadphones": true,
       "mainBar": {
-        "tr": "MAIN 4/5 · Defter & Tepsi",
-        "en": "MAIN 4/5 · Ledger & Tray",
+        "tr": "Defter & Tepsi",
+        "en": "",
         "testId": "spine-cult-chip",
         "mqId": "mq_ledger_tray"
       },
@@ -7809,7 +7817,7 @@
         ]
       }
     },
-    "cssAppend": "\n/* story-form-19 — Day10 ledger tray winner; headphones yields */\nbody.rp-ledger-wins .rp-stage-prop--headphones-note,\nbody.rp-ledger-wins [data-testid=\"story-street-headphones-note\"],\nbody[data-day-index=\"10\"] .rp-stage-prop--headphones-note,\nbody[data-day-index=\"11\"] .rp-stage-prop--headphones-note,\nbody[data-day-index=\"12\"] .rp-stage-prop--headphones-note {\n  display: none !important;\n}\n.rp-stage-prop--ledger-tray-winner {\n  left: 16%; width: 42%; top: 54%; height: 24%;\n  z-index: 10;\n  color: #e8c9a0;\n  animation: rp-ledger-win 1.8s ease-in-out infinite;\n}\n.rp-stage-prop--ledger-tray-winner .rp-stage-prop__tag {\n  font-size: 12px;\n  background: rgba(12,8,6,.92);\n  border: 1px solid rgba(232,180,120,.55);\n}\n.rp-ledger-svg { width: 100%; height: 100%; display: block; }\n@keyframes rp-ledger-win {\n  0%, 100% { filter: drop-shadow(0 0 0 rgba(232,180,120,0)); }\n  50% { filter: drop-shadow(0 0 8px rgba(232,180,120,.35)); }\n}\n.rp-recommend-tonight-bar[data-candidate=\"true\"] {\n  border-color: rgba(232,180,120,.75);\n  box-shadow: 0 0 0 1px rgba(232,180,120,.25);\n  font-weight: 600;\n}\n"
+    "cssAppend": "\n/* story-form-19 — Day10 ledger tray winner; headphones yields */\nbody.rp-ledger-wins .rp-stage-prop--headphones-note,\nbody.rp-ledger-wins [data-testid=\"story-street-headphones-note\"],\nbody[data-day-index=\"10\"] .rp-stage-prop--headphones-note,\nbody[data-day-index=\"11\"] .rp-stage-prop--headphones-note,\nbody[data-day-index=\"12\"] .rp-stage-prop--headphones-note { display: none !important;\n}\n.rp-stage-prop--ledger-tray-winner { left: 16%; width: 42%; top: 54%; height: 24%; z-index: 10; color: #e8c9a0; animation: rp-ledger-win 1.8s ease-in-out infinite;\n}\n.rp-stage-prop--ledger-tray-winner .rp-stage-prop__tag { font-size: 12px; background: rgba(12,8,6,.92); border: 1px solid rgba(232,180,120,.55);\n}\n.rp-ledger-svg { width: 100%; height: 100%; display: block; }\n@keyframes rp-ledger-win { 0%, 100% { filter: drop-shadow(0 0 0 rgba(232,180,120,0)); } 50% { filter: drop-shadow(0 0 8px rgba(232,180,120,.35)); }\n}\n.rp-recommend-tonight-bar[data-candidate=\"true\"] { border-color: rgba(232,180,120,.75); box-shadow: 0 0 0 1px rgba(232,180,120,.25); font-weight: 600;\n}\n"
   },
   "storyForm20": {
     "packId": "story-form-20",
@@ -7817,7 +7825,7 @@
     "optional": true,
     "oneMainChipDay10": {
       "id": "kill_dual_main_day10",
-      "bug": "spineCultChipHtml returns MAIN 4/5 Ledger on day≥10 while mqStreetChipHtml still hits mq_street_volume (MAIN 3/5 Decibel) because flagsNone lacks ledger wins and chips.find returns volume before ledger.",
+      "bug": "spineCultChipHtml returns Ledger on day≥10 while mqStreetChipHtml still hits mq_street_volume (Decibel) because flagsNone lacks ledger wins and chips.find returns volume before ledger.",
       "policy": {
         "when": {
           "dayIndexMin": 10,
@@ -7834,8 +7842,8 @@
         "singleChip": {
           "prefer": "spine-cult-chip",
           "label": {
-            "tr": "MAIN 4/5 · Defter & Tepsi",
-            "en": "MAIN 4/5 · Ledger & Tray"
+            "tr": "Defter & Tepsi",
+            "en": ""
           },
           "testId": "spine-cult-chip",
           "suppressTestIds": [
@@ -7882,8 +7890,8 @@
         "stepRank": 2,
         "testId": "mq-street-chip-antenna",
         "chip": {
-          "tr": "MAIN 2/5 · Anten Operasyonu",
-          "en": "MAIN 2/5 · Antenna Op"
+          "tr": "",
+          "en": ""
         },
         "when": {
           "dayIndexMax": 9,
@@ -7903,8 +7911,8 @@
         "stepRank": 3,
         "testId": "mq-street-chip-volume",
         "chip": {
-          "tr": "MAIN 3/5 · Desibel Antlaşması",
-          "en": "MAIN 3/5 · Decibel Accord"
+          "tr": "",
+          "en": ""
         },
         "when": {
           "dayIndexMax": 9,
@@ -7927,8 +7935,8 @@
         "stepRank": 4,
         "testId": "mq-street-chip-ledger",
         "chip": {
-          "tr": "MAIN 4/5 · Defter & Tepsi",
-          "en": "MAIN 4/5 · Ledger & Tray"
+          "tr": "Defter & Tepsi",
+          "en": ""
         },
         "when": {
           "dayIndexMin": 10,
@@ -7953,6 +7961,29 @@
       "cssBoost": true,
       "note": "Soft gap: tray testid present but not screenshot-tall — enlarge winner tray"
     },
-    "cssAppend": "\n/* story-form-20 — one MAIN chip on Day10; taller ledger tray */\nbody.rp-ledger-wins .rp-mq-street-chip,\nbody.rp-one-main-chip .rp-mq-street-chip,\nbody[data-day-index=\"10\"] .rp-mq-street-chip,\nbody[data-day-index=\"11\"] .rp-mq-street-chip,\nbody[data-day-index=\"12\"] .rp-mq-street-chip,\nbody.rp-ledger-wins [data-testid=\"mq-street-chip-volume\"],\nbody.rp-ledger-wins [data-testid=\"mq-street-chip-antenna\"] {\n  display: none !important;\n}\nbody.rp-one-main-chip .rp-spine-cult-chip,\nbody.rp-ledger-wins .rp-spine-cult-chip {\n  display: block;\n}\n/* taller tray for screenshot read */\nbody.rp-ledger-wins .rp-stage-prop--ledger-tray,\nbody.rp-ledger-wins .rp-stage-prop--ledger-tray-winner {\n  left: 12%;\n  width: 52%;\n  top: 48%;\n  height: 32%;\n  z-index: 10;\n}\nbody.rp-ledger-wins .rp-stage-prop--ledger-tray-winner .rp-stage-prop__tag {\n  font-size: 13px;\n  padding: 0.3rem 0.55rem;\n}\n"
-  }
+    "cssAppend": "\n/* story-form-20 — one MAIN chip on Day10; taller ledger tray */\nbody.rp-ledger-wins .rp-mq-street-chip,\nbody.rp-one-main-chip .rp-mq-street-chip,\nbody[data-day-index=\"10\"] .rp-mq-street-chip,\nbody[data-day-index=\"11\"] .rp-mq-street-chip,\nbody[data-day-index=\"12\"] .rp-mq-street-chip,\nbody.rp-ledger-wins [data-testid=\"mq-street-chip-volume\"],\nbody.rp-ledger-wins [data-testid=\"mq-street-chip-antenna\"] { display: none !important;\n}\nbody.rp-one-main-chip .rp-spine-cult-chip,\nbody.rp-ledger-wins .rp-spine-cult-chip { display: block;\n}\n/* taller tray for screenshot read */\nbody.rp-ledger-wins .rp-stage-prop--ledger-tray,\nbody.rp-ledger-wins .rp-stage-prop--ledger-tray-winner { left: 12%; width: 52%; top: 48%; height: 32%; z-index: 10;\n}\nbody.rp-ledger-wins .rp-stage-prop--ledger-tray-winner .rp-stage-prop__tag { font-size: 13px; padding: 0.3rem 0.55rem;\n}\n"
+  },
+  "defteriPorchChain": [
+    {
+      "questId": "mq_antenna_op",
+      "title": {
+        "tr": "Takılan Uçurtma",
+        "en": "The Snag"
+      }
+    },
+    {
+      "questId": "mq_decibel_accord",
+      "title": {
+        "tr": "01:12",
+        "en": "01:12"
+      }
+    },
+    {
+      "questId": "mq_ledger_tray",
+      "title": {
+        "tr": "Açık Defter",
+        "en": "Open Book"
+      }
+    }
+  ]
 }

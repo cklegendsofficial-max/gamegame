@@ -11,7 +11,7 @@
         "en": "Aunt Merve"
       },
       "trait": "Gossip",
-      "role": "Support buffer",
+      "role": null,
       "synergyTag": "Tea",
       "prop": {
         "id": "prop_demlik",
@@ -90,6 +90,18 @@
             "affinityDelta": 2
           }
         ]
+      },
+      "porchJob": {
+        "tr": "demlikçi",
+        "en": "tea hand"
+      },
+      "porchWant": {
+        "tr": "Defteri kimlerin göreceği",
+        "en": "Who sees the book"
+      },
+      "porchLine": {
+        "tr": "Demlik karar verir.",
+        "en": "The pot decides."
       }
     },
     {
@@ -100,7 +112,7 @@
         "en": "Coach Cem"
       },
       "trait": "Rival",
-      "role": "Bruiser",
+      "role": null,
       "synergyTag": "Rivalry",
       "prop": {
         "id": "prop_duduk",
@@ -179,6 +191,18 @@
             "affinityDelta": 2
           }
         ]
+      },
+      "porchJob": {
+        "tr": "düdük",
+        "en": "whistle"
+      },
+      "porchWant": {
+        "tr": "Provanın ciddi sayılması",
+        "en": "That drills count"
+      },
+      "porchLine": {
+        "tr": "Düdük üç daire ister.",
+        "en": "Whistle wants three circles."
       }
     },
     {
@@ -189,7 +213,7 @@
         "en": "Kid Leyla"
       },
       "trait": "Chaos",
-      "role": "Glass cannon",
+      "role": null,
       "synergyTag": "Chaos",
       "prop": {
         "id": "prop_ucurtma",
@@ -268,6 +292,18 @@
             "affinityDelta": 2
           }
         ]
+      },
+      "porchJob": {
+        "tr": "uçurtmacı",
+        "en": "kite kid"
+      },
+      "porchWant": {
+        "tr": "İpin çocuk işi sayılmaması",
+        "en": "Not being treated like a kid"
+      },
+      "porchLine": {
+        "tr": "Uçurtma çatıda kalmasın.",
+        "en": "Kite shouldn’t stay on the roof."
       }
     },
     {
@@ -278,7 +314,7 @@
         "en": "Mr. Orhan"
       },
       "trait": "Grumpy",
-      "role": "Tank",
+      "role": null,
       "synergyTag": "Fence",
       "prop": {
         "id": "prop_gazete",
@@ -358,6 +394,18 @@
             "affinityDelta": 2
           }
         ]
+      },
+      "porchJob": {
+        "tr": "gazete nöbeti",
+        "en": "paper sit"
+      },
+      "porchWant": {
+        "tr": "01:12’de uyumak",
+        "en": "Sleeping past 01:12"
+      },
+      "porchLine": {
+        "tr": "Anten oyuncak değil.",
+        "en": "The aerial isn’t a toy."
       }
     },
     {
@@ -368,7 +416,7 @@
         "en": "DJ Peri"
       },
       "trait": "Nightowl",
-      "role": "AoE",
+      "role": null,
       "synergyTag": "Neon",
       "prop": {
         "id": "prop_kulaklik",
@@ -448,6 +496,18 @@
             "affinityDelta": 2
           }
         ]
+      },
+      "porchJob": {
+        "tr": "bas kulaklık",
+        "en": "bass cans"
+      },
+      "porchWant": {
+        "tr": "Setin bitmeden kesilmemesi",
+        "en": "Not cutting the set short"
+      },
+      "porchLine": {
+        "tr": "Kapıdaki not sınır.",
+        "en": "The door scrap is a boundary."
       }
     },
     {
@@ -458,7 +518,7 @@
         "en": "Baker Can"
       },
       "trait": "Soft",
-      "role": "Healer",
+      "role": null,
       "synergyTag": "Oven",
       "prop": {
         "id": "prop_tepsi",
@@ -537,6 +597,18 @@
             "affinityDelta": 2
           }
         ]
+      },
+      "porchJob": {
+        "tr": "tepsi",
+        "en": "warm tray"
+      },
+      "porchWant": {
+        "tr": "Poğaçanın barış getirmesi",
+        "en": "Pastry buying peace"
+      },
+      "porchLine": {
+        "tr": "Fırın gece de açık olabilir.",
+        "en": "Oven can run at night."
       }
     }
   ],
@@ -545,8 +617,8 @@
       "id": "syn_tea_circle",
       "nameKey": "synergy.tea_circle.name",
       "name": {
-        "tr": "Çay Çemberi",
-        "en": "Tea Circle"
+        "tr": "Demlik halkası",
+        "en": "Demlik circle"
       },
       "tagsRequired": [
         "Tea",
@@ -559,8 +631,8 @@
         "healPercentMaxHp": 0.04,
         "radius": "allied_grid",
         "description": {
-          "tr": "2+ Tea/Oven: her 4 sn müttefiklere hafif heal aura.",
-          "en": "2+ Tea/Oven: light heal aura on allies every 4s."
+          "tr": "Demlik + tepsi verandayı ayakta tutar — Merve + Can.",
+          "en": "Demlik + tray keep the porch standing — Merve + Can."
         }
       }
     },
@@ -568,8 +640,8 @@
       "id": "syn_rivalry",
       "nameKey": "synergy.rivalry.name",
       "name": {
-        "tr": "Rekabet",
-        "en": "Rivalry"
+        "tr": "Düdük dedikodusu",
+        "en": "Whistle gossip"
       },
       "tagsRequired": [
         "Rivalry",
@@ -582,8 +654,8 @@
         "hpThresholdPercent": 0.35,
         "damageBonusPercent": 0.25,
         "description": {
-          "tr": "2+ Rivalry/Chaos/Fence: düşük HP'de (+%25) hasar.",
-          "en": "2+ Rivalry/Chaos/Fence: +25% damage while under 35% HP."
+          "tr": "Köşeye sıkışınca düdük sertleşir — Cem + Orhan.",
+          "en": "Whistle tightens when someone’s cornered — Cem + Orhan."
         }
       }
     },
@@ -591,8 +663,8 @@
       "id": "syn_neon_night",
       "nameKey": "synergy.neon_night.name",
       "name": {
-        "tr": "Neon Gece",
-        "en": "Neon Night"
+        "tr": "Çatı parıltısı",
+        "en": "Roof flash"
       },
       "tagsRequired": [
         "Neon",
@@ -604,8 +676,8 @@
         "windowSec": 8,
         "dodgeChance": 0.2,
         "description": {
-          "tr": "2+ Neon/Chaos: ilk 8 sn %20 dodge şansı.",
-          "en": "2+ Neon/Chaos: 20% dodge chance for the first 8s."
+          "tr": "İlk şarkı neon — Peri + Leyla açılışı parlaktır.",
+          "en": "First song is neon — Peri + Leyla open flashy."
         }
       }
     }
@@ -626,13 +698,17 @@
           "en": "Bot Merve"
         },
         "trait": "Gossip",
-        "role": "Support buffer",
+        "role": null,
         "synergyTag": "Tea",
         "stats": {
           "hp": 90,
           "atk": 8,
           "def": 6,
           "spd": 10
+        },
+        "porchJob": {
+          "tr": "demlikçi",
+          "en": "tea hand"
         }
       },
       {
@@ -643,13 +719,17 @@
           "en": "Bot Cem"
         },
         "trait": "Rival",
-        "role": "Bruiser",
+        "role": null,
         "synergyTag": "Rivalry",
         "stats": {
           "hp": 110,
           "atk": 14,
           "def": 8,
           "spd": 9
+        },
+        "porchJob": {
+          "tr": "düdük",
+          "en": "whistle"
         }
       },
       {
@@ -660,13 +740,17 @@
           "en": "Bot Leyla"
         },
         "trait": "Chaos",
-        "role": "Glass cannon",
+        "role": null,
         "synergyTag": "Chaos",
         "stats": {
           "hp": 70,
           "atk": 18,
           "def": 4,
           "spd": 14
+        },
+        "porchJob": {
+          "tr": "uçurtmacı",
+          "en": "kite kid"
         }
       },
       {
@@ -677,13 +761,17 @@
           "en": "Bot Orhan"
         },
         "trait": "Grumpy",
-        "role": "Tank",
+        "role": null,
         "synergyTag": "Fence",
         "stats": {
           "hp": 140,
           "atk": 9,
           "def": 16,
           "spd": 6
+        },
+        "porchJob": {
+          "tr": "gazete nöbeti",
+          "en": "paper sit"
         }
       },
       {
@@ -694,13 +782,17 @@
           "en": "Bot Peri"
         },
         "trait": "Nightowl",
-        "role": "AoE",
+        "role": null,
         "synergyTag": "Neon",
         "stats": {
           "hp": 85,
           "atk": 12,
           "def": 5,
           "spd": 12
+        },
+        "porchJob": {
+          "tr": "bas kulaklık",
+          "en": "bass cans"
         }
       },
       {
@@ -711,13 +803,17 @@
           "en": "Bot Can"
         },
         "trait": "Soft",
-        "role": "Healer",
+        "role": null,
         "synergyTag": "Oven",
         "stats": {
           "hp": 95,
           "atk": 7,
           "def": 7,
           "spd": 8
+        },
+        "porchJob": {
+          "tr": "tepsi",
+          "en": "warm tray"
         }
       }
     ],
@@ -838,12 +934,12 @@
       "en": "Affinity"
     },
     "neighbor.trait": {
-      "tr": "Trait",
-      "en": "Trait"
+      "tr": "",
+      "en": ""
     },
     "neighbor.role": {
-      "tr": "Rol",
-      "en": "Role"
+      "tr": "",
+      "en": ""
     },
     "neighbor.prop": {
       "tr": "Prop",
@@ -1064,6 +1160,10 @@
     "fight.tempo_steer": {
       "tr": "Tempo — dokunarak yönlendir",
       "en": "Tempo — steer with taps"
+    },
+    "neighbor.porch_job": {
+      "tr": "Mahalle işi",
+      "en": "Porch job"
     }
   },
   "meta": {

@@ -13,8 +13,8 @@
     {
       "synergyId": "syn_tea_circle",
       "name": {
-        "tr": "Çay Çemberi",
-        "en": "Tea Circle"
+        "tr": "Demlik halkası",
+        "en": "Demlik circle"
       },
       "tagsThatCount": [
         "Tea",
@@ -38,13 +38,13 @@
     {
       "synergyId": "syn_rivalry",
       "name": {
-        "tr": "Rekabet",
-        "en": "Rivalry"
+        "tr": "Düdük dedikodusu",
+        "en": "Whistle gossip"
       },
       "tagsThatCount": [
         "Rivalry",
         "Chaos",
-        "Fence"
+        "paper"
       ],
       "neighborIds": [
         "n2",
@@ -64,8 +64,8 @@
     {
       "synergyId": "syn_neon_night",
       "name": {
-        "tr": "Neon Gece",
-        "en": "Neon Night"
+        "tr": "Çatı parıltısı",
+        "en": "Roof flash"
       },
       "tagsThatCount": [
         "Neon",
@@ -89,8 +89,8 @@
   "dualTagPivot": {
     "neighborId": "n3",
     "note": {
-      "tr": "Leyla (Chaos) hem Rekabet hem Neon Gece'ye sayılır — mastery kancası.",
-      "en": "Leyla (Chaos) counts for both Rivalry and Neon Night — the mastery hook."
+      "tr": "Leyla uçurtması düdük veya çatı ile oturur — mastery kancası.",
+      "en": "Leyla’s kite sits with whistle or roof flash — the mastery hook."
     }
   },
   "synergyTeachBeats": [
@@ -112,12 +112,12 @@
         "n1"
       ],
       "lines": {
-        "tr": "İki Rekabet / Kaos / Çit etiketi yan yana = Rekabet. Canın azalınca vuruş sertleşir. Cem + Orhan ile dene.",
-        "en": "Two Rivalry / Chaos / Fence tags = Rivalry. When HP dips, hits hit harder. Try Cem + Orhan."
+        "tr": "Düdük + gazete köşeye sıkışınca sertleşir. Cem + Orhan ile dene.",
+        "en": "Whistle + paper sit make cornered porches mean. Try Cem + Orhan."
       },
       "confirmLabel": {
-        "tr": "Rekabeti kurdum",
-        "en": "I formed Rivalry"
+        "tr": "Düdük dedikodusu kilit",
+        "en": "Whistle gossip locked"
       },
       "showMeLabel": {
         "tr": "Göster",
@@ -132,8 +132,8 @@
       "durationMs": 1400,
       "blocking": false,
       "lines": {
-        "tr": "Rekabet! Düşük HP → daha sert vuruş",
-        "en": "Rivalry! Low HP → harder hits"
+        "tr": "Köşeye sıkışınca düdük sertleşir",
+        "en": "When cornered, the whistle gets mean"
       },
       "vfxId": "vfx_rivalry_ember",
       "cameraShakeId": "shake_medium"
@@ -156,11 +156,11 @@
       ],
       "lines": {
         "tr": "Çay + Fırın = Çay Çemberi. Her 4 saniyede mahalle yudumlar — heal aura.",
-        "en": "Tea + Oven = Tea Circle. Every 4s the porch sips — heal aura."
+        "en": "Demlik + tray: every little while, a shared pour."
       },
       "confirmLabel": {
         "tr": "Çemberi kurdum",
-        "en": "I formed Tea Circle"
+        "en": "Demlik circle locked"
       },
       "showMeLabel": {
         "tr": "Göster",
@@ -176,7 +176,7 @@
       "blocking": false,
       "lines": {
         "tr": "Çay Çemberi — bir yudum HP",
-        "en": "Tea Circle — a sip of HP"
+        "en": "Demlik circle — a shared pour"
       },
       "vfxId": "vfx_tea_steam_ring",
       "cameraShakeId": "shake_none"
@@ -198,12 +198,12 @@
         "n2"
       ],
       "lines": {
-        "tr": "Neon + Kaos = Neon Gece. İlk 8 saniye dodge şansı. Leyla pivot — dikkat.",
-        "en": "Neon + Chaos = Neon Night. Dodge chance for the first 8s. Leyla is the pivot — careful."
+        "tr": "Çatı + uçurtma = çatı parıltısı. İlk 8 saniye dodge. Leyla pivot.",
+        "en": "First song is neon — opening flash"
       },
       "confirmLabel": {
-        "tr": "Neon'u kurdum",
-        "en": "I formed Neon Night"
+        "tr": "Çatı kilit",
+        "en": "Roof flash locked"
       },
       "showMeLabel": {
         "tr": "Göster",
@@ -218,8 +218,8 @@
       "durationMs": 1400,
       "blocking": false,
       "lines": {
-        "tr": "Neon Gece — dodge penceresi 8 sn",
-        "en": "Neon Night — dodge window 8s"
+        "tr": "Çatı parıltısı — dodge 8 sn",
+        "en": "Roof flash — dodge window 8s"
       },
       "vfxId": "vfx_neon_edge_flicker",
       "cameraShakeId": "shake_light"
@@ -229,13 +229,13 @@
       "phase": "placement",
       "gate": "first_placement",
       "lines": {
-        "tr": "Ön sıra darbeyi yer. Tank / Bruiser öne; Support / Healer / Glass arkaya.",
-        "en": "Front row eats hits. Tank / Bruiser front; Support / Healer / Glass back."
+        "tr": "Ön sıra darbeyi yer. paper sit / whistle öne; tea hand / warm tray / Glass arkaya.",
+        "en": "Front row eats hits. paper sit / whistle front; tea hand / warm tray / Glass back."
       },
       "warnIfSupportFront": {
         "neighborRoles": [
-          "Support buffer",
-          "Healer"
+          "tea hand",
+          "warm tray"
         ],
         "lines": {
           "tr": "Ön sıra tehlikeli — Merve / Can arkada daha mutlu.",
@@ -244,14 +244,14 @@
       },
       "autoPlaceOrder": {
         "frontRoles": [
-          "Tank",
-          "Bruiser"
+          "paper sit",
+          "whistle"
         ],
         "backRoles": [
-          "Support buffer",
-          "Healer",
-          "Glass cannon",
-          "AoE"
+          "tea hand",
+          "warm tray",
+          "kite kid",
+          "bass cans"
         ]
       }
     }
@@ -261,11 +261,11 @@
       "syn_tea_circle": {
         "title": {
           "tr": "Çay Çemberi",
-          "en": "Tea Circle"
+          "en": "Demlik circle"
         },
         "body": {
           "tr": "2+ Çay veya Fırın etiketi. Her 4 sn müttefiklere max HP'nin %4'ü heal.",
-          "en": "2+ Tea or Oven tags. Every 4s heal allies for 4% max HP."
+          "en": "Demlik with tray: every little while, a shared pour."
         },
         "firesWhen": {
           "tr": "Sinerji aktifken sürekli (4 sn tick).",
@@ -273,17 +273,17 @@
         },
         "tagPoolLabel": {
           "tr": "Çay · Fırın",
-          "en": "Tea · Oven"
+          "en": "Demlik · Tray"
         }
       },
       "syn_rivalry": {
         "title": {
           "tr": "Rekabet",
-          "en": "Rivalry"
+          "en": "Whistle gossip"
         },
         "body": {
           "tr": "2+ Rekabet / Kaos / Çit. HP %35 altına inince hasar +%25.",
-          "en": "2+ Rivalry / Chaos / Fence. Under 35% HP → +25% damage."
+          "en": "Whistle with paper. When someone’s cornered, the whistle gets mean."
         },
         "firesWhen": {
           "tr": "Bir müttefik eşik altına indiğinde.",
@@ -291,52 +291,52 @@
         },
         "tagPoolLabel": {
           "tr": "Rekabet · Kaos · Çit",
-          "en": "Rivalry · Chaos · Fence"
+          "en": "Whistle · kite · paper"
         }
       },
       "syn_neon_night": {
         "title": {
-          "tr": "Neon Gece",
-          "en": "Neon Night"
+          "tr": "Çatı parıltısı",
+          "en": "Roof flash"
         },
         "body": {
-          "tr": "2+ Neon veya Kaos. İlk 8 sn %20 dodge şansı.",
-          "en": "2+ Neon or Chaos. 20% dodge for the first 8s."
+          "tr": "Çatı veya uçurtma. İlk 8 sn açılış parıltısı.",
+          "en": "Roof or kite. Opening flash — harder to catch."
         },
         "firesWhen": {
           "tr": "Maç başı — 8 sn sonra söner.",
           "en": "Fight start — fades after 8s."
         },
         "tagPoolLabel": {
-          "tr": "Neon · Kaos",
-          "en": "Neon · Chaos"
+          "tr": "Çatı · uçurtma",
+          "en": "Roof · kite"
         }
       }
     },
     "roles": {
-      "Tank": {
-        "tr": "Darbeyi emer; ön sıra.",
-        "en": "Soaks hits; front row."
+      "whistle": {
+        "tr": "Düdükle vurur; genelde ön.",
+        "en": "Whistle hits; usually front."
       },
-      "Bruiser": {
-        "tr": "Dayanıklı vurucu; genelde ön.",
-        "en": "Sturdy hitter; usually front."
+      "tea hand": {
+        "tr": "Demlik besler; arkada kal.",
+        "en": "Keeps the pot; stay back."
       },
-      "Support buffer": {
-        "tr": "Takımı besler; arkada kal.",
-        "en": "Buffs the team; stay back."
+      "warm tray": {
+        "tr": "Tepsi ısıtır; arkada kal.",
+        "en": "Warm tray; stay back."
       },
-      "Healer": {
-        "tr": "HP yudumlatır; arkada kal.",
-        "en": "Sips HP onto allies; stay back."
+      "kite kid": {
+        "tr": "İpi çeker, çabuk düşer; arka.",
+        "en": "Pulls the line, soft shell; back."
       },
-      "Glass cannon": {
-        "tr": "Sert vurur, çabuk düşer; arka.",
-        "en": "Hard hits, soft shell; back row."
+      "bass cans": {
+        "tr": "Bas dalgası; arka.",
+        "en": "Bass wave; back row."
       },
-      "AoE": {
-        "tr": "Sıra/küme hasarı; arka.",
-        "en": "Row/cluster damage; back row."
+      "paper sit": {
+        "tr": "Çitte nöbet; ön sıra.",
+        "en": "Holds the paper; front row."
       }
     },
     "porchCall": {
@@ -356,7 +356,7 @@
       },
       "body": {
         "tr": "Rekabeti öğreten kısa senaryo. Rakip ayna değil.",
-        "en": "Short script that teaches Rivalry. Enemy is not a mirror."
+        "en": "Short script that teaches whistle gossip. Enemy is not a mirror."
       }
     }
   },
@@ -407,7 +407,7 @@
         },
         "blurb": {
           "tr": "Herkese 6 sn +%12 ATK — güvenli tempo.",
-          "en": "All allies +12% ATK for 6s — safe tempo."
+          "en": "All allies ATK for 6s — safe tempo."
         },
         "effect": {
           "type": "ally_atk_buff",
@@ -468,8 +468,8 @@
           "en": "Tea break"
         },
         "blurb": {
-          "tr": "En düşük HP müttefike anında %22 heal.",
-          "en": "Instant 22% heal on lowest-HP ally."
+          "tr": "En köşeye sıkışınca.",
+          "en": "Demlik + tray keep the porch standing"
         },
         "effect": {
           "type": "instant_heal_lowest_ally",
@@ -497,7 +497,7 @@
         },
         "blurb": {
           "tr": "Ön sıra 5 sn hasarı üstüne çeker (Rekabet).",
-          "en": "Front row taunts 5s (Rivalry lean)."
+          "en": "Front row taunts 5s (whistle lean)."
         },
         "effect": {
           "type": "front_ally_taunt",
@@ -521,12 +521,12 @@
         "category": "synergy_leaning",
         "lean": "syn_neon_night",
         "label": {
-          "tr": "Neon flaş",
-          "en": "Neon flash"
+          "tr": "Çatı flaş",
+          "en": "Roof flash"
         },
         "blurb": {
-          "tr": "4 sn +%15 dodge (Neon lean).",
-          "en": "+15% dodge for 4s (Neon lean)."
+          "tr": "4s +15% dodge (roof lean).",
+          "en": "First song is neon — opening flash"
         },
         "effect": {
           "type": "ally_dodge_buff",
@@ -579,11 +579,11 @@
         "category": "safe",
         "label": {
           "tr": "Çiti tut",
-          "en": "Hold the fence"
+          "en": "Hold the paper"
         },
         "blurb": {
           "tr": "Gerideyken 5 sn +%20 DEF.",
-          "en": "+20% DEF for 5s while behind."
+          "en": "DEF for 5s while behind."
         },
         "effect": {
           "type": "ally_def_buff",
@@ -596,7 +596,7 @@
         "cameraShakeId": "shake_light",
         "comicHint": {
           "tr": "Gazete kalktı — çit dayandı.",
-          "en": "Newspaper up — the fence held."
+          "en": "Newspaper up — the paper held."
         },
         "lean": null,
         "hpSwingDisplay": {
@@ -610,11 +610,11 @@
         "lean": "syn_tea_circle",
         "label": {
           "tr": "Fırın sıcaklığı",
-          "en": "Oven warm"
+          "en": "Tray warm"
         },
         "blurb": {
           "tr": "Tek nabız heal aura %8 (Çay/Fırın).",
-          "en": "One-shot heal aura 8% (Tea/Oven)."
+          "en": "One-shot heal aura 8% (demlik/tray)."
         },
         "effect": {
           "type": "heal_aura_pulse",
@@ -755,7 +755,7 @@
     "id": "practice_cup_rivalry_01",
     "title": {
       "tr": "Prova: Rekabet",
-      "en": "Practice: Rivalry"
+      "en": "Practice: Whistle"
     },
     "unlock": "first_evening_cup_available",
     "playerLineup": [
@@ -828,7 +828,7 @@
         "showTooltipOnce": true,
         "lines": {
           "tr": "Rekabet rozeti yandı. Eşik bekleniyor.",
-          "en": "Rivalry badge lit. Waiting on the threshold."
+          "en": "Whistle lit. Waiting on the threshold."
         }
       },
       {
@@ -851,8 +851,8 @@
         "vfxId": "vfx_rivalry_ember",
         "cameraShakeId": "shake_medium",
         "lines": {
-          "tr": "Rekabet! Düşük HP → daha sert vuruş",
-          "en": "Rivalry! Low HP → harder hits"
+          "tr": "Köşeye sıkışınca düdük sertleşir",
+          "en": "When cornered, the whistle gets mean"
         }
       },
       {
@@ -935,7 +935,7 @@
         "condition": "syn_tea_circle_not_active",
         "lines": {
           "tr": "Çay Çemberi için Can da lazım — sonraki Kupada dene.",
-          "en": "Tea Circle needs Can too — try next Cup."
+          "en": "Demlik needs Can too — try next Cup."
         }
       },
       {
@@ -966,8 +966,8 @@
           "practice_cup_rivalry_pop_seen"
         ],
         "lines": {
-          "tr": "Rekabet! Düşük HP → daha sert vuruş",
-          "en": "Rivalry! Low HP → harder hits"
+          "tr": "Köşeye sıkışınca düdük sertleşir",
+          "en": "When cornered, the whistle gets mean"
         }
       }
     ],
@@ -1025,7 +1025,7 @@
         "format": "-{amount}!",
         "prefixLabel": {
           "tr": "Rekabet",
-          "en": "Rivalry"
+          "en": "Whistle gossip"
         },
         "mustBeOnUnitNotOnlyLog": true
       },
@@ -1160,7 +1160,7 @@
       "format": "-{amount}!",
       "prefixLabel": {
         "tr": "Rekabet",
-        "en": "Rivalry"
+        "en": "Whistle gossip"
       },
       "mustBeOnUnitPad": true,
       "oncePrefixPerTrigger": true
@@ -1182,7 +1182,7 @@
         "id": "glass_punish_exposed_support",
         "priority": 2,
         "appliesToRoles": [
-          "Glass cannon"
+          "kite kid"
         ],
         "rule": "if_enemy_support_or_healer_in_front_prioritize_them",
         "punishToast": {
@@ -1194,7 +1194,7 @@
         "id": "aoe_front_cluster",
         "priority": 2,
         "appliesToRoles": [
-          "AoE"
+          "bass cans"
         ],
         "rule": "hit_frontmost_occupied_row_cluster"
       },
@@ -1202,7 +1202,7 @@
         "id": "healer_lowest_ally",
         "priority": 1,
         "appliesToRoles": [
-          "Healer"
+          "warm tray"
         ],
         "rule": "heal_lowest_ally_hp_percent_each_skill_tick"
       },
@@ -1216,14 +1216,14 @@
     ],
     "placement": {
       "defaultFrontRoles": [
-        "Tank",
-        "Bruiser"
+        "paper sit",
+        "whistle"
       ],
       "defaultBackRoles": [
-        "AoE",
-        "Glass cannon",
-        "Support buffer",
-        "Healer"
+        "bass cans",
+        "kite kid",
+        "tea hand",
+        "warm tray"
       ],
       "punishAllFrontPlayer": {
         "enabled": true,
@@ -1243,7 +1243,7 @@
           "bot_n4",
           "bot_n5"
         ],
-        "lineupHint": "Cem+Orhan Rivalry front pressure"
+        "lineupHint": "Cem+Orhan whistle front pressure"
       },
       "week2": {
         "preferSynergyId": "syn_neon_night",
@@ -1252,7 +1252,7 @@
           "bot_n3",
           "bot_n2"
         ],
-        "lineupHint": "Peri+Leyla Neon open"
+        "lineupHint": "Peri+Leyla roof open"
       },
       "week3": {
         "preferSynergyId": "syn_tea_circle",
@@ -1325,8 +1325,8 @@
       "en": "Safe / swingy / synergy — score swings"
     },
     "fight.synergy_active": {
-      "tr": "Aktif sinerji",
-      "en": "Active synergy"
+      "tr": "Veranda dedikodusu",
+      "en": "Porch gossip"
     },
     "fight.no_synergy": {
       "tr": "Sinerji yok",
@@ -1366,7 +1366,7 @@
     },
     "practice.cta": {
       "tr": "Rekabeti öğren",
-      "en": "Learn Rivalry"
+      "en": "Learn whistle gossip"
     },
     "comic.porch_call_slot": {
       "tr": "Çağrı: {porchCall}",
@@ -1382,7 +1382,7 @@
     },
     "coach.ready_locked": {
       "tr": "Hazır kilitli — sinerjiyi kur",
-      "en": "Ready locked — form the synergy"
+      "en": "Ready locked — lock the gossip"
     },
     "pill.fires_when": {
       "tr": "ateş: {when}",
@@ -1398,7 +1398,7 @@
     },
     "fight.rivalry_sticky": {
       "tr": "Rekabet yanıyor",
-      "en": "Rivalry burning"
+      "en": "Whistle burning"
     },
     "placement.on_pads": {
       "tr": "Arenaya yerleştir",
@@ -1460,23 +1460,23 @@
         "synergyId": "syn_rivalry",
         "ruleOneLiner": {
           "tr": "HP %35 altı → +%25 hasar",
-          "en": "Under 35% HP → +25% damage"
+          "en": "When someone’s hurt bad, the whistle gets mean"
         },
         "firesWhen": {
           "tr": "eşik altına düşen müttefik her vuruşta",
           "en": "each hit while an ally is under threshold"
         },
         "tagPoolDisplay": [
-          "Rivalry",
-          "Chaos",
-          "Fence"
+          "Whistle gossip",
+          "kite",
+          "paper"
         ]
       },
       {
         "synergyId": "syn_tea_circle",
         "ruleOneLiner": {
           "tr": "Her 4 sn %4 max HP aura",
-          "en": "Every 4s heal aura 4% max HP"
+          "en": "every little while, a shared pour"
         },
         "firesWhen": {
           "tr": "sinerji aktifken 4 sn nabız",
@@ -1484,14 +1484,14 @@
         },
         "tagPoolDisplay": [
           "Tea",
-          "Oven"
+          "tray"
         ]
       },
       {
         "synergyId": "syn_neon_night",
         "ruleOneLiner": {
-          "tr": "İlk 8 sn %20 dodge",
-          "en": "First 8s → 20% dodge"
+          "tr": "İlk 8 sn Açılış parıltısı — ritmi kaçırır",
+          "en": "Opening flash — harder to catch"
         },
         "firesWhen": {
           "tr": "dövüş açılışı (8 sn pencere)",
@@ -1499,7 +1499,7 @@
         },
         "tagPoolDisplay": [
           "Neon",
-          "Chaos"
+          "kite"
         ]
       }
     ],
@@ -1511,8 +1511,8 @@
       "blocking": false,
       "durationMs": 2200,
       "lines": {
-        "tr": "Leyla (Kaos) hem Rekabet hem Neon Gece sayılır — aynı pick, farklı ikinci etiket.",
-        "en": "Leyla (Chaos) counts for Rivalry and Neon Night — same pick, different second tag."
+        "tr": "Leyla (Kaos) hem Düdük hem Çatı parıltısı sayılır — aynı pick, farklı ikinci etiket.",
+        "en": "Leyla’s kite pairs with whistle or roof flash — same pick, different second seat."
       },
       "setsFlags": [
         "syn_taught_dual_tag_pivot"
@@ -1525,7 +1525,7 @@
       "showMeAutoPickStillAllowed": true,
       "readyLockedCopy": {
         "tr": "Hazır kilitli — önce sinerjiyi kur (veya Göster).",
-        "en": "Ready locked — form the synergy first (or Show me)."
+        "en": "Ready locked — lock the gossip first (or Show me)."
       },
       "pillMustUpdateLiveOnDraft": true
     },
@@ -1533,14 +1533,14 @@
       "autoPlaceByRole": true,
       "roleRows": {
         "front": [
-          "Tank",
-          "Bruiser"
+          "paper sit",
+          "whistle"
         ],
         "back": [
-          "Support buffer",
-          "Healer",
-          "Glass cannon",
-          "AoE"
+          "tea hand",
+          "warm tray",
+          "kite kid",
+          "bass cans"
         ]
       },
       "supportFrontWarning": {
@@ -1640,7 +1640,7 @@
         "id": "glass_punish_exposed_support",
         "priority": 2,
         "appliesToRoles": [
-          "Glass cannon"
+          "kite kid"
         ],
         "rule": "if_enemy_support_or_healer_in_front_prioritize_them",
         "punishToast": {
@@ -1652,7 +1652,7 @@
         "id": "aoe_front_cluster",
         "priority": 2,
         "appliesToRoles": [
-          "AoE"
+          "bass cans"
         ],
         "rule": "hit_frontmost_occupied_row_cluster"
       },
@@ -1660,7 +1660,7 @@
         "id": "healer_lowest_ally",
         "priority": 1,
         "appliesToRoles": [
-          "Healer"
+          "warm tray"
         ],
         "rule": "heal_lowest_ally_hp_percent_each_skill_tick"
       },
@@ -1674,14 +1674,14 @@
     ],
     "placement": {
       "defaultFrontRoles": [
-        "Tank",
-        "Bruiser"
+        "paper sit",
+        "whistle"
       ],
       "defaultBackRoles": [
-        "AoE",
-        "Glass cannon",
-        "Support buffer",
-        "Healer"
+        "bass cans",
+        "kite kid",
+        "tea hand",
+        "warm tray"
       ],
       "punishAllFrontPlayer": {
         "enabled": true,
@@ -1702,7 +1702,7 @@
           "bot_n4",
           "bot_n5"
         ],
-        "lineupHint": "Cem+Orhan Rivalry front pressure"
+        "lineupHint": "Cem+Orhan whistle front pressure"
       },
       "week2": {
         "preferSynergyId": "syn_neon_night",
@@ -1711,7 +1711,7 @@
           "bot_n3",
           "bot_n2"
         ],
-        "lineupHint": "Peri+Leyla Neon open"
+        "lineupHint": "Peri+Leyla roof open"
       },
       "week3": {
         "preferSynergyId": "syn_tea_circle",
@@ -1725,7 +1725,7 @@
     },
     "challengeAcceptance": [
       "Non-practice Cup: player should not routinely win with >40% team HP remaining on default draft",
-      "Exposed Support/Healer front is KO'd or near-dead before 20s when Glass present",
+      "Exposed tea hand/warm tray front is KO'd or near-dead before 20s when Glass present",
       "Opposing synergy pill visible every ladder Cup"
     ]
   },
@@ -1739,7 +1739,7 @@
       "Porch-call cards show category chip + blurb + ≈HP swing (not label-only)",
       "Post-call toast shows measurable team HP delta within 4s",
       "Ladder bots use week pressureCurve; opposing synergy pill always visible",
-      "Exposed front Support takes Glass focus and shows punish toast",
+      "Exposed front tea hand takes Glass focus and shows punish toast",
       "juiceHints mustImplement list all fire in Practice Cup cold start"
     ]
   },
@@ -1828,8 +1828,8 @@
         "coachPopOncePerFight": {
           "durationMs": 1400,
           "lines": {
-            "tr": "Rekabet! Düşük HP → daha sert vuruş",
-            "en": "Rivalry! Low HP → harder hits"
+            "tr": "Köşeye sıkışınca düdük sertleşir",
+            "en": "When cornered, the whistle gets mean"
           }
         },
         "setsFlagsFirstInPractice": [
@@ -1856,7 +1856,7 @@
           "durationMs": 1400,
           "lines": {
             "tr": "Çay Çemberi — bir yudum HP",
-            "en": "Tea Circle — a sip of HP"
+            "en": "Demlik circle — a shared pour"
           }
         }
       }
@@ -1873,8 +1873,8 @@
         "coachPopOncePerFight": {
           "durationMs": 1400,
           "lines": {
-            "tr": "Neon Gece — dodge penceresi 8 sn",
-            "en": "Neon Night — dodge window 8s"
+            "tr": "Çatı parıltısı — dodge 8 sn",
+            "en": "Roof flash — dodge window 8s"
           }
         }
       },
@@ -1913,7 +1913,7 @@
           "activeWhen": "matched >= minCount",
           "inactiveLabel": {
             "tr": "Rekabet",
-            "en": "Rivalry"
+            "en": "Whistle gossip"
           }
         },
         {
@@ -1922,7 +1922,7 @@
           "activeWhen": "matched >= minCount",
           "inactiveLabel": {
             "tr": "Çay Çemberi",
-            "en": "Tea Circle"
+            "en": "Demlik circle"
           }
         },
         {
@@ -1930,8 +1930,8 @@
           "displayCount": "{matched}/{minCount}",
           "activeWhen": "matched >= minCount",
           "inactiveLabel": {
-            "tr": "Neon Gece",
-            "en": "Neon Night"
+            "tr": "Çatı parıltısı",
+            "en": "Roof flash"
           }
         }
       ],
@@ -2112,8 +2112,8 @@
       ],
       "unlockStart": true,
       "coachLine": {
-        "tr": "Roster hazır — Start'a bas, Rekabeti dövüşte gör.",
-        "en": "Roster set — tap Start, see Rivalry in the fight."
+        "tr": "Roster hazır — Start'a bas, Düdüki dövüşte gör.",
+        "en": "Roster set — tap Start, see Whistle gossip in the fight."
       },
       "ctaPulse": {
         "target": "start_button",
@@ -2133,8 +2133,8 @@
       "ifSynergyNotFormed": {
         "keepStartDisabled": true,
         "showCoach": {
-          "tr": "3 pick var ama Rekabet yok — Cem+Orhan dene veya Göster.",
-          "en": "3 picks but no Rivalry — try Cem+Orhan or Show me."
+          "tr": "3 pick var ama Düdük yok — Cem+Orhan dene veya Göster.",
+          "en": "3 picks but no Whistle gossip — try Cem+Orhan or Show me."
         },
         "offerShowMe": true
       }
@@ -2179,8 +2179,8 @@
         "en": "Pick 3 neighbors or Show me"
       },
       "disabledNeedSynergy": {
-        "tr": "Rekabeti kur (veya Göster)",
-        "en": "Form Rivalry (or Show me)"
+        "tr": "Düdüki kur (veya Göster)",
+        "en": "Form Whistle gossip (or Show me)"
       },
       "disabledSyncing": {
         "tr": "Sinerji senkron…",
@@ -2348,5 +2348,237 @@
       "call_prop_assist",
       "call_chaos_kite"
     ]
-  }
+  },
+  "kits": [
+    {
+      "neighborId": "n1",
+      "propId": "prop_demlik",
+      "range": "ranged",
+      "rowBias": "back",
+      "basic": {
+        "intervalSec": 1.6,
+        "power": "low"
+      },
+      "signature": {
+        "id": "pour",
+        "cdSec": 7,
+        "vfx": "vfx_steam_pour",
+        "effect": {
+          "type": "heal_lowest",
+          "amount": 14
+        }
+      }
+    },
+    {
+      "neighborId": "n2",
+      "propId": "prop_duduck",
+      "range": "melee",
+      "rowBias": "front",
+      "basic": {
+        "intervalSec": 1.4,
+        "power": "low"
+      },
+      "signature": {
+        "id": "whistle_mark",
+        "cdSec": 7,
+        "vfx": "vfx_whistle_shock",
+        "effect": {
+          "type": "mark_foe",
+          "durationSec": 6
+        }
+      }
+    },
+    {
+      "neighborId": "n3",
+      "propId": "prop_ucurtma",
+      "range": "ranged",
+      "rowBias": "back",
+      "basic": {
+        "intervalSec": 1.3,
+        "power": "low"
+      },
+      "signature": {
+        "id": "kite_cut",
+        "cdSec": 8,
+        "openingBias": true,
+        "vfx": "vfx_kite_cut",
+        "effect": {
+          "type": "swap_burst",
+          "power": 18
+        }
+      }
+    },
+    {
+      "neighborId": "n4",
+      "propId": "prop_gazete",
+      "range": "melee",
+      "rowBias": "front",
+      "basic": {
+        "intervalSec": 1.5,
+        "power": "low"
+      },
+      "signature": {
+        "id": "hold_fence",
+        "cdSec": 8,
+        "vfx": "vfx_fence_flap",
+        "effect": {
+          "type": "taunt_glance",
+          "hits": 2,
+          "durationSec": 5
+        }
+      }
+    },
+    {
+      "neighborId": "n5",
+      "propId": "prop_kulaklik",
+      "range": "ranged",
+      "rowBias": "back",
+      "basic": {
+        "intervalSec": 1.5,
+        "power": "low"
+      },
+      "signature": {
+        "id": "bass_drop",
+        "cdSec": 9,
+        "openingBias": true,
+        "vfx": "vfx_bass_drop",
+        "effect": {
+          "type": "front_cone",
+          "power": 12
+        }
+      }
+    },
+    {
+      "neighborId": "n6",
+      "propId": "prop_tepsi",
+      "range": "ranged",
+      "rowBias": "back",
+      "basic": {
+        "intervalSec": 1.6,
+        "power": "low"
+      },
+      "signature": {
+        "id": "oven_warm",
+        "cdSec": 7,
+        "vfx": "vfx_oven_warm",
+        "effect": {
+          "type": "heal_pulse",
+          "amount": 10
+        }
+      }
+    }
+  ],
+  "placementCoach": {
+    "tr": "Gazete ile düdük öne. Demlik, tepsi, uçurtma, kulaklık arkaya.",
+    "en": "Newspaper and whistle up front. Tea, tray, kite, and cans in back."
+  },
+  "synergyChrome": {
+    "header": {
+      "tr": "Veranda dedikodusu",
+      "en": "Porch gossip"
+    }
+  },
+  "synergyStakes": [
+    {
+      "synergyId": "syn_rivalry",
+      "cupLabel": {
+        "tr": "Düdük dedikodusu",
+        "en": "Whistle gossip"
+      },
+      "whoNeighborIds": [
+        "n2",
+        "n4"
+      ],
+      "whoJobs": [
+        "whistle",
+        "paper sit"
+      ],
+      "headline": {
+        "tr": "Köşeye sıkışınca düdük sertleşir",
+        "en": "Whistle tightens when someone’s cornered"
+      },
+      "body": {
+        "tr": "Cem’in düdüğü + Orhan’ın gazetesi: biri kötü yaralanınca imza vuruş sertleşir.",
+        "en": "Cem’s whistle + Orhan’s paper: when someone’s hurt bad, their signature gets mean."
+      },
+      "fireVoice": {
+        "tr": "Sıkışınca",
+        "en": "When cornered"
+      }
+    },
+    {
+      "synergyId": "syn_tea_circle",
+      "cupLabel": {
+        "tr": "Demlik çemberi",
+        "en": "Demlik circle"
+      },
+      "whoNeighborIds": [
+        "n1",
+        "n6"
+      ],
+      "whoJobs": [
+        "tea hand",
+        "warm tray"
+      ],
+      "headline": {
+        "tr": "Demlik + tepsi verandayı ayakta tutar",
+        "en": "Demlik + tray keep the porch standing"
+      },
+      "body": {
+        "tr": "Merve döker, Can ısıtır — ikisi ayaktayken hat düşmez.",
+        "en": "Merve pours, Can warms — the line holds while both stand."
+      },
+      "fireVoice": {
+        "tr": "Paylaşılan demlik",
+        "en": "Shared pour"
+      }
+    },
+    {
+      "synergyId": "syn_neon_night",
+      "cupLabel": {
+        "tr": "Çatı parıltısı",
+        "en": "Roof flash"
+      },
+      "whoNeighborIds": [
+        "n5",
+        "n3"
+      ],
+      "whoJobs": [
+        "bass cans",
+        "kite kid"
+      ],
+      "headline": {
+        "tr": "Çatı parıltısı açılır",
+        "en": "Roof flash opens"
+      },
+      "body": {
+        "tr": "Peri + Leyla açılışı parlaktır; vuruşlar ritmi kaçırır.",
+        "en": "Peri + Leyla open flashy; hits miss the vibe."
+      },
+      "fireVoice": {
+        "tr": "Açılış parıltısı",
+        "en": "Opening flash"
+      }
+    }
+  ],
+  "callBoardMutations": [
+    {
+      "callId": "call_focus_neighbor",
+      "lead": "n2",
+      "board": "whistle_mark",
+      "class": "pad-marked"
+    },
+    {
+      "callId": "call_prop_assist",
+      "lead": "front",
+      "board": "hold_fence",
+      "class": "pad-taunt"
+    },
+    {
+      "callId": "call_chaos_kite",
+      "lead": "n3",
+      "board": "kite_cut",
+      "class": "pad-swapped"
+    }
+  ]
 }

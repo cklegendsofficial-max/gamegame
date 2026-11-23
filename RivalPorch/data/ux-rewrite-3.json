@@ -1,0 +1,13 @@
+{
+  "packId": "ux-rewrite-3",
+  "schemaVersion": 1,
+  "affinityToast": {
+    "testid": "affinity-toast",
+    "park": "above-dock",
+    "dockHeightPx": 88,
+    "gapPx": 12,
+    "ttlMs": 1400,
+    "pointerEvents": "none",
+    "maxConcurrent": 1
+  }
+}

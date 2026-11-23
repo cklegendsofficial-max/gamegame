@@ -1,0 +1,52 @@
+/* Rival Porch — ux-REWRITE-7
+   Practice end clean: ≤1 Call; no Practice-done modal over dock.
+*/
+.rp-dock {
+  position: relative;
+  z-index: 6;
+  pointer-events: auto;
+}
+
+[data-testid="practice-done-modal"],
+.rp-modal--practice-done,
+.rp-modal--practice {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+body[data-practice-end] #fight-actions,
+body[data-practice-end] [data-testid="porch-call-modal"],
+body[data-practice-end] [data-testid="porch-call-modal-2"] {
+  display: none !important;
+}
+
+.rp-open-book-tray {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-top: 0.5rem;
+}
+.rp-open-book-day1.is-lived .rp-open-book-residue {
+  font-size: 0.92rem;
+  color: #f2e6d8;
+  background: rgba(26, 22, 18, 0.78);
+  border: 1px solid rgb(90, 67, 50);
+  padding: 0.45rem 0.6rem;
+  border-radius: 4px;
+}
+
+/* Cup neon must not occlude pick-grid busts (visual-7 also covers) */
+#screen-cup .pick-grid,
+#screen-cup .pick-grid-dense {
+  position: relative;
+  z-index: 4;
+}
+#screen-cup .rp-stage,
+#screen-cup .rp-stage__vignette,
+#screen-cup [class*="neon"] {
+  pointer-events: none;
+}
+#screen-cup .pick-card img {
+  position: relative;
+  z-index: 2;
+}

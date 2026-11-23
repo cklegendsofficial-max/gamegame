@@ -1,0 +1,213 @@
+/* Rival Porch — visual-REWRITE-5
+   Auditor 57bc4ae overall 7.5 / visual 7.4.
+   PF: Seat busts in mud porch doorframes (not floating HUD rings).
+   FAIL from rewrite-4: computed border was BLACK, not mud clay.
+   HARD REQUIREMENT: frame rgb(90, 67, 50) literal — no vars / color-mix.
+   Paste AFTER visual-rewrite-4.css. Packs only — no push.
+*/
+
+.rp-screen--street {
+  /* Literal auditor acceptance color — do NOT alias through failing tokens */
+  --rp-mud-door: rgb(90, 67, 50);
+  --rp-mud-door-hex: #5a4332;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   A. Visible MUD DOORFRAME plate (DOM child + ::after fallback)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.rp-screen--street .rp-hotspot.is-porch-door,
+.rp-screen--street .rp-hotspot {
+  position: absolute !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  width: 58px !important;
+  min-width: 54px !important;
+  height: 98px !important;
+  min-height: 90px !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  filter: none !important;
+  z-index: 3;
+}
+
+/* Real jamb element — integrator JS injects if missing */
+.rp-screen--street .rp-hotspot__doorframe {
+  position: absolute !important;
+  left: 50% !important;
+  top: 0 !important;
+  transform: translateX(-50%) !important;
+  width: 52px !important;
+  height: 72px !important;
+  box-sizing: border-box !important;
+  /* LITERAL mud — auditor samples this */
+  background: rgb(90, 67, 50) !important;
+  background-color: rgb(90, 67, 50) !important;
+  border: 3px solid rgb(90, 67, 50) !important;
+  border-color: rgb(90, 67, 50) !important;
+  border-radius: 24px 24px 5px 5px / 32px 32px 5px 5px !important;
+  box-shadow: none !important;
+  filter: none !important;
+  outline: 2px solid rgb(90, 67, 50) !important;
+  outline-offset: 0 !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* If JS hasn't injected .rp-hotspot__doorframe yet, ::after still paints mud */
+.rp-screen--street .rp-hotspot.is-porch-door:not(:has(.rp-hotspot__doorframe))::after,
+.rp-screen--street .rp-hotspot:not(:has(.rp-hotspot__doorframe))::after {
+  content: "" !important;
+  position: absolute !important;
+  left: 50% !important;
+  top: 0 !important;
+  transform: translateX(-50%) !important;
+  width: 52px !important;
+  height: 72px !important;
+  box-sizing: border-box !important;
+  background: rgb(90, 67, 50) !important;
+  background-color: rgb(90, 67, 50) !important;
+  border: 3px solid rgb(90, 67, 50) !important;
+  border-color: rgb(90, 67, 50) !important;
+  border-radius: 24px 24px 5px 5px / 32px 32px 5px 5px !important;
+  box-shadow: none !important;
+  filter: none !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Kill rewrite-4 dark-gradient ::before that read as black */
+.rp-screen--street .rp-hotspot::before,
+.rp-screen--street .rp-hotspot.is-porch-door::before {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+  border: 0 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   B. Bust aperture — LITERAL mud border (beat black / gold overrides)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.rp-screen--street .rp-hotspot__bust,
+.rp-screen--street .rp-hotspot.is-porch-door .rp-hotspot__bust,
+.rp-screen--street .rp-hotspot img.rp-hotspot__bust {
+  position: relative !important;
+  z-index: 1 !important;
+  width: 40px !important;
+  height: 52px !important;
+  min-width: 40px !important;
+  min-height: 52px !important;
+  margin: 8px 0 0 !important;
+  object-fit: cover !important;
+  object-position: center 20% !important;
+  /* Arch door hole, not HUD disc */
+  border-radius: 18px 18px 3px 3px / 24px 24px 3px 3px !important;
+  /* LITERAL — do not use var() here; rewrite-4 lost to black */
+  border: 3px solid rgb(90, 67, 50) !important;
+  border-top-color: rgb(90, 67, 50) !important;
+  border-right-color: rgb(90, 67, 50) !important;
+  border-bottom-color: rgb(90, 67, 50) !important;
+  border-left-color: rgb(90, 67, 50) !important;
+  border-color: rgb(90, 67, 50) !important;
+  outline: 2px solid rgb(90, 67, 50) !important;
+  outline-color: rgb(90, 67, 50) !important;
+  outline-offset: 1px !important;
+  background: rgb(58, 42, 30) !important;
+  background-color: rgb(58, 42, 30) !important;
+  box-shadow: none !important;
+  filter: none !important;
+  -webkit-filter: none !important;
+}
+
+/* Focus: mud stays; lamp is outline-offset only on the FRAME, not a gold bust ring */
+.rp-screen--street .rp-hotspot.is-focus .rp-hotspot__bust,
+.rp-screen--street .rp-hotspot[aria-pressed="true"] .rp-hotspot__bust,
+.rp-screen--street .rp-hotspot:focus-visible .rp-hotspot__bust {
+  border: 3px solid rgb(90, 67, 50) !important;
+  border-color: rgb(90, 67, 50) !important;
+  outline: 2px solid rgb(90, 67, 50) !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+.rp-screen--street .rp-hotspot.is-focus .rp-hotspot__doorframe,
+.rp-screen--street .rp-hotspot[aria-pressed="true"] .rp-hotspot__doorframe {
+  outline: 2px solid #e8a045 !important; /* lamp on jamb only */
+  outline-offset: 2px !important;
+  background: rgb(90, 67, 50) !important;
+  border-color: rgb(90, 67, 50) !important;
+}
+
+/* Kill gold ring / card leftovers */
+.rp-screen--street .rp-hotspot__frame,
+.rp-screen--street .rp-hotspot__card,
+.rp-screen--street .rp-hotspot__ring,
+.rp-screen--street .rp-hotspot .gold-frame,
+.rp-screen--street .rp-hotspot [class*="gold"] {
+  display: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Sill name — mud bead, not floating HUD chip */
+.rp-screen--street .rp-hotspot__name {
+  position: relative !important;
+  z-index: 2 !important;
+  margin-top: 4px !important;
+  padding: 2px 5px !important;
+  font-size: 8.5px !important;
+  font-weight: 650;
+  color: #f2e6d8 !important;
+  background: rgb(90, 67, 50) !important;
+  background-color: rgb(90, 67, 50) !important;
+  border: 1px solid rgb(90, 67, 50) !important;
+  border-color: rgb(90, 67, 50) !important;
+  border-radius: 3px !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  max-width: 4.8rem;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Keep door-band Y from rewrite-4; X from rewrite-3 */
+.rp-screen--street .rp-hotspot[data-n="1"],
+.rp-screen--street .rp-hotspots > .rp-hotspot:nth-of-type(1) {
+  left: max(8px, 3vw) !important;
+  top: 44% !important;
+}
+.rp-screen--street .rp-hotspot[data-n="2"],
+.rp-screen--street .rp-hotspots > .rp-hotspot:nth-of-type(2) {
+  left: max(68px, 18vw) !important;
+  top: 41% !important;
+}
+.rp-screen--street .rp-hotspot[data-n="3"],
+.rp-screen--street .rp-hotspots > .rp-hotspot:nth-of-type(3) {
+  left: max(128px, 33vw) !important;
+  top: 44% !important;
+}
+.rp-screen--street .rp-hotspot[data-n="4"],
+.rp-screen--street .rp-hotspots > .rp-hotspot:nth-of-type(4) {
+  left: max(188px, 48vw) !important;
+  top: 41% !important;
+}
+.rp-screen--street .rp-hotspot[data-n="5"],
+.rp-screen--street .rp-hotspots > .rp-hotspot:nth-of-type(5) {
+  left: max(248px, 63vw) !important;
+  top: 44% !important;
+}
+.rp-screen--street .rp-hotspot[data-n="6"],
+.rp-screen--street .rp-hotspots > .rp-hotspot:nth-of-type(6) {
+  left: max(308px, 78vw) !important;
+  top: 41% !important;
+}

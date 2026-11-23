@@ -1,0 +1,267 @@
+/* Rival Porch — visual-REWRITE-2
+   Auditor 92e32e0 overall 5.4 / visual 5.8 (anti-slop-r1).
+   1) Busts → mid-stage porch niches (NOT gold toolbar @ top≈104px)
+   2) Delete Omurga whisper + Beat card chrome from street
+   3) ≥60% viewport clay stage on cold street
+   Paste AFTER visual-rewrite-1.css. Packs only — no push.
+*/
+
+.rp-screen--street {
+  --rp-niche-band-top: 34%;
+  --rp-niche-band-bottom: 58%;
+  --rp-hud-max: 40px;
+  --rp-dock-max: 68px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   A. KILL Omurga whisper + Beat card product on STREET
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.rp-screen--street .rp-beat-card,
+.rp-screen--street .rp-omurga-bar,
+.rp-screen--street .rp-omurga-whisper,
+.rp-screen--street .rp-spine-whisper,
+.rp-screen--street .rp-arc-card,
+.rp-screen--street .rp-quest-beat,
+.rp-screen--street [data-testid="beat-card"],
+.rp-screen--street [data-testid="omurga-bar"],
+.rp-screen--street [data-testid="omurga-whisper"],
+.rp-screen--street [data-testid="spine-whisper"],
+.rp-screen--street [data-testid="antenna-beat-card"],
+.rp-screen--street [data-ui="beat-card"],
+.rp-screen--street [data-ui="omurga"],
+.rp-screen--street .rp-mid--beat,
+.rp-screen--street .rp-street-agenda,
+.rp-screen--street .rp-quest-strip,
+.rp-screen--street .rp-main-bar,
+/* TR copy hooks if class names differ */
+.rp-screen--street .beat-card,
+.rp-screen--street .omurga-bar {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Also kill floating mid-bottom trait math card if mounted on street */
+.rp-screen--street .rp-synergy-toast,
+.rp-screen--street .rp-draft-summary,
+.rp-screen--street [data-testid="street-synergy-chip"] {
+  display: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   B. STAGE fills the phone — chrome cannot steal ≥40%
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.rp-screen--street .rp-stage {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center 42% !important;
+  border-radius: 0 !important;
+  transform: none !important;
+}
+
+.rp-screen--street .rp-stage-vignette {
+  z-index: 1;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--mud-night, #1a1612) 42%, transparent) 0%,
+      transparent 14%,
+      transparent 78%,
+      color-mix(in srgb, var(--mud-night, #1a1612) 55%, transparent) 100%
+    );
+}
+
+/* Thin day bead only — no Beat above it */
+.rp-screen--street .rp-hud-top {
+  max-height: var(--rp-hud-max) !important;
+  min-height: 0 !important;
+  padding: 4px 10px !important;
+  z-index: 4;
+}
+
+.rp-screen--street .rp-dock {
+  max-height: var(--rp-dock-max) !important;
+  z-index: 6;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   C. Porch NICHES — mid-stage, on the clay, not a gold toolbar
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.rp-screen--street .rp-hotspots,
+.rp-screen--street .rp-bust-rail,
+.rp-screen--street .rp-neighbor-rail {
+  position: absolute !important;
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  display: block !important; /* NOT flex row toolbar */
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: none !important;
+  border: 0 !important;
+  z-index: 3 !important;
+  pointer-events: none;
+}
+
+.rp-screen--street .rp-hotspot {
+  position: absolute !important;
+  pointer-events: auto;
+  width: 58px !important;
+  height: 78px !important;
+  min-width: 52px !important;
+  min-height: 72px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 3px;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  /* Kill gold square “card frame” toolbar look */
+  border-radius: 0 !important;
+  filter: none !important;
+}
+
+/* Soft clay bead on bust only — not a framed card */
+.rp-screen--street .rp-hotspot__bust {
+  width: 52px !important;
+  height: 52px !important;
+  min-height: 48px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  object-position: center 28% !important;
+  border: 2px solid color-mix(in srgb, var(--porch-lamp, #e8a045) 50%, var(--clay-mid, #7a5c45)) !important;
+  box-shadow: none !important;
+  background: var(--clay-earth, #4a3728);
+}
+
+.rp-screen--street .rp-hotspot__frame,
+.rp-screen--street .rp-hotspot__card,
+.rp-screen--street .rp-hotspot .gold-frame {
+  display: none !important; /* no square gold toolbar bezels */
+}
+
+.rp-screen--street .rp-hotspot__name {
+  font-size: 9px !important;
+  font-weight: 650;
+  color: var(--tea-cream, #f2e6d8);
+  text-shadow: 0 1px 2px var(--mud-night, #1a1612);
+  max-width: 4.2rem;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Hard mid-stage porch map — MUST beat #screen-street .rp-hotspot { left: var(--x,50%) }.
+   Auditor deae887: all niches stacked left≈167 (center). Spread X across porches. */
+#screen-street.rp-screen--street .rp-hotspot[data-n="1"],
+#screen-street .rp-hotspot[data-n="1"],
+.rp-screen--street .rp-hotspot[data-n="1"] {
+  left: 5% !important;
+  top: 40% !important;
+  transform: none !important;
+  --x: 5%;
+  --y: 40%;
+}
+#screen-street.rp-screen--street .rp-hotspot[data-n="2"],
+#screen-street .rp-hotspot[data-n="2"],
+.rp-screen--street .rp-hotspot[data-n="2"] {
+  left: 21% !important;
+  top: 36% !important;
+  transform: none !important;
+  --x: 21%;
+  --y: 36%;
+}
+#screen-street.rp-screen--street .rp-hotspot[data-n="3"],
+#screen-street .rp-hotspot[data-n="3"],
+.rp-screen--street .rp-hotspot[data-n="3"] {
+  left: 37% !important;
+  top: 38% !important;
+  transform: none !important;
+  --x: 37%;
+  --y: 38%;
+}
+#screen-street.rp-screen--street .rp-hotspot[data-n="4"],
+#screen-street .rp-hotspot[data-n="4"],
+.rp-screen--street .rp-hotspot[data-n="4"] {
+  left: 53% !important;
+  top: 36% !important;
+  transform: none !important;
+  --x: 53%;
+  --y: 36%;
+}
+#screen-street.rp-screen--street .rp-hotspot[data-n="5"],
+#screen-street .rp-hotspot[data-n="5"],
+.rp-screen--street .rp-hotspot[data-n="5"] {
+  left: 69% !important;
+  top: 38% !important;
+  transform: none !important;
+  --x: 69%;
+  --y: 38%;
+}
+#screen-street.rp-screen--street .rp-hotspot[data-n="6"],
+#screen-street .rp-hotspot[data-n="6"],
+.rp-screen--street .rp-hotspot[data-n="6"] {
+  left: 84% !important;
+  top: 40% !important;
+  transform: none !important;
+  --x: 84%;
+  --y: 40%;
+}
+
+/* Focus = porch lamp bead, not purple glow */
+.rp-screen--street .rp-hotspot.is-focus .rp-hotspot__bust,
+.rp-screen--street .rp-hotspot[aria-pressed="true"] .rp-hotspot__bust {
+  outline: 2px solid var(--porch-lamp, #e8a045);
+  outline-offset: 2px;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+/* Safety: any hotspot whose inline top parked it in HUD band → shove mid */
+.rp-screen--street .rp-hotspots .rp-hotspot[style*="top: 1"],
+.rp-screen--street .rp-hotspots .rp-hotspot[style*="top:1"],
+.rp-screen--street .rp-hotspots .rp-hotspot[style*="top: 0"],
+.rp-screen--street .rp-hotspots .rp-hotspot[style*="top:0"] {
+  top: 38% !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   D. ONE optional whisper under HUD — never Omurga / Beat vocabulary
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.rp-screen--street .rp-quest-whisper {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: calc(44px + var(--rp-safe-top, 0px));
+  z-index: 4;
+  max-height: 2.5em;
+  overflow: hidden;
+  font-size: 12px;
+  color: var(--tea-cream, #f2e6d8);
+  pointer-events: none;
+  background: none !important;
+  border: 0 !important;
+}
+
+/* If whisper still contains spine language, hide via data attr once story cleans;
+   CSS cannot match text — integrator must not mount Omurga/Beat strings. */

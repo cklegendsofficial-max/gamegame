@@ -1,0 +1,21 @@
+{
+  "packId": "ux-rewrite-4",
+  "schemaVersion": 1,
+  "dock": {
+    "primary": {
+      "testid": "evening-primary",
+      "class": "rp-cta-lamp",
+      "count": 1
+    },
+    "street": {
+      "testid": "goto-street",
+      "outsideOverflow": true,
+      "style": "text-link"
+    },
+    "overflowAllowed": [
+      "quests",
+      "journal",
+      "shop"
+    ]
+  }
+}
